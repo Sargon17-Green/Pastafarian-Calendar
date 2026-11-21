@@ -223,6 +223,13 @@ jobs:
           echo 'Stage30: four formerly RED public date witnesses now GREEN'
       - name: Stage 31 — exact polynomial weave vs independent exhaustive oracle
         run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage31_weave_polynomial_counts_agree_with_exhaustive_small_states'
+      - name: Stage 33 — exhaustive lexicographic small-state weave unrank (342 ranks)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage33_weave_unrank_exhaustive_lexicographic_small_states' \
+            2>&1 | tee stage33_weave_unrank.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |
@@ -290,4 +297,5 @@ jobs:
             stage31_test_stage31_diag_*.log
             stage31_numeric.log
             stage32_boundaries.log
+            stage33_weave_unrank.log
           if-no-files-found: ignore

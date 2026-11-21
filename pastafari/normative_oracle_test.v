@@ -1863,3 +1863,55 @@ fn test_stage32_public_year_gate_boundaries_match_independent_oracle() {
 		assert big_eq(got.day_in_month, expected.day_in_month)
 	}
 }
+// Stage33: enumerate every legal small-state weave in lexical order without
+// using the production polynomial count, rank or unrank implementation.
+fn stage33_enumerate_legal_weaves(oracle OracleWeaveCounter, state OracleWeaveState, prefix []int, mut words [][]int) {
+	mut complete := true
+	for remaining in state.remaining {
+		if remaining != 0 {
+			complete = false
+			break
+		}
+	}
+	if complete {
+		words << prefix.clone()
+		return
+	}
+	for label in 1 .. oracle.lengths.len + 1 {
+		if oracle.legal_move(state, label) {
+			mut next_prefix := prefix.clone()
+			next_prefix << label
+			stage33_enumerate_legal_weaves(oracle, oracle.apply_move(state, label), next_prefix, mut words)
+		}
+	}
+}
+
+fn stage33_check_weave_unrank_case(lengths []int) int {
+	mut oracle := new_oracle_weave_counter(lengths)
+	mut expected_words := [][]int{}
+	stage33_enumerate_legal_weaves(oracle, oracle.initial_state(), []int{}, mut expected_words)
+	assert expected_words.len > 0
+	mut candidate := new_patch15_weave_counter(lengths)
+	assert big_eq(candidate.count_all(), big_from_int(expected_words.len))
+	for zero_rank, expected in expected_words {
+		actual := candidate.unrank1(big_from_int(zero_rank + 1))
+		assert actual == expected
+	}
+	return expected_words.len
+}
+
+fn test_stage33_weave_unrank_exhaustive_lexicographic_small_states() {
+	mut checked := 0
+	checked += stage33_check_weave_unrank_case([2, 2])
+	checked += stage33_check_weave_unrank_case([2, 3, 2])
+	checked += stage33_check_weave_unrank_case([3, 2, 2])
+	checked += stage33_check_weave_unrank_case([2, 2, 2, 2])
+	checked += stage33_check_weave_unrank_case([2, 2, 3])
+	checked += stage33_check_weave_unrank_case([3, 3, 3])
+	checked += stage33_check_weave_unrank_case([3, 3, 2, 2])
+	checked += stage33_check_weave_unrank_case([2, 3, 2, 3])
+	checked += stage33_check_weave_unrank_case([2, 2, 2, 2, 2])
+	assert checked == 342
+	println('V_AMHARIC_STAGE33_WEAVE_UNRANK_LEXICOGRAPHIC_PASS CASES=342')
+}
+
