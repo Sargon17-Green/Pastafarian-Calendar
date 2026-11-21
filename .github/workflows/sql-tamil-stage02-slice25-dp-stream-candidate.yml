@@ -1,7 +1,7 @@
 name: SQL Tamil Slice25 month-weaving DP streaming candidate PG17
 on:
   push:
-    branches: ['SQL+தமிழ்']
+    branches: ['SQL\+தமிழ்']
     paths:
       - 'sql/test/166_stage25_month_weaving_dp_stream_candidate.py'
       - '.github/workflows/sql-tamil-stage02-slice25-dp-stream-candidate.yml'
