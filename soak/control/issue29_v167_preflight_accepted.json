@@ -1,0 +1,23 @@
+{
+  "schema": "ISSUE29_V167_ACCEPTED_COMPILE_ONLY_FOUNDATION_PREFLIGHT/1",
+  "source_preflight_run_id": 44928644965,
+  "source_preflight_commit": "f8cd2e9f3cb42fc70146225202efb257693129b1",
+  "preflight_status": "SUCCESS",
+  "preflight_artifact_id": 14719170401,
+  "preflight_artifact_sha256": "sha256:1db45ac845b950eea46df829e884198cdaa3b2ce116cf99e9e70c087eef2e1fc",
+  "preflight_linked_binary_sha256": "69fdfa7a2356fbdccb466cfaf061b6837c195dbcaac2324ddd1c9bf20d71f730",
+  "preflight_qa_oracle_sha256": "3b31d908dc3cf92ec302b729301c86b3a7230469b4bdb9168f4d80122c638262",
+  "preflight_includes_calendar_calls": false,
+  "expected_foundation": [
+    5000,
+    10,
+    503,
+    20,
+    56
+  ],
+  "original_calendar_calls": 0,
+  "original_soak_years": 0,
+  "one_shot_only": true,
+  "source_verified_from_downloaded_artifact": true,
+  "production_certified": false
+}
