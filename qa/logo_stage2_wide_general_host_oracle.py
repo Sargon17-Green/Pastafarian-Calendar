@@ -158,7 +158,6 @@ def finite_exhaustive() -> tuple[int, int, int, int, int, dict]:
 
 def large_modulus_vectors() -> tuple[int, int]:
     """Boundary and rejection vectors, including widths beyond D20's 31 cap."""
-    # Full-M compatibility probes for the already accepted two-digit contract.
     k2_vectors = 0
     for first, direction, count in (
         (1, 1, M + 1),
@@ -191,15 +190,12 @@ def large_modulus_vectors() -> tuple[int, int]:
 
     for width in widths:
         space = M ** width
-
-        # Exact upper boundary: no rejection is possible and rank equals W.
         first = M - width
         rank, actual_width, initial, limit = formula_choice(first, 1, space, M)
         assert actual_width == width and limit == space and initial <= limit
         assert rank == initial
         vectors += 1
 
-        # Both rejection directions: N=ceil(S/2), hence floor(S/N)=1 and L=N.
         count = (space + 1) // 2
         for direction in (-1, 1):
             midpoint = (M // 2) + 1
@@ -218,7 +214,6 @@ def large_modulus_vectors() -> tuple[int, int]:
             assert rank == (1 if direction == 1 else count)
             vectors += 1
 
-        # Minimal-width transition: M**(k-1)+1 must require exactly k digits.
         transition = (M ** (width - 1)) + 1
         actual_width, actual_space = minimum_width(transition, M)
         assert actual_width == width and actual_space == space
@@ -226,8 +221,7 @@ def large_modulus_vectors() -> tuple[int, int]:
         assert check_width == width and 1 <= rank <= transition
         vectors += 1
 
-    # Explicitly pin the transition at the former 31-digit API boundary.
-    for count, expected_width in ((M ** 31 + 1, 32), (M ** 32 + 1, 33)):
+    for count, expected_width in ((M ** 31 + M, 32), (M ** 32 + M, 33)):
         width, _ = minimum_width(count, M)
         assert width == expected_width
         vectors += 1

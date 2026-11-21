@@ -1,0 +1,56 @@
+; Stage2 Appendix-A general wide rank reporter for k >= 3.
+; QA-only production candidate; not promoted to canonical Logo+Ido.
+; Input [first BI in 1..M, step exactly +1 or -1], N canonical BI > M^2.
+; The minimal width k is derived from N; no D20 0..31 answer.at cap is used.
+; All large values remain exact BI; no floating-point conversion or global mutation.
+
+to monster.stage02.choose.wide.general :stream :N
+  if not listp :stream [output []]
+  if (count :stream) <> 2 [output []]
+  localmake "firstv first :stream
+  localmake "step last :stream
+  if not (monster.stage02.bi.canonical :firstv) [output []]
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if (bi.lt :firstv (bi.small 1)) [output []]
+  localmake "m nr.M
+  if (bi.gt :firstv :m) [output []]
+  if not numberp :step [output []]
+  if not (equalp :step (int :step)) [output []]
+  if not (or (:step = 1) (:step = -1)) [output []]
+  localmake "square bi.square :m
+  if (bi.le :N :square) [output []]
+  output monster.stage02.choose.wide.general.prepare :firstv :step :N :m :square 2
+end
+
+to monster.stage02.choose.wide.general.prepare :firstv :step :N :m :space :width
+  if bi.ge :space :N [
+    output monster.stage02.choose.wide.general.build :step :N :m :space :width :firstv 0 (bi.small 1) (bi.small 1)
+  ]
+  output monster.stage02.choose.wide.general.prepare :firstv :step :N :m (bi.mul :space :m) (:width + 1)
+end
+
+to monster.stage02.choose.wide.general.build :step :N :m :space :width :digit :index :wide :weight
+  if :index >= :width [
+    localmake "remainder bi.regmod :space :N
+    localmake "limit bi.sub :space :remainder
+    if bi.le :wide :limit [
+      output bi.add (bi.small 1) (bi.regmod (bi.sub :wide (bi.small 1)) :N)
+    ]
+    if :step = 1 [output bi.small 1]
+    output :N
+  ]
+  localmake "digitOffset bi.sub :digit (bi.small 1)
+  localmake "term bi.mul :digitOffset :weight
+  localmake "nextWide bi.add :wide :term
+  localmake "nextWeight bi.mul :weight :m
+  localmake "nextDigit :digit
+  if :step = 1 [
+    if bi.eq :digit :m [make "nextDigit bi.small 1]
+    if not (bi.eq :digit :m) [make "nextDigit bi.add :digit (bi.small 1)]
+  ]
+  if :step = -1 [
+    if bi.eq :digit (bi.small 1) [make "nextDigit :m]
+    if not (bi.eq :digit (bi.small 1)) [make "nextDigit bi.sub :digit (bi.small 1)]
+  ]
+  output monster.stage02.choose.wide.general.build :step :N :m :space :width :nextDigit (:index + 1) :nextWide :nextWeight
+end

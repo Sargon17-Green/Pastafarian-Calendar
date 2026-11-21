@@ -1,0 +1,131 @@
+name: Logo Stage2 Appendix-A General Wide Native QA
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-wide-general-k3plus-20261122'
+permissions:
+  contents: read
+
+jobs:
+  wide-general-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out isolated general-k QA branch
+        uses: actions/checkout@v4
+
+      - name: Verify exact SHA and source locks; run independent host oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF" = 'refs/heads/qa/logo-ido-stage2-wide-general-k3plus-20261122'
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb838168f6b2f6b29ed3649cf
+          test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
+          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md)" = 36f05683158d76ade80dff671b9900e108e94b7d
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = SOURCE_BLOB
+          test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = HOST_BLOB
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = VECTOR_BLOB
+          git rev-parse HEAD > "$RUNNER_TEMP/wide-general-commit.txt"
+          git hash-object .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-workflow-blob.txt"
+          {
+            git hash-object src/exact_integer.logo
+            git hash-object src/stage02_context.logo
+            git hash-object src/stage02_answer_at.logo
+            git hash-object src/stage02_choose_wide.logo
+            git hash-object src/stage02_choose_wide_general.logo
+            git hash-object test/normative_reference.logo
+            git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md
+            git hash-object qa/logo_stage2_wide_general_host_oracle.py
+            git hash-object qa/logo_stage2_wide_general_native_vectors.py
+            git hash-object .github/workflows/logo-stage02-wide-general-native.yml
+          } > "$RUNNER_TEMP/wide-general-git-blobs.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-source-sha256.txt"
+          python3 qa/logo_stage2_wide_general_host_oracle.py | tee "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_ENUM_CASES 42748' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_K2_COMPAT_CASES 3340' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_K3_CASES 14332' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_K4_CASES 14852' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_K5_CASES 7180' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_K6_CASES 3044' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_REJECTION_CASES 8672' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_POSITIVE_REJECTIONS 4549' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_NEGATIVE_REJECTIONS 4123' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_MAX_ENUMERATED_STEPS 570' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_LARGE_M_VECTORS 30' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_INVALID_GUARDS 14' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_ORACLE=PASS' "$RUNNER_TEMP/wide-general-host.log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE=NOT_RUN' "$RUNNER_TEMP/wide-general-host.log"
+
+      - name: Generate independent Python-integer Native fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/logo_stage2_wide_general_native_vectors.py --output "$RUNNER_TEMP/wide-general-native.logo" | tee "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_VALID 30' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_INVALID 18' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED 14' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_PLUS 7' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_MINUS 7' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_CASES 48' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_CHECKS 138' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_ORACLE=PASS' "$RUNNER_TEMP/wide-general-vectors.log"
+
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+
+      - name: Execute exact-BI general wide Native differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/wide-general-native.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 1200s stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/wide-general-native.logo" > "$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::General wide Native failure/timeout exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'WIDE_GENERAL_NATIVE_CASES_PASIS 48' "$log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE_CHECKS_PASIS 138' "$log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::Native failure text present"
+            exit 1
+          fi
+          echo 'NATIVE_LOGO_STAGE2_WIDE_GENERAL=PASS'
+
+      - name: Preserve exact inputs and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-wide-general-native-evidence
+          path: |
+            ${{ runner.temp }}/wide-general-commit.txt
+            ${{ runner.temp }}/wide-general-workflow-blob.txt
+            ${{ runner.temp }}/wide-general-git-blobs.txt
+            ${{ runner.temp }}/wide-general-source-sha256.txt
+            ${{ runner.temp }}/wide-general-host.log
+            ${{ runner.temp }}/wide-general-vectors.log
+            ${{ runner.temp }}/wide-general-native.logo
+            ${{ runner.temp }}/wide-general-native.log
+          if-no-files-found: warn
+          retention-days: 30
