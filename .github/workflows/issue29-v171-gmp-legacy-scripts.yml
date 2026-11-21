@@ -50,16 +50,15 @@ jobs:
               if path.startswith("tests/"):
                   assert b"Calendar_Date" not in data,(path,"unauthorized F")
           lock=Path(".github/workflows/canonical-names-lock.yml").read_text()
-          assert lock.count("    if: " + "$" + "{{ false }}")==42
+          assert lock.count("    if: "+"$"+"{{ false }}")==42
           assert lock.count("  verify:\n")==1
           for p in ("run_stage03_patch01.sh","run_stage05_patch02.sh"):
               sh=Path(p).read_text()
               assert "gprbuild -p -j2 -P pastafari_calendar_legacy_gmp.gpr" in sh
               assert "gnatmake" not in "\n".join(x for x in sh.splitlines() if not x.lstrip().startswith("#"))
               assert "timeout --signal=TERM --kill-after=5s 90s" in sh
-              assert "BUILD_STDOUT=" in sh
-              assert "BUILD_STDERR=" in sh
-              assert '>"$BUILD_STDOUT" 2>"$BUILD_STDERR"' in sh
+              assert "BUILD_STDOUT=" in sh and "BUILD_STDERR=" in sh
+              assert '>'+'"$BUILD_STDOUT" 2>'+'"$BUILD_STDERR"' in sh
           assert 'with "gnatcoll_gmp.gpr";' in Path("pastafari_calendar_legacy_gmp.gpr").read_text()
           print(json.dumps({"status":"V171_SOURCE_AND_42_GATE_PRECHECK_PASS",
              "base":BASE,"head":head,"changed_files":changed,
@@ -80,59 +79,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          (ulimit -v 1048576; ulimit -c 0; GPRBUILD_STDOUT=evidence/stage03-build.stdout \
-             GPRBUILD_STDERR=evidence/stage03-build.stderr timeout --signal=KILL 150s \
-             sh ./run_stage03_patch01.sh > evidence/stage03-native.stdout 2> evidence/stage03-native.stderr)
+          (ulimit -v 1048576; ulimit -c 0; export GPRBUILD_STDOUT=evidence/stage03-build.stdout GPRBUILD_STDERR=evidence/stage03-build.stderr; timeout --signal=KILL 150s sh ./run_stage03_patch01.sh > evidence/stage03-native.stdout 2> evidence/stage03-native.stderr)
           test -f evidence/stage03-build.stdout
           test -f evidence/stage03-build.stderr
           if grep -E '(^|: )error:|gprbuild: \*\*\*' evidence/stage03-build.stderr; then exit 1; fi
           test ! -s evidence/stage03-native.stderr
-          grep -E '^STAGE03_PATCH01_ASSERTIONS=[[:space:]]*1471
+          grep -E '^STAGE03_PATCH01_ASSERTIONS=[[:space:]]*1471$' evidence/stage03-native.stdout
           echo "V171_STAGE03_GMP_SCRIPT_NATIVE_1471_PASS_NO_F" | tee evidence/stage03-verdict.txt
       - name: Run unchanged Stage05 original test main via repaired GMP-aware script only, bounded
         shell: bash
         run: |
           set -euo pipefail
-          (ulimit -v 1048576; ulimit -c 0; GPRBUILD_STDOUT=evidence/stage05-build.stdout \
-             GPRBUILD_STDERR=evidence/stage05-build.stderr timeout --signal=KILL 150s \
-             sh ./run_stage05_patch02.sh > evidence/stage05-native.stdout 2> evidence/stage05-native.stderr)
+          (ulimit -v 1048576; ulimit -c 0; export GPRBUILD_STDOUT=evidence/stage05-build.stdout GPRBUILD_STDERR=evidence/stage05-build.stderr; timeout --signal=KILL 150s sh ./run_stage05_patch02.sh > evidence/stage05-native.stdout 2> evidence/stage05-native.stderr)
           test -f evidence/stage05-build.stdout
           test -f evidence/stage05-build.stderr
           if grep -E '(^|: )error:|gprbuild: \*\*\*' evidence/stage05-build.stderr; then exit 1; fi
           test ! -s evidence/stage05-native.stderr
-          grep -E '^STAGE05_PATCH02_ASSERTIONS=[[:space:]]*1465
-          echo "V171_STAGE05_GMP_SCRIPT_NATIVE_1465_PASS_NO_F" | tee evidence/stage05-verdict.txt
-      - name: Hash all QA receipts and native script output independently
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -B - <<'PY'
-          from pathlib import Path
-          import hashlib,json
-          p=Path("evidence");p.mkdir(exist_ok=True)
-          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),
-                     "bytes":x.stat().st_size}
-             for x in p.iterdir() if x.is_file()}
-          (p/"members.sha256.json").write_text(json.dumps(m,sort_keys=True,indent=2)+"\n")
-          PY
-      - name: Archive v171 test-only artifacts and gate receipts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: issue29-v171-repaired-gmp-legacy-stage03-05-native-no-F
-          path: evidence/
-          retention-days: 30
-          if-no-files-found: warn
- evidence/stage03-native.stdout
-          echo "V171_STAGE03_GMP_SCRIPT_NATIVE_1471_PASS_NO_F" | tee evidence/stage03-verdict.txt
-      - name: Run unchanged Stage05 original test main via repaired GMP-aware script only, bounded
-        shell: bash
-        run: |
-          set -euo pipefail
-          (ulimit -v 1048576; ulimit -c 0; timeout --signal=KILL 150s \
-             sh ./run_stage05_patch02.sh > evidence/stage05-native.stdout 2> evidence/stage05-native.stderr)
-          test ! -s evidence/stage05-native.stderr
           grep -E '^STAGE05_PATCH02_ASSERTIONS=[[:space:]]*1465$' evidence/stage05-native.stdout
           echo "V171_STAGE05_GMP_SCRIPT_NATIVE_1465_PASS_NO_F" | tee evidence/stage05-verdict.txt
       - name: Hash all QA receipts and native script output independently
@@ -144,66 +106,7 @@ jobs:
           from pathlib import Path
           import hashlib,json
           p=Path("evidence");p.mkdir(exist_ok=True)
-          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),
-                     "bytes":x.stat().st_size}
-             for x in p.iterdir() if x.is_file()}
-          (p/"members.sha256.json").write_text(json.dumps(m,sort_keys=True,indent=2)+"\n")
-          PY
-      - name: Archive v171 test-only artifacts and gate receipts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: issue29-v171-repaired-gmp-legacy-stage03-05-native-no-F
-          path: evidence/
-          retention-days: 30
-          if-no-files-found: warn
- evidence/stage05-native.stdout
-          echo "V171_STAGE05_GMP_SCRIPT_NATIVE_1465_PASS_NO_F" | tee evidence/stage05-verdict.txt
-      - name: Hash all QA receipts and native script output independently
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -B - <<'PY'
-          from pathlib import Path
-          import hashlib,json
-          p=Path("evidence");p.mkdir(exist_ok=True)
-          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),
-                     "bytes":x.stat().st_size}
-             for x in p.iterdir() if x.is_file()}
-          (p/"members.sha256.json").write_text(json.dumps(m,sort_keys=True,indent=2)+"\n")
-          PY
-      - name: Archive v171 test-only artifacts and gate receipts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: issue29-v171-repaired-gmp-legacy-stage03-05-native-no-F
-          path: evidence/
-          retention-days: 30
-          if-no-files-found: warn
- evidence/stage03-native.stdout
-          echo "V171_STAGE03_GMP_SCRIPT_NATIVE_1471_PASS_NO_F" | tee evidence/stage03-verdict.txt
-      - name: Run unchanged Stage05 original test main via repaired GMP-aware script only, bounded
-        shell: bash
-        run: |
-          set -euo pipefail
-          (ulimit -v 1048576; ulimit -c 0; timeout --signal=KILL 150s \
-             sh ./run_stage05_patch02.sh > evidence/stage05-native.stdout 2> evidence/stage05-native.stderr)
-          test ! -s evidence/stage05-native.stderr
-          grep -E '^STAGE05_PATCH02_ASSERTIONS=[[:space:]]*1465$' evidence/stage05-native.stdout
-          echo "V171_STAGE05_GMP_SCRIPT_NATIVE_1465_PASS_NO_F" | tee evidence/stage05-verdict.txt
-      - name: Hash all QA receipts and native script output independently
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -B - <<'PY'
-          from pathlib import Path
-          import hashlib,json
-          p=Path("evidence");p.mkdir(exist_ok=True)
-          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),
-                     "bytes":x.stat().st_size}
-             for x in p.iterdir() if x.is_file()}
+          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),"bytes":x.stat().st_size} for x in p.iterdir() if x.is_file()}
           (p/"members.sha256.json").write_text(json.dumps(m,sort_keys=True,indent=2)+"\n")
           PY
       - name: Archive v171 test-only artifacts and gate receipts
