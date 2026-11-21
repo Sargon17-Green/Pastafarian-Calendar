@@ -10,7 +10,8 @@ New-Item -ItemType Directory -Force $Evidence | Out-Null
 $Evidence=(Resolve-Path -LiteralPath $Evidence).Path
 $expectedExe='192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
 $source='7161824b9fcbfaca91f20d1ea492417e77003ff4'
-$indices=@(1..19 | ForEach-Object { $_ * 5 })
+$indices=@((1..18 | ForEach-Object { $_ * 5 }) + @(91,92,93,94,95))
+if($indices.Count -ne 23 -or $indices[-1] -ne 95){throw 'STAGE01_TAIL_CHUNK_BOUNDARIES_INVALID'}
 $acceptToken='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=7161824b9fcbfaca91f20d1ea492417e77003ff4|FILES=5|FX=95|TEST=STAGE01_PASS'
 $r=[ordered]@{
  schema='APL_GERMAN_STAGE01_NATIVE_CHUNKED_V1'
@@ -47,13 +48,15 @@ try {
  & python qa/nars-interface/stage01_chunked_import.py --repo-root . --source $ws --candidate $candidate --receipt $receipt --marker $marker
  if($LASTEXITCODE -ne 0){throw 'PROGRESS_GENERATOR_FAILED'}
  $meta=Get-Content -LiteralPath $receipt -Raw | ConvertFrom-Json
- if($meta.schema -cne 'APL_GERMAN_STAGE01_CHUNKED_CANDIDATE_V1' -or $meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_ACCEPTED' -or $meta.function_count -ne 95 -or $meta.unique_function_count -ne 95 -or $meta.source_file_count -ne 5 -or $meta.chunk_size -ne 5 -or $meta.chunk_count -ne 19 -or $meta.source_commit -cne $source -or $meta.test_entrypoint -cne 'RunStage01Tests' -or $meta.final_expression -cne 'SAME_EC_AFTER_TEST'){throw 'STAGE01_CANDIDATE_METADATA_CONTRACT_FAILED'}
+ if($meta.schema -cne 'APL_GERMAN_STAGE01_CHUNKED_CANDIDATE_V1' -or $meta.status -cne 'GENERATED_NOT_NATIVE_VALIDATED' -or $meta.native_executed -ne $false -or $meta.stage01 -cne 'NOT_ACCEPTED' -or $meta.function_count -ne 95 -or $meta.unique_function_count -ne 95 -or $meta.source_file_count -ne 5 -or $meta.chunk_size -ne 5 -or $meta.tail_start -ne 90 -or $meta.tail_chunk_size -ne 1 -or $meta.chunk_count -ne 23 -or $meta.source_commit -cne $source -or $meta.test_entrypoint -cne 'RunStage01Tests' -or $meta.final_expression -cne 'SAME_EC_AFTER_TEST'){throw 'STAGE01_CANDIDATE_METADATA_CONTRACT_FAILED'}
  if($meta.marker_token -cne $acceptToken){throw 'STAGE01_ACCEPTANCE_TOKEN_MISMATCH'}
- if($meta.marker_path -cne $marker -or $meta.chunk_records.Count -ne 19 -or $meta.function_names.Count -ne 95 -or @($meta.function_names | Sort-Object -Unique).Count -ne 95){throw 'STAGE01_CANDIDATE_MANIFEST_INVALID'}
+ if($meta.marker_path -cne $marker -or $meta.chunk_records.Count -ne 23 -or $meta.function_names.Count -ne 95 -or @($meta.function_names | Sort-Object -Unique).Count -ne 95){throw 'STAGE01_CANDIDATE_MANIFEST_INVALID'}
  foreach($i in 0..($indices.Count-1)){
    $point=$meta.chunk_records[$i]
    $after=$indices[$i]
    $expectedPath=Join-Path $env:RUNNER_TEMP (('apl_german_stage01_chunked_after_{0:D2}.txt') -f $after)
+   $previous=if($i -eq 0){0}else{[int]$indices[$i-1]}
+   if($point.fx_in_chunk -ne ($after-$previous)){throw 'CHECKPOINT_FUNCTIONS_PER_CHUNK_MISMATCH'}
    if($point.after -ne $after -or $point.marker_path -cne $expectedPath){throw 'CHECKPOINT_PATH_OR_INDEX_MISMATCH'}
    if(Test-Path -LiteralPath $expectedPath){throw 'CHECKPOINT_PREEXISTS'}
    if($point.name -cne $meta.function_names[$after-1]){throw 'CHECKPOINT_NAME_MISMATCH'}

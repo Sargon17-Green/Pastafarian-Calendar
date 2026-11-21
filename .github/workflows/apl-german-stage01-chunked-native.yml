@@ -52,7 +52,7 @@ jobs:
           $c=Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
           $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=7161824b9fcbfaca91f20d1ea492417e77003ff4|FILES=5|FX=95|TEST=STAGE01_PASS'
           if ($r.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
-          if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 19 -or $c.chunk_count -ne 19 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
+          if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 23 -or $c.chunk_count -ne 23 -or $c.tail_chunk_size -ne 1 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
           if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) { throw 'STAGE01_CHUNK_MARKER_MISMATCH' }
           $nativeMarker='stage01_chunked_evidence/final_native_marker.txt'
           if (-not (Test-Path -LiteralPath $nativeMarker)) { throw 'STAGE01_NATIVE_MARKER_NOT_ARCHIVED' }

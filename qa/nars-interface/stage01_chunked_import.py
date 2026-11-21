@@ -21,6 +21,9 @@ from stage01_import_workspace import (
 )
 
 CHUNK_SIZE = 5
+TAIL_START = 90
+TAIL_CHUNK_SIZE = 1
+EXPECTED_CHUNK_BOUNDARIES = tuple(range(CHUNK_SIZE, TAIL_START + 1, CHUNK_SIZE)) + tuple(range(TAIL_START + 1, EXPECTED_TOTAL_FUNCTIONS + 1))
 STAGE01_MARKER = (
     "APL_GERMAN_STAGE01_NATIVE_PASS_V1"
     f"|SOURCE={SOURCE_COMMIT}|FILES=5|FX=95|TEST=STAGE01_PASS"
@@ -41,8 +44,15 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
     path_obj = pathlib.PureWindowsPath(marker)
     chunk_programs = []
     chunk_records = []
-    for start in range(0, EXPECTED_TOTAL_FUNCTIONS, CHUNK_SIZE):
-        after = start + CHUNK_SIZE
+    # The original final five-function expression was 79,231 APL characters.
+    # Native evidence confirmed FX=90; it never confirmed FX=95.
+    # Isolate each of the final five locked test functions without changing source.
+    ranges = [(start, start + CHUNK_SIZE) for start in range(0, TAIL_START, CHUNK_SIZE)]
+    ranges.extend((start, start + TAIL_CHUNK_SIZE)
+                  for start in range(TAIL_START, EXPECTED_TOTAL_FUNCTIONS, TAIL_CHUNK_SIZE))
+    if tuple(after for _, after in ranges) != EXPECTED_CHUNK_BOUNDARIES:
+        raise ValueError("STAGE01_CHUNK_BOUNDARIES_CHANGED")
+    for start, after in ranges:
         parts = []
         if start == 0:
             parts.extend([
@@ -68,6 +78,7 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         chunk_programs.append(inner)
         chunk_records.append({
             "after": after,
+            "fx_in_chunk": after - start,
             "name": names[after - 1],
             "marker_path": path,
             "token": token,
@@ -115,7 +126,10 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         "unique_function_count": len(set(names)),
         "function_names": names,
         "chunk_size": CHUNK_SIZE,
+        "tail_start": TAIL_START,
+        "tail_chunk_size": TAIL_CHUNK_SIZE,
         "chunk_count": len(chunk_records),
+        "chunk_boundaries": list(EXPECTED_CHUNK_BOUNDARIES),
         "chunk_records": chunk_records,
         "test_entrypoint": "RunStage01Tests",
         "final_expression": "SAME_EC_AFTER_TEST",
