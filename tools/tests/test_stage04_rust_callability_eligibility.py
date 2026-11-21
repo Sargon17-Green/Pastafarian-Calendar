@@ -88,10 +88,10 @@ class CallabilityTests(unittest.TestCase):
             # A legal 33-hash raw literal previously escaped the <=32-hash
             # filter and exposed a forged direct function declaration.
             'const S: &str = r' + '#' * 33
-                + '""\\npub fn day(d: &BigInt) -> BigInt { d.clone() }\\n""'
+                + '""\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n""'
                 + '#' * 33 + ';',
             'const S: &std::ffi::CStr = cr#" "'
-                + '\\npub fn day(d: &BigInt) -> BigInt { d.clone() }\\n" "#;',
+                + '\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n" "#;',
         ]
         for source in fragments:
             with self.subTest(source=source[:35]):
@@ -114,13 +114,13 @@ class CallabilityTests(unittest.TestCase):
             "impl T {\npub fn day(d: &BigInt) -> BigInt { d.clone() }\n}", "day"))
         for attributes in (
             "#[cfg(any())]",
-            "#[cfg(any())]\\n#[inline]",
+            "#[cfg(any())]\n#[inline]",
             "#![cfg(any())]",
             "#[inline]",
         ):
             with self.subTest(attributes=attributes):
                 self.assertFalse(supported_signature(
-                    attributes + "\\npub fn day(d: &BigInt) -> BigInt { d.clone() }", "day"))
+                    attributes + "\npub fn day(d: &BigInt) -> BigInt { d.clone() }", "day"))
         self.assertFalse(supported_signature(
             "macro_rules! synth { () => { pub fn day(d: &BigInt) -> BigInt { d.clone() } } }",
             "day"))

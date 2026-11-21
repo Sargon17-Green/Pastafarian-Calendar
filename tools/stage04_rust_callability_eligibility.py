@@ -163,7 +163,7 @@ def supported_signature(source: str, function: str) -> bool:
         # function declarations as callable historical production functions.
         if _has_attached_outer_attribute(clean, match.start()):
             continue
-        if re.search(r"(?m)^[ \\t]*#!\\s*\\[", prefix):
+        if re.search(r"(?m)^[ \t]*#!\s*\[", prefix):
             continue
         return True
     return False
