@@ -1,0 +1,115 @@
+name: Issue29 v171 GMP-aware Stage03 Stage05 repaired scripts (NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-legacy-scripts-v171
+    paths:
+      - '.github/workflows/issue29-v171-gmp-legacy-scripts.yml'
+permissions:
+  contents: read
+jobs:
+  verify-and-run-non-calendar-original-legacy-scripts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Lock unchanged original corrected Ada src/test code, enforce all 42 legacy F jobs skipped
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v171-source-gates.json
+          import subprocess,hashlib,json
+          from pathlib import Path
+          BASE="7bf8b086059379877e990f631b9e95e346cbc458"
+          head=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+          subprocess.run(["git","merge-base","--is-ancestor",BASE,head],check=True)
+          changed=subprocess.check_output(["git","diff","--name-only",BASE,head],text=True).splitlines()
+          allowed={
+            ".github/workflows/issue29-v171-gmp-legacy-scripts.yml",
+            "pastafari_calendar_legacy_gmp.gpr",
+            "run_stage03_patch01.sh",
+            "run_stage05_patch02.sh",
+          }
+          assert set(changed)==allowed,changed
+          pins={
+            "src/normative_oracle.adb":"0be8f8ab4ddef26d34963d5567707a511ebda50b",
+            "src/canonical_full_weave_gmp_v164.adb":"845bd8905943a54e63d6aba0334404a5051fe666",
+            "src/canonical_wide_rank_gmp_v164.adb":"52b8814c2ab1924cdebafe893a65d97cd3ccfa61",
+            "tests/stage03_patch01_tests.adb":"71286209b4747b0505e926f18d83cc179a569b85",
+            "tests/stage05_patch02_tests.adb":"f02abee387f8b0a543499cf70085606f8004c65e",
+          }
+          for path,expected in pins.items():
+              data=Path(path).read_bytes()
+              actual=hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
+              assert actual==expected,(path,actual)
+              assert subprocess.check_output(["git","rev-parse",BASE+":"+path],text=True).strip()==expected
+              if path.startswith("tests/"):
+                  assert b"Calendar_Date" not in data,(path,"unauthorized F")
+          lock=Path(".github/workflows/canonical-names-lock.yml").read_text()
+          assert lock.count("    if: " + "$" + "{{ false }}")==42
+          assert lock.count("  verify:\n")==1
+          for p in ("run_stage03_patch01.sh","run_stage05_patch02.sh"):
+              sh=Path(p).read_text()
+              assert "gprbuild -p -j2 -P pastafari_calendar_legacy_gmp.gpr" in sh
+              assert "gnatmake" not in "\n".join(x for x in sh.splitlines() if not x.lstrip().startswith("#"))
+              assert "timeout --signal=TERM --kill-after=5s 90s" in sh
+          assert 'with "gnatcoll_gmp.gpr";' in Path("pastafari_calendar_legacy_gmp.gpr").read_text()
+          print(json.dumps({"status":"V171_SOURCE_AND_42_GATE_PRECHECK_PASS",
+             "base":BASE,"head":head,"changed_files":changed,
+             "pinned_files":pins,"all_42_native_auto_jobs_halted":True,
+             "source_calendar_F_calls":0,"full_year_soak_years":0},sort_keys=True))
+          PY
+          sh -n run_stage03_patch01.sh
+          sh -n run_stage05_patch02.sh
+      - name: Install native Ada GNAT/GMP toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gmp-packages.txt
+      - name: Run unchanged Stage03 original test main via repaired GMP-aware script only, bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          (ulimit -v 1048576; ulimit -c 0; timeout --signal=KILL 150s \
+             sh ./run_stage03_patch01.sh > evidence/stage03-native.stdout 2> evidence/stage03-native.stderr)
+          test ! -s evidence/stage03-native.stderr
+          grep -E '^STAGE03_PATCH01_ASSERTIONS=[[:space:]]*1471$' evidence/stage03-native.stdout
+          echo "V171_STAGE03_GMP_SCRIPT_NATIVE_1471_PASS_NO_F" | tee evidence/stage03-verdict.txt
+      - name: Run unchanged Stage05 original test main via repaired GMP-aware script only, bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          (ulimit -v 1048576; ulimit -c 0; timeout --signal=KILL 150s \
+             sh ./run_stage05_patch02.sh > evidence/stage05-native.stdout 2> evidence/stage05-native.stderr)
+          test ! -s evidence/stage05-native.stderr
+          grep -E '^STAGE05_PATCH02_ASSERTIONS=[[:space:]]*1465$' evidence/stage05-native.stdout
+          echo "V171_STAGE05_GMP_SCRIPT_NATIVE_1465_PASS_NO_F" | tee evidence/stage05-verdict.txt
+      - name: Hash all QA receipts and native script output independently
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path("evidence");p.mkdir(exist_ok=True)
+          m={x.name:{"sha256":hashlib.sha256(x.read_bytes()).hexdigest(),
+                     "bytes":x.stat().st_size}
+             for x in p.iterdir() if x.is_file()}
+          (p/"members.sha256.json").write_text(json.dumps(m,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Archive v171 test-only artifacts and gate receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v171-repaired-gmp-legacy-stage03-05-native-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
