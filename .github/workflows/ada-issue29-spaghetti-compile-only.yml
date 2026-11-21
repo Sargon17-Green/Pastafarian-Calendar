@@ -2,7 +2,7 @@ name: Ada Telugu Issue29 spaghetti original-branch GNAT/GMP build only (NO F)
 on:
   push:
     branches:
-      - 'Ada+తెలుగు'
+      - 'Ada\+తెలుగు'
     paths:
       - '.github/workflows/ada-issue29-spaghetti-compile-only.yml'
       - 'src/normative_oracle.adb'
