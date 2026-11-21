@@ -14,7 +14,7 @@ jobs:
   bounded-low-level-component-tests:
     if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-low-level-stage-tests-v171' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 12 # v171.1 token-based Calendar_Date source guard
+    timeout-minutes: 12 # v171.2 declaration-aware Calendar_Date source guard
     steps:
       - name: Checkout exact corrected Ada source descendants
         uses: actions/checkout@v4
