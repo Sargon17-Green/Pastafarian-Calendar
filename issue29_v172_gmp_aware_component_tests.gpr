@@ -1,0 +1,18 @@
+with "gnatcoll_gmp.gpr";
+
+-- QA-only project for the remaining low-level component test mains:
+-- Stage02, Stage04, Stage06 through Stage12.
+-- The source-locked test units contain no Calendar_Date invocation.
+project Issue29_V172_GMP_Aware_Component_Tests is
+   Main_Unit := external ("NATIVE_MAIN", "stage02_discovery01_tests.adb");
+
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v172";
+   for Exec_Dir use "bin_v172";
+   for Main use (Main_Unit);
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V172_GMP_Aware_Component_Tests;
