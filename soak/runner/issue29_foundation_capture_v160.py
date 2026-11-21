@@ -159,6 +159,22 @@ def prepare(base: Path) -> None:
     manifest = generate(srcroot, evidence)
     require(verify(srcroot, evidence), "v159 deterministic reversibility check failed")
     py = (evidence / "instrumented_normative_reference_v159.py").read_bytes()
+    # Python 3.11+ rejects decimal rendering of arbitrary integers >4300 digits.
+    # Capture lossless hexadecimal ranks instead, exclusively inside V159 markers.
+    # Never change the historical original or disable Python's security limit.
+    for old, new in [
+        (b'"family_count_decimal": str(family.count()),',
+         b'"family_count_hex": format(family.count(), "x"),'),
+        (b'"global_rank_decimal": str(rank),',
+         b'"global_rank_hex": format(rank, "x"),'),
+    ]:
+        require(py.count(old) == 1, "wide-number instrumentation anchor not unique")
+        py = py.replace(old, new, 1)
+    original_py = (srcroot / "Python-Turkce" / SOURCE_LOCKS["REF-41"]["commit"]
+                   / "tests/normative_reference.py").read_bytes()
+    require(strip_insertions(
+        py, ("PY_SELECTOR_GLOBAL_RANK", "PY_FINAL_NAME_AND_WEAVE"), "PY"
+    ) == original_py, "Python QA patch modified historical computation")
     ast.parse(py.decode("utf-8"))
     (base / "instrumented_normative_reference_v159.py").write_bytes(py)
 
@@ -267,7 +283,8 @@ def run_bounded(command: list[str], cwd: Path, out: Path, err: Path,
         "wall_seconds_cap": timeout_seconds, "combined_output_cap_bytes": output_limit,
         "source_mode": "QA_INSTRUMENTED_COPY_NOT_ORIGINAL",
     }
-    require(reason == "completed" and rc == 0, "bounded process failed: " + json.dumps(receipt))
+    # The caller must persist this receipt even when a child fails.
+    # Never disguise a nonzero exit or threshold violation as success.
     return receipt
 
 
@@ -285,6 +302,8 @@ def compile_ada(base: Path) -> None:
     result = run_bounded(command, root, base / "gnat-build.stdout",
                          base / "gnat-build.stderr", ADA_BUILD_TIMEOUT_SECONDS,
                          MAX_BUILD_LOG, 1024 * 1024 * 1024, 120)
+    require(result["status"] == "completed" and result["exit_code"] == 0,
+            "Ada compilation did not pass resource and exit gates: " + json.dumps(result))
     binary = root / "bin" / "issue29_foundation_probe"
     require(binary.is_file(), "Ada executable missing after claimed compilation")
     result["gnatmake_version"] = version
@@ -337,6 +356,9 @@ def run_one_date(base: Path) -> None:
                               MAX_RSS_BYTES, RUN_TIMEOUT_SECONDS)
         results[lang] = receipt
         json_write_new(base / f"run-{lang}.receipt.json", receipt)
+        require(receipt["status"] == "completed" and receipt["exit_code"] == 0,
+                "diagnostic child failed, abort before next language: "
+                + json.dumps(receipt))
     json_write_new(base / "run-results.json", {
         "status": "TWO_QA_INSTRUMENTED_FOUNDATION_CALLS_NOT_ORIGINAL",
         "case": {"c": DAY, "t": DAY}, "original_calls": 0,
