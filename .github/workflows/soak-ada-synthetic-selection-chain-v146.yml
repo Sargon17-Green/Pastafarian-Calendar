@@ -1,0 +1,151 @@
+name: Soak v146 synthetic Ask_Bowl rank full-month-sequence Ada chain, original Fct STOP
+on:
+  push:
+    branches:
+      - qa/soak-ada-synthetic-selection-chain-v146
+    paths:
+      - 'soak/control/ada_synthetic_selection_chain_v146.json'
+      - 'soak/runner/soak_synthetic_selection_chain_v146.py'
+      - 'soak/process_tests/test_soak_synthetic_selection_chain_v146.py'
+      - 'soak/ada_chain_v146/**'
+      - 'soak/ada_port_v144/**'
+      - 'soak/ada_rank_v145/**'
+      - '.github/workflows/soak-ada-synthetic-selection-chain-v146.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  pure-synthetic-standalone-integrated-ada-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce original source dispatch halt and no original Ada package imports
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v146-preflight.log
+          import ast,json,re
+          from pathlib import Path
+          root=Path('soak')
+          halt=json.loads((root/'control/confirmed_first_original_mismatch_dispatch_halt_v108.json').read_text())
+          assert halt['decision']=='STOP_NEW_NATIVE_SOAK_DISPATCH'
+          m=json.loads((root/'control/ada_synthetic_selection_chain_v146.json').read_text())
+          assert m['scope_locks']['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          assert m['scope_locks']['original_native_calendar_compiles']==0
+          assert m['scope_locks']['original_Fct_calls']==0
+          assert m['scope_locks']['original_date_inputs_used']==0
+          assert m['scope_locks']['original_soak_years_certified']==0
+          assert m['scope_locks']['production_patch'] is False
+          assert m['scope_locks']['combined_cases']==30
+          assert m['scope_locks']['full_sequences_compared']==30
+          assert m['scope_locks']['wide_rank_cases']==18
+          for file in ('soak/ada_chain_v146/test_synthetic_selection_chain_v146.adb',
+             'soak/ada_port_v144/legal_month_weave_dp.ads',
+             'soak/ada_port_v144/legal_month_weave_dp.adb',
+             'soak/ada_rank_v145/synthetic_rank_stream_v145.ads',
+             'soak/ada_rank_v145/synthetic_rank_stream_v145.adb'):
+              code=Path(file).read_text(encoding='utf-8')
+              imports=re.findall(r'^with\s+([^;]+);',code,re.MULTILINE)
+              allow={'Ada.Numerics.Big_Numbers.Big_Integers','Ada.Text_IO',
+                     'Legal_Month_Weave_DP','Synthetic_Rank_Stream_V145'}
+              assert set(imports).issubset(allow),(file,imports)
+              non_comments='\n'.join(line for line in code.splitlines()
+                    if not line.lstrip().startswith('--'))
+              assert not re.search(r'\b(?:Normative_Oracle|Calendar_Date|Foundation_Day|Compute_Work_Counts)\b',
+                 non_comments),file
+          for file in ('soak/runner/soak_synthetic_selection_chain_v146.py',
+                       'soak/process_tests/test_soak_synthetic_selection_chain_v146.py'):
+              tree=ast.parse(Path(file).read_text())
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(x.name.split('.')[0] not in
+                         ('subprocess','ctypes','multiprocessing','pastafari_calendar')
+                         for x in n.names)
+                  if isinstance(n,ast.ImportFrom):
+                      assert (n.module or '').split('.')[0] not in
+                         ('subprocess','ctypes','multiprocessing','pastafari_calendar')
+          print('V146_NO_ORIGINAL_FCT_OR_NATIVE_ENGINES_IMPORTED')
+          print('V146_ORIGINAL_NATIVE_DISPATCH_STOP_CONFIRMED')
+          PY
+      - name: Run 24 source-independent pure math negative and exact-vector tests
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_soak_synthetic_selection_chain_v146.py' -v 2>&1 | tee evidence/v146-tests.log
+          grep -Eq '^Ran 24 tests ' evidence/v146-tests.log
+          grep -q '^OK$' evidence/v146-tests.log
+      - name: Reverify original source blobs, accepted v144/v145, and all 30 exact full-sequence values
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_synthetic_selection_chain_v146.py \
+            --manifest soak/control/ada_synthetic_selection_chain_v146.json \
+            --bowl-manifest soak/control/ada_rank_stream_source_v145.json \
+            --ada-source soak/ada_chain_v146/test_synthetic_selection_chain_v146.adb \
+            --output evidence/v146-independent-full-sequence-proof.json \
+            | tee evidence/v146-summary.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('evidence/v146-independent-full-sequence-proof.json').read_text())
+          assert r['original_sources']['pinned_source_git_blobs']==2
+          assert r['predecessor_CI']['v144_completed_success'] is True
+          assert r['predecessor_CI']['v145_completed_success'] is True
+          assert r['predecessor_CI']['both_SHA_digest_evidence_pinned'] is True
+          assert r['Ada_code_literal_audit']['Ada_full_sequence_expected_text_literals_exact']==30
+          assert r['pure_mathematical_oracle']['exact_full_sequence_checks']==30
+          assert r['pure_mathematical_oracle']['wide_family_cases']==18
+          assert r['pure_mathematical_oracle']['all_30_complete_sequences_match_independent_pure_math'] is True
+          assert r['pure_mathematical_oracle']['original_date_values_computed']==0
+          assert r['new_original_native_Fct_calls']==0
+          assert r['original_full_years_accepted']==0
+          assert r['STOP_NEW_NATIVE_SOAK_DISPATCH'] is True
+          print('V146_ALL_30_FULL_LABEL_SEQUENCES_INDEPENDENTLY_VERIFIED')
+          PY
+      - name: Install GNAT 13 to compile ONLY three isolated QA synthetic packages
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq >/dev/null
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 time >/dev/null
+          gnatmake --version | head -n 1 | tee evidence/v146-gnat-version.log
+      - name: GNAT compile and test synthetic Ask_Bowl to rank to full legal month sequence only
+        run: |
+          set -euo pipefail
+          trap 'find soak/ada_chain_v146 soak/ada_port_v144 soak/ada_rank_v145 -type f \( -name "*.ali" -o -name "*.o" -o -name "test_synthetic_selection_chain_v146" \) -delete' EXIT
+          cd soak/ada_chain_v146
+          gnatmake -gnat2022 -gnata -O1 \
+            -I../ada_port_v144 -I../ada_rank_v145 \
+            -o test_synthetic_selection_chain_v146 \
+            test_synthetic_selection_chain_v146.adb 2>&1 | tee ../../evidence/v146-ada-build.log
+          /usr/bin/time -f 'V146_SYNTHETIC_ONLY_WALL_SECONDS=%e\nV146_SYNTHETIC_ONLY_MAX_RSS_KiB=%M' \
+             -o ../../evidence/v146-resources-informational.log \
+             timeout 60s ./test_synthetic_selection_chain_v146 \
+             | tee ../../evidence/v146-ada-goldens.log
+          grep -Fx 'V146_SYNTHETIC_FULL_SELECTION_CHAINS=30' ../../evidence/v146-ada-goldens.log
+          grep -Fx 'V146_WIDE_GLOBAL_RANK_CHAIN_CASES=18' ../../evidence/v146-ada-goldens.log
+          grep -Fx 'V146_FULL_SEQUENCES_COMPARED_EXACTLY=30' ../../evidence/v146-ada-goldens.log
+          grep -Fx 'V146_ORIGINAL_CALENDAR_FCT_CALLS=0' ../../evidence/v146-ada-goldens.log
+          grep -Fx 'V146_PRODUCTION_ADA_PATCH_APPLIED=FALSE' ../../evidence/v146-ada-goldens.log
+          echo 'V146_GNAT_FULL_SYNTHETIC_PIPELINE_30_CASES_PASS_NO_ORIGINAL_FCT' \
+            | tee ../../evidence/v146-verdict.log
+      - name: Preserve mathematical and GNAT logs, never original calendar native binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v146-30-exact-full-synthetic-month-chain-GNAT-logs-only
+          path: |
+            evidence/v146-preflight.log
+            evidence/v146-tests.log
+            evidence/v146-independent-full-sequence-proof.json
+            evidence/v146-summary.json
+            evidence/v146-gnat-version.log
+            evidence/v146-ada-build.log
+            evidence/v146-ada-goldens.log
+            evidence/v146-resources-informational.log
+            evidence/v146-verdict.log
+          if-no-files-found: warn
+          retention-days: 30
