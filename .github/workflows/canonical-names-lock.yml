@@ -228,6 +228,28 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Bounded two-process Native 4244 median research (NOT Stage 6)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 test/run_native_4244_research.py \\
+            --binary ./chapel-native-adjoint-probe \\
+            --source-sha "$(git rev-parse HEAD)" \\
+            --outdir chapel-native-4244-evidence \\
+            | tee chapel-native-4244-runner.log
+
+      - name: Retain bounded Native 4244 attempt, including incomplete evidence
+        if: always() && github.ref == 'refs/heads/Chapel+Українська-мова'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-native-4244-research-evidence
+          path: |
+            chapel-native-4244-runner.log
+            chapel-native-4244-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |

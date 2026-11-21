@@ -3,6 +3,16 @@
 use BigInteger;
 use List;
 
+config const runMode = "finite";
+config const rankInput = "";
+
+proc isCheckpoint(depth: int): bool {
+  return depth == 6 || depth == 16 || depth == 32 || depth == 64 ||
+         depth == 96 || depth == 128 || depth == 256 ||
+         depth == 512 || depth == 1024 || depth == 2048 ||
+         depth == 4096 || depth == 4244;
+}
+
 record GapSpec {
   var q: int = 0;
   var fixedSum: int = 0;
@@ -200,6 +210,8 @@ proc unrank(const ref lens: [?D] int, rank0: bigint): list(int) {
         chosen = c;
         take(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
         word.pushBack(c);
+        if runMode != "finite" && isCheckpoint(step) then
+          writeln("NATIVE_MEDIAN_CHECKPOINT=", step, ";", total);
         break;
       }
     }
@@ -218,11 +230,15 @@ proc rankWord(const ref lens: [?D] int, const ref word: list(int)): bigint {
   var total = setup(lens,states,sizes,specs);
   if word.size != sizes[m] then halt("Rank word length mismatch");
   var rank = new bigint(0);
+  var step = 0;
   for c in word {
     if c < 1 || c > m then halt("Rank word symbol outside family");
     const blocks = candidateBlocks(lens,states,sizes,specs,used,opened,closed,total);
     for earlier in 1..<c do rank += blocks[earlier];
     take(c,lens,states,sizes,specs,used,opened,closed,total,blocks[c]);
+    step += 1;
+    if runMode != "finite" && isCheckpoint(step) then
+      writeln("NATIVE_MEDIAN_CHECKPOINT=", step, ";", total);
   }
   if total != 1 then halt("Rank terminal invariant failed");
   return rank;
@@ -266,7 +282,44 @@ proc emitBlocks(const ref lens: [?D] int, const ref word: list(int)) {
     prefix.pushBack(c);
   }
 }
+// Research-only complete-word attempt; no Stage 6 or production claims.
+proc runFullYear() {
+  const lens: [1..45] int =
+    [115,108,119,109,106,81,115,114,117,120,98,52,81,97,121,
+     97,115,96,107,61,106,115,119,39,84,103,115,107,55,119,
+     97,50,122,110,81,54,101,83,88,40,25,77,98,122,105];
+  var days = 0;
+  for k in lens do days += k;
+  if days != 4244 then halt("Full-year length lock mismatch");
+  var specs: [1..45] GapSpec;
+  var states: [1..45] SparseVec;
+  var sizes: [1..45] int;
+  const root = setup(lens,states,sizes,specs);
+  writeln("NATIVE_MEDIAN_ROOT=",root);
+  if runMode == "unrank" {
+    const word = unrank(lens,root / new bigint(2));
+    writeln("NATIVE_MEDIAN_WORD=",csv(word));
+    writeln("NATIVE_MEDIAN_RESIDUAL=0");
+  } else if runMode == "rank" {
+    if rankInput == "" then halt("Missing rankInput witness");
+    var word = new list(int);
+    for token in rankInput.split(",") {
+      if token == "" then halt("Empty rankInput field");
+      word.pushBack(token:int);
+    }
+    const result = rankWord(lens,word);
+    writeln("NATIVE_MEDIAN_WORD=",csv(word));
+    writeln("NATIVE_MEDIAN_RESULT_RANK=",result);
+  } else {
+    halt("Unknown research runMode");
+  }
+  writeln("NATIVE_MEDIAN_COMPLETE=1");
+}
 proc main() {
+  if runMode != "finite" {
+    runFullYear();
+    return;
+  }
   var families = 0, words = 0, blocks = 0;
   for m in 1..4 {
     var possibilities = 1;
