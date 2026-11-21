@@ -108,8 +108,9 @@ def main() -> None:
         raise AssertionError("containing cutlet position outside partition")
     if fields[1] != cutlet_names[cutlet_position - 1]:
         raise AssertionError("projected cutlet canonical name index mismatch")
-    if not 1 <= fields[2] <= cutlet_partition[cutlet_position - 1]:
-        raise AssertionError("projected day outside containing cutlet")
+    cutlet_day_spans = [last - first + 1 for first, last in zip(cutlet_first_days, cutlet_last_days)]
+    if not 1 <= fields[2] <= cutlet_day_spans[cutlet_position - 1]:
+        raise AssertionError("projected day outside containing cutlet day span")
     if not 1 <= month_id <= month_count:
         raise AssertionError("containing month ID outside year")
     if fields[3] != month_names[month_id - 1]:
@@ -163,10 +164,11 @@ def main() -> None:
             "close_gate_day": gate_days[1],
         },
         "cutlets": {
-            "partition": cutlet_partition,
+            "partition_gate_intervals": cutlet_partition,
             "name_indices": cutlet_names,
             "first_days": cutlet_first_days,
             "last_days": cutlet_last_days,
+            "day_spans": cutlet_day_spans,
         },
         "months": {
             "lengths": month_lengths,
@@ -179,7 +181,8 @@ def main() -> None:
             "month_frequency": True,
             "first_occurrence_order": True,
             "last_occurrence_order": True,
-            "cutlet_partition_span": True,
+            "cutlet_partition_gate_interval_sum": True,
+            "cutlet_day_intervals_contiguous": True,
             "projected_date_bounds": True,
         },
     }
