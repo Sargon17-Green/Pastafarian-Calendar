@@ -1,0 +1,126 @@
+name: Issue29 v160 pinned foundation-day causal capture (QA-only, NO SOAK)
+on:
+  push:
+    branches:
+      - qa/issue29-foundation-causal-v160
+    paths:
+      - '.github/workflows/issue29-foundation-causal-v160.yml'
+      - 'soak/runner/issue29_foundation_capture_v160.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-foundation-day-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      PC_FOUNDATION_DIAG_V159: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm immutable halt and no changes to original sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json")
+          v=json.loads(p.read_text())
+          assert v["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert v["incident_issue"]==29
+          assert v["main_changes_permitted"] is False
+          assert v["successful_original_source_full_years"]==0
+          assert v["successful_ten_thousand_soak_years"]==0
+          print("V160_STOP_NEW_NATIVE_SOAK_DISPATCH_STILL_TRUE")
+          PY
+          python3 -B -m py_compile soak/runner/issue29_foundation_capture_v160.py
+          git rev-parse HEAD > evidence/v160-workflow-head.txt
+          git status --short > evidence/v160-worktree-preflight.txt
+      - name: Prepare exact source-locked QA-only patches, independent finite math witnesses
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare \
+            --root "$RUNNER_TEMP/issue29-v160" > evidence/v160-prepare.stdout \
+            2> evidence/v160-prepare.stderr
+          cp "$RUNNER_TEMP/issue29-v160/preparation.json" evidence/v160-preparation.json
+          cp "$RUNNER_TEMP/issue29-v160/ada-instrumentation-review.diff" evidence/v160-ada-review.diff
+          cp "$RUNNER_TEMP/issue29-v160/v159-raw-copies/manifest.json" evidence/v160-v159-manifest.json
+          sha256sum "$RUNNER_TEMP/issue29-v160/instrumented_normative_reference_v159.py" \
+            "$RUNNER_TEMP/issue29-v160/ada-build/src/normative_oracle.adb" \
+            > evidence/v160-adapted-sources.sha256
+      - name: Install GNAT 13 for Ada QA-copy compilation
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/v160-apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 \
+            > evidence/v160-gnat-install.log 2>&1
+          gnatmake --version > evidence/v160-compiler-version.txt
+      - name: Compile source-reviewed instrumented Ada QA copy before any call
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py compile \
+            --root "$RUNNER_TEMP/issue29-v160" > evidence/v160-compile.stdout \
+            2> evidence/v160-compile.stderr
+          cp "$RUNNER_TEMP/issue29-v160/build.json" evidence/v160-build.json
+          cp "$RUNNER_TEMP/issue29-v160/gnat-build.stdout" evidence/v160-gnat-build.stdout
+          cp "$RUNNER_TEMP/issue29-v160/gnat-build.stderr" evidence/v160-gnat-build.stderr
+          sha256sum "$RUNNER_TEMP/issue29-v160/ada-build/bin/issue29_foundation_probe" \
+            > evidence/v160-ada-executable.sha256
+      - name: Execute only F(c=-15055671,t=-15055671), once per instrumented language
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py run \
+            --root "$RUNNER_TEMP/issue29-v160" > evidence/v160-run-control.stdout \
+            2> evidence/v160-run-control.stderr
+      - name: Preserve raw process outputs separately and fail on unexpected final tuples
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          D="$RUNNER_TEMP/issue29-v160"
+          for file in run-python.stdout run-python.stderr run-ada.stdout run-ada.stderr \
+            run-python.receipt.json run-ada.receipt.json run-results.json \
+            preparation.json build.json ada-instrumentation-review.diff; do
+            if [ -f "$D/$file" ]; then
+              cp "$D/$file" "evidence/$file"
+            fi
+          done
+          python3 -B - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          evidence=Path("evidence")
+          details={}
+          for p in sorted(evidence.iterdir()):
+              if p.is_file():
+                  details[p.name]={"sha256":hashlib.sha256(p.read_bytes()).hexdigest(),
+                                   "bytes":p.stat().st_size}
+          (evidence/"v160-artifact-member-hashes.json").write_text(
+              json.dumps(details,sort_keys=True,indent=2)+"\n")
+          assert (evidence/"run-results.json").exists(), "no real QA receipt"
+          p=(evidence/"run-python.stdout").read_text()
+          a=(evidence/"run-ada.stdout").read_text()
+          assert "V160_PY_RESULT|5000|10|503|20|56" in p, repr(p)
+          assert "V160_ADA_RESULT|5000| 10|503| 30|52" in a, repr(a)
+          print("V160_ORIGINAL_MISMATCH_REPRODUCED_BY_SEPARATE_QA_INSTRUMENTED_BYTES")
+          print("V160_PYTHON_AND_ADA_INTERMEDIATE_TRACES_PRESENT")
+          print("V160_ORIGINAL_FCT_CALLS_ZERO")
+          print("V160_QA_FCT_CALLS_TWO_FOUNDATION_ONLY")
+          PY
+      - name: Archive all available diagnostic provenance even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v160-one-date-instrumented-qa-traces-and-gates
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
