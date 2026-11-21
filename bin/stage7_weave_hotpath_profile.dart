@@ -211,6 +211,10 @@ void auditCountReuse() {
     'Known-total helper does not re-count; public wrapper still counts',
   );
   check(
+    helper.contains('if (ordinal <= childBases[0])'),
+    'Candidate B first-active lower bound is present',
+  );
+  check(
     plan.contains(
           'monthIds: _unrankWithKnownTotal(lengths.lengths, choice.result, count)',
         ) &&
@@ -396,7 +400,7 @@ void main() {
     'Five paired canonical cases within bounded runtime',
   );
   print(
-    'STAGE7_CANDIDATE_A_PAIRED; pairs=5; '
+    'STAGE7_CANDIDATE_B_VS_LEGACY_PAIRED; pairs=5; '
     'baseline_ms=${baselinePairs.join(",")}; '
     'candidate_ms=${candidatePairs.join(",")}; '
     'median_baseline_ms=${medianMilliseconds(baselinePairs)}; '
@@ -408,5 +412,5 @@ void main() {
   print('STAGE7_HOTPATH_PASS; checks=$checks; year_days=${lengths.yearLength}; '
       'month_count=${lengths.monthCount}; full_year_words=3; '
       'small_domains=6; small_ranks=$smallRanks; canonical_case=1; '
-      'phases=4; optimization=candidate_a_count_reuse');
+      'phases=4; optimization=candidate_b_first_active_bound');
 }

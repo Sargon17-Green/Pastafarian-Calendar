@@ -132,22 +132,26 @@ final class MonsterMonthWeavePlanner {
       BigInt? nextBase;
       if (active.isNotEmpty) {
         final childBases = _activeChildren(active, activeBase);
-        // For rank 1, the first active token is necessarily lexicographically
-        // minimal. Avoid a full unopened-factor calculation in this case.
-        final factor = ordinal == BigInt.one
-            ? BigInt.one
-            : _unopenedFactor(remaining, opened, activeLength - 1);
-        for (var i = 0; i < active.length; i++) {
-          if (childBases[i] == BigInt.zero) {
-            continue;
-          }
-          final block = childBases[i] * factor;
-          if (ordinal > block) {
-            ordinal -= block;
-          } else {
-            chosen = closed + i;
-            nextBase = childBases[i];
-            break;
+        // Every valid unopened suffix contributes at least one completion.
+        // Therefore the first active block is at least childBases[0].
+        // If the rank fits this bound, avoid the expensive suffix DP.
+        if (ordinal <= childBases[0]) {
+          chosen = closed;
+          nextBase = childBases[0];
+        } else {
+          final factor = _unopenedFactor(remaining, opened, activeLength - 1);
+          for (var i = 0; i < active.length; i++) {
+            if (childBases[i] == BigInt.zero) {
+              continue;
+            }
+            final block = childBases[i] * factor;
+            if (ordinal > block) {
+              ordinal -= block;
+            } else {
+              chosen = closed + i;
+              nextBase = childBases[i];
+              break;
+            }
           }
         }
       }
