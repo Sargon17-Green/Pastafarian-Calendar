@@ -169,7 +169,7 @@ class PatchProposalUnitTests(unittest.TestCase):
     def test_28_python_source_anchor_count_pinned(self):
         self.assertEqual(len(PY_ANCHORS),2)
         self.assertEqual(len(set(PY_ANCHORS)),2)
-        self.assertEqual(PY_ANCHORS[0],"        return family.unrank1(rank)")
+        self.assertEqual(PY_ANCHORS[0],"        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())")
 
     def test_29_source_relative_paths_from_exact_commits(self):
         p=source_paths(Path("/tmp/example"))
@@ -183,6 +183,16 @@ class PatchProposalUnitTests(unittest.TestCase):
         self.assertTrue(str(p["REF-41"]).endswith(".py"))
         self.assertTrue(str(p["ADA-TELUGU"]).endswith(".adb"))
 
+
+    def test_31_post_assignment_insertion_is_exactly_after_target(self):
+        original=(b"def f():\n    rank = 1\n    return rank\n")
+        modified=insert_once(original,"    rank = 1","T",
+                             ["    print(rank)"],"PY",after=True)
+        self.assertLess(modified.index(b"rank = 1"),
+                        modified.index(b"print(rank)"))
+        self.assertLess(modified.index(b"print(rank)"),
+                        modified.index(b"return rank"))
+        self.assertEqual(strip_insertions(modified,("T",),"PY"),original)
 
 if __name__=="__main__":
     unittest.main()
