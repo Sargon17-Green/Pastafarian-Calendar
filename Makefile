@@ -125,3 +125,11 @@ build/calendar_chain4.o: build/calendar.o src/runtime/calendar_hidden_visible4_c
 build/calendar_chain4.gb: build/calendar_chain4.o
 	$(RGBLINK) -n build/calendar_chain4.sym -m build/calendar_chain4.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated V5 Native384; preserve every accepted 370..383 route.
+build/calendar_chain5.o: build/calendar.o src/runtime/calendar_hidden_visible5_chain.asm src/tests/calendar_hidden_visible5_chain_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_CHAIN5_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_chain5.gb: build/calendar_chain5.o
+	$(RGBLINK) -n build/calendar_chain5.sym -m build/calendar_chain5.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
