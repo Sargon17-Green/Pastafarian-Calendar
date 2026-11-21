@@ -1,0 +1,18 @@
+with "gnatcoll_gmp.gpr";
+
+-- Common GMP-aware GPR for the existing Stage03 and Stage05 native test scripts.
+-- The source under src/ and the test bodies are unchanged; this project
+-- replaces direct gnatmake -Isrc -Itests with project-aware GNATCOLL linkage.
+project Pastafari_Calendar_Legacy_GMP is
+   Main_Unit := external ("NATIVE_MAIN", "stage03_patch01_tests.adb");
+
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_gmp_legacy";
+   for Exec_Dir use "bin_gmp_legacy";
+   for Main use (Main_Unit);
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Pastafari_Calendar_Legacy_GMP;
