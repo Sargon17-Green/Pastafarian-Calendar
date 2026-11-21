@@ -5,6 +5,9 @@ with Ada.Containers.Vectors;
 with Ada.Numerics.Big_Numbers.Big_Integers;
 with Exact_Math;
 with Month_Weaving;
+with Canonical_Full_Weave_GMP_V164;
+with Canonical_Wide_Rank_GMP_V164;
+with GNATCOLL.GMP.Integers;
 with Ada.Environment_Variables;
 with Ada.Text_IO;
 
@@ -1076,49 +1079,35 @@ package body Normative_Oracle is
       Stage13_Trace ("month_lengths_done");
    end Choose_Month_Lengths;
 
-   -- Canonical two-rail family: open every month in order, rank an exact
-   -- multiset permutation of the interior days, then close every month in
-   -- order. This avoids memoizing an intractable vector of remaining counters.
+   --  Issue29 PATCH (minimal spaghetti): replace only the broken two-rail
+   --  ticket logic with a full legal-family GMP Count + single global Unrank.
+   --  All other calendar arithmetic, names, gates and Sauce are untouched.
    function Choose_Month_Weaving
      (Structure_R : Sauce_Result; Lengths : Natural_Array) return Natural_Array
    is
-      M_Count : constant Natural := Lengths'Length;
-      Total : Natural := 0;
+      package G renames GNATCOLL.GMP.Integers;
+      F : Canonical_Full_Weave_GMP_V164.Family (Lengths'Length);
    begin
-      for J in Lengths'Range loop
-         Total := Total + Lengths (J);
-      end loop;
-      Stage13_Trace
-        ("month_weave_begin_M=" & Natural'Image (M_Count) &
-         "_T=" & Natural'Image (Total));
-       -- Exact 45-way multinomials exceed GNAT's bounded Big_Integer.
-       Stage13_Trace ("month_weave_tickets_begin");
-       declare
-          Interior : constant Natural := Total - 2 * M_Count;
-          Tickets : Natural_Array (1 .. Interior);
-          Stream : constant Answer_Stream :=
-            Ask_Bowl (Structure_R, 4, Seal_Month_Weaving);
-       begin
-          for I in Tickets'Range loop
-             declare
-                Slots : constant Positive := Positive (Interior - I + 1);
-                Shifted : constant Answer_Stream :=
-                  (First => Answer_At (Stream, B (I - 1)),
-                   Direction_Step => Stream.Direction_Step);
-             begin
-                Tickets (I) :=
-                  To_Natural_Checked (Choose_Rank (Shifted, B (Slots)), Slots);
-             end;
-          end loop;
-          Stage13_Trace ("month_weave_tickets_done");
-          declare
-             Result : constant Natural_Array :=
-               Month_Weaving.From_Choices (Lengths, Tickets);
-          begin
-             Stage13_Trace ("month_weave_reconstruction_done");
-             return Result;
-          end;
-       end;
+      Stage13_Trace ("month_weave_issue29_gmp_patch_begin");
+      Canonical_Full_Weave_GMP_V164.Build
+        (F, Canonical_Full_Weave_GMP_V164.Natural_Array (Lengths));
+      declare
+         Number_Of_Weaves : G.Big_Integer;
+         Global_Rank : G.Big_Integer;
+         Stream : constant Answer_Stream :=
+           Ask_Bowl (Structure_R, 4, Seal_Month_Weaving);
+      begin
+         Canonical_Full_Weave_GMP_V164.Count (F, Number_Of_Weaves);
+         Canonical_Wide_Rank_GMP_V164.Choose_Rank
+           (Stream.First, Stream.Direction_Step, Number_Of_Weaves, Global_Rank);
+         declare
+            Result : constant Canonical_Full_Weave_GMP_V164.Natural_Array :=
+              Canonical_Full_Weave_GMP_V164.Unrank (F, Global_Rank);
+         begin
+            Stage13_Trace ("month_weave_issue29_gmp_patch_done");
+            return Natural_Array (Result);
+         end;
+      end;
    end Choose_Month_Weaving;
 
    function Calendar_Date
