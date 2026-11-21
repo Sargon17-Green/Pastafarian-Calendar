@@ -15,6 +15,7 @@ on:
       - 'soak/process_tests/test_soak_raw_bound_year_diff_v149.py'
       - 'soak/process_tests/test_soak_native_semantic_replay_v150.py'
       - 'soak/process_tests/test_soak_source_derived_names_v151.py'
+      - 'soak/process_tests/verify_real_catalog_synthetic_replay_v151.py'
       - 'soak/control/pilot_two_engine_source_locks_v001.json'
       - 'soak/tests/test_year_validator.py'
       - 'soak/tests/test_two_lane_scheduler.py'
@@ -55,6 +56,7 @@ jobs:
                          "soak/process_tests/test_soak_native_semantic_replay_v150.py",
                          "soak/runner/soak_source_derived_names_v151.py",
                          "soak/process_tests/test_soak_source_derived_names_v151.py",
+                         "soak/process_tests/verify_real_catalog_synthetic_replay_v151.py",
                          "soak/tests/test_year_validator.py",
                          "soak/tests/test_two_lane_scheduler.py"):
               tree=ast.parse(Path(source).read_text(encoding="utf-8"))
@@ -202,6 +204,33 @@ jobs:
           print("V151_SCIENTIFIC_10000_YEAR_SOAK_PASS=FALSE")
           PY
           printf 'V151_MOCK_SOURCE_REGRESSIONS=20\nV151_PRIOR_GENERIC_REGRESSIONS=112\nV151_TOTAL_PYTHON_REGRESSIONS=132\nV151_ORIGINAL_FCT_CALLS=0\nV151_SOURCE_CATALOG_PROVENANCE_LIMITED_TO_TWO_HISTORICAL_REFERENCES\nV151_OFFICIAL_SOAK_PASS=FALSE\n' | tee evidence/v151-verdict.log
+      - name: Replay four synthetic days with actual SHA-locked native names and block rehashed forgery
+        run: |
+          set -euo pipefail
+          python3 -B soak/process_tests/verify_real_catalog_synthetic_replay_v151.py \
+            --sources-root "$RUNNER_TEMP/soak-v151-pinned-sources" \
+            --report evidence/v151-real-source-catalog-integration-verdict.json \
+            | tee evidence/v151-real-source-catalog-integration.log
+          python3 -B - <<'PY' | tee evidence/v151-real-source-integration-contract.log
+          import json
+          from pathlib import Path
+          verdict=json.loads(Path("evidence/v151-real-source-catalog-integration-verdict.json").read_text())
+          assert verdict["status"]=="REAL_SOURCE_CATALOGS_SYNTHETIC_REPLAY_PASS_NOT_NATIVE_CERTIFIED"
+          assert verdict["synthetic_day_pairs_replayed"]==4
+          assert verdict["source_code_files_bytes_verified"]==3
+          assert verdict["byte_only_v149_false_positive_reproduced"] is True
+          assert verdict["v151_rejected_rehashed_semantic_forgery"] is True
+          assert verdict["ref_41_cutlet_10"]=="Akrep"
+          assert verdict["ref_41_month_20"]=="Kuyu"
+          assert verdict["ref_24_cutlet_10"]=="scorpion"
+          assert verdict["ref_24_month_20"]=="pute"
+          assert verdict["original_converter_calls"]==0
+          assert verdict["original_soak_years_certified"]==0
+          assert verdict["original_algorithmic_independence_certified"] is False
+          print("V151_HISTORICAL_SOURCE_NAMES_USED_FOR_4_SYNTHETIC_DAY_PAIRS")
+          print("V151_REHASHED_WRONG_NATIVE_MONTH_BLOCKED_AFTER_V149_FALSE_POSITIVE")
+          print("V151_EXACT_NATIVE_ORIGINAL_FUNCTION_CALLS=0")
+          PY
       - name: Archive synthetic-only logs (never engine binaries)
         uses: actions/upload-artifact@v4
         with:
@@ -224,5 +253,8 @@ jobs:
             evidence/v151-pinned-real-source-gate.log
             evidence/v151-reality-witness.log
             evidence/v151-verdict.log
+            evidence/v151-real-source-catalog-integration-verdict.json
+            evidence/v151-real-source-catalog-integration.log
+            evidence/v151-real-source-integration-contract.log
           if-no-files-found: error
           retention-days: 30
