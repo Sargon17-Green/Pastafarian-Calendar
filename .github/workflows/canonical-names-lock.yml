@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   clojure-native-stage02-discovery24:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && !contains(github.event.head_commit.message, '[generic-e2e-next-year-p1]') && !contains(github.event.head_commit.message, '[generic-e2e-canonical-plus17]')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && !contains(github.event.head_commit.message, '[generic-e2e-next-year-p1]') && !contains(github.event.head_commit.message, '[generic-e2e-canonical-plus17]') && !contains(github.event.head_commit.message, '[generic-e2e-first-refusal]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -193,5 +193,42 @@ jobs:
         with:
           name: clojure-dutch-canonical-plus17-p520-e2e-witness
           path: qa/discovery24_canonical_plus17_feasibility.edn
+          if-no-files-found: warn
+          retention-days: 90
+
+  clojure-dutch-p520-first-refusal-accounting:
+    # Test-only new first-refusal accounting at canonical p520; no p520 rerun.
+    # Full Native suite is intentionally skipped for this isolated marker.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && contains(github.event.head_commit.message, '[generic-e2e-first-refusal]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact feature-branch SHA
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Clojure CLI
+        uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: 1.12.5.1664
+      - name: Assert exact project/source identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          echo "PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH"
+          echo "SOURCE_SHA=$GITHUB_SHA"
+      - name: Isolated first-refusal accounting with exhaustive small oracle families
+        run: |
+          set -euo pipefail
+          clojure -Sdeps '{:paths ["src" "test"]}' -M -e "(require 'pastafari.discovery24-first-refusal-test) (pastafari.discovery24-first-refusal-test/run-discovery24-first-refusal-accounting!)"
+      - name: Preserve exact-SHA accounting EDN on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clojure-dutch-p520-first-refusal-accounting
+          path: qa/discovery24_p520_first_refusal_accounting.edn
           if-no-files-found: warn
           retention-days: 90
