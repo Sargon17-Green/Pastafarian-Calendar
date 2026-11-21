@@ -3191,6 +3191,44 @@ BEGIN {
     }
     expect_exact("wide original eighty-first+1 eighty-second-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Eighty-second-digit to eighty-third-digit transition, M = 2^127 - 1.
+    # Independent direct-positional JS BigInt vs symbolic witnesses 4/4:
+    # boundary/backward 3135 decimal digits; rejection rank 1; wrap 3099.
+    WIDE_EIGHTY_SECOND=bi_mul(WIDE_EIGHTY_FIRST,M)
+    STREAM_FIRST=bi_sub(M,"82"); STREAM_STEP=1
+    choose_rank_wide(WIDE_EIGHTY_SECOND)
+    EXPECTED_EIGHTY_SECOND=WIDE_EIGHTY_SECOND
+    QA_POWER="1"
+    for (QA_I=0;QA_I<82;QA_I++) {
+        EXPECTED_EIGHTY_SECOND=bi_sub(EXPECTED_EIGHTY_SECOND,bi_mul_small(QA_POWER,82-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighty-second eighty-second-digit boundary", CHOSEN_RANK, EXPECTED_EIGHTY_SECOND)
+
+    WIDE_N=bi_add(WIDE_EIGHTY_SECOND,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original eighty-second+1 eighty-third-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_EIGHTY_SECOND
+    QA_POWER=M
+    for (QA_I=1;QA_I<82;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"83")
+    expect_exact("wide original eighty-second+1 eighty-third-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"81")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<82;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighty-second+1 eighty-third-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
