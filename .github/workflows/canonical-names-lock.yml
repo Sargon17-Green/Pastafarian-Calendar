@@ -186,3 +186,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage17-native-order.yml
     permissions:
       contents: read
+
+  false-arabic-stage18-drop-order:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-drop750]')
+    uses: ./.github/workflows/false-arabic-stage18-native-drop-order.yml
+    permissions:
+      contents: read
