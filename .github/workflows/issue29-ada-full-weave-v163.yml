@@ -5,6 +5,7 @@ on:
       - qa/issue29-ada-canonical-weave-v163
     paths:
       - .github/workflows/issue29-ada-full-weave-v163.yml
+      - 'soak/candidates/ada_full_weave_v163/**'
 permissions:
   contents: read
 jobs:
