@@ -25,3 +25,13 @@ Workflow `.github/workflows/soak-generic-jsonl-hardening-v147.yml` בודק גם
 התיקון אינו מאמת את מיפוי השמות, את גיבובי פלט המקור, את גבולות השנה, את עצמאות האלגוריתמים או את כשירות Windows. אין קריאות לממיר המקורי `F(c,t)`; Issue #29 פתוח והחסימה על Soak מקורי נשארת בתוקף. **0/10,000 שנים מאושרות**, `main=56bc4173aae4975ded019ef5ab5a36249f1424df` ללא שינוי.
 
 [מפרט האב Issue #27](https://github.com/Sargon17-Green/Pastafarian-Calendar/issues/27) | [חסימת אי־התאמה Issue #29](https://github.com/Sargon17-Green/Pastafarian-Calendar/issues/29).
+
+## קבלת v147 — הושלמה ב־21 בנובמבר 2026
+
+ההרצה הראשונה [44879642784](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44879642784) נכשלה **לפני כל בדיקת אלגוריתם**, עקב `assert` לא־תקין בסקריפט ה־workflow. התיקון המבודד בוצע בקומיט `87fdc847d56cd2a7af00fb45969baa5a48321ae4`.
+
+**ההרצה החוזרת [44881920229](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44881920229) הסתיימה `completed/success`** בדיוק על קומיט זה: 24/24 בדיקות אדוורסריות, 10/10 בדיקות משווה קיימות, 12/12 בדיקות מתזמן, יחד **46/46**. שלבי אימות עצירת ה־Soak והיעדר ייבוא של ממירי תאריכים מקוריים עברו.
+
+**ארטיפקט:** `14697689798`, `soak-v147-generic-jsonl-hardening-46-python-tests-logs-only`, גודל 2,358 בתים, SHA-256 לפי מטא־נתוני GitHub Actions: `60bea8cb0477a75f730535221586b26e35aeb75cf98ad2ead5fa43fa3bd28223`. לא בוצע אימות הורדה עצמאי של בתיו.
+
+**גבול הקבלה:** קבלת תיקון JSONL ומבחני תשתית סינתטיים בלבד. אין הרשאה להפעיל ממירים מקוריים, Issue #29 פתוח, 0/10,000 שנות Soak מאושרות. קומיט התיעוד המאוחר יותר אינו קומיט המקור שעבר CI.
