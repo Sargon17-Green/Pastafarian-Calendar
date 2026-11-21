@@ -1,0 +1,79 @@
+name: SQL Tamil Slice25 calendar_date production PG17 smoke
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/27_stage02_calendar_date.sql'
+      - 'sql/test/162_stage25_calendar_date_smoke.sql'
+      - '.github/workflows/sql-tamil-stage02-calendar-date-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Lock source and preserve exact SQL hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p slice25-native-smoke-evidence
+          printf 'GITHUB_SHA=%s\nGITHUB_REF_NAME=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > slice25-native-smoke-evidence/versions.txt
+          sha256sum sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            sql/test/162_stage25_calendar_date_smoke.sql \
+            .github/workflows/sql-tamil-stage02-calendar-date-smoke.yml \
+            > slice25-native-smoke-evidence/source-sha256.txt
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            sha256sum "${matches[0]}" >> slice25-native-smoke-evidence/source-sha256.txt
+          done
+      - name: Start offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sql-tamil-slice25-smoke-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-slice25-smoke-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-slice25-smoke-pg postgres --version | tee -a slice25-native-smoke-evidence/versions.txt
+      - name: Execute real production calendar_date and exact five-field oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            args+=(-f "/work/${matches[0]}")
+          done
+          args+=(-f /work/sql/test/162_stage25_calendar_date_smoke.sql)
+          docker exec -u postgres sql-tamil-slice25-smoke-pg \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" \
+            2>&1 | tee slice25-native-smoke-evidence/postgres-results.txt
+          test "$(grep -c 'SLICE25_SMOKE_FIELD_PASS=' slice25-native-smoke-evidence/postgres-results.txt)" -eq 5
+          test "$(grep -c 'SLICE25_SMOKE_INVALID_PASS=' slice25-native-smoke-evidence/postgres-results.txt)" -eq 5
+          grep -q 'SLICE25_SMOKE_GREEN=1' slice25-native-smoke-evidence/postgres-results.txt
+          printf 'SLICE25_NATIVE_SMOKE_GREEN=1\n' > slice25-native-smoke-evidence/completion.txt
+      - name: Preserve source-locked original evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-native-smoke-${{ github.run_id }}
+          path: slice25-native-smoke-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL instance
+        if: always()
+        shell: bash
+        run: docker rm -f sql-tamil-slice25-smoke-pg 2>/dev/null || true
