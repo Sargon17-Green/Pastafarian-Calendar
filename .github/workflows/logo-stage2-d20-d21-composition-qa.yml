@@ -1,0 +1,76 @@
+name: Logo Stage2 D20-D21 Composition QA
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-d20-d21-composition-20261121'
+permissions:
+  contents: read
+jobs:
+  composition-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA SHA
+        uses: actions/checkout@v4
+      - name: Check canonical production source locks and host oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-d20-d21-composition-20261121"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_short.logo)" = a556145f52a6c59018b0ef216d7a4fc6813e0f23
+          mkdir -p qa/composition-evidence
+          python3 qa/logo_stage2_d20_d21_composition.py --output qa/composition-evidence/fixture.logo | tee qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_VALID 150' qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_SKIPPED 18' qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_AT_K31 6' qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_INVALID 4' qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_CHECKS 1094' qa/composition-evidence/host.log
+          grep -Fxq 'QCOMBO_HOST_ORACLE=PASS' qa/composition-evidence/host.log
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Run genuine bounded Logo composition Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          logfile=qa/composition-evidence/native.log
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 480s stdbuf -oL -eL "$LOGO_BIN" qa/composition-evidence/fixture.logo >"$logfile" 2>&1; then
+            cat "$logfile"
+          else
+            code=$?
+            cat "$logfile"
+            echo "::error::Composition Native exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'QCOMBO_NATIVE_CASES_PASIS 154' "$logfile"
+          grep -Fxq 'QCOMBO_NATIVE_CHECKS_PASIS 1094' "$logfile"
+          grep -Fxq 'QCOMBO_NATIVE_PASIS' "$logfile"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$logfile"; then
+            echo "::error::Native error text"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE2_D20_D21_COMPOSITION_QA=PASS'
+      - name: Preserve independent fixture and raw logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-d20-d21-composition-qa
+          path: qa/composition-evidence/
+          if-no-files-found: warn
+          retention-days: 30
