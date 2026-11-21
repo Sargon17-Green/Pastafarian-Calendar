@@ -140,6 +140,16 @@ def main() -> int:
     p_err, a_err = load_lines(d / "run-python.stderr"), load_lines(d / "run-ada.stderr")
     p_out, a_out = load_lines(d / "run-python.stdout"), load_lines(d / "run-ada.stdout")
     py = labelled_json(p_err, "V159_PY_DIAG|result|")
+    # Python telemetry renders calendar-day integers as decimal strings while
+    # Ada renders them as big integers. Normalize *before* equality checks;
+    # otherwise the identical normative gates become false positives.
+    if isinstance(py, dict):
+        for integer_day in ("calculation_day", "target_day", "year_open_day", "year_close_day"):
+            if integer_day in py:
+                text_value = py[integer_day]
+                if not isinstance(text_value, (str, int)) or isinstance(text_value, bool):
+                    raise ValueError("invalid Python day type: " + integer_day)
+                py[integer_day] = int(text_value)
     selector = labelled_json(p_err, "V159_PY_DIAG|selector|")
     ada = parse_ada(a_err)
     py_tuple = tuple_from_stdout(p_out, "V160_PY_RESULT|")
