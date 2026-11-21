@@ -5,6 +5,8 @@ use List;
 
 config const runMode = "finite";
 config const rankInput = "";
+// Research-only near-median probes; zero preserves the accepted median path.
+config const rankDelta = 0;
 
 proc isCheckpoint(depth: int): bool {
   return depth == 6 || depth == 16 || depth == 32 || depth == 64 ||
@@ -342,7 +344,9 @@ proc runFullYear() {
   const root = setup(lens,states,sizes,specs);
   writeln("NATIVE_MEDIAN_ROOT=",root);
   if runMode == "unrank" {
-    const word = unrank(lens,root / new bigint(2));
+    if rankDelta < -1 || rankDelta > 1 then halt("Unsupported research rankDelta");
+    if rankDelta != 0 then writeln("NATIVE_NONMEDIAN_RANK_DELTA=",rankDelta);
+    const word = unrank(lens,root / new bigint(2) + new bigint(rankDelta));
     writeln("NATIVE_MEDIAN_WORD=",csv(word));
     writeln("NATIVE_MEDIAN_RESIDUAL=0");
   } else if runMode == "rank" {

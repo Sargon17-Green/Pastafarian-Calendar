@@ -250,6 +250,32 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Native nonmedian 4244 near-neighbor research (NOT Stage 6)
+        if: github.ref == 'refs/heads/Chapel+Українська-мова'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check --only-binary=:all: gmpy2==2.2.1
+          python3 test/weaving_native_nonmedian_research.py --self-test | tee chapel-native-nonmedian-selftest.log
+          grep -Fxq 'NATIVE_NONMEDIAN_SELFTEST_RESULT=PASS' chapel-native-nonmedian-selftest.log
+          python3 test/weaving_native_nonmedian_research.py \
+            --binary ./chapel-native-adjoint-probe \
+            --source-sha "$(git rev-parse HEAD)" \
+            --outdir chapel-native-nonmedian-evidence \
+            | tee chapel-native-nonmedian-runner.log
+
+      - name: Retain nonmedian 4244 research and incomplete evidence
+        if: always() && github.ref == 'refs/heads/Chapel+Українська-мова'
+        uses: actions/upload-artifact@v4
+        with:
+          name: chapel-native-nonmedian-research-evidence
+          path: |
+            chapel-native-nonmedian-selftest.log
+            chapel-native-nonmedian-runner.log
+            chapel-native-nonmedian-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Independent GateOracle year-boundary and calendarDate decomposition probe
         shell: bash
         run: |

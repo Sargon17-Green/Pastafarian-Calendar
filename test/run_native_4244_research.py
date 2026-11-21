@@ -43,19 +43,21 @@ def direct_children(pid):
         return []
 
 
-def run_native(binary, outdir, direction, word=None):
+def run_native(binary, outdir, direction, word=None, rank_delta=0):
     name = direction
     stdout_path = outdir / (name + ".stdout")
     stderr_path = outdir / (name + ".stderr")
     metrics_path = outdir / (name + ".os-time")
     argv = [str(binary), "--runMode=" + direction]
+    if direction == "unrank" and rank_delta:
+        argv.append("--rankDelta=" + str(rank_delta))
     if direction == "rank":
         argv.append("--rankInput=" + ",".join(map(str, word)))
     command = ["/usr/bin/time", "-f", "OS_WALL_SECONDS=%e\\nOS_MAX_RSS_KIB=%M\\nOS_EXIT=%x",
                "-o", str(metrics_path), *argv]
     (outdir / (name + ".command.json")).write_text(
         json.dumps({"argv": argv,
-                "witness_sha256": oracle.WITNESS_SHA256 if direction == "rank" else None,
+                "witness_sha256": oracle.digest_word(word) if direction == "rank" else None,
                 "source": "Native Chapel binary"}, ensure_ascii=False) + "\n")
     begin = time.monotonic()
     reason = None
