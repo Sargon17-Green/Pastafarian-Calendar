@@ -1425,6 +1425,7 @@ jobs:
           python3 -m py_compile test/stage01_actual_45_full_year_diff.py
           python3 test/stage01_actual_45_full_year_diff.py --self-test | tee build/stage01-actual-45-full-year-selftest.log
           grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_SELFTEST=6/6' build/stage01-actual-45-full-year-selftest.log
+          grep -Fxq 'STAGE01_ACTUAL_45_RANK_BOUNDARY_MUTATIONS=10/10' build/stage01-actual-45-full-year-selftest.log
       - name: Compare all 4244 actual year dates and 21220 exact fields
         shell: bash
         run: |
@@ -1443,6 +1444,8 @@ jobs:
           test "$rc" -eq 0
           grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_WEAVING=4244/4244' build/stage01-actual-45-full-year.log
           grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_FIELDS=21220/21220' build/stage01-actual-45-full-year.log
+          grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_RANK_BOUNDARIES=4/4 FIRST=4244/4244 SECOND=4244/4244 PENULTIMATE=4244/4244 LAST=4244/4244' build/stage01-actual-45-full-year.log
+          grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_ORDERING=5/5' build/stage01-actual-45-full-year.log
           grep -Fxq 'STAGE01_ACTUAL_45_FULL_YEAR_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-actual-45-full-year.log
           python3 - <<'PY'
           import json
@@ -1455,6 +1458,25 @@ jobs:
           assert len(p['month_lengths'])==45 and sum(p['month_lengths'])==4244
           assert p['matched_month_ids']==p['total_month_ids']==4244
           assert p['matched_fields']==p['total_fields']==21220
+          assert p['weaving_count_matches_reference'] is True
+          assert p['weaving_count_digits']==6765
+          assert len(p['weaving_count_sha256'])==64
+          assert p['rank_boundary_ranks'][0:2]==['1','2']
+          assert p['rank_boundary_ranks'][2].isdigit()
+          assert p['rank_boundary_ranks'][3]==p['weaving_count_decimal']
+          assert p['rank_boundary_cases']==p['rank_boundary_cases_passed']==4
+          assert p['matched_rank1_ids']==p['total_rank1_ids']==4244
+          assert p['matched_rank2_ids']==p['total_rank2_ids']==4244
+          assert p['matched_rank_penultimate_ids']==p['total_rank_penultimate_ids']==4244
+          assert p['matched_rank_last_ids']==p['total_rank_last_ids']==4244
+          assert p['first_last_occurrence_ordering_passed']==5
+          assert p['actual_first_occurrence_order'] is True
+          assert p['actual_last_occurrence_order'] is True
+          assert len(p['rank_boundary_first_last_ordering'])==4
+          assert all(x['first_occurrence_order'] and x['last_occurrence_order']
+                     for x in p['rank_boundary_first_last_ordering'])
+          assert p['fortran_original_unrank_boundary_probes'] is True
+          assert p['independent_rank_oracle_blob']==p['reference_blob']
           assert p['discrepancies']==[]
           assert p['original_full_entrypoint_for_every_day'] is False
           assert p['fortran_original_build_plus_projection'] is True

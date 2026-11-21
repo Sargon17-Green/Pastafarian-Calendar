@@ -19,6 +19,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+if hasattr(sys, "set_int_max_str_digits"):
+    sys.set_int_max_str_digits(0)
+
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
 SOURCE_COMMIT = "83f1069e5eef4a349d5a9efe6097525cddc7300e"
 REFERENCE_BLOB = "d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53"
@@ -66,6 +69,49 @@ def score_row(raw, index, month_id, expected):
     return month_match, field_matches, issues
 
 
+def parse_rank_row(raw, index):
+    check(raw.startswith("STAGE01_45_RANK_ROW="), "wrong rank-row marker")
+    observed = parse_csv(raw[len("STAGE01_45_RANK_ROW="):], 5)
+    check(observed[0] == index, "out-of-order/duplicate rank-row index")
+    month_ids = observed[1:]
+    check(all(1 <= month_id <= EXPECTED_MONTHS for month_id in month_ids),
+          "rank-boundary month ID outside range")
+    return tuple(month_ids)
+
+
+def score_rank_row(raw, index, expected):
+    observed = parse_rank_row(raw, index)
+    return tuple(int(actual == wanted) for actual, wanted in zip(observed, expected))
+
+
+def validate_weave_ordering(sequence, lengths, label):
+    month_count = len(lengths)
+    check(len(sequence) == sum(lengths), label + ": wrong sequence length")
+    counts = [0] * (month_count + 1)
+    first = [None] * (month_count + 1)
+    last = [None] * (month_count + 1)
+    for position, month_id in enumerate(sequence, 1):
+        check(1 <= month_id <= month_count, label + ": month ID outside range")
+        counts[month_id] += 1
+        if first[month_id] is None:
+            first[month_id] = position
+        last[month_id] = position
+    check(tuple(counts[1:]) == tuple(lengths), label + ": month frequency mismatch")
+    first_order = all(first[i] < first[i + 1] for i in range(1, month_count))
+    last_order = all(last[i] < last[i + 1] for i in range(1, month_count))
+    check(first_order, label + ": first-occurrence order mismatch")
+    check(last_order, label + ": last-occurrence order mismatch")
+    return {"first_occurrence_order": first_order, "last_occurrence_order": last_order}
+
+
+def expect_rejection(action, message):
+    try:
+        action()
+    except AssertionError:
+        return
+    raise AssertionError(message)
+
+
 def selftest():
     check(parse_csv("1,2,3,4,5,6,7", 7) == tuple(range(1, 8)), "CSV roundtrip")
     check(exactly_one(["STAGE01_45_DONE=4"], "STAGE01_45_DONE=") == "4", "marker")
@@ -109,6 +155,33 @@ def selftest():
             pass
         else:
             raise AssertionError("out-of-order or truncated row accepted")
+    rank_baseline = [1, 1, 1, 45, 45]
+    rank_expected = (1, 1, 45, 45)
+    rank_wire = lambda values: "STAGE01_45_RANK_ROW=" + ",".join(str(v) for v in values)
+    check(score_rank_row(rank_wire(rank_baseline), 1, rank_expected) == (1, 1, 1, 1),
+          "intact rank-boundary row rejected")
+    rank_mutations = (
+        ([1, 2, 1, 45, 45], (0, 1, 1, 1)),
+        ([1, 1, 2, 45, 45], (1, 0, 1, 1)),
+        ([1, 1, 1, 44, 45], (1, 1, 0, 1)),
+        ([1, 1, 1, 45, 44], (1, 1, 1, 0)),
+    )
+    for changed, expected_matches in rank_mutations:
+        check(score_rank_row(rank_wire(changed), 1, rank_expected) == expected_matches,
+              "rank-boundary corruption was not isolated")
+    expect_rejection(lambda: parse_rank_row(rank_wire([2, 1, 1, 45, 45]), 1),
+                     "out-of-order rank row accepted")
+    expect_rejection(lambda: parse_rank_row(rank_wire([1, 1, 1, 45]), 1),
+                     "truncated rank row accepted")
+    expect_rejection(lambda: parse_rank_row(rank_wire([1, 1, 1, 45, 45, 9]), 1),
+                     "extra rank-row field accepted")
+    expect_rejection(lambda: parse_rank_row(rank_wire([1, 0, 1, 45, 45]), 1),
+                     "zero rank month ID accepted")
+    expect_rejection(lambda: parse_rank_row(rank_wire([1, 1, 46, 45, 45]), 1),
+                     "out-of-range rank month ID accepted")
+    expect_rejection(lambda: parse_rank_row(rank_wire([1, 1, 1, 45, 46]), 1),
+                     "out-of-range final rank month ID accepted")
+    print("STAGE01_ACTUAL_45_RANK_BOUNDARY_MUTATIONS=10/10")
     print("STAGE01_ACTUAL_45_FULL_YEAR_MUTATIONS=8/8")
     print("STAGE01_ACTUAL_45_FULL_YEAR_SELFTEST=6/6")
 
@@ -125,7 +198,7 @@ def reference(path):
     check(mod.FOUNDATION_DAY == FOUNDATION, "reference foundation mismatch")
     check(mod.MAX_MONTHS == 47 and mod.MIN_MONTH_DAYS == 4 and
           mod.MAX_MONTH_DAYS == 123, "reference contract changed")
-    return mod.NormativeCalendar()
+    return mod.NormativeCalendar(), mod.MonthWeavingFamily
 
 
 def bounded_fortran(executable):
@@ -140,7 +213,7 @@ def bounded_fortran(executable):
 
 
 def compare(python_path, fortran_exe):
-    oracle = reference(python_path)
+    oracle, month_weaving_family = reference(python_path)
     year = oracle.year5000(FOUNDATION)
     structure = oracle.build_year_structure(FOUNDATION, year)
     days = year.close_gate_day - year.open_gate_day
@@ -161,6 +234,15 @@ def compare(python_path, fortran_exe):
     for before, after in zip(structure.cutlets, structure.cutlets[1:]):
         check(after.first_day == before.last_day + 1, "cutlet gap or overlap")
 
+    family = month_weaving_family(structure.month_lengths)
+    weaving_count = family.count()
+    check(weaving_count > 2, "actual weaving family too small for boundary ranks")
+    boundary_ranks = (1, 2, weaving_count - 1, weaving_count)
+    expected_boundary_sequences = tuple(family.unrank1(rank) for rank in boundary_ranks)
+    check(all(left < right for left, right in zip(expected_boundary_sequences,
+                                                  expected_boundary_sequences[1:])),
+          "independent boundary ranks are not strictly lexicographic")
+
     raw_lines = bounded_fortran(fortran_exe)
     meta = parse_csv(exactly_one(raw_lines, "STAGE01_45_META="), 5)
     check(meta == (EXPECTED_YEAR, year.open_gate_day, year.close_gate_day,
@@ -168,13 +250,24 @@ def compare(python_path, fortran_exe):
     lengths = parse_csv(exactly_one(raw_lines, "STAGE01_45_LENGTHS="), 45)
     check(lengths == tuple(structure.month_lengths),
           "independently selected month lengths differ")
+    check(exactly_one(raw_lines, "STAGE01_45_RANK_TOTAL=") == str(weaving_count),
+          "Fortran and independent Python weaving counts differ")
     check(int(exactly_one(raw_lines, "STAGE01_45_DONE=")) == days,
           "Fortran did not finish all year days")
+    check(int(exactly_one(raw_lines, "STAGE01_45_RANK_DONE=")) == days,
+          "Fortran did not finish all rank-boundary rows")
+    check(exactly_one(raw_lines, "STAGE01_45_ORDERING_PASS=") == "5/5",
+          "Fortran first/last occurrence ordering gate incomplete")
     output_rows = [line for line in raw_lines if line.startswith("STAGE01_45_ROW=")]
+    rank_rows = [line for line in raw_lines if line.startswith("STAGE01_45_RANK_ROW=")]
     check(len(output_rows) == days, "Fortran row count differs")
-    check(len(raw_lines) == days + 3, "unexpected Fortran records")
+    check(len(rank_rows) == days, "Fortran rank-boundary row count differs")
+    check(len(raw_lines) == 2 * days + 6, "unexpected Fortran records")
 
     ordinal = [0] * (EXPECTED_MONTHS + 1)
+    actual_sequence = []
+    rank_sequences = [[], [], [], []]
+    rank_matches = [0, 0, 0, 0]
     cutlet_index = 0
     matched_fields = 0
     matched_weave_ids = 0
@@ -182,6 +275,7 @@ def compare(python_path, fortran_exe):
     for index, raw in enumerate(output_rows, 1):
         target = year.open_gate_day + index
         month_id = structure.month_weaving[index - 1]
+        actual_sequence.append(month_id)
         ordinal[month_id] += 1
         while cutlet_index + 1 < len(structure.cutlets) and (
                 target > structure.cutlets[cutlet_index].last_day):
@@ -200,6 +294,36 @@ def compare(python_path, fortran_exe):
                 failures.append(issue)
     check(tuple(ordinal[1:]) == tuple(structure.month_lengths),
           "yearwide independent ordinal mismatch")
+    check(tuple(actual_sequence) == tuple(structure.month_weaving),
+          "Fortran actual weaving differs from independent reference")
+
+    for index, raw in enumerate(rank_rows, 1):
+        observed = parse_rank_row(raw, index)
+        for slot, month_id in enumerate(observed):
+            rank_sequences[slot].append(month_id)
+            rank_matches[slot] += int(month_id == expected_boundary_sequences[slot][index - 1])
+    for slot, (observed, expected, rank) in enumerate(
+            zip(rank_sequences, expected_boundary_sequences, boundary_ranks)):
+        check(tuple(observed) == tuple(expected),
+              "Fortran original unrank differs at boundary rank " + str(rank))
+        check(rank_matches[slot] == days,
+              "rank-boundary exact month-ID count incomplete at rank " + str(rank))
+
+    actual_ordering = validate_weave_ordering(
+        tuple(actual_sequence), structure.month_lengths, "actual normative weave")
+    boundary_orderings = [
+        validate_weave_ordering(tuple(sequence), structure.month_lengths,
+                                 "rank " + str(rank))
+        for sequence, rank in zip(rank_sequences, boundary_ranks)
+    ]
+    ordering_passes = 1 + len(boundary_orderings)
+    check(ordering_passes == 5, "first/last occurrence ordering coverage incomplete")
+
+    rank_hashes = [
+        hashlib.sha256(bytes(sequence)).hexdigest()
+        for sequence in rank_sequences
+    ]
+    rank_total_text = str(weaving_count)
     result = {
         "project_id": PROJECT_ID, "source_commit": SOURCE_COMMIT,
         "reference_blob": REFERENCE_BLOB, "year": EXPECTED_YEAR,
@@ -207,8 +331,28 @@ def compare(python_path, fortran_exe):
         "month_lengths": list(structure.month_lengths),
         "independent_weaving_sha256": hashlib.sha256(
             bytes(structure.month_weaving)).hexdigest(),
+        "weaving_count_decimal": rank_total_text,
+        "weaving_count_digits": len(rank_total_text),
+        "weaving_count_sha256": hashlib.sha256(rank_total_text.encode()).hexdigest(),
+        "weaving_count_matches_reference": True,
+        "rank_boundary_ranks": [str(rank) for rank in boundary_ranks],
+        "rank_boundary_cases": 4,
+        "rank_boundary_cases_passed": 4,
         "matched_month_ids": matched_weave_ids, "total_month_ids": days,
-        "matched_fields": matched_fields, "total_fields": 5 * days,
+        "matched_rank1_ids": rank_matches[0], "total_rank1_ids": days,
+        "matched_rank2_ids": rank_matches[1], "total_rank2_ids": days,
+        "matched_rank_penultimate_ids": rank_matches[2], "total_rank_penultimate_ids": days,
+        "matched_rank_last_ids": rank_matches[3], "total_rank_last_ids": days,
+        "rank1_sha256": rank_hashes[0],
+        "rank2_sha256": rank_hashes[1],
+        "rank_penultimate_sha256": rank_hashes[2],
+        "rank_last_sha256": rank_hashes[3],
+        "actual_first_occurrence_order": actual_ordering["first_occurrence_order"],
+        "actual_last_occurrence_order": actual_ordering["last_occurrence_order"],
+        "rank_boundary_first_last_ordering": boundary_orderings,
+        "first_last_occurrence_ordering_passed": ordering_passes,
+        "fortran_original_unrank_boundary_probes": True,
+        "independent_rank_oracle_blob": REFERENCE_BLOB,
         "full_stage1_accepted": False,
         "original_full_entrypoint_for_every_day": False,
         "fortran_original_build_plus_projection": True,
@@ -216,11 +360,19 @@ def compare(python_path, fortran_exe):
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
-    passed = matched_weave_ids == days and matched_fields == 5 * days
+    passed = (matched_weave_ids == days and matched_fields == 5 * days
+              and all(matches == days for matches in rank_matches)
+              and ordering_passes == 5)
     print("STAGE01_ACTUAL_45_FULL_YEAR_WEAVING="
           + str(matched_weave_ids) + "/" + str(days), flush=True)
     print("STAGE01_ACTUAL_45_FULL_YEAR_FIELDS="
           + str(matched_fields) + "/" + str(5 * days), flush=True)
+    print("STAGE01_ACTUAL_45_FULL_YEAR_RANK_BOUNDARIES=4/4 "
+          + "FIRST=" + str(rank_matches[0]) + "/" + str(days)
+          + " SECOND=" + str(rank_matches[1]) + "/" + str(days)
+          + " PENULTIMATE=" + str(rank_matches[2]) + "/" + str(days)
+          + " LAST=" + str(rank_matches[3]) + "/" + str(days), flush=True)
+    print("STAGE01_ACTUAL_45_FULL_YEAR_ORDERING=" + str(ordering_passes) + "/5", flush=True)
     print("STAGE01_ACTUAL_45_FULL_YEAR_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
     return 0 if passed else 1
 
