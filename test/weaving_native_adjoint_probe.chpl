@@ -275,7 +275,7 @@ proc main() {
       var digits = raw;
       var lens: [1..m] int;
       var days = 0;
-      for j in 1..m {
+      for j in 1..m by -1 {
         lens[j] = 1 + digits%3;
         digits /= 3;
         days += lens[j];
