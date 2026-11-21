@@ -2620,7 +2620,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends gnucobol3
           cobc --version
-      - name: Bounded strict Native Stage50 and independent oracle
+      - name: Bounded strict Native Stage51 and independent oracle
         shell: bash
         run: |
           set -euo pipefail
@@ -2657,7 +2657,8 @@ jobs:
           grep -Fxq 'STAGE51_PLANNING_GATE=PASS_NOT_NATIVE' build/stage51-native.log
           grep -Fxq 'STAGE51_HEAP_MEASURED=YES' build/stage51-native.log
           grep -Fxq 'RESULT=PASS_STAGE51_FIVE_SAME_SIGN_CANCELLATION_NATIVE' build/stage51-native.log
-          for pair in 'INITIAL_OWNERS 125' 'INPUT_REBUILDS 100' 'PRESERVED_AFTER_INPUT_CHANGE 125' 'OCCUPIED_REJECTS 25' 'INVALID_SIGN_REJECTS 25' 'PRESERVED_AFTER_REJECT 125' 'SURVIVORS_AFTER_FREE 100' 'SURVIVORS_AFTER_REUSE 100' 'REPLACEMENT_OWNERS 25' 'RESTORED_OWNERS 25' 'RESTORED_SNAPSHOTS 125' 'FINAL_CLEANUP 25' 'TARGET_SLOT_1 5' 'TARGET_SLOT_2 5' 'TARGET_SLOT_3 5' 'TARGET_SLOT_4 5' 'TARGET_SLOT_5 5' 'RUNS 25' 'PASS 25' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
+          grep -Fxq 'STAGE51_INIT_VALIDATION_GATE=PASS' build/stage51-native.log
+          for pair in 'INIT_VALIDATION_REJECTS 75' 'INITIAL_OWNERS 125' 'INPUT_REBUILDS 100' 'PRESERVED_AFTER_INPUT_CHANGE 125' 'OCCUPIED_REJECTS 25' 'INVALID_SIGN_REJECTS 25' 'PRESERVED_AFTER_REJECT 125' 'SURVIVORS_AFTER_FREE 100' 'SURVIVORS_AFTER_REUSE 100' 'REPLACEMENT_OWNERS 25' 'RESTORED_OWNERS 25' 'RESTORED_SNAPSHOTS 125' 'FINAL_CLEANUP 25' 'TARGET_SLOT_1 5' 'TARGET_SLOT_2 5' 'TARGET_SLOT_3 5' 'TARGET_SLOT_4 5' 'TARGET_SLOT_5 5' 'RUNS 25' 'PASS 25' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
             read -r key value <<<"$pair"
             grep -Eq "^STAGE51_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage51-native.log
           done
