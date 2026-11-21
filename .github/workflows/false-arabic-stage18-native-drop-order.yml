@@ -1,0 +1,72 @@
+name: FALSE Arabic Stage 18 signed drop-to-order original-runtime Native
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage18-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: 9ab8511b05158f7ddbd0c664b8d6cc9f7efc1339
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 6
+          persist-credentials: false
+      - name: Lock production source, tests, and original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage18_native upstream
+          git cat-file -e "$SOURCE_PIN^{commit}"
+          git merge-base --is-ancestor "$SOURCE_PIN" HEAD
+          git rev-parse "$SOURCE_PIN" > evidence/stage18_native/source_observed.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage18_native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage18_native/runtime_observed.txt
+          test "$(cat evidence/stage18_native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+      - name: Compile pinned original FALSE interpreter and Unicode preflight
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/stage18_native/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/stage18_native/compiler_stdout.txt 2> evidence/stage18_native/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/stage18_native/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/stage18_native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage18_native/unicode_pick.false \
+            > evidence/stage18_native/unicode_pick.stdout.txt \
+            2> evidence/stage18_native/unicode_pick.stderr.txt
+          test "$(cat evidence/stage18_native/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/stage18_native/preflight.txt
+      - name: Generate independent pinned fixtures and run Stage18 Native gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile tools/stage18_drop_order_fixture.py tools/stage18_drop_order_ci.py
+          PYTHONPATH=tools python3 tools/stage18_drop_order_fixture.py | tee evidence/stage18_native/fixture_generation.log
+          PYTHONPATH=tools python3 tools/stage18_drop_order_ci.py
+      - name: Preserve Native artifacts and exact input/output traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage18-drop750-native
+          path: evidence/stage18_native/
+          if-no-files-found: error
+          retention-days: 30
