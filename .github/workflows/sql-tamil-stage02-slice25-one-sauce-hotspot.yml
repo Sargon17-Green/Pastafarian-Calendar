@@ -1,0 +1,77 @@
+name: SQL Tamil Slice25 one-case bowl and stone hotspot
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/173_stage25_sauce_bowl_stone_hotspot.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-one-sauce-hotspot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-one-sauce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source and generate only QA functions
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p hot-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > hot-evidence/versions.txt
+          python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --self-test | tee hot-evidence/static.txt
+          python3 sql/test/173_stage25_sauce_bowl_stone_hotspot.py --out-dir hot-evidence | tee hot-evidence/generation.txt
+          sha256sum hot-evidence/*.sql sql/test/173_stage25_sauce_bowl_stone_hotspot.py > hot-evidence/sha256.txt
+      - name: Start PostgreSQL 17.12 isolated from external network
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-hotspot --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-hotspot pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-hotspot pg_isready -q -U postgres
+          docker exec -u postgres tamil-hotspot postgres --version | tee -a hot-evidence/versions.txt
+      - name: Load original 00 through 27 then QA-only clones
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            found=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "$(printf '%s\n' "$found" | grep -c .)" = 1
+            args+=(-f "/work/$found")
+            git hash-object "$found" >> hot-evidence/production-blobs.txt
+          done
+          docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_aliases.sql > hot-evidence/load.log 2>&1 || {
+            cat hot-evidence/load.log
+            exit 3
+          }
+      - name: Bounded new single-case Native trace with real exit capture
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          docker exec -u postgres tamil-hotspot psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/hot-evidence/hotspot_probe.sql > hot-evidence/probe.log 2>&1
+          result=$?
+          printf 'PROBE_EXIT=%s\n' "$result" | tee hot-evidence/exits.txt
+          tail -60 hot-evidence/probe.log || true
+          if [ "$result" -ne 0 ]; then exit 3; fi
+          grep -q 'SQL_TAMIL_HOT_STONE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 4
+          grep -q 'SQL_TAMIL_HOT_SAUCE_EQUIVALENCE=1/1 PASS' hot-evidence/probe.log || exit 5
+          grep -q 'SQL_TAMIL_HOT_ENTER=bowl_round:' hot-evidence/probe.log || exit 6
+      - name: Preserve full raw artifact on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-bowl-stone-hotspot
+          path: hot-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Clean isolated PostgreSQL
+        if: always()
+        run: docker rm -f tamil-hotspot 2>/dev/null || true
