@@ -36,7 +36,7 @@ fn test_patch01_matches_spec_across_signed_and_large_integers() {
 fn test_patch01_entrypoint_reaches_fixed_output() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
 	mut error_text := ''
-	_ = calendar_date_spaghetti(m, m) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(m, m) or {
 		error_text = err.msg()
 		CalendarResult{}
 	}
@@ -47,7 +47,7 @@ fn test_patch01_entrypoint_control_m_plus_one() {
 	m := big_sub(big_pow_small(big_from_int(2), 127), big_one())
 	x := big_add(m, big_one())
 	mut error_text := ''
-	_ = calendar_date_spaghetti(x, x) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(x, x) or {
 		error_text = err.msg()
 		CalendarResult{}
 	}

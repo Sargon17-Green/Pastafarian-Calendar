@@ -46,7 +46,7 @@ fn test_discovery03_legacy_adapter_retains_original_result() {
 	assert legacy.str() == '1'
 	assert calendar_distance_spaghetti(before, after).str() == '3'
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(before, after) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(before, after) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

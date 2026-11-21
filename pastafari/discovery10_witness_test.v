@@ -152,7 +152,7 @@ fn test_discovery10_previous_patches_and_monster_probe() {
 	assert calendar_stones_spaghetti(2, initial_stones()).b.str() == '1073'
 	assert (calendar_grind_row_spaghetti(11) or { []int{} }) == [37, 41, 43, 47, 1]
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

@@ -77,7 +77,7 @@ fn test_discovery07_prior_patches_survive_new_grind_adapter() {
 fn test_discovery07_monster_diagnostic_keeps_old_index_error() {
 	foundation := big_from_i64(-15_055_671)
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

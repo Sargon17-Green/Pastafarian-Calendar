@@ -97,7 +97,7 @@ fn test_discovery08_previous_patches_and_production_probe_still_work() {
 	assert (calendar_grind_row_spaghetti(1) or { []int{} }) == [3, 5, 7, 11, 1]
 	assert (calendar_grind_row_spaghetti(11) or { []int{} }) == [37, 41, 43, 47, 1]
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

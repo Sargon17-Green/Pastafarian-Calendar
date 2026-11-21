@@ -117,7 +117,7 @@ fn test_patch08_prior_history_and_monster_diagnostics_still_match() {
 	}
 	assert big_eq(prior, calendar_hidden_by_nearness(hidden, 1))
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

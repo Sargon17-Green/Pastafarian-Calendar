@@ -129,7 +129,7 @@ fn test_patch04_previous_patches_and_diagnostic_are_intact() {
 	assert old_remainder(m).str() == '0'
 	assert big_eq(calendar_save_spaghetti(m), m)
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

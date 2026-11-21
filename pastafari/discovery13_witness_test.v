@@ -200,7 +200,7 @@ fn test_discovery13_existing_monster_diagnostics_remain_intact() {
 	foundation := big_from_i64(-15_055_671)
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
 	mut message := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		message = err.msg()
 		CalendarResult{}
 	}

@@ -77,7 +77,7 @@ fn test_patch06_diagnostic_and_previous_patches() {
 	assert calendar_stones_spaghetti(2, initial_stones()).b.str() == '1073'
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

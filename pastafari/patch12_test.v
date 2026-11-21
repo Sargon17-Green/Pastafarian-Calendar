@@ -138,7 +138,7 @@ fn test_patch12_repeated_interleaved_queries_preserve_latches_and_caller_input()
 fn test_patch12_monster_probe_preserves_legacy_and_patch_diagnostics() {
 	foundation := big_from_i64(-15_055_671)
 	mut message := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		message = err.msg()
 		CalendarResult{}
 	}

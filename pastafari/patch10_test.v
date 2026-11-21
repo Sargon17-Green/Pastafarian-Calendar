@@ -158,7 +158,7 @@ fn test_patch10_fail_closed_before_commit_on_invalid_inputs() {
 fn test_patch10_monster_diagnostic_contains_wrong_and_correct() {
 	foundation := big_from_i64(-15_055_671)
 	mut msg := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		msg = err.msg()
 		CalendarResult{}
 	}

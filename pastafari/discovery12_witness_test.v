@@ -110,7 +110,7 @@ fn test_discovery12_monster_path_and_prior_patches_are_still_wired() {
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
 	assert calendar_stones_spaghetti(2, initial_stones()).b.str() == '1073'
 	mut message := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		message = err.msg()
 		CalendarResult{}
 	}

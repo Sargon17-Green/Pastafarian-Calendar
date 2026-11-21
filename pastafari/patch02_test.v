@@ -76,7 +76,7 @@ fn test_patch02_previous_save_patch_does_not_regress() {
 	assert big_eq(calendar_save_spaghetti(m), m)
 	mut error_text := ''
 	foundation := big_from_i64(-15_055_671)
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		error_text = err.msg()
 		CalendarResult{}
 	}

@@ -147,7 +147,7 @@ fn test_discovery11_previous_patches_and_monster_probe() {
 	assert (calendar_bowl_order_spaghetti(big_from_int(720)) or { []int{} }) == [6, 5, 4, 3, 2,
 		1]
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

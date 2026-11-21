@@ -97,7 +97,7 @@ fn test_patch03_production_entrypoint_uses_patched_distance() {
 	before := big_sub(foundation, big_one())
 	after := big_add(foundation, big_one())
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(before, after) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(before, after) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

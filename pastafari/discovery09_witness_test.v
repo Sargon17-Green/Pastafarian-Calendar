@@ -129,7 +129,7 @@ fn test_discovery09_actual_permutation_and_monster_probe() {
 	assert pours[1].str() == calendar_save_spaghetti(big_add(big_add(big_square(big_from_int(720)), big_mul(initial_stones().w,
 		bowls[1])), big_from_int(3))).str()
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

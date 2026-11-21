@@ -121,7 +121,7 @@ fn test_patch11_invalid_order_is_rejected_before_legacy_execution() {
 fn test_patch11_diagnostic_contains_legacy_scar_and_unwritten_latch() {
 	foundation := big_from_i64(-15_055_671)
 	mut message := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		message = err.msg()
 		CalendarResult{}
 	}

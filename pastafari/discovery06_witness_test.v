@@ -78,7 +78,7 @@ fn test_discovery06_prior_patches_and_diagnostic_stay_available() {
 	hidden := calendar_hidden_spaghetti(foundation, foundation)
 	assert calendar_hidden_by_nearness(hidden, 1).str() == '119390830530032782664128530203002080344'
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

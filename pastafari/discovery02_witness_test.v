@@ -26,7 +26,7 @@ fn test_discovery02_old_tag_on_large_signed_days() {
 fn test_discovery02_entrypoint_exposes_patched_tag_and_legacy_remains() {
 	foundation := big_from_i64(-15_055_671)
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}

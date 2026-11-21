@@ -84,7 +84,7 @@ fn test_discovery05_prior_patches_and_production_path_are_intact() {
 	assert old_distance(foundation, foundation).str() == '0'
 	assert calendar_distance_spaghetti(foundation, foundation).str() == '1'
 	mut diagnostic := ''
-	_ = calendar_date_spaghetti(foundation, foundation) or {
+	_ = calendar_date_stage30_legacy_diagnostic_spaghetti(foundation, foundation) or {
 		diagnostic = err.msg()
 		CalendarResult{}
 	}
