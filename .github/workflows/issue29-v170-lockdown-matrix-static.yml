@@ -1,0 +1,71 @@
+name: Issue29 v170 verify 42 legacy native CI jobs fail-closed (STATIC NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-safe-legacy-regressions-v170
+    paths:
+      - '.github/workflows/canonical-names-lock.yml'
+      - '.github/workflows/issue29-v170-lockdown-matrix-static.yml'
+      - 'tests/issue29_v170_legacy_dispatch_gate_audit.py'
+permissions:
+  contents: read
+jobs:
+  independent-42-job-legacy-gate-static-verifier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Audit byte-exact 42-job native dispatch lockdown from pinned Ada commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B tests/issue29_v170_legacy_dispatch_gate_audit.py --check | tee evidence/halt-42-native-jobs.json
+          python3 -B - <<'PY' | tee evidence/independent-gate-decision.log
+          import json, pathlib, subprocess,hashlib
+          p=pathlib.Path("evidence/halt-42-native-jobs.json")
+          d=json.loads(p.read_text())
+          assert d["native_jobs_hard_skipped"]==42
+          assert d["status"]=="EXACT_42_HISTORICAL_NATIVE_JOBS_HARD_SKIPPED"
+          assert d["canonical_name_hash_verify_preserved"] is True
+          assert d["native_jobs_before_source_review_can_execute"] is False
+          assert d["soak_dispatch_allowed"] is False
+          w=pathlib.Path(".github/workflows/canonical-names-lock.yml").read_text()
+          assert w.count("if: ${{ false }}")==42
+          assert w.count("  verify:\n")==1
+          assert d["staged_sha256"]==hashlib.sha256(w.encode()).hexdigest()
+          print("V170_ALL_42_ORIGINAL_ADA_LEGACY_NATIVE_JOBS_FAIL_SHUT")
+          print("V170_CANONICAL_NAMES_SHA256_VERIFIER_REMAINS_ACTIVE")
+          print("V170_NO_NATIVE_CALENDAR_F_EXECUTED")
+          PY
+      - name: Run adversarial 12-mutant old-auto-dispatch reinstatement tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v170_legacy_dispatch_gate_audit.py --tests 2>&1 | tee evidence/12-gate-mutant-tests.log
+          grep -Eq '^Ran 12 tests in ' evidence/12-gate-mutant-tests.log
+          grep -Fx OK evidence/12-gate-mutant-tests.log
+      - name: Hash and upload static only evidence with no native binaries
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence");p.mkdir(exist_ok=True)
+          d={f.name:{"sha256":hashlib.sha256(f.read_bytes()).hexdigest(),"bytes":f.stat().st_size}
+            for f in p.iterdir() if f.is_file()}
+          (p/"members.sha256.json").write_text(json.dumps(d,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Archive 42-job lockdown QA staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v170-42-native-jobs-hard-skipped-static-12-mutants
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
