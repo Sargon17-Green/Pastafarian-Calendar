@@ -54,8 +54,7 @@ def run_native(binary, outdir, direction, word=None):
     command = ["/usr/bin/time", "-f", "OS_WALL_SECONDS=%e\\nOS_MAX_RSS_KIB=%M\\nOS_EXIT=%x",
                "-o", str(metrics_path), *argv]
     (outdir / (name + ".command.json")).write_text(
-        json.dumps({"argv": [str(binary), "--runMode=" + direction,
-                "<exact-witness-as-argument>" if direction == "rank" else ""],
+        json.dumps({"argv": argv,
                 "witness_sha256": oracle.WITNESS_SHA256 if direction == "rank" else None,
                 "source": "Native Chapel binary"}, ensure_ascii=False) + "\n")
     begin = time.monotonic()

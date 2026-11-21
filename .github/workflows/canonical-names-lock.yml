@@ -233,10 +233,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 test/run_native_4244_research.py \\
-            --binary ./chapel-native-adjoint-probe \\
-            --source-sha "$(git rev-parse HEAD)" \\
-            --outdir chapel-native-4244-evidence \\
+          python3 test/run_native_4244_research.py \
+            --binary ./chapel-native-adjoint-probe \
+            --source-sha "$(git rev-parse HEAD)" \
+            --outdir chapel-native-4244-evidence \
             | tee chapel-native-4244-runner.log
 
       - name: Retain bounded Native 4244 attempt, including incomplete evidence
