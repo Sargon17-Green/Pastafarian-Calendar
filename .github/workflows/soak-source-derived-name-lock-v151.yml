@@ -1,0 +1,228 @@
+name: Soak v151 pinned Python/JavaScript source-derived catalogs + semantic replay, original Fct STOP
+on:
+  push:
+    branches:
+      - qa/soak-source-derived-name-lock-v151
+    paths:
+      - 'soak/runner/year_validator.py'
+      - 'soak/runner/soak_raw_bound_year_diff_v149.py'
+      - 'soak/runner/soak_native_semantic_replay_v150.py'
+      - 'soak/runner/soak_source_derived_names_v151.py'
+      - 'soak/runner/native_raw_pair_gate_v018.py'
+      - 'soak/runner/native_execution_receipt_v038.py'
+      - 'soak/process_tests/test_soak_generic_jsonl_hardening_v147.py'
+      - 'soak/process_tests/test_soak_physical_transcript_identity_v148.py'
+      - 'soak/process_tests/test_soak_raw_bound_year_diff_v149.py'
+      - 'soak/process_tests/test_soak_native_semantic_replay_v150.py'
+      - 'soak/process_tests/test_soak_source_derived_names_v151.py'
+      - 'soak/control/pilot_two_engine_source_locks_v001.json'
+      - 'soak/tests/test_year_validator.py'
+      - 'soak/tests/test_two_lane_scheduler.py'
+      - 'soak/runner/two_lane_scheduler.py'
+      - '.github/workflows/soak-source-derived-name-lock-v151.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic-generic-jsonl-regression-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm original-mismatch halt and forbid converter execution
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v147-preflight.log
+          import ast,json,urllib.request
+          from pathlib import Path
+          m=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text(encoding="utf-8"))
+          assert m["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert m["incident_issue"]==29 and m["main_changes_permitted"] is False
+          assert m["successful_ten_thousand_soak_years"]==0
+          assert m["successful_original_source_full_years"]==0
+          for source in ("soak/runner/year_validator.py",
+                         "soak/runner/two_lane_scheduler.py",
+                         "soak/process_tests/test_soak_generic_jsonl_hardening_v147.py",
+                         "soak/process_tests/test_soak_physical_transcript_identity_v148.py",
+                         "soak/runner/soak_raw_bound_year_diff_v149.py",
+                         "soak/process_tests/test_soak_raw_bound_year_diff_v149.py",
+                         "soak/runner/soak_native_semantic_replay_v150.py",
+                         "soak/process_tests/test_soak_native_semantic_replay_v150.py",
+                         "soak/runner/soak_source_derived_names_v151.py",
+                         "soak/process_tests/test_soak_source_derived_names_v151.py",
+                         "soak/tests/test_year_validator.py",
+                         "soak/tests/test_two_lane_scheduler.py"):
+              tree=ast.parse(Path(source).read_text(encoding="utf-8"))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(x.name.split(".")[0] not in
+                          ("subprocess","ctypes","multiprocessing","pastafari_calendar")
+                          for x in n.names),source
+                  elif isinstance(n,ast.ImportFrom):
+                      assert ((n.module or "").split(".")[0] not in
+                          ("subprocess","ctypes","multiprocessing","pastafari_calendar")),source
+          import os
+          url="https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/branches/main"
+          req=urllib.request.Request(url,headers={
+              "Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],
+              "User-Agent":"soak-v147-no-dispatch-main-check",
+              "Accept":"application/vnd.github+json"})
+          with urllib.request.urlopen(req,timeout=20) as f:
+              live=json.load(f)
+          assert live["commit"]["sha"]=="56bc4173aae4975ded019ef5ab5a36249f1424df"
+          print("V147_ORIGINAL_FCT_DISPATCH_STOP_TRUE")
+          print("V147_MAIN_FROZEN_SOURCE_SHA_VERIFIED")
+          print("V147_PYTHON_ONLY_NO_NATIVE_CONVERTER_IMPORTS")
+          PY
+      - name: Existing whole-year JSONL parser regression
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests -p 'test_year_validator.py' -v 2>&1 | tee evidence/v147-existing-year-validator-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v147-existing-year-validator-tests.log
+          grep -Fx 'OK' evidence/v147-existing-year-validator-tests.log
+      - name: Existing two-lane no-kill scheduler regression
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests -p 'test_two_lane_scheduler.py' -v 2>&1 | tee evidence/v147-existing-scheduler-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v147-existing-scheduler-tests.log
+          grep -Fx 'OK' evidence/v147-existing-scheduler-tests.log
+      - name: Adversarial cross-engine raw JSONL ambiguity and mismatch tests
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_generic_jsonl_hardening_v147.py' -v 2>&1 | tee evidence/v147-adversarial-24-tests.log
+          grep -Eq '^Ran 24 tests ' evidence/v147-adversarial-24-tests.log
+          grep -Fx 'OK' evidence/v147-adversarial-24-tests.log
+          printf 'V147_ADVERSARIAL_JSONL_24_TESTS_PASS\nV147_EXISTING_GENERIC_REGRESSIONS_22_TESTS_PASS\nV147_ORIGINAL_CALENDAR_FCT_CALLS=0\nV147_ORIGINAL_FULL_YEARS_CERTIFIED=0\nV147_SCIENTIFIC_10000_YEAR_SOAK_PASS=FALSE\n' | tee evidence/v147-verdict.log
+      - name: Physical transcript identity alias regression
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_physical_transcript_identity_v148.py' -v 2>&1 | tee evidence/v148-physical-12-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v148-physical-12-tests.log
+          grep -Fx 'OK' evidence/v148-physical-12-tests.log
+          printf 'V148_SAME_INODE_ALIAS_REJECTED\nV148_INDEPENDENT_SAME_CONTENT_FILES_ACCEPTED\nV148_TOTAL_PYTHON_REGRESSIONS=58\nV148_ORIGINAL_CALENDAR_FCT_CALLS=0\nV148_ORIGINAL_FULL_YEARS_CERTIFIED=0\nV148_SCIENTIFIC_SOAK_PASS=FALSE\n' | tee evidence/v148-verdict.log
+      - name: Link raw native stdout SHA256, v038 receipt, and entire synthetic year
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_raw_bound_year_diff_v149.py' -v 2>&1 | tee evidence/v149-raw-bound-28-tests.log
+          grep -Eq '^Ran 28 tests ' evidence/v149-raw-bound-28-tests.log
+          grep -Fx 'OK' evidence/v149-raw-bound-28-tests.log
+          printf 'V149_RAW_NATIVE_ROWS_VERIFIED_THROUGH_EXISTING_V038_SHA_RECEIPTS=TRUE\nV149_FULL_SYNTHETIC_YEAR_CHUNK_COVERAGE_VERIFIED=TRUE\nV149_GENERIC_COMPARATOR_REGRESSIONS=86\nV149_ORIGINAL_FCT_CALLS=0\nV149_OFFICIAL_10000_YEAR_SOAK=FALSE\n' | tee evidence/v149-verdict.log
+      - name: Prove raw-native semantic replay and reject consistent hash-laundering
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_native_semantic_replay_v150.py' -v 2>&1 | tee evidence/v150-native-semantic-26-tests.log
+          grep -Eq '^Ran 26 tests ' evidence/v150-native-semantic-26-tests.log
+          grep -Fx 'OK' evidence/v150-native-semantic-26-tests.log
+          printf 'V150_RAW_NATIVE_SEMANTIC_REPLAY_CHECKED=TRUE\nV150_HASH_CONSISTENT_WRONG_NORMALIZATION_REJECTED=TRUE\nV150_ORIGINAL_NAME_MAP_ATTESTATION=FALSE\nV150_GENERIC_COMPARATOR_REGRESSIONS=112\nV150_ORIGINAL_FCT_CALLS=0\nV150_OFFICIAL_10000_YEAR_SOAK=FALSE\n' | tee evidence/v150-verdict.log
+      - name: Check synthetic source-byte locks and semantic spoofing regressions
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_source_derived_names_v151.py' -v 2>&1 | tee evidence/v151-mock-source-lock-20-tests.log
+          grep -Eq '^Ran 20 tests ' evidence/v151-mock-source-lock-20-tests.log
+          grep -Fx 'OK' evidence/v151-mock-source-lock-20-tests.log
+      - name: Fetch exactly three historical pinned source blobs without executing
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY' | tee evidence/v151-pinned-real-download.log
+          import base64,hashlib,json,os,urllib.request,urllib.parse
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,"soak/runner")
+          from native_raw_pair_gate_v018 import git_blob
+          from soak_source_derived_names_v151 import pinned_lock
+          lock=pinned_lock()
+          root=Path(os.environ["RUNNER_TEMP"])/"soak-v151-pinned-sources"
+          root.mkdir(parents=True,exist_ok=False)
+          for engine in lock["engines"]:
+              ident=engine["id"]
+              folder="Python-Turkce" if ident=="REF-41" else "JavaScript-Interlingue"
+              for item in engine["sources"]:
+                  file_path=item["path"]
+                  url=("https://api.github.com/repos/"
+                       +engine["repository"]+"/contents/"
+                       +urllib.parse.quote(file_path,safe="/")+"?ref="
+                       +urllib.parse.quote(engine["commit"],safe=""))
+                  req=urllib.request.Request(url,headers={
+                      "Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],
+                      "Accept":"application/vnd.github+json",
+                      "User-Agent":"soak-v151-pinned-source-bytes-only",
+                  })
+                  with urllib.request.urlopen(req,timeout=25) as response:
+                      metadata=json.load(response)
+                  assert metadata["type"]=="file",file_path
+                  assert metadata["sha"]==item["git_blob_sha1"],file_path
+                  assert metadata["encoding"]=="base64",file_path
+                  content=base64.b64decode(metadata["content"])
+                  assert len(content)==item["bytes"],file_path
+                  assert hashlib.sha256(content).hexdigest()==item["sha256"],file_path
+                  assert git_blob(content)==item["git_blob_sha1"],file_path
+                  dest=root/folder/engine["commit"]/file_path
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  with dest.open("xb") as output:
+                      output.write(content)
+                  print("V151_RETRIEVED_GITHUB_COMMIT_FILE_CHECKED",ident,file_path,
+                        item["bytes"],item["sha256"],item["git_blob_sha1"])
+          print("V151_NATIVE_FCT_CALLS=0")
+          print("V151_SOURCE_BLOBS_FETCHED_FROM_COMMIT_SCOPED_GITHUB_API=3")
+          PY
+      - name: Independently derive real Turkish and Interlingue catalogs from locked source bytes
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/soak_source_derived_names_v151.py \
+            --sources-root "$RUNNER_TEMP/soak-v151-pinned-sources" \
+            --report evidence/v151-source-derived-real-catalog-verdict.json \
+            | tee evidence/v151-pinned-real-source-gate.log
+          python3 -B - <<'PY' | tee evidence/v151-reality-witness.log
+          import json
+          from pathlib import Path
+          x=json.loads(Path("evidence/v151-source-derived-real-catalog-verdict.json").read_text())
+          assert x["status"]=="PINNED_SOURCE_CATALOG_BYTES_VERIFIED_UNCERTIFIED"
+          assert x["source_code_files_bytes_verified"]==3
+          a=x["source_catalogs"]
+          assert set(a)=={"REF-41","REF-24"}
+          assert a["REF-41"]["catalog"]["cutlets"][9]=="Akrep"
+          assert a["REF-24"]["catalog"]["cutlets"][9]=="scorpion"
+          assert a["REF-24"]["catalog"]["months"][19]=="pute"
+          assert all(len(d["catalog"]["cutlets"])==17 and
+                     len(d["catalog"]["months"])==47 for d in a.values())
+          assert x["original_years_certified"]==0
+          assert x["original_converters_executed"]==0
+          assert x["halt_new_native_soak_dispatch"] is True
+          print("V151_HISTORICAL_REAL_SOURCE_BYTES_SHA256_AND_GIT_BLOB_VALIDATED")
+          print("V151_REAL_TURKISH_AND_INTERLINGUE_17X47_NAMES_EXTRACTED")
+          print("V151_SOURCE_NAMES_ARE_EXTRACTED_NOT_SELF_REPORTED")
+          print("V151_SOURCE_LINEAGE_INDEPENDENCE_NOT_PROVEN")
+          print("V151_SCIENTIFIC_10000_YEAR_SOAK_PASS=FALSE")
+          PY
+          printf 'V151_MOCK_SOURCE_REGRESSIONS=20\nV151_PRIOR_GENERIC_REGRESSIONS=112\nV151_TOTAL_PYTHON_REGRESSIONS=132\nV151_ORIGINAL_FCT_CALLS=0\nV151_SOURCE_CATALOG_PROVENANCE_LIMITED_TO_TWO_HISTORICAL_REFERENCES\nV151_OFFICIAL_SOAK_PASS=FALSE\n' | tee evidence/v151-verdict.log
+      - name: Archive synthetic-only logs (never engine binaries)
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v151-real-source-catalog-132-tests-no-native-execution
+          path: |
+            evidence/v147-preflight.log
+            evidence/v147-existing-year-validator-tests.log
+            evidence/v147-existing-scheduler-tests.log
+            evidence/v147-adversarial-24-tests.log
+            evidence/v147-verdict.log
+            evidence/v148-physical-12-tests.log
+            evidence/v148-verdict.log
+            evidence/v149-raw-bound-28-tests.log
+            evidence/v149-verdict.log
+            evidence/v150-native-semantic-26-tests.log
+            evidence/v150-verdict.log
+            evidence/v151-mock-source-lock-20-tests.log
+            evidence/v151-pinned-real-download.log
+            evidence/v151-source-derived-real-catalog-verdict.json
+            evidence/v151-pinned-real-source-gate.log
+            evidence/v151-reality-witness.log
+            evidence/v151-verdict.log
+          if-no-files-found: error
+          retention-days: 30
