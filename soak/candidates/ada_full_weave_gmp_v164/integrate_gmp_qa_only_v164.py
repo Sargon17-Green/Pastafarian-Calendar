@@ -136,7 +136,7 @@ def main() -> int:
         shutil.copyfile(item, output)
     oracle.write_bytes(new)
 
-    (root / "ada-build" / "issue29-gmp-oracle-qa-compile.gpr").write_text(
+    (root / "ada-build" / "issue29_gmp_oracle_qa_compile.gpr").write_text(
         PROJECT, encoding="utf-8"
     )
     old_text = original.decode("utf-8")
