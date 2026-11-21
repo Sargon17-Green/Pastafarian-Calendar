@@ -101,3 +101,11 @@ build/calendar_chain1.o: build/calendar.o src/runtime/calendar_hidden_visible1_c
 build/calendar_chain1.gb: build/calendar_chain1.o
 	$(RGBLINK) -n build/calendar_chain1.sym -m build/calendar_chain1.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated second-visible Native381, independent of accepted 370..380 routes.
+build/calendar_chain2.o: build/calendar.o src/runtime/calendar_hidden_visible2_chain.asm src/tests/calendar_hidden_visible2_chain_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_CHAIN2_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_chain2.gb: build/calendar_chain2.o
+	$(RGBLINK) -n build/calendar_chain2.sym -m build/calendar_chain2.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@

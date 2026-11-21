@@ -1,6 +1,6 @@
-; Stage1 isolated visible drop i=1; caller supplies canonical hidden
-; drops k=1,3,7 (in this order) and five i=1 stones. No hidden-output
-; fixtures in production ROMX. 16-byte residue published only on success.
+; Stage1 visible drop i=1 or i=2 with three caller-supplied predecessors.
+; The already accepted i=1 interface is preserved. Only a successful
+; invocation publishes the 16-byte output; runtime has no fixture data.
 SECTION "Calendar visible1 native", ROMX, BANK[1]
 CalendarVisibleDrop1::
     call CalendarOrdinalValidate
@@ -9,7 +9,10 @@ CalendarVisibleDrop1::
     ret nz
     ld a, [wCalendarVisibleIteration]
     cp 1
+    jr z, .validIteration
+    cp 2
     jp nz, .invalid
+.validIteration:
     ld hl, wCalendarStoneOld
     ld b, 5
     call .validateResidues
@@ -59,7 +62,7 @@ CalendarVisibleDrop1::
     call .repeatAddition
     ld hl, wAddend
     call Clear16
-    ld a, 1
+    ld a, [wCalendarVisibleIteration]
     ld [wAddend], a
     call Add16
     call Save127
