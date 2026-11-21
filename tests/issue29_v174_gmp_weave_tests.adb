@@ -263,9 +263,9 @@ begin
       end;
    end;
 
-   if Assertions /= 10_574 then
+   if Assertions /= 56_221 then
       raise Program_Error with
-        "v174 expected exactly 10574 exhaustive GMP weave assertions";
+        "v174 expected exactly 56221 exhaustive GMP weave assertions";
    end if;
 
    Ada.Text_IO.Put_Line

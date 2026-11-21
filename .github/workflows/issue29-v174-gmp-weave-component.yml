@@ -58,13 +58,13 @@ jobs:
         run: |
           set -euo pipefail
           python3 -B tests/issue29_v174_gmp_weave_runner.py run-once | tee v174-run.stdout
-          grep -Fx V174_PRODUCTION_GMP_WEAVE_10574_ASSERTIONS_PASS_ZERO_F_ZERO_SOAK v174-run.stdout
+          grep -Fx V174_PRODUCTION_GMP_WEAVE_56221_ASSERTIONS_PASS_ZERO_F_ZERO_SOAK v174-run.stdout
           python3 -B - <<'PY'
           import json
           from pathlib import Path
           d=json.loads(Path("evidence/result.json").read_bytes())
           assert d["status"]=="PASS_PRODUCTION_GMP_WEAVE_EXHAUSTIVE_NORMATIVE_ORACLE"
-          assert d["assertions"]==10574
+          assert d["assertions"]==56221
           assert d["reference_families"]["4,4"]["total_distinct_multiset_permutations"]==70
           assert d["reference_families"]["4,4"]["normatively_valid_weaves"]==20
           assert d["reference_families"]["4,5,4"]["total_distinct_multiset_permutations"]==90090
@@ -75,7 +75,7 @@ jobs:
           assert d["process"]["exit_code"]==0
           assert d["gnu_time"]["exit_code"]==0
           assert d["process"]["limit_violation"] is None
-          print("V174_INDEPENDENT_EXHAUSTIVE_GMP_WEAVE_RESULT_PASS_ZERO_F_ZERO_SOAK")
+          print("V174_INDEPENDENT_EXHAUSTIVE_GMP_WEAVE_56221_RESULT_PASS_ZERO_F_ZERO_SOAK")
           PY
       - name: Hash and preserve evidence on success or failure
         if: always()

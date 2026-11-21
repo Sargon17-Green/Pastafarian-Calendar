@@ -68,7 +68,7 @@ BUILD_CPU_SECONDS = 120
 BUILD_ADDRESS_SPACE_BYTES = 1024 * 1024 * 1024
 BUILD_OUTPUT_LIMIT_BYTES = 1024 * 1024
 BUILD_FILE_SIZE_LIMIT_BYTES = 128 * 1024 * 1024
-EXPECTED_ASSERTIONS = 10574
+EXPECTED_ASSERTIONS = 56221
 
 
 def insist(condition: bool, message: str) -> None:
@@ -558,7 +558,7 @@ def run_once() -> None:
         },
     }
     write_exclusive(EVIDENCE / "result.json", json_bytes(result))
-    print("V174_PRODUCTION_GMP_WEAVE_10574_ASSERTIONS_PASS_ZERO_F_ZERO_SOAK")
+    print("V174_PRODUCTION_GMP_WEAVE_56221_ASSERTIONS_PASS_ZERO_F_ZERO_SOAK")
 
 
 def main() -> int:
