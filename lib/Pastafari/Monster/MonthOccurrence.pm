@@ -14,7 +14,7 @@ our @EXPORT_OK = qw(month_occurrence);
 # 日期年份、肉排邊界、月份名稱及完整年曆不由此原語計算。
 sub month_occurrence ($lengths, $rank, $position) {
     # Stage04 的投影域保留最多九個月／三十六日；
-    # Stage19 的 WeavingPrimitive 可接受十個月／四十日，不得隱式擴張本 API。
+    # Stage21 的 WeavingPrimitive 可接受十二個月／四十八日；本 API 仍限制九個月／三十六日，不得隱式擴張。
     # 無效的月份元素仍交由原有交織驗證器處理。
     if (ref($lengths) eq 'ARRAY') {
         die "月份數超出本投影範圍\n" if @$lengths > 9;

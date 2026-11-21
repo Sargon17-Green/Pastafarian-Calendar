@@ -8,7 +8,7 @@ use Math::BigInt;
 use Scalar::Util qw(blessed);
 our @EXPORT_OK = qw(count_weavings rank_weaving unrank_weaving);
 
-# Stage21 candidate: twelve months / forty-eight days. No date semantics.
+# Stage21 accepted primitive: twelve months / forty-eight days. No date semantics.
 sub _counts ($profile) {
     die "月份長度須為陣列參照\n" if ref($profile) ne 'ARRAY';
     my $m = scalar @$profile;
