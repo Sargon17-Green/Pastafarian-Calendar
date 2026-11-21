@@ -38,7 +38,7 @@ TARGETS={
 # Exact original source snippets. These anchors must remain unique and the
 # historical whole-file Git blob must match before insertion.
 PY_ANCHORS=(
-    "        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())",
+    "        return family.unrank1(rank)",
     "        return DateIds(",
 )
 ADA_ANCHORS=(
@@ -231,6 +231,11 @@ def make_patched(originals:dict[str,bytes])->dict[str,bytes]:
     select,final=python_blocks()
     py=insert_once(py,PY_ANCHORS[0],"PY_SELECTOR_GLOBAL_RANK",select,"PY")
     py=insert_once(py,PY_ANCHORS[1],"PY_FINAL_NAME_AND_WEAVE",final,"PY")
+    rank_assignment=b"        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())"
+    selector_marker=b"# >>> V159_QA_DIAG_INSTRUMENTED_COPY_ONLY PY_SELECTOR_GLOBAL_RANK"
+    return_rank=b"        return family.unrank1(rank)"
+    require(py.index(rank_assignment) < py.index(selector_marker) <
+            py.index(return_rank),"Python rank diagnostic must follow rank assignment before return")
     ast.parse(py.decode("utf-8"),filename="qa-instrumented-copy-not-executed.py")
     first,tickets,afinal=ada_blocks()
     ada=insert_once(ada,ADA_ANCHORS[0],"ADA_MONTH_LENGTH_RANK",first,"ADA")
