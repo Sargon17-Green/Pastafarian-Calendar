@@ -31,7 +31,7 @@ jobs:
           test "$(git rev-parse HEAD:src/bigint.lua)" = "fcff58bcaaf8bb3f205e7a9c624a51069c0e5a5d" || exit 22
           test "$(git rev-parse HEAD:src/source_language_catalog.lua)" = "5b59ee6bb0ea2c2a551185929b5531ea28a50e49" || exit 23
           git rev-parse HEAD > lua-composition-resource-evidence/source_sha.txt
-          sha256sum test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_composition_boundary_oracle.py test/lua_haitian_composition_resource_adapter.lua test/lua_haitian_composition_resource_boundary.lua docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md test/lua_haitian_weaving_state_budget_qa.py .github/workflows/lua-haitian-composition-resource-gate.yml > lua-composition-resource-evidence/sha256.txt
+          sha256sum test/normative_oracle.lua src/bigint.lua src/source_language_catalog.lua test/lua_haitian_composition_boundary_oracle.py test/lua_haitian_composition_resource_adapter.lua test/lua_haitian_composition_resource_boundary.lua docs/LUA_HAITIAN_COMPOSITION_RESOURCE_BOUNDARY_NATIVE_QA_2026-11-21.md test/lua_haitian_weaving_state_budget_qa.py test/lua_haitian_exact_month_composition_qa.lua test/lua_haitian_exact_month_composition_tests.lua docs/LUA_HAITIAN_EXACT_MONTH_COMPOSITION_QA_2026-11-21.md .github/workflows/lua-haitian-composition-resource-gate.yml > lua-composition-resource-evidence/sha256.txt
           python3 test/lua_haitian_composition_boundary_oracle.py --check-source test/normative_oracle.lua > lua-composition-resource-evidence/python_stdout.txt 2> lua-composition-resource-evidence/python_stderr.txt
           test ! -s lua-composition-resource-evidence/python_stderr.txt || exit 24
           grep -Fxq 'COMPOSITION_BOUNDARY_STATIC_SELFTEST_PASS: 286/286' lua-composition-resource-evidence/python_stdout.txt || exit 25
@@ -69,6 +69,22 @@ jobs:
           grep -Fxq 'FULL_DATE: NOT_RUN' lua-composition-resource-evidence/lua_stdout.txt || exit 32
           grep -Fxq 'QA_BOUNDARY_NATIVE_ASSERTIONS_PASS: 28/28' lua-composition-resource-evidence/lua_stdout.txt || exit 33
           grep -Eq '^SELECTED_YEAR_RECEIPT\|sourceSha=[0-9a-f]{40}\|day=-15017676\|year=5000\|candidateCount=69\|rank1=56\|openIndex=71\|closeIndex=82\|openDay=-15018117\|closeDay=-15012823\|length=5294\|minMonths=44\|maxMonths=47\|qaCap=16\|status=RESOURCE_REJECT$' lua-composition-resource-evidence/lua_stdout.txt || exit 34
+
+      - name: Independent exact BigInt month composition QA
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          ( ulimit -v 131072; timeout --signal=TERM --kill-after=2s 90s lua5.3 test/lua_haitian_exact_month_composition_tests.lua . ) > lua-composition-resource-evidence/exact_months_stdout.txt 2> lua-composition-resource-evidence/exact_months_stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > lua-composition-resource-evidence/exact_months_exit_code.txt
+          cat lua-composition-resource-evidence/exact_months_stdout.txt
+          if test -s lua-composition-resource-evidence/exact_months_stderr.txt; then cat lua-composition-resource-evidence/exact_months_stderr.txt >&2; fi
+          test "$code" -eq 0 || exit "$code"
+          test ! -s lua-composition-resource-evidence/exact_months_stderr.txt || exit 39
+          grep -Fxq 'LUA_HAITIAN_EXACT_MONTHS_PASS: 486/486' lua-composition-resource-evidence/exact_months_stdout.txt || exit 40
+          grep -Fxq 'PRODUCTION=UNCHANGED; WEAVING=NOT_RUN; FULL_DATE=NOT_RUN' lua-composition-resource-evidence/exact_months_stdout.txt || exit 41
 
       - name: Upload all evidence even if native QA fails
         if: always()
