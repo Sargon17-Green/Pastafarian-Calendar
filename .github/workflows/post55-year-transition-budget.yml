@@ -1,0 +1,83 @@
+name: Kotlin bounded year transition budget and recovery QA
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/Post55YearTransitionBudgetProbe.kt'
+      - 'soak/audit_production_year_transition_budget.py'
+      - 'soak/test_audit_production_year_transition_budget.py'
+      - '.github/workflows/post55-year-transition-budget.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  transition-budget-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify source and transition ceilings
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fq 'maxGateAbsIndex: Int = 8192' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          grep -Fq 'maxYearTransitions in 1..100000' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          grep -Fq 'private const val LIMIT = 8192' soak/Post55YearTransitionBudgetProbe.kt
+          echo 'TRANSITION_BUDGET_SOURCE_LOCK_GREEN'
+      - name: Strict synthetic parser, mutation and provenance tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile soak/audit_production_year_transition_budget.py soak/test_audit_production_year_transition_budget.py
+          python3 -m unittest discover -s soak -p 'test_audit_production_year_transition_budget.py' -v \
+            2>&1 | tee evidence/transition-budget-tests.log
+      - name: Install Kotlin 1.9.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 3 \
+            'https://github.com/JetBrains/kotlin/releases/download/v1.9.0/kotlin-compiler-1.9.0.zip' \
+            -o "$RUNNER_TEMP/kotlin.zip"
+          unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/kotlinc/bin" >> "$GITHUB_PATH"
+      - name: Compile actual Kotlin production with bounded QA probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          kotlinc src/main/kotlin/pastafari/*.kt soak/Post55YearTransitionBudgetProbe.kt \
+            -include-runtime -d "$RUNNER_TEMP/transition-budget.jar"
+          test -s "$RUNNER_TEMP/transition-budget.jar"
+          echo 'TRANSITION_BUDGET_REAL_PRODUCTION_COMPILED'
+      - name: Run Native and compare all 12 cases against unseeded geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 soak/audit_production_year_transition_budget.py \
+            --jar "$RUNNER_TEMP/transition-budget.jar" \
+            --timeout-seconds 900 \
+            --evidence evidence/transition-budget.json \
+            2>&1 | tee evidence/transition-budget.log
+      - name: Preserve bounded QA evidence whether green or red
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-year-transition-budget-recovery
+          path: evidence/transition-budget*
+          if-no-files-found: warn
+          retention-days: 30
