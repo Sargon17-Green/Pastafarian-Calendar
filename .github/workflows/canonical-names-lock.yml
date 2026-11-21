@@ -798,3 +798,28 @@ jobs:
         run: dart analyze
       - name: Attribute §V full-year count, unrank and canonical plan costs
         run: dart run bin/stage7_weave_hotpath_profile.dart
+
+  dart-hebrew-stage7-ab-qa-only:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact candidate source history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Report SDK version
+        run: dart --version
+      - name: Run source-locked same-environment A versus B QA benchmark
+        run: python3 tool/dart_hebrew_stage7_ab_runner.py
+      - name: Preserve raw benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-stage7-ab-qa
+          path: out/dart-hebrew-stage7-ab/
+          if-no-files-found: warn
