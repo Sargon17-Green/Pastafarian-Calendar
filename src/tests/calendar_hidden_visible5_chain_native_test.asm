@@ -1,4 +1,4 @@
-; Native384: chain H1..H7, V1, V2 and genuine V3.
+; Native384: chain H1..H7, retain V1..V4 and verify V5.
 SECTION "Calendar hidden-visible chain Native benchmark", ROMX, BANK[1]
 RunCalendarHiddenVisible5ChainBench::
     call SRAMEnable
@@ -227,9 +227,9 @@ RunCalendarHiddenVisible5ChainBench::
 .selectedExpected:
     db $72,$e5,$db,$9d,$ca,$2b,$4b,$c1,$d8,$76,$8e,$a2,$3c,$24,$0c,$15
     db $13,$c8,$f6,$f1,$ec,$0f,$5e,$3d,$a8,$e7,$0b,$17,$33,$01,$e0,$33
-    db $60,$3e,$d4,$70,$be,$73,$9f,$af,$24,$a8,$c1,$6e,$bc,$1c,$17,$3d
+    db $74,$96,$da,$ec,$5b,$2a,$ea,$ed,$dd,$ca,$27,$75,$76,$2e,$38,$12
 .visibleExpected:
-    db $d2,$52,$0e,$b0,$95,$8f,$68,$5e,$24,$d1,$a7,$b1,$2f,$b8,$98,$4b
+    db $57,$f7,$4f,$44,$05,$45,$50,$cd,$16,$d5,$d4,$5a,$a3,$40,$9c,$6a
 .visible1Expected:
     db $3f,$c4,$83,$d3,$96,$37,$b7,$a5,$9a,$46,$58,$36,$97,$5a,$9d,$2a
 .stones5Expected:

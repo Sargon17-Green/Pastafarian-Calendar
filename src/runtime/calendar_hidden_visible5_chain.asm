@@ -1,5 +1,5 @@
-; Stage1 Native384: V4 follows chained H1..H7 and visible V1..V3.
-; For i=5, predecessors (i-1,i-3,i-7) are V4,V2,H5.
+; Stage1 Native384: V5 follows chained H1..H7 and visible V1..V4.
+; For i=5, predecessors (i-1,i-3,i-7) are V4,V2,H3.
 ; Source old-round five stones are snapshot i4; compute exactly one i5.
 SECTION "Calendar fifth visible integration", ROMX, BANK[1]
 CalendarHiddenVisible5Chain::
@@ -33,7 +33,7 @@ CalendarHiddenVisible5Chain::
     ld hl, wCalendarVisibleSecond
     ld de, wCalendarVisibleInputs+16
     call .copy16
-    ld hl, wCalendarHiddenRetained+64
+    ld hl, wCalendarHiddenRetained+32
     ld de, wCalendarVisibleInputs+32
     call .copy16
     ld a, 5

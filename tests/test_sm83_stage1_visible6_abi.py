@@ -4,6 +4,7 @@ from pathlib import Path
 import random,re
 from test_sm83_stage1_visible5_abi import compute as prior_five, ROWS
 from test_sm83_stage1_chain1_abi import expected_hidden
+from test_sm83_stage1_sauce_oracle import FOUNDATION, compute_sauce
 M=(1<<127)-1
 ROOT=Path(__file__).resolve().parents[1]
 def canonical(n): return (n-1)%M+1
@@ -12,7 +13,7 @@ def compute(c,t):
     p,q,r,s,u=old
     new=tuple(canonical(x) for x in (p*p+3*q+6,q*q+5*r+p,r*r+7*s+q,s*s+11*u+r,u*u+13*p+s))
     hidden=expected_hidden(c,t)
-    prev=(fifth,third,hidden[5])
+    prev=(fifth,third,hidden[1])
     wc=lambda x:2*abs(x) if x<0 else 2*x+1
     counts=(wc(c),wc(t),abs(t-c)+1,wc(c)+wc(t),1 if t<c else 2 if t==c else 3)
     value=canonical(sum(x*y for x,y in zip(new,counts))+prev[0]+3*prev[1]+5*prev[2]+6)
@@ -40,6 +41,7 @@ def main():
         a,b,d,e,f,g,prev,stones=compute(c,t)
         assert all(1<=x<=M for x in (a,b,d,e,f,g,*prev,*stones))
         assert prev[0]==f and prev[1]==d and len(stones)==5
+        assert compute_sauce(FOUNDATION+c, FOUNDATION+t).visible[5] == g
     # Detect a wrongly aliased implementation that updates p before computing q.
     assert any(canonical(q*q + 5*r + canonical(p*p + 3*q + 6)) != canonical(q*q + 5*r + p)
                for c,t in pairs for p,q,r,s,u in (prior_five(c,t)[-1],))
@@ -48,12 +50,12 @@ def main():
     visible=(ROOT/"src/runtime/calendar_visible1.asm").read_text()
     boot=(ROOT/"src/boot.asm").read_text()
     assert "call CalendarHiddenVisible5Chain" in chain and "call CalendarStoneTransitionStep" in chain
-    assert "wCalendarHiddenRetained+80" in chain and "wCalendarVisibleFifth" in chain and "wCalendarVisibleThird" in chain
+    assert "wCalendarHiddenRetained+16" in chain and "wCalendarVisibleFifth" in chain and "wCalendarVisibleThird" in chain
     assert "CalendarStoneRunValidated.validateSource" in transition
     assert "wCalendarVisibleFifth:: ds 16" in boot and "STAGE1_CHAIN6_NATIVE_BENCH" in boot
     assert "cp 6" in visible and "ld a, 129" in bench and ".checkFifth:" in bench
     assert "build/calendar_chain6.gb" in (ROOT/"Makefile").read_text()
     assert "dmg-chain6-native:" in (ROOT/".github/workflows/canonical-names-lock.yml").read_text()
-    print("HOST_STAGE1_VISIBLE6=PASS independent_pairs=72 signed32_endpoints=YES V1_V2_V3_V4_V5_RETAINED=YES predecessor=V5_V3_H6 i6_stones=5 Native385=CI_REQUIRED",flush=True)
+    print("HOST_STAGE1_VISIBLE6=PASS independent_pairs=72 signed32_endpoints=YES V1_V2_V3_V4_V5_RETAINED=YES predecessor=V5_V3_H2 i6_stones=5 Native385=CI_REQUIRED",flush=True)
 if __name__=="__main__":
     main()

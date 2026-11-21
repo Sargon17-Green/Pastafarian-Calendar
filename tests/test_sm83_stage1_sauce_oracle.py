@@ -106,6 +106,7 @@ def post_stir(
 class SauceTrace:
     counts: tuple[int, int, int, int, int]
     hidden: tuple[int, ...]
+    visible: tuple[int, ...]
     first_visible: int
     last_visible: int
     order_at_46: tuple[int, ...]
@@ -165,7 +166,8 @@ def compute_sauce(c: int, t: int, *, historical_mutant: bool = False) -> SauceTr
         bowls = post_stir(bowls, r, historical_mutant=historical_mutant)
     assert len(drops) == 53 and len(final_sums) == 12
     return SauceTrace(
-        counts, tuple(hidden[k] for k in range(1, 8)), first_visible,
+        counts, tuple(hidden[k] for k in range(1, 8)),
+        tuple(drops[i] for i in range(1, 47)), first_visible,
         drops[46], order_at_46, bowls, tuple(final_sums),
     )
 
@@ -178,6 +180,9 @@ def check_stage1_sauce_oracle() -> None:
     actual = compute_sauce(FOUNDATION, FOUNDATION)
     assert actual.counts == tuple(checkpoint["work_counts"])
     assert tuple(map(str, actual.hidden)) == tuple(checkpoint["hidden_drops"])
+    assert len(actual.visible) == 46
+    assert actual.visible[0] == actual.first_visible
+    assert actual.visible[-1] == actual.last_visible
     assert str(actual.first_visible) == checkpoint["visible_drop_1"]
     assert str(actual.last_visible) == checkpoint["visible_drop_46"]
     assert actual.order_at_46 == tuple(checkpoint["order_at_46"])
@@ -216,7 +221,7 @@ def check_stage1_sauce_oracle() -> None:
 
     print(
         "HOST_STAGE1_SAUCE_RECURRENCE=PASS normative_main=56bc4173aae4975ded019ef5ab5a36249f1424df "
-        "canonical_checkpoint=FOUNDATION hidden=7/7 visible=1,46/2 "
+        "canonical_checkpoint=FOUNDATION hidden=7/7 visible=46/46 "
         "orderAt46=PASS post_stir_bowls=6/6 retained_sum=YES "
         "historical_raw_sum_mutant=REPRODUCED_AND_EXCLUDED "
         "canonical_inputs=10 deterministic=YES unbounded_day_pair=1 "
