@@ -9,10 +9,9 @@ def literal(n):
     assert isinstance(n,int)
     return f"{-n}_" if n<0 else str(n)
 def position(order,bowl_id):
-    found=0
     for i,value in enumerate(order,1):
-        if value==bowl_id: found=i
-    return found
+        if value==bowl_id: return i
+    return 0
 def order_block(order,order_index,mutant=None):
     code=["z;d:6a;!"+"".join(literal(x)+"a;!" for x in order)]
     labels=[];checks=0
@@ -50,7 +49,7 @@ def probe_fixture(probes=None,mutant=None):
     code=["{ Stage19 non-permutation and not-found semantic probes. }"];labels=[];checks=0
     for i,item in enumerate(probes):
         order=item["order"];bowl=item["bowl_id"];expected=item["expected"]
-        if mutant=="wrong_duplicate_first" and item["label"]=="duplicate-last-match":expected=1
+        if mutant=="wrong_duplicate_last" and item["label"]=="duplicate-first-match":expected=3
         tag=f"STAGE19_PROBE_{i:03d}"
         code.append("z;d:6a;!"+"".join(literal(x)+"a;!" for x in order))
         code.append(f"z;b:d;a;!b;{literal(bowl)}a;!b;s:b;36h;!!o:")

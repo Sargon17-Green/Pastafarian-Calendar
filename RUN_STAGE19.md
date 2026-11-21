@@ -14,7 +14,7 @@ Accepted production operations 34 and 35 return a direct table \`[6,o1,o2,o3,o4,
 
 - Input: allocated two-cell argument tuple; cell 0 is a valid handle to an allocated direct table with header 6 and six values; cell 1 is a FALSE small integer.
 - Output: greatest \`i ∈ {1,…,6}\` for which \`orderTable[i] = bowlId\`; 0 if no such i.
-- The six values are compared exactly. No permutation-only restriction is imposed; duplicates return the last match and arbitrary small values are allowed, matching op53's search semantics.
+- The six values are compared exactly. No permutation-only restriction is imposed; duplicates return the first match and arbitrary small values are allowed, matching op53's search semantics.
 - Invalid direct-table header (anything other than 6) raises \`E_BOWL_POSITION_LENGTH\`.
 - The tuple, table and all their cells remain unchanged. Repeated calls are deterministic.
 - Excluded: unallocated/invalid pointers, physically truncated tuples/tables, corrupted heap, and non-small-integer object handles. The runtime exposes no safe allocation-extent metadata, so this stage does not claim physical pointer safety.

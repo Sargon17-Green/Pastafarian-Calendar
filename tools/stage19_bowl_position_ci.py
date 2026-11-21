@@ -40,7 +40,7 @@ def main():
     probe_labels=re.findall(r"STAGE19_PROBE_\d{3}_OK",probe_txt)
     probes_passed=probe_code==0 and probe_err==b"" and probe_labels==probe_wanted and not re.findall(r"STAGE19_[A-Z0-9_]+_FAIL",probe_txt) and probe_txt.count(probe_final)==1 and probe_txt.rstrip().endswith(probe_final)
     mutants={}
-    for name,marker in (("wrong_expected","STAGE19_CASE_0000_POSITION_FAIL"),("wrong_duplicate_first","STAGE19_PROBE_005_POSITION_FAIL")):
+    for name,marker in (("wrong_expected","STAGE19_CASE_0000_POSITION_FAIL"),("wrong_duplicate_last","STAGE19_PROBE_005_POSITION_FAIL")):
         if name=="wrong_expected":mp=fixture.positive_fixture(fixture.chunks()[0][1][:1],0,mutant=name)[0]
         else:mp=fixture.probe_fixture(parsed["probes"],mutant=name)[0]
         mc,mo,me=execute("mutant_"+name,prefix+mp.encode(),30);mt=mo.decode("utf-8","replace")
