@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -79,6 +80,12 @@ def git_blob(text: str) -> str:
     data = text.encode("utf-8")
     return hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
 
+def write_results(out: Path, results: dict) -> None:
+    (out / "results.json").write_text(
+        json.dumps(results, indent=2, ensure_ascii=False) + "\\n",
+        encoding="utf-8",
+    )
+
 def words_for(lengths: tuple[int, ...]) -> list[list[int]]:
     output: list[list[int]] = []
     def visit(remaining: tuple[int, ...], opened: int, closed: int, prefix: tuple[int, ...]) -> None:
@@ -139,29 +146,76 @@ def main() -> None:
                                   "a_middle_chars": len(a)-prefix-suffix},
                "oracle_sha256": hashlib.sha256(oracle_json.encode("utf-8")).hexdigest(),
                "domains": EXPECTED_COUNTS, "variants": {}}
-    with tempfile.TemporaryDirectory(prefix="dart_stage7_restoration_") as td:
-        for label in ("B", "RESTORED_A"):
-            wd = Path(td) / label
-            run("git", "worktree", "add", "--detach", str(wd), head, cwd=root)
-            try:
-                if label == "RESTORED_A":
-                    (wd / PLANNER).write_text(restored, encoding="utf-8")
-                    assert (wd / PLANNER).read_text(encoding="utf-8") == a
-                    assert git_blob((wd / PLANNER).read_text(encoding="utf-8")) == A_BLOB
-                (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
-                (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
-                fmt = run("dart", "format", "--output=none", "--set-exit-if-changed", PLANNER, cwd=wd)
-                analyze = run("dart", "analyze", cwd=wd, timeout=360)
-                log = run("dart", "run", "tool/stage7_qa_probe.dart", "tool/stage7_qa_expected.json", label,
-                          cwd=wd, timeout=600)
-                assert f"STAGE7_ISOLATED_DIFFERENTIAL_PASS variant={label} ranks=1788" in log
-                results["variants"][label] = {"format": fmt, "analyze": analyze, "run": log}
-            finally:
-                run("git", "worktree", "remove", "--force", str(wd), cwd=root)
-    results["status"] = "PASS_ISOLATED_QA_ONLY"
-    (out / "results.json").write_text(json.dumps(results, indent=2, ensure_ascii=False) + "\n",
-                                      encoding="utf-8")
-    print("STAGE7_ISOLATED_RESTORATION_QA_PASS head=" + head + " cases=1788x2 no_production_edit")
+    try:
+        with tempfile.TemporaryDirectory(prefix="dart_stage7_restoration_") as td:
+            for label in ("B", "RESTORED_A"):
+                wd = Path(td) / label
+                run("git", "worktree", "add", "--detach", str(wd), head, cwd=root)
+                try:
+                    if label == "RESTORED_A":
+                        (wd / PLANNER).write_text(restored, encoding="utf-8")
+                        assert (wd / PLANNER).read_text(encoding="utf-8") == a
+                    source_before_format = (wd / PLANNER).read_text(encoding="utf-8")
+                    (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
+                    (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
+                    if label == "B":
+                        # Candidate B is the current branch source and must be formatter-clean.
+                        fmt = run("dart", "format", "--output=none", "--set-exit-if-changed", PLANNER, cwd=wd)
+                        format_status = "CLEAN"
+                    else:
+                        # A is a historical accepted source lock. Diagnose formatter drift without
+                        # rewriting it: the exact A bytes must remain intact for the differential.
+                        fmt_proc = subprocess.run(
+                            ("dart", "format", "--output=none", PLANNER),
+                            cwd=wd, capture_output=True, text=True, timeout=240,
+                        )
+                        fmt_output = (fmt_proc.stdout or "") + (fmt_proc.stderr or "")
+                        if fmt_proc.returncode != 0:
+                            raise RuntimeError(
+                                f"dart format diagnostic failed for locked A (exit={fmt_proc.returncode})\\n{fmt_output[-4000:]}"
+                            )
+                        changed_match = re.search(r"Formatted \\d+ files? \\((\\d+) changed\\)", fmt_output)
+                        if changed_match is None:
+                            raise RuntimeError("Could not parse Dart formatter summary for locked A: " + fmt_output[-2000:])
+                        changed_files = int(changed_match.group(1))
+                        fmt = {"output": fmt_output.strip(), "changed_files": changed_files}
+                        format_status = "CLEAN" if changed_files == 0 else "BASELINE_FORMAT_DRIFT"
+                    source_after_format = (wd / PLANNER).read_text(encoding="utf-8")
+                    expected_blob = B_BLOB if label == "B" else A_BLOB
+                    assert source_after_format == source_before_format, "Formatter changed the source-locked worktree"
+                    assert git_blob(source_after_format) == expected_blob, (
+                        f"Source blob changed after format diagnostic: {label}"
+                    )
+                    analyze = run("dart", "analyze", cwd=wd, timeout=360)
+                    log = run("dart", "run", "tool/stage7_qa_probe.dart", "tool/stage7_qa_expected.json", label,
+                              cwd=wd, timeout=600)
+                    assert f"STAGE7_ISOLATED_DIFFERENTIAL_PASS variant={label} ranks=1788" in log
+                    results["variants"][label] = {
+                        "format": fmt,
+                        "format_status": format_status,
+                        "source_blob_after_format": git_blob(source_after_format),
+                        "analyze": analyze,
+                        "run": log,
+                    }
+                    write_results(out, results)
+                finally:
+                    run("git", "worktree", "remove", "--force", str(wd), cwd=root)
+    except Exception as exc:
+        results["status"] = "INCOMPLETE"
+        results["error"] = repr(exc)
+        write_results(out, results)
+        raise
+    a_format_drift = results["variants"]["RESTORED_A"]["format_status"] == "BASELINE_FORMAT_DRIFT"
+    results["status"] = (
+        "PASS_ISOLATED_DIFFERENTIAL_WITH_A_FORMAT_DRIFT"
+        if a_format_drift else "PASS_ISOLATED_QA_ONLY"
+    )
+    write_results(out, results)
+    print(
+        "STAGE7_ISOLATED_RESTORATION_QA_PASS head=" + head +
+        " cases=1788x2 A_format=" + results["variants"]["RESTORED_A"]["format_status"] +
+        " no_production_edit"
+    )
 
 if __name__ == "__main__":
     main()
