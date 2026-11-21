@@ -150,11 +150,11 @@ jobs:
           print("V158_ORIGINAL_EVIDENCE_NOT_ATTESTED")
           print("V158_SOURCE_ATTESTATION_REQUIRES_SEPARATE_GOVERNANCE")
           PY
-      - name: Reject unsafe source edits and check reversible toy patch insertion in 30 regression tests
+      - name: Reject unsafe source edits and check reversible toy patch insertion in 31 regression tests
         run: |
           set -euo pipefail
           python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_foundation_diagnostic_patchplan_v159.py' -v 2>&1 | tee evidence/v159-reversible-patchplan-30-tests.log
-          grep -Eq '^Ran 30 tests ' evidence/v159-reversible-patchplan-30-tests.log
+          grep -Eq '^Ran 31 tests ' evidence/v159-reversible-patchplan-30-tests.log
           grep -Fx 'OK' evidence/v159-reversible-patchplan-30-tests.log
       - name: Prepare exactly two nonexecuted source-locked diagnostic QA copies and reversible unified diffs
         run: |
@@ -197,13 +197,13 @@ jobs:
           print("V159_ADA_SYNTAX_AND_SEMANTIC_EQUIVALENCE_NOT_TESTED")
           print("V159_ORIGINAL_NATIVE_FCT_CALLS=0")
           print("V159_NATIVE_DISPATCH_REQUIRES_ISSUE29_DISPOSITION")
-          print("V159_TOTAL_SYNTHETIC_PYTHON_REGRESSIONS=90")
+          print("V159_TOTAL_SYNTHETIC_PYTHON_REGRESSIONS=91")
           PY
       - name: Archive source-only analyses, no binaries or native execution
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: soak-v159-static-diagnostic-qa-copies-90-tests-zero-original-calls
+          name: soak-v159-static-diagnostic-qa-copies-91-tests-zero-original-calls
           path: evidence/
           if-no-files-found: warn
           retention-days: 30
