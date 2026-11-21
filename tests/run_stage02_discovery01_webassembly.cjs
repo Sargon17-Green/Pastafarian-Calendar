@@ -149,7 +149,7 @@ function child(file, name) {
   assert.equal(typeof instance.exports[name], 'function', 'missing export');
   const value = instance.exports[name]();
   const record = {name, value};
-  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name) || SHORT_SMALL_N_TARGETS.has(name) || K4_Q1_TARGETS.has(name) || K5_Q2_TARGETS.has(name) || K5_Q3_TARGETS.has(name) || K5_Q4_TARGETS.has(name) || K5_Q5_TARGETS.has(name) || K5_Q6_TARGETS.has(name) || K5_Q7_TARGETS.has(name) || K5_Q8_TARGETS.has(name)) {
+  if (TARGETS.has(name) || FORWARD_TARGETS.has(name) || SHORT_TARGETS.has(name) || SHORT_Q23_TARGETS.has(name) || SHORT_Q2_LIVENESS_TARGETS.has(name) || SHORT_Q123_DIFFERENTIAL_TARGETS.has(name) || SHORT_Q45_TARGETS.has(name) || SHORT_SMALL_N_TARGETS.has(name) || K4_Q1_TARGETS.has(name) || K5_Q2_TARGETS.has(name) || K5_Q3_TARGETS.has(name) || K5_Q4_TARGETS.has(name) || K5_Q5_TARGETS.has(name) || K5_Q6_TARGETS.has(name) || K5_Q7_TARGETS.has(name) || K5_Q8_TARGETS.has(name) || K5_Q9_TARGETS.has(name)) {
     const mem = instance.exports.memory;
     assert.ok(mem instanceof WebAssembly.Memory, 'missing memory export');
     record.numerics = {};
