@@ -57,13 +57,15 @@ class Issue29StaticContract(unittest.TestCase):
 
     def test_month_name_index_is_not_internal_id(self):
         # Independent finite non-injective witness, not a foundation-day claim.
-        w1, n1, o1 = (1, 2, 1, 1, 2, 2), (20, 30), 3
-        w2, n2, o2 = (1, 2, 2, 2, 1, 1), (30, 20), 3
+        w1, n1, o1 = (1, 2, 1, 1, 2, 2, 1, 2), (20, 30), 2
+        w2, n2, o2 = (1, 2, 2, 2, 1, 1, 1, 2), (30, 20), 2
         def project(w, n, o):
             identifier = w[o]
             return (n[identifier - 1], sum(x == identifier for x in w[:o + 1]))
-        self.assertEqual(project(w1, n1, o1), (20, 3))
-        self.assertEqual(project(w2, n2, o2), (20, 3))
+        self.assertIn(w1, legal_sequences(4, 4))
+        self.assertIn(w2, legal_sequences(4, 4))
+        self.assertEqual(project(w1, n1, o1), (20, 2))
+        self.assertEqual(project(w2, n2, o2), (20, 2))
         self.assertNotEqual(w1[o1], w2[o2])
 
     def test_lossless_hex_avoids_decimal_digit_limit(self):
