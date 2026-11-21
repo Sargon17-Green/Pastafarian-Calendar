@@ -193,6 +193,10 @@ ELIF DEF(STAGE1_HIDDEN6_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarHidden6Bench
+ELIF DEF(STAGE1_HIDDEN7_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarHidden7Bench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -313,6 +317,7 @@ INCLUDE "src/runtime/calendar_hidden3.asm"
 INCLUDE "src/runtime/calendar_hidden4.asm"
 INCLUDE "src/runtime/calendar_hidden5.asm"
 INCLUDE "src/runtime/calendar_hidden6.asm"
+INCLUDE "src/runtime/calendar_hidden7.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -364,4 +369,8 @@ ENDC
 
 IF DEF(STAGE1_HIDDEN6_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_hidden6_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_HIDDEN7_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_hidden7_native_test.asm"
 ENDC
