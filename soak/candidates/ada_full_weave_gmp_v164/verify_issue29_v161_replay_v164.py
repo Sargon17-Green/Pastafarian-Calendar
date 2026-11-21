@@ -34,8 +34,6 @@ def main() -> int:
         raise RuntimeError("Ada GMP family count hex is not canonical")
     ada_weave = [int(s) for s in weave_text.split(",")]
     expected_weave = e["expected_python_QA_month_weave"]
-    if len(ada_weave) != len(expected_weave) != 4244:
-        raise RuntimeError("replayed full weave width is wrong")
     if len(ada_weave) != 4244 or len(expected_weave) != 4244:
         raise RuntimeError("replayed weave differs from prescribed 4244-day year")
     if count_hex != e["selector_family_count_hex"]:
