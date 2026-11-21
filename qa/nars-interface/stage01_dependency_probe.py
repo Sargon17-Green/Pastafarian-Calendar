@@ -10,7 +10,7 @@ from chunked_fx_probe import marker_write
 from stage01_import_workspace import SOURCE_COMMIT, _codes, load_locked_sources
 from stage01_statement_probe import build_statement_probe, decode_programs
 
-FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V2_COMPLETE_NOT_STAGE01"
+FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V3_COMPLETE_NOT_STAGE01"
 
 
 def anchor(blocks, name, needle=None, required_line=None):
@@ -152,14 +152,25 @@ def build_dependency_probe(raw, root, marker):
         ("sauce_post_first_value", "", "QAPostValue←Save ((QAPostS×QAPostS)+(7×QAPostOld[QAPostPrev]×QAPostOld[QAPostNext]))", "call", "post_stir_save"),
         ("sauce_post_next_bowls", "", "QAPostNextBowls←6⍴0x", "call", "post_stir_next_bowls"),
         ("sauce_post_assign_first", "", "QAPostNextBowls[QAPostId]←QAPostValue", "call", "post_stir_assign"),
+        ("ownership_vector_match_correct", new_b, "(,2)≡⍴MonsterBaseSemanticState QACTXB", "value", "ownership"),
+        ("sauce_post_old_shape", "", "⍴QAPostOld", "value", "post_stir_old"),
+        ("sauce_post_old_rank", "", "⍴⍴QAPostOld", "value", "post_stir_old"),
+        ("sauce_post_old_sum", "", "+/QAPostOld", "value", "post_stir_old"),
+        ("sauce_post_old_value", "", "QAPostOld", "value", "post_stir_old"),
+        ("sauce_post_saved_shape", "", "⍴QAPostSaved", "value", "post_stir_saved"),
+        ("sauce_post_saved_rank", "", "⍴⍴QAPostSaved", "value", "post_stir_saved"),
+        ("sauce_post_saved_known_vector", "", "PostStirSavedSum (⊂1 2 3 4 5 6) 1", "value", "post_saved"),
+        ("sauce_post_saved_known_vector_rank", "", "⍴⍴PostStirSavedSum (⊂1 2 3 4 5 6) 1", "value", "post_saved"),
+        ("sauce_post_rank_shape", "", "⍴QAPostRank", "value", "post_stir_rank"),
+        ("sauce_post_rank_rank", "", "⍴⍴QAPostRank", "value", "post_stir_rank"),
     ]
-    if len(specs) != 43:
+    if len(specs) != 54:
         raise ValueError("ROOTCAUSE_PROBE_COUNT_INVALID")
 
     entries = []
     programs = programs[:-1]
     for index, (name, setup, expression, mode, origin) in enumerate(specs, 1):
-        prefix = f"APL_GERMAN_ROOT_V2|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
+        prefix = f"APL_GERMAN_ROOT_V3|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"
         paths = {phase + "_path": str(p.with_name(f"{p.stem}_dep_{index:02d}_{phase}.txt"))
                  for phase in ("start", "captured", "code", "value", "message")}
         start_token = prefix + "|PHASE=START"
@@ -195,7 +206,7 @@ def build_dependency_probe(raw, root, marker):
                        f"'{serial}'{match['ending']}")
     candidate = "".join(lines).encode("cp1252")
     receipt = dict(base)
-    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V2",
+    receipt.update(schema="APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V3",
                    stage01="NOT_ACCEPTED", status="GENERATED_NOT_NATIVE_VALIDATED",
                    source_commit=SOURCE_COMMIT, source_dependency_anchors=anchors,
                    dependency_probes=entries, marker_token=FINAL, marker_path=marker,
