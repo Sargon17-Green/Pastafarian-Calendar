@@ -1863,9 +1863,11 @@ fn test_stage32_public_year_gate_boundaries_match_independent_oracle() {
 		assert big_eq(got.day_in_month, expected.day_in_month)
 	}
 }
+
 // Stage33: enumerate every legal small-state weave in lexical order without
 // using the production polynomial count, rank or unrank implementation.
-fn stage33_enumerate_legal_weaves(oracle OracleWeaveCounter, state OracleWeaveState, prefix []int, mut words [][]int) {
+fn stage33_enumerate_legal_weaves(oracle OracleWeaveCounter, state OracleWeaveState, prefix []int,
+	mut words [][]int) {
 	mut complete := true
 	for remaining in state.remaining {
 		if remaining != 0 {
@@ -1914,4 +1916,3 @@ fn test_stage33_weave_unrank_exhaustive_lexicographic_small_states() {
 	assert checked == 342
 	println('V_AMHARIC_STAGE33_WEAVE_UNRANK_LEXICOGRAPHIC_PASS CASES=342')
 }
-
