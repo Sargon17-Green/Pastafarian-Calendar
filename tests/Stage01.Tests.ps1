@@ -117,6 +117,8 @@ for ($id = 1; $id -le 6; $id++) {
     Assert-StageTrue -Condition ($sauce1.Bowls[$id] -ge 1 -and $sauce1.Bowls[$id] -le (Get-NormM)) -Name "Nasa 1..M ang final bowl $id"
 }
 
+. (Join-Path $root 'tests/StrictUtf8StageMetadata.Tests.ps1')
+
 $ok = Complete-StageTestRun
 if (-not $ok) { exit 1 }
 exit 0
