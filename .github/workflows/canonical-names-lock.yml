@@ -56,6 +56,8 @@ jobs:
         run: |
           set -euo pipefail
           v version
+          # Diagnostic only: show the exact pinned-formatter hunk; the verify gate below remains mandatory.
+          v fmt -diff ./pastafari/normative_oracle_test.v || true
           v fmt -verify ./pastafari
       - name: Stage 1 — normative reference (bounded to Stage 1 tests)
         run: v test ./pastafari/normative_oracle_test.v -run-only 'test_stage01_*'
