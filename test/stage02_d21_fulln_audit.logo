@@ -1,0 +1,209 @@
+; D21 full-N QA audit. TEST-ONLY candidate; not full-N production or Stage2 acceptance.
+; Vectors are generated independently with Python arbitrary-precision arithmetic.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_answer_at.logo
+
+make "D21A.CASES 0
+make "D21A.CHECKS 0
+make "D21A.FAILED "false
+
+to d21a.require :condition :tag
+  make "D21A.CHECKS (:D21A.CHECKS + 1)
+  if not :condition [
+    make "D21A.FAILED "true
+    print sentence [D21_FULLN_AUDIT_FALIIS:] :tag
+  ]
+end
+
+; Test-only model: uses exact BI quotient, multiple and remainder, plus accepted D20 indexed stream.
+; k=0..31 is an explicit audit horizon, not a general bound for CHOOSE.SHORT.
+to d21a.select :stream :N
+  localmake "q bi.floor.div nr.M :N
+  localmake "limit bi.mul :q :N
+  output d21a.scan :stream :N :limit 0
+end
+
+to d21a.scan :stream :N :limit :k
+  if :k > 31 [output []]
+  localmake "x monster.stage02.answer.at :stream :k
+  if bi.le :x :limit [
+    localmake "rank bi.add (bi.small 1) (bi.regmod (bi.sub :x (bi.small 1)) :N)
+    output (list :rank :k)
+  ]
+  output d21a.scan :stream :N :limit (:k + 1)
+end
+
+; Python oracle uses independent native integers and an iterative +/-1 walker.
+to d21a.case :N :firstv :dir :expectedQ :expectedR :expectedK :expectedRank :tag
+  make "D21A.CASES (:D21A.CASES + 1)
+  localmake "qr bi.divmod.floor nr.M :N
+  localmake "q first :qr
+  localmake "r last :qr
+  d21a.require (bi.eq :q :expectedQ) (list :tag [quotient])
+  d21a.require (bi.eq :r :expectedR) (list :tag [remainder])
+  d21a.require (bi.eq (bi.add (bi.mul :q :N) :r) nr.M) (list :tag [reconstruction])
+  d21a.require (and (bi.ge :r bi.zero) (bi.lt :r :N)) (list :tag [euclidean_bounds])
+  localmake "stream (list :firstv :dir)
+  localmake "actual d21a.select :stream :N
+  if :expectedK < 0 [
+    d21a.require (equalp :actual []) (list :tag [no_hit_within_32])
+  ]
+  if :expectedK >= 0 [
+    d21a.require (not (emptyp :actual)) (list :tag [hit_within_32])
+    if (emptyp :actual) [
+      d21a.require "false (list :tag [rank_missing])
+      d21a.require "false (list :tag [index_missing])
+    ]
+    if not (emptyp :actual) [
+      d21a.require (bi.eq (first :actual) :expectedRank) (list :tag [independent_rank])
+      d21a.require ((last :actual) = :expectedK) (list :tag [independent_index])
+    ]
+  ]
+  d21a.require (equalp :actual (d21a.select :stream :N)) (list :tag [determinism])
+end
+
+to d21a.run
+  print [D21_FULLN_AUDIT_STEP python_verified_vectors]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [1]) 1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_one_p]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [1]) -1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_one_m]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_atL_p]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_atL_m]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_atLminus1_p]
+  d21a.case (bi.make 1 [1]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [one_atLminus1_m]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [1]) 1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [two_one_p]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [1]) -1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [two_one_m]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [2]) [two_atL_p]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [2]) [two_atL_m]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [two_atLminus1_p]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [two_atLminus1_m]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [two_afterL_p]
+  d21a.case (bi.make 1 [2]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 1 (bi.make 1 [2]) [two_afterL_m]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [1]) 1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [three_one_p]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [1]) -1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [three_one_m]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [3]) [three_atL_p]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [3]) [three_atL_m]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [2]) [three_atLminus1_p]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 0 (bi.make 1 [2]) [three_atLminus1_m]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [three_afterL_p]
+  d21a.case (bi.make 1 [3]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 1 (bi.make 1 [3]) [three_afterL_m]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [1]) 1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [seven_one_p]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [1]) -1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [seven_one_m]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [7]) [seven_atL_p]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [7]) [seven_atL_m]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [6]) [seven_atLminus1_p]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 0 (bi.make 1 [6]) [seven_atLminus1_m]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [seven_afterL_p]
+  d21a.case (bi.make 1 [7]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 1 (bi.make 1 [7]) [seven_afterL_m]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [1]) 1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [1]) [thirtyone_one_p]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [1]) -1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [1]) [thirtyone_one_m]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5724 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [31]) [thirtyone_atL_p]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5724 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [31]) [thirtyone_atL_m]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5723 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [30]) [thirtyone_atLminus1_p]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5723 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 0 (bi.make 1 [30]) [thirtyone_atLminus1_m]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 3 (bi.make 1 [1]) [thirtyone_afterL_p]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 1 (bi.make 1 [31]) [thirtyone_afterL_m]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 1 (bi.make 1 [1]) [thirtyone_atM_p]
+  d21a.case (bi.make 1 [31]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7604 6077 8940 5396 1392 3623 2918 2527 4884 5]) (bi.make 1 [3]) 3 (bi.make 1 [31]) [thirtyone_atM_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [1]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [1]) [ninetyseven_one_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [1]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [1]) [ninetyseven_one_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5662 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [97]) [ninetyseven_atL_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5662 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [97]) [ninetyseven_atL_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5661 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [96]) [ninetyseven_atLminus1_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5661 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 0 (bi.make 1 [96]) [ninetyseven_atLminus1_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5663 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) -1 (bi.make 1 [1]) [ninetyseven_afterL_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5663 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 1 (bi.make 1 [97]) [ninetyseven_afterL_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 1 (bi.make 1 [1]) [ninetyseven_atM_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) -1 (bi.make 1 [1]) [ninetyseven_atM_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5693 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) -1 (bi.make 1 [1]) [ninetyseven_afterL31_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5693 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) 31 (bi.make 1 [97]) [ninetyseven_afterL31_m]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5694 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) -1 (bi.make 1 [1]) [ninetyseven_afterL32_p]
+  d21a.case (bi.make 1 [97]) (bi.make 1 [5694 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [9646 9261 6877 1621 7249 951 9180 3281 7540 1]) (bi.make 1 [65]) -1 (bi.make 1 [1]) [ninetyseven_afterL32_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [1]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [1]) [base_one_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [1]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [1]) [base_one_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [0 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [0 1]) [base_atL_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [0 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [0 1]) [base_atL_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [9999 8409 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [9999]) [base_atLminus1_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [9999 8409 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 0 (bi.make 1 [9999]) [base_atLminus1_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [1 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) -1 (bi.make 1 [1]) [base_afterL_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [1 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 1 (bi.make 1 [0 1]) [base_afterL_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 1 (bi.make 1 [1]) [base_atM_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) -1 (bi.make 1 [1]) [base_atM_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [31 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) -1 (bi.make 1 [1]) [base_afterL31_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [31 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) 31 (bi.make 1 [0 1]) [base_afterL31_m]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [32 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) -1 (bi.make 1 [1]) [base_afterL32_p]
+  d21a.case (bi.make 1 [0 1]) (bi.make 1 [32 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727]) -1 (bi.make 1 [1]) [base_afterL32_m]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [half_floor_one_p]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) -1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [half_floor_one_m]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) [half_floor_atL_p]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) [half_floor_atL_m]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [2862 4205 8579 3651 6584 6158 234 9173 705 85]) [half_floor_atLminus1_p]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2]) (bi.make 1 [1]) 0 (bi.make 1 [2862 4205 8579 3651 6584 6158 234 9173 705 85]) [half_floor_atLminus1_m]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [2]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [half_floor_afterL_p]
+  d21a.case (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [2]) (bi.make 1 [1]) 1 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) [half_floor_afterL_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [1]) [half_plus_one_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [1]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [1]) [half_plus_one_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_atL_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_atL_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_atLminus1_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 0 (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_atLminus1_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2865 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) [half_plus_afterL_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2865 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_afterL_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) [half_plus_atM_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) [half_plus_atM_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2895 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) [half_plus_afterL31_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2895 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) 31 (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) [half_plus_afterL31_m]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2896 4205 8579 3651 6584 6158 234 9173 705 85]) 1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) [half_plus_afterL32_p]
+  d21a.case (bi.make 1 [2864 4205 8579 3651 6584 6158 234 9173 705 85]) (bi.make 1 [2896 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) (bi.make 1 [2863 4205 8579 3651 6584 6158 234 9173 705 85]) -1 (bi.make 1 [1]) [half_plus_afterL32_m]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) 1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [third_floor_one_p]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [1]) -1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [third_floor_one_m]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) [third_floor_atL_p]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) [third_floor_atL_m]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [5241 2803 2386 9101 7722 4105 156 2782 7137 56]) [third_floor_atLminus1_p]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [3]) (bi.make 1 [1]) 0 (bi.make 1 [5241 2803 2386 9101 7722 4105 156 2782 7137 56]) [third_floor_atLminus1_m]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [3]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [third_floor_afterL_p]
+  d21a.case (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [3]) (bi.make 1 [1]) 1 (bi.make 1 [5242 2803 2386 9101 7722 4105 156 2782 7137 56]) [third_floor_afterL_m]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) 1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [seventh_floor_one_p]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [1]) -1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [seventh_floor_one_m]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) [seventh_floor_atL_p]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) [seventh_floor_atL_m]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [817 2630 2451 8186 3309 6045 1495 8335 3058 24]) [seventh_floor_atLminus1_p]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7]) (bi.make 1 [1]) 0 (bi.make 1 [817 2630 2451 8186 3309 6045 1495 8335 3058 24]) [seventh_floor_atLminus1_m]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [7]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [seventh_floor_afterL_p]
+  d21a.case (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [7]) (bi.make 1 [1]) 1 (bi.make 1 [818 2630 2451 8186 3309 6045 1495 8335 3058 24]) [seventh_floor_afterL_m]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) 1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [1]) [near31_one_p]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) -1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [1]) [near31_one_m]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_atL_p]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_atL_m]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5695 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [5695 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_atLminus1_p]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5695 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [31]) 0 (bi.make 1 [5695 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_atLminus1_m]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5697 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [31]) 31 (bi.make 1 [1]) [near31_afterL_p]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5697 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [31]) 1 (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_afterL_m]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [31]) 1 (bi.make 1 [1]) [near31_atM_p]
+  d21a.case (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [31]) 31 (bi.make 1 [5696 8410 7158 7303 3168 2317 469 8346 1411 170]) [near31_atM_m]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) 1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [near1_one_p]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) -1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [1]) [near1_one_m]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) [near1_atL_p]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) [near1_atL_m]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) [near1_atLminus1_p]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [1]) 0 (bi.make 1 [5725 8410 7158 7303 3168 2317 469 8346 1411 170]) [near1_atLminus1_m]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [1]) 1 (bi.make 1 [1]) [near1_afterL_p]
+  d21a.case (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [1]) 1 (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) [near1_afterL_m]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) 1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [modulus_one_p]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [1]) -1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [1]) [modulus_one_m]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) [modulus_atL_p]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) [modulus_atL_m]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) 1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) [modulus_atLminus1_p]
+  d21a.case (bi.make 1 [5727 8410 7158 7303 3168 2317 469 8346 1411 170]) (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) -1 (bi.make 1 [1]) (bi.make 1 [0]) 0 (bi.make 1 [5726 8410 7158 7303 3168 2317 469 8346 1411 170]) [modulus_atLminus1_m]
+  if :D21A.FAILED [print [D21_FULLN_AUDIT_FAIL] stop]
+  if :D21A.CASES <> 130 [print [D21_FULLN_AUDIT_CASE_COUNT_FAIL] stop]
+  if :D21A.CHECKS <> 1010 [print [D21_FULLN_AUDIT_CHECK_COUNT_FAIL] stop]
+  print sentence [D21_FULLN_AUDIT_CASES_PASIS] :D21A.CASES
+  print sentence [D21_FULLN_AUDIT_CHECKS_PASIS] :D21A.CHECKS
+  print [D21_FULLN_AUDIT_PASIS]
+end
+
+d21a.run

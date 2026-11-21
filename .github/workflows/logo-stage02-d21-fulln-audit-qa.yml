@@ -1,0 +1,79 @@
+name: Logo D21 Full-N Exact-BI QA Audit
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-d21-full-n-audit'
+permissions:
+  contents: read
+jobs:
+  d21-full-n-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA SHA
+        uses: actions/checkout@v4
+      - name: Verify immutable source locks and independent host oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_short_near.logo)" = 883ceb75007bb799330dd9c14e7e854e21bfdcf1
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
+          test "$(git hash-object test/stage02_discovery21_tests.logo)" = f62f8fd583a9e25fcd536580bdee275df102e11b
+          test "$(git hash-object test/stage02_d21_fulln_audit.logo)" = 70f43adfbbfc0be40218dca7c90c89cb127f8540
+          test "$(git hash-object qa/logo_d21_fulln_host_oracle.py)" = dd9d57abc5097ccdfbf3b09a340548054bb655ba
+          test "$(git hash-object STAGE02_D21_FULL_N_AUDIT.md)" = 1b9ab72173dc9493e99d667a90746aed8fce32da
+          python3 qa/logo_d21_fulln_host_oracle.py test/stage02_d21_fulln_audit.logo | tee "$RUNNER_TEMP/d21-fulln-host.log"
+          grep -Fxq 'D21_FULLN_HOST_CASES_OK 130' "$RUNNER_TEMP/d21-fulln-host.log"
+          grep -Fxq 'D21_FULLN_HOST_CHECKS_OK 1010' "$RUNNER_TEMP/d21-fulln-host.log"
+          grep -Fxq 'D21_FULLN_HOST_ORACLE=PASS' "$RUNNER_TEMP/d21-fulln-host.log"
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Run independent Native full-N arithmetic QA (test-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/d21-fulln-native.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 600s stdbuf -oL -eL "$LOGO_BIN" test/stage02_d21_fulln_audit.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::Full-N QA Native test failed/timeout, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'D21_FULLN_AUDIT_CASES_PASIS 130' "$log"
+          grep -Fxq 'D21_FULLN_AUDIT_CHECKS_PASIS 1010' "$log"
+          grep -Fxq 'D21_FULLN_AUDIT_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like|D21_FULLN_AUDIT_FAIL' "$log"; then
+            echo "::error::D21 full-N QA failure marker found"
+            exit 1
+          fi
+          echo 'NATIVE_D21_FULLN_TEST_ONLY_AUDIT=PASS'
+      - name: Preserve exact QA logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d21-fulln-qa-audit-logs
+          path: |
+            ${{ runner.temp }}/d21-fulln-host.log
+            ${{ runner.temp }}/d21-fulln-native.log
+          if-no-files-found: warn
+          retention-days: 30
