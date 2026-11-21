@@ -173,6 +173,8 @@ wCalendarVisibleSecond:: ds 16
 wCalendarVisibleThird:: ds 16
 ; Retained fourth visible residue for i5.
 wCalendarVisibleFourth:: ds 16
+; Retained fifth visible residue for i6.
+wCalendarVisibleFifth:: ds 16
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -240,6 +242,10 @@ ELIF DEF(STAGE1_CHAIN5_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarHiddenVisible5ChainBench
+ELIF DEF(STAGE1_CHAIN6_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarHiddenVisible6ChainBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -367,6 +373,7 @@ INCLUDE "src/runtime/calendar_hidden_visible2_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible3_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible4_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible5_chain.asm"
+INCLUDE "src/runtime/calendar_hidden_visible6_chain.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -445,4 +452,8 @@ INCLUDE "src/tests/calendar_hidden_visible4_chain_native_test.asm"
 ENDC
 IF DEF(STAGE1_CHAIN5_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_hidden_visible5_chain_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_CHAIN6_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_hidden_visible6_chain_native_test.asm"
 ENDC
