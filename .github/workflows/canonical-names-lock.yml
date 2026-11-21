@@ -1297,3 +1297,90 @@ jobs:
             build/stage01-actual-weave.json
           if-no-files-found: warn
           retention-days: 30
+
+  stage01-actual-45-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and verify independent normative source by Git blob
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          curl --fail --location --silent --show-error --retry 3 --connect-timeout 15 --max-time 45 \
+            'https://raw.githubusercontent.com/Sargon17-Green/Pastafarian-Calendar/0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4/tests/normative_reference.py' \
+            --output build/stage01_python_reference_pinned.py
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          data = Path('build/stage01_python_reference_pinned.py').read_bytes()
+          actual = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          expected = 'd58298c6b7be58fc1d1e2d64a0d203b7c42e4d53'
+          assert actual == expected, f'independent reference blob mismatch: {actual}'
+          print('STAGE01_ACTUAL_45_REFERENCE_BLOB=' + actual)
+          PY
+      - name: Run bounded eight-year actual-month census and validate records
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_actual_45_preflight.py
+          python3 test/stage01_actual_45_preflight.py --self-test | tee build/stage01-actual-45-selftest.log
+          grep -Fxq 'STAGE01_ACTUAL_45_PREFLIGHT_SELFTEST=5/5' build/stage01-actual-45-selftest.log
+          set +e
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 390s \
+            python3 -u test/stage01_actual_45_preflight.py \
+              --reference build/stage01_python_reference_pinned.py \
+              --max-years 8 --output build/stage01-actual-45-preflight.json) \
+            > build/stage01-actual-45-preflight.log 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > build/stage01-actual-45-preflight.exit
+          cat build/stage01-actual-45-preflight.log
+          echo "STAGE01_ACTUAL_45_CENSUS_EXIT=$rc TIME_LIMIT=390 MEMORY_KIB=1048576"
+          test "$rc" -eq 0
+          grep -Fxq 'STAGE01_ACTUAL_45_PREFLIGHT=8/8' build/stage01-actual-45-preflight.log
+          grep -Fxq 'STAGE01_ACTUAL_45_NOT_INTERLEAVING_ACCEPTANCE' build/stage01-actual-45-preflight.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('build/stage01-actual-45-preflight.json').read_text(encoding='utf-8'))
+          assert p['project_id'] == 'PC-BRANCH-FORTRAN-ENGLISH'
+          assert p['reference_blob'] == 'd58298c6b7be58fc1d1e2d64a0d203b7c42e4d53'
+          assert p['calculation_day'] == -15055671 and p['max_years'] == 8
+          assert p['status'] == 'completed_preflight_only'
+          assert p['full_stage1_accepted'] is False
+          assert p['actual_45_month_interleaving_accepted'] is False
+          years = p['year_census']
+          assert len(years) == 8
+          for i, item in enumerate(years):
+              assert item['year_number'] == 5000 + i
+              assert item['year_days'] == item['close_gate_day'] - item['open_gate_day']
+              assert 252 <= item['year_days'] <= 5778
+              assert 3 <= item['min_month_count'] <= item['actual_month_count'] <= item['max_month_count'] <= 47
+              assert item['actual_weaving_materialized'] is False
+              assert item['has_45_actual_months'] is (item['actual_month_count'] == 45)
+              if item['has_45_actual_months']:
+                  lens = item['actual_month_lengths']
+                  assert len(lens) == 45 and sum(lens) == item['year_days']
+                  assert all(4 <= n <= 123 for n in lens)
+              else:
+                  assert 'actual_month_lengths' not in item
+          assert p['actual_45_month_candidate_found'] is any(x['has_45_actual_months'] for x in years)
+          print('STAGE01_ACTUAL_45_RECORD_VALIDATION=8/8')
+          print('STAGE01_ACTUAL_45_CANDIDATE_FOUND=' + str(p['actual_45_month_candidate_found']).lower())
+          print('STAGE01_ACTUAL_45_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE')
+          PY
+          echo 'Eight actual-year normative month count census validated (QA only; not full Stage1 acceptance).' >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain real-year census JSON, log, exit code and selftest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-actual-45-census
+          path: |
+            build/stage01-actual-45-preflight.json
+            build/stage01-actual-45-preflight.log
+            build/stage01-actual-45-preflight.exit
+            build/stage01-actual-45-selftest.log
+          if-no-files-found: warn
+          retention-days: 30

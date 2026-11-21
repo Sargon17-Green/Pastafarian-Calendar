@@ -99,14 +99,14 @@ def run(reference: Path, maximum: int, output: Path) -> int:
             # build_year_structure, but intentionally stop *before* weaving.
             sauce = oracle._sauce(FOUNDATION, year.open_gate_day + 1)
             selected = oracle.choose_month_count(sauce, year)
-            minimum, maximum = validated_month_selection(length, selected)
+            minimum, upper_bound = validated_month_selection(length, selected)
             entry = {
                 'year_number': year.number,
                 'open_gate_day': year.open_gate_day,
                 'close_gate_day': year.close_gate_day,
                 'year_days': length,
                 'min_month_count': minimum,
-                'max_month_count': maximum,
+                'max_month_count': upper_bound,
                 'actual_month_count': selected,
                 'has_45_actual_months': selected == 45,
                 'actual_weaving_materialized': False,
