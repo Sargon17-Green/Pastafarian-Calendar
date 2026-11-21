@@ -1,0 +1,60 @@
+name: WAT Stage02 k253 focused Native QA (isolated, not production)
+on:
+  push:
+    branches:
+      - 'qa/wat-k253-focused-native-20261121'
+    paths:
+      - 'tests/stage02_k253_native_witness.cjs'
+      - '.github/workflows/wat-stage02-k253-focused.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  k253-two-directions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Assert locked source is unchanged, prove check-out commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nQA_SHA=%s\n' "$(git rev-parse HEAD)"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/normative_selector.wat)" = e23f013ab96b498b0ac365dbb1b25273c845e790
+          echo '18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980  tests/normative_selector.wat' | sha256sum -c -
+          git cat-file -e '871f9b70216c16c57abcd552ec6fb0ed1010e305^{commit}'
+          test "$(git rev-parse 871f9b70216c16c57abcd552ec6fb0ed1010e305:tests/normative_selector.wat)" = e23f013ab96b498b0ac365dbb1b25273c845e790
+      - name: Install WABT and check exact runner syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends wabt
+          node --version
+          wat2wasm --version
+          node --check tests/stage02_k253_native_witness.cjs
+      - name: Run original source-aware static numeric checker (separate gate)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/wat-k253
+          python3 tests/stage02_wat_envelope_audit.py tests/normative_selector.wat | tee evidence/wat-k253/source-aware.json
+      - name: Run ONLY k253 forward/backward instrumented witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/stage02_k253_native_witness.cjs
+      - name: Upload all focused evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-k253-focused-evidence
+          path: evidence/wat-k253/
+          if-no-files-found: warn
+          retention-days: 30
