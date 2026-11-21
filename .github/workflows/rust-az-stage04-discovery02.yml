@@ -110,7 +110,7 @@ jobs:
               --symbol calendar_date_spaghetti \
               > evidence/stage04_old_rust_callability.json
           python3 -c 'import json; d=json.load(open("evidence/stage04_old_rust_callability.json")); assert d["source_pin_eligible"] is True and d["callability_status"] == "SOURCE_ONLY_NO_SUPPORTED_SIGNATURE" and d["callable_day_tag_route_verified"] is False and d["observed_runtime_red"] is False and d["stage04_closure"] == "NOT_CLAIMED"'
-          printf 'STAGE04_CALLABILITY_QA=16_PASS (synthetic Rust positive only)\nSTAGE04_ACTUAL_OLD_RUST_CALLABLE_DAY_TAG=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_callability_result.txt
+          printf 'STAGE04_CALLABILITY_QA=19_PASS (synthetic Rust positive only)\nSTAGE04_ACTUAL_OLD_RUST_CALLABLE_DAY_TAG=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' > evidence/stage04_callability_result.txt
           cat evidence/stage04_callability_result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Run bounded native baseline and prior regression tests
         shell: bash
