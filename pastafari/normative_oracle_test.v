@@ -1917,3 +1917,34 @@ fn test_stage33_weave_unrank_exhaustive_lexicographic_small_states() {
 	assert checked == 342
 	println('V_AMHARIC_STAGE33_WEAVE_UNRANK_LEXICOGRAPHIC_PASS CASES=342')
 }
+
+// Stage34: Catalan closed-form boundary oracle for legal two-occurrence months.
+// First occurrences and last occurrences must each appear in ascending order.
+fn stage34_check_catalan_month_boundary(month_count int) {
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	expected := oracle_weave_div_small(
+		oracle_weave_choose_exact(2 * month_count, month_count), month_count + 1)
+	assert big_eq(candidate.count_all(), expected)
+	mut first := []int{cap: 2 * month_count}
+	mut last := []int{cap: 2 * month_count}
+	for month in 1 .. month_count + 1 {
+		first << month
+		first << month
+		last << month
+	}
+	for month in 1 .. month_count + 1 {
+		last << month
+	}
+	assert candidate.unrank1(big_one()) == first
+	assert candidate.unrank1(expected) == last
+	mut oracle := new_oracle_weave_counter(lengths)
+	middle_rank := big_floor_div(big_add(expected, big_one()), big_from_int(2))
+	assert candidate.unrank1(middle_rank) == oracle.unrank1(middle_rank)
+}
+
+fn test_stage34_catalan_boundary_months_and_lexical_edges() {
+	stage34_check_catalan_month_boundary(17)
+	stage34_check_catalan_month_boundary(47)
+	println('V_AMHARIC_STAGE34_CATALAN_BOUNDARIES_PASS MONTHS=17,47')
+}

@@ -232,6 +232,13 @@ jobs:
           timeout --signal=TERM --kill-after=5s 120s \
             v test ./pastafari/normative_oracle_test.v -run-only 'test_stage33_weave_unrank_exhaustive_lexicographic_small_states' \
             2>&1 | tee stage33_weave_unrank.log
+      - name: Stage 34 — Catalan closed-form boundary counts and lexical edges (17/47 months)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage34_catalan_boundary_months_and_lexical_edges' \
+            2>&1 | tee stage34_catalan.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |
@@ -300,4 +307,5 @@ jobs:
             stage31_numeric.log
             stage32_boundaries.log
             stage33_weave_unrank.log
+            stage34_catalan.log
           if-no-files-found: ignore
