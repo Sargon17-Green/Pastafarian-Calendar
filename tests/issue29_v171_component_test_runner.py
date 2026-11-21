@@ -125,7 +125,11 @@ def environment_guard() -> dict:
     insist(run_id.isdigit() and int(run_id) > 0, "GitHub run identity missing")
     head = git("rev-parse", "HEAD").decode().strip()
     insist(os.environ.get("GITHUB_SHA") == head, "workflow HEAD drift")
-    insist(git("merge-base", "--is-ancestor", V170_PARENT, head, check=False) == b"",
+    ancestry = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", V170_PARENT, head],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False
+    )
+    insist(ancestry.returncode == 0,
            "v171 branch does not descend from the reviewed v170 gated branch")
     changed = git("diff", "--name-only", V170_PARENT + "...HEAD").decode().splitlines()
     insist(set(changed) == ALLOWED_QA_FILES and len(changed) == len(ALLOWED_QA_FILES),
@@ -372,7 +376,7 @@ def run_once() -> None:
     insist(not any(EVIDENCE.glob("RUN_STARTED_*")), "one or more test executions already attempted")
     expected = {x["name"]: x for x in TESTS}
     built = {x["name"]: x for x in manifest["entries"]}
-    insist set(expected) == set(built), "build manifest test set mismatch"
+    insist(set(expected) == set(built), "build manifest test set mismatch")
     results = []
     overall = "FAIL_CLOSED"
     for test in TESTS:
