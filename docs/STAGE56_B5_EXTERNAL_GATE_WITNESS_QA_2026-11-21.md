@@ -52,3 +52,35 @@ QA adapter supplying those gate/year witnesses to buildVerified for real
 oracle, demonstrate production PHP source attestation and three isolated
 900s/512MiB count/rank/unrank profiles; do NOT certify Stage56 prematurely.
 No PATCH22/PATCH23 integration, merge/main or publication.
+
+## Exact-source CI execution gate (follow-up)
+
+The authorized Canonical Names Lock workflow now runs the existing Python
+gate-witness exporter **after** the canonical Python reference export has
+succeeded and **before** the independent semantic differential. This is the
+same immutable clean external checkout and reference JSON, not a replacement
+oracle or production PHP source. The script checks exact external source
+bytes, the contextual Year5000 anchor and real years; the new workflow
+checks the output SHA-256 sidecar, consecutive gate indices, distances,
+boundaries, all three year envelopes, exit status, stderr and checkout
+cleanliness. Evidence is retained in the existing external artifact:
+`external-gates.json`, `external-gates.json.sha256`,
+`gates.stdout`, `gates.stderr`, `gates.exit`,
+`canonical-post-gates-status.txt` and
+`stage56-evidence-files.sha256`.
+
+The workflow change is **QA-only** and does not change PHP production
+providers, PATCH22/PATCH23, main, merge or publication. A green run
+establishes source-bound external gate witness execution at its exact
+feature-branch SHA, not independent gate oracle acceptance, not
+source-attested PHP callbacks, not genuine PHP 4999/5000/5001 exports,
+not 900s/512MiB profiling, and not Stage56 acceptance.
+
+Predecessor `00247fe0a4016d60c9ab270aa31cfc95cb9fcc46`
+push run #44910098924: completed/success, 30/30 jobs,
+including provider PHP8.3 64-bit synthetic QA (170 chooser checks,
+275 provider assertions with `synthetic=YES` and
+`source_attested=NO`) and external 271-tuple independent
+Scroll-derived differential. External job exported reference JSON
+SHA256 `46b2f316eb2b08c2dc99fd827d8e0a227061c9b97bbb708842318c08a7bf1880`;
+the new gate-witness script was *not* executed by that predecessor.
