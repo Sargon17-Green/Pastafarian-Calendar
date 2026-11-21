@@ -1,0 +1,18 @@
+with "gnatcoll_gmp.gpr";
+
+-- QA-only replacement for legacy gnatmake build entrypoints.
+-- A single scenario chooses the historical test main; NOTHING runs this
+-- compiled executable in the v169 workflow.
+project Issue29_V169_GMP_Aware_Legacy_Compile is
+   Main_Unit := external ("NATIVE_MAIN", "stage01_tests.adb");
+
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v169";
+   for Exec_Dir use "bin_v169";
+   for Main use (Main_Unit);
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V169_GMP_Aware_Legacy_Compile;
