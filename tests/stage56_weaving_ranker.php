@@ -6,6 +6,7 @@ require_once dirname(__DIR__) . '/src/Patches/MonthWeavingAdjoint56.php';
 require_once dirname(__DIR__) . '/src/Patches/MonthWeavingRanker56.php';
 
 use Pastafari\Stage01\BigInt;
+use Pastafari\Stage01\Patches\MonthWeavingAdjoint56;
 use Pastafari\Stage01\Patches\MonthWeavingRanker56;
 
 function rejectRanker56(callable $operation, string $label): void
