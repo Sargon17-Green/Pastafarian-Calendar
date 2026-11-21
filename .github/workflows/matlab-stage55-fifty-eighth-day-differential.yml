@@ -1,0 +1,95 @@
+name: MATLAB Stage55 Fifty Eighth Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_fifty_eighth_native.m'
+      - 'tools/stage55_after58_interval_five_fields.py'
+      - 'tools/stage55_after4_interval_witness.py'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-fifty-eighth-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-fifty-eighth-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  fifty-eighth-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER57 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-fifty-seventh-day-differential
+          run-id: 44937277521
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER57
+        run: |
+          echo '4d9e5b1cb87a2f4bd4d8c0039162b4233fd42246f217a7b2923e6083498b84d1  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_57.json' | sha256sum -c -
+      - name: Preflight AFTER58 independent witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after58_interval_five_fields.py
+          grep -Fqx 'PIN = "4d9e5b1cb87a2f4bd4d8c0039162b4233fd42246f217a7b2923e6083498b84d1"' tools/stage55_after58_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after58_interval_five_fields.py tools/stage55_after4_interval_witness.py
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_57.json' tools/run_stage55_year5000_fifty_eighth_native.m
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_58.json' tools/run_stage55_year5000_fifty_eighth_native.m
+          python3 tools/stage55_after58_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_57.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --report logs/STAGE55_AFTER58_PREFLIGHT.json \
+            | tee logs/STAGE55_AFTER58_PREFLIGHT.log
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native fifty-eighth-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_fifty_eighth_native
+      - name: Python independent child intervals and strict five-field diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after58_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_57.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --after58 logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_58.json \
+            --report logs/STAGE55_AFTER58_CERTIFICATION.json \
+            | tee logs/STAGE55_FIFTY_EIGHTH_PYTHON.log
+          grep '^STAGE55_FIFTY_EIGHTH_ROW ' logs/STAGE55_FIFTY_EIGHTH_PYTHON.log > logs/STAGE55_FIFTY_EIGHTH_PYTHON_ROW.txt
+          grep '^STAGE55_FIFTY_EIGHTH_ROW ' logs/STAGE55_FIFTY_EIGHTH_NATIVE.log > logs/STAGE55_FIFTY_EIGHTH_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_FIFTY_EIGHTH_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_FIFTY_EIGHTH_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_FIFTY_EIGHTH_PYTHON_ROW.txt logs/STAGE55_FIFTY_EIGHTH_NATIVE_ROW.txt
+          expected="STAGE55_FIFTY_EIGHTH_ROW POSITION=58 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=58 MONTH_INDEX=46 MONTH_DAY=3"
+          grep -Fqx "$expected" logs/STAGE55_FIFTY_EIGHTH_NATIVE_ROW.txt
+          grep -Fqx "$expected" logs/STAGE55_FIFTY_EIGHTH_PYTHON_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_58.json | tee logs/STAGE55_FIFTY_EIGHTH_DIGEST.txt
+          echo 'STAGE55_FIFTY_EIGHTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-fifty-eighth-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_57.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_58.json
+            logs/STAGE55_FIFTY_EIGHTH_NATIVE.log
+            logs/STAGE55_FIFTY_EIGHTH_PYTHON.log
+            logs/STAGE55_FIFTY_EIGHTH_PYTHON_ROW.txt
+            logs/STAGE55_FIFTY_EIGHTH_NATIVE_ROW.txt
+            logs/STAGE55_FIFTY_EIGHTH_DIGEST.txt
+            logs/STAGE55_AFTER58_PREFLIGHT.json
+            logs/STAGE55_AFTER58_PREFLIGHT.log
+            logs/STAGE55_AFTER58_CERTIFICATION.json
+          if-no-files-found: warn
+          retention-days: 30
