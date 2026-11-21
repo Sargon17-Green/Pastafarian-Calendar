@@ -183,6 +183,23 @@ class ImportWorkInventoryTests(unittest.TestCase):
                                           "const MONTHS = ["),
                           "frozen arrays")
 
+    def test_21_inert_source_function_reference_default_is_allowed(self):
+        # The real locked Python engine has __init__(sauce_function=sauce).
+        source = PY.replace("    b: int", "    b: int\n    def __init__(self, sauce_function=save):\n        self.f = sauce_function")
+        r = python_import_inventory(source)
+        self.assertEqual(r["module_level_eager_calls"], ["STONES = build_stones()"])
+        self.assertFalse(r["module_import_work_is_zero"])
+
+    def test_22_effectful_source_method_default_call_is_rejected(self):
+        source = PY.replace("    b: int",
+                            "    b: int\n    def __init__(self, sauce_function=save(4)):\n        self.f = sauce_function")
+        self.py_rejected(source, "effectful Python method default")
+
+    def test_23_unreviewed_source_method_attribute_default_is_rejected(self):
+        source = PY.replace("    b: int",
+                            "    b: int\n    def __init__(self, factory=thing.property):\n        self.f = factory")
+        self.py_rejected(source, "effectful Python method default")
+
 
 if __name__ == "__main__":
     unittest.main()
