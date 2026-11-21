@@ -27,24 +27,15 @@ jobs:
           test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb838168f6b2f6b29ed3649cf
           test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
           test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md)" = 36f05683158d76ade80dff671b9900e108e94b7d
-          test "$(git hash-object src/stage02_choose_wide_general.logo)" = SOURCE_BLOB
-          test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = HOST_BLOB
-          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = VECTOR_BLOB
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = 5a624a2f3ade5b356b0569e3a1165904ad7e9c1d
+          test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = d4393c6bba9c955b7b208e796abac15fcb7f24aa
           git rev-parse HEAD > "$RUNNER_TEMP/wide-general-commit.txt"
           git hash-object .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-workflow-blob.txt"
-          {
-            git hash-object src/exact_integer.logo
-            git hash-object src/stage02_context.logo
-            git hash-object src/stage02_answer_at.logo
-            git hash-object src/stage02_choose_wide.logo
-            git hash-object src/stage02_choose_wide_general.logo
-            git hash-object test/normative_reference.logo
-            git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md
-            git hash-object qa/logo_stage2_wide_general_host_oracle.py
-            git hash-object qa/logo_stage2_wide_general_native_vectors.py
-            git hash-object .github/workflows/logo-stage02-wide-general-native.yml
-          } > "$RUNNER_TEMP/wide-general-git-blobs.txt"
-          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-source-sha256.txt"
+          for path in src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml; do
+            printf '%s %s\\n' "$(git hash-object "$path")" "$path"
+          done > "$RUNNER_TEMP/wide-general-git-blobs.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-source-sha256.txt"
           python3 qa/logo_stage2_wide_general_host_oracle.py | tee "$RUNNER_TEMP/wide-general-host.log"
           grep -Fxq 'WIDE_GENERAL_ENUM_CASES 42748' "$RUNNER_TEMP/wide-general-host.log"
           grep -Fxq 'WIDE_GENERAL_K2_COMPAT_CASES 3340' "$RUNNER_TEMP/wide-general-host.log"
