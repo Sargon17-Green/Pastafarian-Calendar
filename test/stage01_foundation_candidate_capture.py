@@ -54,6 +54,8 @@ def main() -> None:
     fields = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_FIELDS"))
     if len(fields) != 5:
         raise AssertionError("Foundation date did not return exactly five fields")
+    cutlet_position = int(one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_POSITION"))
+    month_id = int(one(lines, "STAGE01_FOUNDATION_CANDIDATE_MONTH_ID"))
     year_number = int(one(lines, "STAGE01_FOUNDATION_CANDIDATE_YEAR_NUMBER"))
     month_count = int(one(lines, "STAGE01_FOUNDATION_CANDIDATE_MONTH_COUNT"))
     day_count = int(one(lines, "STAGE01_FOUNDATION_CANDIDATE_DAY_COUNT"))
@@ -61,8 +63,8 @@ def main() -> None:
     gate_days = one(lines, "STAGE01_FOUNDATION_CANDIDATE_GATE_DAYS").split(",")
     cutlet_partition = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_PARTITION"))
     cutlet_names = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_NAME_INDICES"))
-    cutlet_first_days = one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_FIRST_DAYS").split(",")
-    cutlet_last_days = one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_LAST_DAYS").split(",")
+    cutlet_first_days = [int(x) for x in one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_FIRST_DAYS").split(",")]
+    cutlet_last_days = [int(x) for x in one(lines, "STAGE01_FOUNDATION_CANDIDATE_CUTLET_LAST_DAYS").split(",")]
     month_lengths = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_MONTH_LENGTHS"))
     month_names = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_MONTH_NAME_INDICES"))
     month_weaving = ints(one(lines, "STAGE01_FOUNDATION_CANDIDATE_MONTH_WEAVING"))
@@ -77,6 +79,8 @@ def main() -> None:
         raise AssertionError("cutlet day dimensions disagree")
     if sum(cutlet_partition) != gate_indices[1] - gate_indices[0]:
         raise AssertionError("cutlet partition does not span gate interval")
+    if any(last < first or last - first + 1 != length for first, last, length in zip(cutlet_first_days, cutlet_last_days, cutlet_partition)):
+        raise AssertionError("cutlet day boundaries differ from partition")
     if len(month_lengths) != month_count or len(month_names) != month_count:
         raise AssertionError("month dimensions disagree")
     if day_count != sum(month_lengths) or day_count != len(month_weaving):
@@ -87,15 +91,19 @@ def main() -> None:
         raise AssertionError("invalid or repeated cutlet names")
     if len(set(month_names)) != len(month_names) or any(not 1 <= x <= 47 for x in month_names):
         raise AssertionError("invalid or repeated month names")
-    if not 1 <= fields[1] <= len(cutlet_partition):
-        raise AssertionError("projected cutlet index outside partition")
-    if not 1 <= fields[2] <= cutlet_partition[fields[1] - 1]:
-        raise AssertionError("projected day outside cutlet")
-    if not 1 <= fields[3] <= month_count:
-        raise AssertionError("projected month index outside year")
-    if not 1 <= fields[4] <= month_lengths[fields[3] - 1]:
-        raise AssertionError("projected day outside month")
-    if any(not 1 <= month_id <= month_count for month_id in month_weaving):
+    if not 1 <= cutlet_position <= len(cutlet_partition):
+        raise AssertionError("containing cutlet position outside partition")
+    if fields[1] != cutlet_names[cutlet_position - 1]:
+        raise AssertionError("projected cutlet canonical name index mismatch")
+    if not 1 <= fields[2] <= cutlet_partition[cutlet_position - 1]:
+        raise AssertionError("projected day outside containing cutlet")
+    if not 1 <= month_id <= month_count:
+        raise AssertionError("containing month ID outside year")
+    if fields[3] != month_names[month_id - 1]:
+        raise AssertionError("projected month canonical name index mismatch")
+    if not 1 <= fields[4] <= month_lengths[month_id - 1]:
+        raise AssertionError("projected day outside containing month")
+    if any(not 1 <= month_id_value <= month_count for month_id_value in month_weaving):
         raise AssertionError("month weaving contains an invalid month ID")
 
     counts = collections.Counter(month_weaving)
@@ -103,8 +111,8 @@ def main() -> None:
         raise AssertionError("weaving frequencies differ from month lengths")
     first_positions = []
     last_positions = []
-    for month_id in range(1, month_count + 1):
-        positions = [i for i, value in enumerate(month_weaving, start=1) if value == month_id]
+    for month_id_value in range(1, month_count + 1):
+        positions = [i for i, value in enumerate(month_weaving, start=1) if value == month_id_value]
         if not positions:
             raise AssertionError("month ID is absent from weaving")
         first_positions.append(positions[0])
@@ -130,6 +138,8 @@ def main() -> None:
             "month_canonical_index": fields[3],
             "day_in_month": fields[4],
         },
+        "cutlet_position": cutlet_position,
+        "month_id": month_id,
         "year": {
             "number": year_number,
             "month_count": month_count,

@@ -57,16 +57,19 @@ This is component-level evidence only. It does not independently prove the gate 
 
 ## Foundation-Day diagnostic contract
 
-The next diagnostic captures the corrected Fortran output for calculationDay=targetDay=Foundation Day, without treating it as an expected answer.
+The diagnostic captures the corrected Fortran output for calculationDay=targetDay=Foundation Day, without treating it as an expected answer.
 
 - Input: the actual Fortran `foundation_day()` used as both calculation day and target day.
 - Output: the five date fields, selected year gates, cutlet partition and names, month lengths and names, and the complete month-weaving sequence.
-- Independent checks in the capture step: array dimensions, cutlet span, month bounds, exact weaving frequencies, first/last occurrence ordering, and projected date bounds.
+- The five projected fields contain canonical **name indices** for cutlet and month, not their positional indices. The probe separately identifies the containing cutlet position and woven month ID before checking the projection.
+- Internal checks: array dimensions, cutlet span, month bounds, exact weaving frequencies, first/last occurrence ordering, and projection-to-structure consistency.
 - The artifact is explicitly candidate-only. It records no canonical expected tuple and cannot accept Stage 1.
+
+The legacy actual-weave artifact's 45-month/4,244-day metadata came from the Python reference structure, not from the corrected Fortran structure. The legacy full-year Fortran probe stops at its hard-coded 45/4,244 assertion before reporting the actual structure.
 
 ## Remaining full-date oracle gap
 
-The pinned Python reference is not suitable as a canonical full-date oracle until its other rules are independently checked against the Hebrew Scroll. After the correction, the legacy full-date comparisons fail against that reference; these mismatches are not canonical expected values. The legacy full-year probe also hard-codes the old 45-month/4,244-day structure and stops before reporting the corrected Fortran structure.
+The pinned Python reference is not suitable as a canonical full-date oracle until its other rules are independently checked against the Hebrew Scroll. After the correction, the legacy full-date comparisons fail against that reference; these mismatches are not canonical expected values.
 
 The next acceptance-quality step is a complete independent implementation derived from the Hebrew Scroll, with separately verified intermediate results for the sauce, gates, year selection, cutlets, month count and lengths, weaving, and names. No full-date tuple or full-year differential is promoted to canonical acceptance before that work is complete.
 
