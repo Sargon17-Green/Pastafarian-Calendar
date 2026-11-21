@@ -1,0 +1,114 @@
+name: Issue29 v170 Ada Stage01-03-05 safe native NO-CALENDAR-F regressions
+on:
+  push:
+    branches:
+      - qa/issue29-ada-safe-legacy-regressions-v170
+    paths:
+      - '.github/workflows/issue29-v170-no-F-regressions.yml'
+permissions:
+  contents: read
+jobs:
+  source-locked-native-nondate-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Assert exact QA source scope and stop on any untrusted calendar entrypoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/entrypoint-static-assertions.log
+          import json,subprocess,sys
+          from pathlib import Path
+          sys.path.insert(0,"tests")
+          from issue29_v168_single_native_guard import BASE, source_guard
+          from issue29_v170_no_F_native_regressions import TEST_BLOBS,NO_F_TOKEN,blob_sha
+          source_guard()
+          head=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()
+          subprocess.run(["git","merge-base","--is-ancestor",BASE,head],check=True)
+          modified=subprocess.check_output(["git","diff","--name-only",BASE,head],text=True).splitlines()
+          expected=set((
+            ".github/workflows/issue29-v168-single-development-foundation.yml",
+            ".github/workflows/issue29-v169-gmp-aware-legacy-native-compile-no-F.yml",
+            ".github/workflows/issue29-v170-no-F-regressions.yml",
+            "issue29_v168_native_foundation.gpr",
+            "issue29_v169_gmp_aware_legacy_compile.gpr",
+            "tests/issue29_v168_native_foundation_probe.adb",
+            "tests/issue29_v168_single_native_guard.py",
+            "tests/issue29_v170_no_F_native_regressions.py",
+          ))
+          assert set(modified)<=expected,modified
+          for file,sha in TEST_BLOBS.items():
+              b=Path(file).read_bytes()
+              assert blob_sha(b)==sha,(file,"historical test file changed")
+              assert NO_F_TOKEN.search(b) is None,(file,"forbidden Calendar_Date invocation")
+          print("V170_CORRECTED_ADA_SOURCE_BYTE_LOCKS_UNCHANGED")
+          print("V170_DIRECT_NO_F_TEST_ENTRYPOINTS_AND_BOOTSTRAP_STATICALLY_VERIFIED")
+          print("V170_LEGACY_TESTS_STILL_UNMODIFIED_AND_STAGE41_DISABLED")
+          PY
+      - name: Install native GNAT and GMP-aware build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gmp-packages.txt
+      - name: Compile linked unchanged Stage01 Stage03 Stage05 using isolated GMP-aware GPR, no date dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          for unit in stage01_tests stage03_patch01_tests stage05_patch02_tests; do
+            (ulimit -v 1048576; timeout --signal=KILL 120s gprbuild -p -j2 \
+              -P issue29_v169_gmp_aware_legacy_compile.gpr \
+              "-XNATIVE_MAIN=${unit}.adb" \
+              > "evidence/${unit}.build.stdout" \
+              2> "evidence/${unit}.build.stderr")
+            test -x "bin_v169/${unit}"
+            sha256sum "bin_v169/${unit}" >> evidence/linked-binaries.sha256
+          done
+      - name: Run only source-locked no-F regressions, isolated OS caps, fail closed at first failure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v170_no_F_native_regressions.py --evidence evidence \
+            | tee evidence/native-no-F-verdict.stdout
+          grep -Fx V170_STAGE01_STAGE03_STAGE05_NATIVE_NO_CALENDAR_DATE_PASS \
+            evidence/native-no-F-verdict.stdout
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("evidence/v170-final.json").read_text())
+          assert d["status"]=="THREE_SOURCE_LOCKED_ADA_NO_F_REGRESSIONS_PASS"
+          assert d["date_calls"]==0 and d["original_soak_years"]==0
+          assert d["soak_dispatch_enabled"] is False
+          assert len(d["tests"])==3
+          assert all(v["status"]=="PASS_NATIVE_NO_CALENDAR_F" for v in d["tests"])
+          print("V170_ALL_THREE_NATIVE_REGRESSIONS_PASS_ZERO_F")
+          PY
+      - name: Preserve full original native stdout/stderr hashes and partial evidence even on failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence");p.mkdir(exist_ok=True)
+          d={f.name:{"sha256":hashlib.sha256(f.read_bytes()).hexdigest(),
+                     "bytes":f.stat().st_size}
+             for f in p.iterdir() if f.is_file() and f.name!="members.sha256.json"}
+          (p/"members.sha256.json").write_text(json.dumps(d,indent=2,sort_keys=True)+"\n")
+          PY
+      - name: Archive v170 exact-source non-calendar regression artifacts only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v170-stage01-stage03-stage05-native-no-calendar-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
