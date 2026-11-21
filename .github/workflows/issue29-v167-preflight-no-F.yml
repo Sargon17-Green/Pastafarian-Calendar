@@ -1,0 +1,108 @@
+name: Issue29 v167 PRELIGHT corrected Ada one-shot, COMPILE ONLY (NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-foundation-v167
+    paths:
+      - .github/workflows/issue29-v167-preflight-no-F.yml
+permissions:
+  contents: read
+jobs:
+  preflight-no-execution:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce halt, static syntax and exact one-shot source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import ast,json
+          from pathlib import Path
+          data=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert data["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert data["main_changes_permitted"] is False
+          assert data["successful_original_source_full_years"]==0
+          run=Path("soak/candidates/ada_full_weave_gmp_v164/issue29_v167_one_shot_runner.py")
+          ast.parse(run.read_text())
+          src=run.read_text()
+          assert 'EXPECTED = [5000, 10, 503, 20, 56]' in src
+          assert 'MAX_WALL_SECONDS = 90' in src
+          assert 'MAX_AS_BYTES = 768 * 1024 * 1024' in src
+          assert 'with attempt.open("x"' in src
+          assert 'GITHUB_RUN_ATTEMPT") == "1"' in src
+          assert 'run_bounded(' in src
+          print("V167_ONE_SHOT_SOURCE_STATIC_PREFLIGHT_PASS_NO_F")
+          PY
+          git rev-parse HEAD > evidence/tested-head.txt
+      - name: Install Ada/GMP toolchain for compile-only test
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gpr-version.txt
+      - name: Create reversible Ada QA copy, lock historical source
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 -B soak/runner/issue29_foundation_capture_v160.py prepare --root "$RUNNER_TEMP/v167-preflight" > evidence/prepare.stdout 2> evidence/prepare.stderr
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/integrate_gmp_qa_only_v164.py "$RUNNER_TEMP/v167-preflight" soak/candidates/ada_full_weave_gmp_v164 > evidence/adapter.stdout 2> evidence/adapter.stderr
+          cp "$RUNNER_TEMP/v167-preflight/v164-qa-integration-receipt.json" evidence/
+      - name: Compile AND link integrated foundation probe but NEVER launch
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/v167-preflight/ada-build"
+          cat > "$ROOT/issue29_v167_foundation_link.gpr" <<'GPR'
+          with "gnatcoll_gmp.gpr";
+          project Issue29_V167_Foundation_Link is
+             for Source_Dirs use ("src", "tests");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("issue29_foundation_probe.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
+             end Compiler;
+          end Issue29_V167_Foundation_Link;
+          GPR
+          gprbuild -p -P "$ROOT/issue29_v167_foundation_link.gpr" -j2 > evidence/full-link.stdout 2> evidence/full-link.stderr
+          test -x "$ROOT/bin/issue29_foundation_probe"
+          sha256sum "$ROOT/bin/issue29_foundation_probe" > evidence/binary-sha256.txt
+          ldd "$ROOT/bin/issue29_foundation_probe" > evidence/dynamic-libraries.txt
+          echo "V167_FOUNDATION_QA_LINK_ONLY_NO_EXECUTION" > evidence/compile-verdict.txt
+      - name: Run only preflight verification of pre-existing binary SHA, no F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/candidates/ada_full_weave_gmp_v164/issue29_v167_one_shot_runner.py "$RUNNER_TEMP/v167-preflight" preflight > evidence/one-shot-preflight.stdout 2> evidence/one-shot-preflight.stderr
+          grep -Fx V167_PREFLIGHT_LOCKED_CORRECTED_ADA_QA_BINARY_ONLY evidence/one-shot-preflight.stdout
+          cp "$RUNNER_TEMP/v167-preflight/v167-preflight.json" evidence/
+          test ! -e "$RUNNER_TEMP/v167-preflight/RUN_STARTED_ONCE"
+          test ! -e "$RUNNER_TEMP/v167-preflight/v167-corrected-ada.stdout"
+          echo "V167_PREPARED_ONE_SHOT_IS_NOT_EXECUTED" > evidence/preflight-final-verdict.txt
+      - name: Hash immutable preflight evidence
+        if: always()
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path("evidence")
+          d={x.name:{"bytes":x.stat().st_size,"sha256":hashlib.sha256(x.read_bytes()).hexdigest()} for x in sorted(p.iterdir()) if x.is_file()}
+          (p/"member-hashes.json").write_text(json.dumps(d,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Archive no-F build, link and binary-hash preflight receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v167-foundation-one-shot-static-and-native-preflight-no-F
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
