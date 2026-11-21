@@ -1,0 +1,109 @@
+name: SQL Tamil Slice25 month-weaving DP streaming candidate PG17
+on:
+  push:
+    branches: ['SQL+தமிழ்']
+    paths:
+      - 'sql/test/166_stage25_month_weaving_dp_stream_candidate.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-dp-stream-candidate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate-case:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {mode: native, case_id: prev_3_prev_middle}
+          - {mode: differential, case_id: prev_3_prev_last}
+    env:
+      TEST_MODE: ${{ matrix.mode }}
+      TEST_CASE: ${{ matrix.case_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify parent source and construct isolated SQL candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          test "$(git hash-object sql/24_stage02_month_weaving.sql)" = 'a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c'
+          mkdir -p slice25-dp-candidate-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nGITHUB_SHA=%s\nGITHUB_REF_NAME=%s\nMODE=%s\nCASE=%s\nPRODUCTION_SOURCE_BLOB=%s\n' \
+            "$GITHUB_SHA" "$GITHUB_REF_NAME" "$TEST_MODE" "$TEST_CASE" \
+            'a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c' \
+            > slice25-dp-candidate-evidence/versions.txt
+          python3 sql/test/166_stage25_month_weaving_dp_stream_candidate.py --self-test | tee slice25-dp-candidate-evidence/math-selftest.txt
+          python3 sql/test/166_stage25_month_weaving_dp_stream_candidate.py \
+            --write-candidate slice25-dp-candidate-evidence/24_candidate.sql | tee slice25-dp-candidate-evidence/transform.txt
+          python3 sql/test/150_stage25_calendar_date_oracle.py --self-test | tee slice25-dp-candidate-evidence/ordinal-selftest.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py --audit | tee slice25-dp-candidate-evidence/corpus-audit.txt
+          python3 sql/test/165_stage25_calendar_date_full_matrix_contract.py | tee slice25-dp-candidate-evidence/static-contract.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py \
+            --mode "$TEST_MODE" --case-id "$TEST_CASE" \
+            --output slice25-dp-candidate-evidence/test.sql | tee slice25-dp-candidate-evidence/test-generator.txt
+          sha256sum sql/24_stage02_month_weaving.sql \
+            sql/test/166_stage25_month_weaving_dp_stream_candidate.py \
+            sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            sql/test/164_stage25_calendar_date_matrix.py \
+            sql/test/165_stage25_calendar_date_full_matrix_contract.py \
+            sql/test/10_normative_reference.sql \
+            slice25-dp-candidate-evidence/24_candidate.sql \
+            slice25-dp-candidate-evidence/test.sql \
+            .github/workflows/sql-tamil-stage02-slice25-dp-stream-candidate.yml \
+            > slice25-dp-candidate-evidence/source-sha256.txt
+      - name: Start offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sql-tamil-dp-stream-candidate-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-dp-stream-candidate-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-dp-stream-candidate-pg postgres --version | tee -a slice25-dp-candidate-evidence/versions.txt
+      - name: Test isolated candidate against independent Slice25 oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            if [ "$i" = 24 ]; then
+              args+=(-f /work/slice25-dp-candidate-evidence/24_candidate.sql)
+            else
+              args+=(-f "/work/${matches[0]}")
+            fi
+          done
+          if [ "$TEST_MODE" = differential ]; then
+            args+=(-f /work/sql/test/10_normative_reference.sql)
+          fi
+          args+=(-f /work/slice25-dp-candidate-evidence/test.sql)
+          docker exec -u postgres sql-tamil-dp-stream-candidate-pg \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" \
+            2>&1 | tee slice25-dp-candidate-evidence/postgres-results.txt
+          test "$(grep -c 'SLICE25_NATIVE_FIELD_PASS=' slice25-dp-candidate-evidence/postgres-results.txt)" -eq 5
+          if [ "$TEST_MODE" = differential ]; then
+            test "$(grep -c 'SLICE25_DIFFERENTIAL_FIELD_PASS=' slice25-dp-candidate-evidence/postgres-results.txt)" -eq 5
+          fi
+          grep -q "SLICE25_MATRIX_GREEN=$TEST_MODE:$TEST_CASE" slice25-dp-candidate-evidence/postgres-results.txt
+          printf 'SLICE25_DP_STREAM_CANDIDATE_GREEN=%s:%s\n' "$TEST_MODE" "$TEST_CASE" \
+            > slice25-dp-candidate-evidence/completion.txt
+      - name: Preserve code, manifests and actual PG logs (success or failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-dp-stream-candidate-${{ matrix.mode }}-${{ matrix.case_id }}-${{ github.run_id }}
+          path: slice25-dp-candidate-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL container
+        if: always()
+        run: docker rm -f sql-tamil-dp-stream-candidate-pg 2>/dev/null || true
