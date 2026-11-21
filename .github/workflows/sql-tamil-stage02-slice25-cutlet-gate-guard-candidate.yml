@@ -1,0 +1,104 @@
+name: SQL Tamil Slice25 outside-year cutlet gate guard PG17 candidate
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/167_stage25_cutlet_gate_guard_candidate.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-cutlet-gate-guard-candidate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-gate-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - {case_id: prev_3_prev_middle}
+          - {case_id: anchor_cutlet_boundary}
+    env:
+      TEST_CASE: ${{ matrix.case_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source and generate exact-one-block QA candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          test "$(git hash-object sql/20_stage02_cutlet_partition.sql)" = '42acfb80e9eabfd9d091176643763ee7d7bca9ee'
+          mkdir -p slice25-gate-guard-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nGITHUB_SHA=%s\nGITHUB_REF_NAME=%s\nMODE=native\nCASE=%s\nPRODUCTION_SOURCE_BLOB=42acfb80e9eabfd9d091176643763ee7d7bca9ee\n' \
+            "$GITHUB_SHA" "$GITHUB_REF_NAME" "$TEST_CASE" > slice25-gate-guard-evidence/versions.txt
+          python3 sql/test/167_stage25_cutlet_gate_guard_candidate.py --self-test \
+            | tee slice25-gate-guard-evidence/math-selftest.txt
+          python3 sql/test/167_stage25_cutlet_gate_guard_candidate.py \
+            --write-candidate slice25-gate-guard-evidence/20_candidate.sql \
+            | tee slice25-gate-guard-evidence/transform.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py --audit \
+            | tee slice25-gate-guard-evidence/corpus-audit.txt
+          python3 sql/test/165_stage25_calendar_date_full_matrix_contract.py \
+            | tee slice25-gate-guard-evidence/static-contract.txt
+          python3 sql/test/164_stage25_calendar_date_matrix.py \
+            --mode native --case-id "$TEST_CASE" \
+            --output slice25-gate-guard-evidence/test.sql \
+            | tee slice25-gate-guard-evidence/test-generator.txt
+          sha256sum sql/20_stage02_cutlet_partition.sql \
+            sql/test/167_stage25_cutlet_gate_guard_candidate.py \
+            sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            sql/test/164_stage25_calendar_date_matrix.py \
+            sql/test/165_stage25_calendar_date_full_matrix_contract.py \
+            slice25-gate-guard-evidence/20_candidate.sql \
+            slice25-gate-guard-evidence/test.sql \
+            .github/workflows/sql-tamil-stage02-slice25-cutlet-gate-guard-candidate.yml \
+            > slice25-gate-guard-evidence/source-sha256.txt
+      - name: Start isolated offline PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sql-tamil-cutlet-gate-guard-pg --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-cutlet-gate-guard-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-tamil-cutlet-gate-guard-pg postgres --version \
+            | tee -a slice25-gate-guard-evidence/versions.txt
+      - name: Verify production-equivalent calendar fields on PG17
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t matches < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#matches[@]}" -eq 1
+            if [ "$i" = 20 ]; then
+              args+=(-f /work/slice25-gate-guard-evidence/20_candidate.sql)
+            else
+              args+=(-f "/work/${matches[0]}")
+            fi
+          done
+          args+=(-f /work/slice25-gate-guard-evidence/test.sql)
+          docker exec -u postgres sql-tamil-cutlet-gate-guard-pg \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" \
+            2>&1 | tee slice25-gate-guard-evidence/postgres-results.txt
+          test "$(grep -c 'SLICE25_NATIVE_FIELD_PASS=' slice25-gate-guard-evidence/postgres-results.txt)" -eq 5
+          grep -q "SLICE25_MATRIX_GREEN=native:$TEST_CASE" slice25-gate-guard-evidence/postgres-results.txt
+          printf 'SLICE25_CUTLET_GATE_GUARD_GREEN=native:%s\n' "$TEST_CASE" \
+            > slice25-gate-guard-evidence/completion.txt
+      - name: Preserve original PG logs, hash manifest and source (even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-cutlet-gate-guard-${{ matrix.case_id }}-${{ github.run_id }}
+          path: slice25-gate-guard-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL container
+        if: always()
+        run: docker rm -f sql-tamil-cutlet-gate-guard-pg 2>/dev/null || true
