@@ -308,21 +308,23 @@ contains
 
   subroutine post_stir_12(bowls)
     type(BigInt), intent(inout) :: bowls(6)
-    type(BigInt) :: old(6),nextBowls(6),savedBowlSum,s
+    type(BigInt) :: old(6),nextBowls(6),rawBowlSum,savedBowlSum,s
     integer :: stir,position,id,prev,next,order(6),orderNumber
     do stir=1,12
        old=bowls
-       savedBowlSum=bi_zero()
+       rawBowlSum=bi_zero()
        do id=1,6
-          savedBowlSum=bi_add(savedBowlSum,old(id))
+          rawBowlSum=bi_add(rawBowlSum,old(id))
        end do
-       savedBowlSum=save_value(bi_add_small(savedBowlSum,int(149*stir,int64)))
+       ! Hebrew Scroll, chapter 14: SAVE(raw sum + 149*turn) selects the
+       ! permutation only; the unsaved six-bowl sum enters every bowl update.
+       savedBowlSum=save_value(bi_add_small(rawBowlSum,int(149*stir,int64)))
        orderNumber=int(bi_to_int64(bi_mod(bi_sub(savedBowlSum,bi_one()),bi_from_int64(720_int64))))+1
        call bowl_order_from_number(orderNumber,order)
        do position=1,6
           id=order(position); prev=order(wrap1(position-1,6)); next=order(wrap1(position+1,6))
           s=old(id); s=bi_add(s,bi_mul_small(old(prev),3_int64)); s=bi_add(s,bi_mul_small(old(next),5_int64))
-          s=bi_add(s,savedBowlSum); s=bi_add_small(s,int(stir+position*position,int64))
+          s=bi_add(s,rawBowlSum); s=bi_add_small(s,int(stir+position*position,int64))
           nextBowls(id)=save_value(bi_add(bi_mul(s,s),bi_mul_small(bi_mul(old(prev),old(next)),7_int64)))
        end do
        bowls=nextBowls

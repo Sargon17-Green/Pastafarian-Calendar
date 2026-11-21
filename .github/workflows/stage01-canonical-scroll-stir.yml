@@ -1,0 +1,61 @@
+name: Stage 1 Hebrew Scroll — twelve post-stirs
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canonical-scroll-stir:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile the actual Fortran post-stir routine and probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "${flags[@]}" test/stage01_scroll_stir_probe.f90 \
+            build/big_integer.o build/normative_oracle_core.o \
+            -o build/stage01_scroll_stir_probe
+          test -x build/stage01_scroll_stir_probe
+      - name: Self-test the independent Hebrew Scroll transcription
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_stir_reference.py
+          python3 test/stage01_scroll_stir_reference.py --self-test | tee build/stage01-scroll-stir-selftest.log
+          grep -Fxq 'STAGE01_SCROLL_STIR_SELFTEST=17/17' build/stage01-scroll-stir-selftest.log
+      - name: Compare the Fortran routine with the Hebrew Scroll oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=3s 90s \
+            python3 -u test/stage01_scroll_stir_reference.py \
+              --fortran-exe build/stage01_scroll_stir_probe \
+              --output build/stage01-scroll-stir.json \
+              | tee build/stage01-scroll-stir.log
+          grep -Fxq 'STAGE01_SCROLL_STIR_DIFFERENTIAL=5/5 CASES; 30/30 EXACT BOWLS' build/stage01-scroll-stir.log
+          grep -Fxq 'STAGE01_SCROLL_STIR_COMPONENT_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-stir.log
+      - name: Preserve canonical component evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-canonical-scroll-stir
+          path: |
+            build/stage01-scroll-stir-selftest.log
+            build/stage01-scroll-stir.log
+            build/stage01-scroll-stir.json
+          if-no-files-found: warn
+          retention-days: 30
