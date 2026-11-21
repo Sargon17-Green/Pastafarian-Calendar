@@ -1,0 +1,55 @@
+name: Issue29 v160 source-free mathematical and telemetry QA ONLY
+on:
+  push:
+    branches:
+      - qa/issue29-foundation-causal-v160
+    paths:
+      - '.github/workflows/issue29-foundation-static-v160.yml'
+      - 'soak/process_tests/test_issue29_foundation_static_v160.py'
+      - 'soak/runner/issue29_foundation_capture_v160.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-free-math-and-telemetry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm Issue29 halt and run ONLY seven synthetic tests, no date calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["incident_issue"]==29
+          assert d["successful_original_source_full_years"]==0
+          assert d["main_changes_permitted"] is False
+          print("V160_HALT_ENFORCED_NO_FCT")
+          PY
+          python3 -B -m unittest discover -s soak/process_tests \
+            -p 'test_issue29_foundation_static_v160.py' -v \
+            > evidence/v160-seven-static-tests.log 2>&1 || {
+            cat evidence/v160-seven-static-tests.log
+            exit 1
+          }
+          cat evidence/v160-seven-static-tests.log
+          grep -Eq '^Ran 7 tests ' evidence/v160-seven-static-tests.log
+          grep -Fx 'OK' evidence/v160-seven-static-tests.log
+          python3 -B -m py_compile soak/runner/issue29_foundation_capture_v160.py
+          python3 --version > evidence/v160-python-version.txt
+          git rev-parse HEAD > evidence/v160-source-head.txt
+          echo 'ORIGINAL_FCT_CALLS=0; QA_FCT_CALLS=0; SOAK_YEARS=0' > evidence/v160-no-date-calls.txt
+      - name: Archive source-free QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v160-seven-source-free-regressions
+          path: evidence/
+          retention-days: 30
