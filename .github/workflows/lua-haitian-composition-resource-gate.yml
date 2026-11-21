@@ -99,24 +99,8 @@ jobs:
           if test -s lua-composition-resource-evidence/weaving_strategy_native_stderr.txt; then cat lua-composition-resource-evidence/weaving_strategy_native_stderr.txt >&2; fi
           test "$code" -eq 0 || exit "$code"
           test ! -s lua-composition-resource-evidence/weaving_strategy_native_stderr.txt || exit 42
-          grep -Eq '^LUA_HAITIAN_WEAVING_RESOURCE_STRATEGY_NATIVE_PASS: [0-9]+/[0-9]+
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lua-haitian-composition-resource-boundary-evidence
-          path: lua-composition-resource-evidence/
-          retention-days: 30
-          if-no-files-found: warn
- lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 43
-          grep -Eq '^MEMO_STATE_LOWER_BOUND: [0-9]+
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lua-haitian-composition-resource-boundary-evidence
-          path: lua-composition-resource-evidence/
-          retention-days: 30
-          if-no-files-found: warn
- lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 44
+          grep -Eq '^LUA_HAITIAN_WEAVING_RESOURCE_STRATEGY_NATIVE_PASS: [0-9]+/[0-9]+$' lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 43
+          grep -Eq '^MEMO_STATE_LOWER_BOUND: [0-9]+$' lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 44
           grep -Fxq 'WIDE_RANK_REQUIRED: YES' lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 45
           grep -Fxq 'NORMATIVE_RECURSIVE_REAL_COMPOSITION: NOT_RUN' lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 46
           grep -Fxq 'WEAVING_NOT_INVOKED: YES; FULL_DATE: NOT_RUN; PRODUCTION: UNCHANGED' lua-composition-resource-evidence/weaving_strategy_native_stdout.txt || exit 47
