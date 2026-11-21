@@ -1,7 +1,7 @@
 name: Kotlin bounded independent unseeded seven-field date QA
 on:
   push:
-    branches: ['Kotlin\\+Cymraeg']
+    branches: ['Kotlin\+Cymraeg']
     paths:
       - 'soak/audit_production_seven_field_unseeded.py'
       - 'soak/test_audit_production_seven_field_unseeded.py'
