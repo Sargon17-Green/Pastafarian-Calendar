@@ -1,0 +1,55 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "stage": 22,
+  "phase": "DISCOVERY_ONLY_NOT_NATIVE_ACCEPTED",
+  "parent_sha": "60f2fc024a5177532ed987f9bf45b778854d9c63",
+  "authorization": "user approved Stage22 and expanded scope on 2026-11-21",
+  "target_months": 13,
+  "target_days": 52,
+  "accepted_last_stage": 21,
+  "full_year_accepted": false,
+  "catalan13": {
+    "word_count": 742900,
+    "csv_numeric_lexical_lf_sha256": "67edb036b070b196c6b889b161a27baef6b0ec7852717586550ef2f8b4d7173d",
+    "independent_methods": "Perl Dyck lexical DFS; independent Python ballot unrank cross-check",
+    "perl": {
+      "version": "5.40.1",
+      "syntax": "PASS",
+      "exit": 0,
+      "stderr": "empty",
+      "elapsed_s": 1.75,
+      "rss_kib": 4224,
+      "timeout_s": 120,
+      "vsize_limit_kib": 393216
+    },
+    "python_local_scratch": {
+      "exit": 0,
+      "elapsed_s": 4.39,
+      "rss_kib": 95496,
+      "sha_match": true,
+      "not_committed": true
+    }
+  },
+  "capacity": {
+    "maximum_count_upper_bound": "14778213400262135041705388361938994140625",
+    "digits": 41,
+    "packed_decimal_capacity": 48,
+    "maximum_active_mixed_radix_product": 1769472,
+    "max_interval_buckets": 105,
+    "memo_index_exclusive_bound": 185794560,
+    "perl": {
+      "version": "5.40.1",
+      "syntax": "PASS",
+      "exit": 0,
+      "stderr": "empty",
+      "elapsed_s": 0.03,
+      "rss_kib": 10624,
+      "timeout_s": 120,
+      "vsize_limit_kib": 393216
+    }
+  },
+  "preserved": "MonthOccurrence <=9 months/36 days",
+  "stage22_native_accepted": false,
+  "stage22_production_implemented": false,
+  "next": "Bounded, temporary source-exact Stage22 production preflight with 13x4 count and rank under 120s/393216KiB; no production merge before resource evidence"
+}
