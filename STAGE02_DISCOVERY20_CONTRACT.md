@@ -1,10 +1,10 @@
 # Stage 2 / Discovery 20 — bounded ANSWER-AT stream indexing (Logo+Ido)
 
-Status: QA_NATIVE_PASS_VERIFIED; CANONICAL_CANDIDATE_PENDING_NATIVE_AND_SAME_SHA_REGRESSIONS. This document belongs to the QA branch `qa/logo-ido-d20-answer-at` forked from the D19 canonical acceptance SHA `4002280506a93999e64159155f2e9f8b89ae4c23`. It does not advance LAST_COMPLETED_STAGE, merge anything, or authorize a completed Stage 2.
+Status: CANONICAL_NATIVE_ACCEPTED_ON_07f67dad3fde1d1a5cc6178d5c5536311638e866. Originally designed on QA branch `qa/logo-ido-d20-answer-at` forked from accepted D19 SHA `4002280506a93999e64159155f2e9f8b89ae4c23`; the resulting implementation was fast-forwarded to non-protected `Logo+Ido`. This acceptance does not advance LAST_COMPLETED_STAGE, merge anything, or imply completed Stage 2.
 
 ## Prerequisite and scope
 
-D19 ASK on the canonical source SHA is accepted by original push run 44800092723: completed forward job 136509674985 (17 cases / 61 checks), reverse job 136509674613 (17 / 62), and dependent acceptance job 136518079924 (34 / 123 and final Native PASS). The twelve additional same-SHA workflows are completed SUCCESS with their relevant Native markers; all three D19 production/test/reference blob SHAs match the successful QA source. The canonical HEAD remains 4002280506a93999e64159155f2e9f8b89ae4c23.
+D19 ASK on the canonical source SHA is accepted by original push run 44800092723: completed forward job 136509674985 (17 cases / 61 checks), reverse job 136509674613 (17 / 62), and dependent acceptance job 136518079924 (34 / 123 and final Native PASS). The twelve additional same-SHA workflows are completed SUCCESS with their relevant Native markers; all three D19 production/test/reference blob SHAs match the successful QA source. The D19 acceptance SHA was `4002280506a93999e64159155f2e9f8b89ae4c23`; the subsequently accepted D20 canonical implementation SHA is `07f67dad3fde1d1a5cc6178d5c5536311638e866`.
 
 Implement *only* the next Appendix-A primitive: get the k-th value of a previously constructed two-element ASK stream. No rejection sampling, choose.short, choose.wide, unranking, year discovery, calendarDateSpaghetti, Stage 1 changes, main, or merge.
 
@@ -38,7 +38,7 @@ Six direct synthetic wrap-boundary cases use three assertions each (shape, exact
 
 Ten rejected cases each assert exact `[]`: stream non-list; stream length 1; stream length 3; firstValue=0 BI; firstValue=M+1 BI; step=0; step=2; k=-1; k=32; fractional k=0.5. Guard tests do not define unsupported arbitrary BI-structure detection.
 
-**Target for each direction:** 44+6+10=60 cases; 176+18+10=204 counted assertions. The reverse direction additionally verifies the workcount's direction field against independently reconstructed raw-date workcounts: 205 total checks (same 60 cases). **Dependent total:** 120 case executions, 409 checks. These are targets only, NOT observed PASS results.
+**Target for each direction:** 44+6+10=60 cases; 176+18+10=204 counted assertions. The reverse direction additionally verifies the workcount's direction field against independently reconstructed raw-date workcounts: 205 total checks (same 60 cases). **Dependent total:** 120 case executions, 409 checks. These were pre-execution targets; observed canonical Native PASS results and evidence are recorded below.
 
 ## Execution, source-lock and acceptance gates
 
@@ -52,14 +52,20 @@ Implement D20 code and its independent walker/test fixture on this QA branch fir
 
 A dependent aggregate may emit `STAGE_2_DISCOVERY_20_CASES_PASIS 120`, `STAGE_2_DISCOVERY_20_CHECKS_PASIS 409`, and `NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS` only when both source-locked shards have completed successfully. Reject missing/unknown/failure/timeout markers and malformed outputs. The target counts alone are not evidence of successful execution.
 
-QA D20 Native PASS has now been verified against run 44820146210, but no canonical D20 acceptance, Stage 2 completion, main write, or public release may be claimed until completed exact-canonical-SHA job logs and all required regressions are checked. Do not re-run already accepted D19 on its unchanged SHA. Queued/in_progress is neither PASS nor blocker.
+QA D20 Native PASS was independently verified at run 44820146210. Canonical D20 was subsequently accepted from completed first-attempt same-SHA Native job logs and all thirteen required companion regression workflows, as documented below. No Stage 2 completion, main write, or public release is claimed. Queued/in_progress is neither PASS nor blocker.
 
 ## Next authorized action
 
-The QA implementation and algorithmically distinct test-only walker are committed at `19de85e8a78e8735913851fd3e50a772b621e18e` with completed success evidence. Promote only through a reviewed, non-protected `Logo+Ido` branch-only descendant (never main or merge), and inspect the naturally triggered canonical D20 dual-shard Native workflow plus every same-SHA regression. Queued/in_progress is neither acceptance nor blocker.
+D20 Native was accepted at canonical implementation SHA `07f67dad3fde1d1a5cc6178d5c5536311638e866`. The next actionable step within Stage 2 is to inspect the remaining Appendix-A primitive sequence, specify the next bounded input/output contract and independent oracle, and only then implement its authorized scope. D20 acceptance alone does not authorize Stage 2 completion, main, merge, or publication.
 
 ## Verified QA evidence and controlled canonical-candidate handoff (2026-11-21)
 
 QA HEAD `19de85e8a78e8735913851fd3e50a772b621e18e` remained exactly two commits ahead of accepted canonical D19 `4002280506a93999e64159155f2e9f8b89ae4c23`, with six added files and no modified pre-existing source/reference files. Run [44820146210](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44820146210) completed success on that exact QA SHA: forward job 136578625166 60/204 with authentic shard PASS, reverse job 136578624567 60/205 with authentic shard PASS, dependent job 136592092959 120/409 and NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS. Artifact IDs: forward 14672692683, reverse 14673535730; both preserved in the original run. Canonical Names Lock run 44820146113/job 136578624379 completed success. These are **QA**, not canonical or Stage 2 acceptance.
 
-The new canonical D20 workflow is a separate push-only `Logo\\+Ido` gate, derived from the validated QA workflow but additionally source-locks the newly introduced D20 production/test files by Git blob SHA. It has two independent 1800s/35min bounded Native jobs and one dependent acceptance job. Check every completed canonical job's real log/artifacts/trigger SHA and all same-SHA D01–D19, Stage1, Names Lock regressions before setting D20 ACCEPTED=YES. LAST_COMPLETED_STAGE remains 1. No main/merge.
+The new canonical D20 workflow is a separate push-only `Logo\\+Ido` gate, derived from the validated QA workflow but additionally source-locks the newly introduced D20 production/test files by Git blob SHA. It has two independent 1800s/35min bounded Native jobs and one dependent acceptance job. The canonical gate and all thirteen companion workflows were subsequently checked against completed job logs and the identical trigger SHA before D20 was recorded ACCEPTED=YES. LAST_COMPLETED_STAGE remains 1. No main/merge.
+
+## Canonical D20 acceptance evidence (2026-11-21)
+
+Canonical implementation SHA `07f67dad3fde1d1a5cc6178d5c5536311638e866` was confirmed as the HEAD of unprotected `Logo+Ido` before this documentation-only acceptance update. First-attempt [run 44828444891](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44828444891) completed SUCCESS with genuine source-locked UCBLogo 6.2.5 execution: forward job **136606933674** printed 60 cases / 204 checks / `NATIVE_STAGE_2_DISCOVERY_20_FORWARD_SHARD=PASS`; reverse job **136606933393** printed 60 cases / 205 checks / `NATIVE_STAGE_2_DISCOVERY_20_REVERSE_SHARD=PASS`; dependent job **136619231518** emitted 120 cases / 409 checks / `NATIVE_STAGE_2_DISCOVERY_20_VERIFICATION=PASS`. Forward log artifact **14677261158** (digest sha256:d8d48da2c9d07e212ae80d81421264c36ca387c18e4c89b8729a40075ad73b62), reverse log artifact **14675749962** (sha256:1d82b7dc5ce0cbbd51e11b5f891b7058c8862d4b6810459eabc98c8c1396c5b3), both original exact-SHA and unexpired at verification.
+
+All **13** first-attempt companion workflows on this same SHA completed SUCCESS; job logs were inspected for Native markers or Names Lock: D19 `44828444872` (34/123 aggregate), D14 `44828444905`, D16 `44828444827`, D15 `44828444819`, D01–D09 `44828444760`, D18 `44828444778` (6/40 aggregate), Stage1 `44828444740` (`STAGE_1_TESTI_PASIS`, `NATIVE_STAGE_1_VERIFICATION=PASS`), Names Lock `44828444811`, D10 `44828444759`, D12 `44828444820`, D13 `44828444726`, D17 `44828444713`, D11 `44828444771`. Therefore **D20 ACCEPTED=YES on canonical implementation SHA**. This is a bounded D20 Native + independent differential acceptance, **not Stage 2 acceptance**; `LAST_COMPLETED_STAGE=1` remains unchanged. No manual dispatch or rerun was used.
