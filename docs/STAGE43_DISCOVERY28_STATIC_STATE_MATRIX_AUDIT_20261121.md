@@ -36,7 +36,7 @@ At the audited HEAD:
 | G | Stage43 sealed with LAST=42 | REJECT | REJECT | REJECT |
 | H | Duplicate, contradictory `CURRENT_STAGE=42` **and** `CURRENT_STAGE=43` declarations | **REJECT** | **ALLOW — gap** | **ALLOW — gap** |
 
-**Static result:** 8/8 scenarios evaluated; **two genuine fail-closed gaps (B and H)** in the current preflight predicates. This is not 8/8 software PASS. Four of the six rejected contractual scenarios reject correctly; two do not. States C/E are intentionally unsupported before activation and therefore not defects *at this time*.
+**Static result:** 8/8 scenarios evaluated; **two genuine fail-closed gaps (B and H)** in the current preflight predicates. This is not 8/8 software PASS. Three of the five rejected contractual scenarios reject correctly; two do not. States C/E are intentionally unsupported before activation and therefore not defects *at this time*.
 
 ## 3. Future gate inventory, without modifying it
 
