@@ -234,8 +234,11 @@ def make_patched(originals:dict[str,bytes])->dict[str,bytes]:
     rank_assignment=b"        rank = choose_rank(ask_bowl(result, 4, SEAL_MONTH_WEAVING), family.count())"
     selector_marker=b"# >>> V159_QA_DIAG_INSTRUMENTED_COPY_ONLY PY_SELECTOR_GLOBAL_RANK"
     return_rank=b"        return family.unrank1(rank)"
-    require(py.index(rank_assignment) < py.index(selector_marker) <
-            py.index(return_rank),"Python rank diagnostic must follow rank assignment before return")
+    rank_position=py.index(rank_assignment)
+    marker_position=py.index(selector_marker)
+    next_return_position=py.find(return_rank,marker_position)
+    require(rank_position < marker_position < next_return_position,
+            "Python rank diagnostic must follow local rank assignment before its return")
     ast.parse(py.decode("utf-8"),filename="qa-instrumented-copy-not-executed.py")
     first,tickets,afinal=ada_blocks()
     ada=insert_once(ada,ADA_ANCHORS[0],"ADA_MONTH_LENGTH_RANK",first,"ADA")
