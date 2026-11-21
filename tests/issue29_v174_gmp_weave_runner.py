@@ -23,7 +23,7 @@ BASE_COMMIT = "1160096aa847c54cbef27c232771ce1549d7ba8f"
 SOURCE_BASE = "e17ab44aa3fd1d08eb14644164735a7c5c87721d"
 BRANCH = "qa/issue29-ada-gmp-weave-component-v174"
 ACTIVATION_MESSAGE = (
-    "test(issue29-v174): compare production GMP weave against exhaustive normative oracle"
+    "fix(issue29-v174): bind one-shot runner to final corrected commit"
 )
 GPR = Path("issue29_v174_gmp_weave_component.gpr")
 TEST = Path("tests/issue29_v174_gmp_weave_tests.adb")

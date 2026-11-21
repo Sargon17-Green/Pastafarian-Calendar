@@ -10,6 +10,7 @@ permissions:
 concurrency:
   group: issue29-v174-exhaustive-gmp-weave-one-shot
 # The exact assertion total includes every parsed reference-symbol range check.
+# Runner accepts only this exact, source-pinned one-shot commit message.
   cancel-in-progress: false
 jobs:
   bounded-production-gmp-weave-exhaustive-oracle:
