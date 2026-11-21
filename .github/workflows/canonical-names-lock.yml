@@ -26,7 +26,7 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
 
   native-stage01:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE01_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -44,7 +44,7 @@ jobs:
           sh ./run_stage01.sh
 
   native-stage02-discovery01:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE02_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -60,7 +60,7 @@ jobs:
           sh ./run_stage02_discovery01.sh
 
   native-stage03-patch01:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE03_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -76,7 +76,7 @@ jobs:
           sh ./run_stage03_patch01.sh
 
   native-stage04-discovery02:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE04_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -92,7 +92,7 @@ jobs:
           sh ./run_stage04_discovery02.sh
 
   native-stage05-patch02:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE05_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -108,7 +108,7 @@ jobs:
           sh ./run_stage05_patch02.sh
 
   native-stage06-discovery03:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE06_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -124,7 +124,7 @@ jobs:
           sh ./run_stage06_discovery03.sh
 
   native-stage07-discovery04:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE07_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -140,7 +140,7 @@ jobs:
           sh ./run_stage07_discovery04.sh
 
   native-stage08-discovery05:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE08_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -156,7 +156,7 @@ jobs:
           sh ./run_stage08_discovery05.sh
 
   native-stage09-discovery06:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE09_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -172,7 +172,7 @@ jobs:
           sh ./run_stage09_discovery06.sh
 
   native-stage10-discovery07:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE10_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -188,7 +188,7 @@ jobs:
           sh ./run_stage10_discovery07.sh
 
   native-stage11-discovery08:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE11_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -204,7 +204,7 @@ jobs:
           sh ./run_stage11_discovery08.sh
 
   native-stage12-discovery09:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE12_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -219,7 +219,7 @@ jobs:
           set -euo pipefail
           sh ./run_stage12_discovery09.sh
   native-stage13-discovery10:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE13_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -248,7 +248,7 @@ jobs:
           grep -Fx 'STAGE14_SYNTHETIC_FIVEFIELD_ASSERTIONS=61' stage14-synthetic.log
 
   native-stage14-real-differential:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE14_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -267,7 +267,7 @@ jobs:
           sh ./run_stage14_real_differential.sh
 
   native-stage15-multi-calibration:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE15_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -286,7 +286,7 @@ jobs:
           sh ./run_stage15_multi_calibration.sh
 
   native-stage16-sparse-window:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE16_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -305,7 +305,7 @@ jobs:
           sh ./run_stage16_sparse_window.sh
 
   native-stage17-year-crossing:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE17_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -324,7 +324,7 @@ jobs:
           sh ./run_stage17_year_crossing.sh
 
   native-stage18-wide-calibration:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE18_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -343,7 +343,7 @@ jobs:
           sh ./run_stage18_wide_calibration.sh
 
   native-stage19-joint-wide:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE19_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -362,7 +362,7 @@ jobs:
           sh ./run_stage19_joint_wide.sh
 
   native-stage20-joint-sparse:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE20_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -381,7 +381,7 @@ jobs:
           sh ./run_stage20_joint_sparse.sh
   
   native-stage21-edge-adjacent:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE21_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -400,7 +400,7 @@ jobs:
           sh ./run_stage21_edge_adjacent.sh
 
   native-stage22-limit-mixed:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE22_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -419,7 +419,7 @@ jobs:
           sh ./run_stage22_limit_mixed.sh
 
   native-stage23-remote-seven:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE23_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -438,7 +438,7 @@ jobs:
           sh ./run_stage23_remote_seven.sh
 
   native-stage24-limit-seven:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE24_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -457,7 +457,7 @@ jobs:
           sh ./run_stage24_limit_seven.sh
 
   native-stage25-limit-one:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE25_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -476,7 +476,7 @@ jobs:
           sh ./run_stage25_limit_one.sh
 
   native-stage26-limit-two:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE26_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -495,7 +495,7 @@ jobs:
           sh ./run_stage26_limit_two.sh
 
   native-stage27-remote-two:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE27_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -514,7 +514,7 @@ jobs:
           sh ./run_stage27_remote_two.sh
 
   native-stage28-remote-three:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE28_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -533,7 +533,7 @@ jobs:
           sh ./run_stage28_remote_three.sh
 
   native-stage29-remote-four:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE29_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -552,7 +552,7 @@ jobs:
           sh ./run_stage29_remote_four.sh
 
   native-stage30-remote-five:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE30_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -571,7 +571,7 @@ jobs:
           sh ./run_stage30_remote_five.sh
 
   native-stage31-remote-six:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE31_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -590,7 +590,7 @@ jobs:
           sh ./run_stage31_remote_six.sh
 
   native-stage32-remote-eight:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE32_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -609,7 +609,7 @@ jobs:
           sh ./run_stage32_remote_eight.sh
 
   native-stage33-remote-nine:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE33_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -628,7 +628,7 @@ jobs:
           sh ./run_stage33_remote_nine.sh
 
   native-stage34-remote-ten:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE34_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -647,7 +647,7 @@ jobs:
           sh ./run_stage34_remote_ten.sh
 
   native-stage35-remote-eleven:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE35_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -666,7 +666,7 @@ jobs:
           sh ./run_stage35_remote_eleven.sh
 
   native-stage36-remote-twelve:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE36_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -685,7 +685,7 @@ jobs:
           sh ./run_stage36_remote_twelve.sh
 
   native-stage37-remote-thirteen:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE37_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -704,7 +704,7 @@ jobs:
           sh ./run_stage37_remote_thirteen.sh
 
   native-stage38-remote-fourteen:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE38_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -723,7 +723,7 @@ jobs:
           sh ./run_stage38_remote_fourteen.sh
 
   native-stage39-remote-fifteen:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE39_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -742,7 +742,7 @@ jobs:
           sh ./run_stage39_remote_fifteen.sh
 
   native-stage40-remote-sixteen:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE40_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -761,7 +761,7 @@ jobs:
           sh ./run_stage40_remote_sixteen.sh
 
   native-stage41-remote-seventeen:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Ada+తెలుగు' && vars.ISSUE29_NATIVE_STAGE41_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
