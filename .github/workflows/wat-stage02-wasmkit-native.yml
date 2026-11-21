@@ -1,11 +1,7 @@
 name: WAT Stage02 WasmKit Native Evidence
 
 on:
-  push:
-    branches:
-      - 'WAT+Español'
-    paths:
-      - '.github/workflows/wat-stage02-wasmkit-native.yml'
+  workflow_call:
 
 permissions:
   contents: read

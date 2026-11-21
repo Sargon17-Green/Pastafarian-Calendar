@@ -25,6 +25,12 @@ jobs:
             fi
           done < CANONICAL_NAMES_LOCK.sha256
 
+  wat-stage02-wasmkit-native:
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español' && contains(github.event.head_commit.message, '[wasmkit-run]')"
+    uses: ./.github/workflows/wat-stage02-wasmkit-native.yml
+    permissions:
+      contents: read
+
   wat-stage02-semantic:
     if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español'"
     runs-on: ubuntu-24.04
