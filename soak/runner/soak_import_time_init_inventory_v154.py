@@ -46,6 +46,15 @@ def _call_name(node: ast.AST) -> str | None:
     return None
 
 
+def _inert_default_values(args: ast.arguments) -> bool:
+    """Names (e.g. sauce_function=sauce) and literals are evaluated on import
+    but do not *themselves* invoke an arbitrary Python function. Do not allow
+    attribute/property getters, subscripts, comprehensions or call expressions.
+    """
+    values = [*args.defaults, *(x for x in args.kw_defaults if x is not None)]
+    return all(type(x) in (ast.Name, ast.Constant) for x in values)
+
+
 def python_import_inventory(source: str) -> dict:
     tree = ast.parse(source)
     imports, immediate, decorators, declarations = [], [], [], []
@@ -80,8 +89,7 @@ def python_import_inventory(source: str) -> dict:
             declarations.append(node.name)
             need(not node.decorator_list,
                  "unexpected Python top-level function decorator")
-            need(not node.args.defaults and
-                 not any(x is not None for x in node.args.kw_defaults),
+            need(_inert_default_values(node.args),
                  "unexpected Python function definition-time defaults")
         elif isinstance(node, ast.ClassDef):
             declarations.append(node.name)
@@ -116,9 +124,8 @@ def python_import_inventory(source: str) -> dict:
                 if type(entry) is ast.FunctionDef:
                     need(not entry.decorator_list,
                          "Python class method decorator executes at import")
-                    need(not entry.args.defaults and
-                         not any(x is not None for x in entry.args.kw_defaults),
-                         "Python method default expression executes at import")
+                    need(_inert_default_values(entry.args),
+                         "effectful Python method default expression executes at import")
         elif isinstance(node, ast.Expr):
             need(type(node.value) is ast.Constant and
                  type(node.value.value) is str,
