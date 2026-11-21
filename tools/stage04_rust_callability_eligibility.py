@@ -7,6 +7,7 @@ callable. SOURCE_ONLY is not proof of global absence; no outcome asserts RED.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import io
 import json
 import os
@@ -200,6 +201,56 @@ def install_probe(dest: Path, crate: str, symbol: str) -> Path:
         raise RuntimeUnverified("cannot create exclusive historical test probe") from exc
     return probe
 
+def _verify_archived_tree(repo: Path, commit: str, dest: Path) -> None:
+    """Require every exported file to match its original pinned Git blob.
+
+    git archive is not byte-preserving under export-subst/export-ignore; a
+    successfully compiled exported snapshot alone is not original production
+    code evidence. Compare complete Git tree membership and content hashes
+    before adding the one-use native probe.
+    """
+    try:
+        tree = subprocess.run(
+            ["git", "-C", str(repo), "ls-tree", "-r", "-z", "--full-tree", commit],
+            capture_output=True, check=False, timeout=20,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise RuntimeUnverified("cannot inspect pinned Git tree") from exc
+    if tree.returncode != 0 or len(tree.stdout) > 8_000_000:
+        raise RuntimeUnverified("pinned Git tree unavailable or too large")
+
+    expected: dict[str, str] = {}
+    for record in tree.stdout.split(b"\0"):
+        if not record:
+            continue
+        metadata, separator, filename = record.partition(b"\t")
+        try:
+            mode, kind, sha = metadata.decode("ascii").split()
+        except (UnicodeError, ValueError) as exc:
+            raise RuntimeUnverified("invalid pinned Git tree entry") from exc
+        name = os.fsdecode(filename)
+        if (not separator or mode not in ("100644", "100755")
+                or kind != "blob" or not re.fullmatch(r"[0-9a-f]{40}", sha)
+                or not name or name in expected):
+            raise RuntimeUnverified("unsupported or duplicate pinned tree entry")
+        expected[name] = sha
+
+    actual = {
+        file.relative_to(dest).as_posix(): file
+        for file in dest.rglob("*") if file.is_file()
+    }
+    if set(actual) != set(expected):
+        raise RuntimeUnverified("archived tree membership differs from pinned Git tree")
+    for name, sha in expected.items():
+        try:
+            data = actual[name].read_bytes()
+        except OSError as exc:
+            raise RuntimeUnverified("cannot read exported pinned file") from exc
+        canonical = b"blob " + str(len(data)).encode("ascii") + b"\0" + data
+        if hashlib.sha1(canonical).hexdigest() != sha:
+            raise RuntimeUnverified("archived file bytes differ from pinned Git blob")
+
+
 def archive(repo: Path, commit: str, dest: Path) -> None:
     try:
         r = subprocess.run(["git", "-C", str(repo), "archive", "--format=tar", commit],
@@ -217,6 +268,7 @@ def archive(repo: Path, commit: str, dest: Path) -> None:
             t.extractall(dest, filter="data")
     except (tarfile.TarError, OSError) as exc:
         raise RuntimeUnverified("unpack failed") from exc
+    _verify_archived_tree(repo, commit, dest)
 
 def check_callability(repo: Path, witness_commit: str, witness_path: str,
                       witness_blob: str, stage3_closure: str,
