@@ -1,0 +1,86 @@
+name: MATLAB Stage55 Fifty Sixth Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_fifty_sixth_native.m'
+      - 'tools/stage55_after56_interval_five_fields.py'
+      - 'tools/stage55_after4_interval_witness.py'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-fifty-sixth-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-fifty-sixth-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  fifty-sixth-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER55 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-fifty-fifth-day-differential
+          run-id: 44909701790
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER55
+        run: |
+          echo '7e9c8d5c4ae7524847b3b3882cda333b39c1f05471f3c7389e46c77273b0acb3  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json' | sha256sum -c -
+      - name: Preflight AFTER56 independent witness wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after56_interval_five_fields.py
+          grep -Fqx 'PIN = "7e9c8d5c4ae7524847b3b3882cda333b39c1f05471f3c7389e46c77273b0acb3"' tools/stage55_after56_interval_five_fields.py
+          python3 -m py_compile tools/stage55_after56_interval_five_fields.py
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json' tools/run_stage55_year5000_fifty_sixth_native.m
+          grep -Fq 'STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_56.json' tools/run_stage55_year5000_fifty_sixth_native.m
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native fifty-sixth-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_fifty_sixth_native
+      - name: Python independent child intervals and strict five-field diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after56_interval_five_fields.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_56.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            | tee logs/STAGE55_FIFTY_SIXTH_PYTHON.log
+          grep '^STAGE55_FIFTY_SIXTH_ROW ' logs/STAGE55_FIFTY_SIXTH_PYTHON.log > logs/STAGE55_FIFTY_SIXTH_PYTHON_ROW.txt
+          grep '^STAGE55_FIFTY_SIXTH_ROW ' logs/STAGE55_FIFTY_SIXTH_NATIVE.log > logs/STAGE55_FIFTY_SIXTH_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_FIFTY_SIXTH_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_FIFTY_SIXTH_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_FIFTY_SIXTH_PYTHON_ROW.txt logs/STAGE55_FIFTY_SIXTH_NATIVE_ROW.txt
+          expected="STAGE55_FIFTY_SIXTH_ROW POSITION=56 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=56 MONTH_INDEX=24 MONTH_DAY=4"
+          grep -Fqx "$expected" logs/STAGE55_FIFTY_SIXTH_NATIVE_ROW.txt
+          grep -Fqx "$expected" logs/STAGE55_FIFTY_SIXTH_PYTHON_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_56.json | tee logs/STAGE55_FIFTY_SIXTH_DIGEST.txt
+          echo 'STAGE55_FIFTY_SIXTH_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-fifty-sixth-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_55.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_56.json
+            logs/STAGE55_FIFTY_SIXTH_NATIVE.log
+            logs/STAGE55_FIFTY_SIXTH_PYTHON.log
+            logs/STAGE55_FIFTY_SIXTH_PYTHON_ROW.txt
+            logs/STAGE55_FIFTY_SIXTH_NATIVE_ROW.txt
+            logs/STAGE55_FIFTY_SIXTH_DIGEST.txt
+          if-no-files-found: warn
+          retention-days: 30
