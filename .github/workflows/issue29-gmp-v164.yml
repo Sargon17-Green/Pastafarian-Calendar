@@ -1,0 +1,93 @@
+name: Issue29 v164 Ada GMP exact full-family QA (synthetic only, NO F)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-full-weave-v164
+    paths:
+      - .github/workflows/issue29-gmp-v164.yml
+      - 'soak/candidates/ada_full_weave_gmp_v164/**'
+permissions:
+  contents: read
+jobs:
+  gmp-exact-full-family:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Enforce STOP and isolate all calendar code from QA binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text())
+          assert d["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert d["main_changes_permitted"] is False
+          assert d["successful_original_source_full_years"]==0
+          s=Path("soak/candidates/ada_full_weave_gmp_v164")
+          for p in s.glob("*.ad?"):
+              content=p.read_text()
+              assert "with Normative_Oracle;" not in content
+              assert "Normative_Oracle.Calendar_Date" not in content
+          print("V164_NO_CALENDAR_CODE_DEPENDENCIES")
+          PY
+          git rev-parse HEAD > evidence/tested-commit.txt
+      - name: Install GNAT/GPRBuild/GNATCOLL GMP and record package versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y             gnat-13 gprbuild libgnatcoll-gmp-dev             > evidence/apt-install.log 2>&1
+          gnatmake --version > evidence/gnat-version.txt
+          gprbuild --version > evidence/gpr-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/installed-gmp-versions.txt
+      - name: Compile GMP all-legal-family engine and two independent test programs
+        shell: bash
+        run: |
+          set -euo pipefail
+          gprbuild -p -P soak/candidates/ada_full_weave_gmp_v164/issue29_gmp_v164.gpr             -j2 > evidence/build.stdout 2> evidence/build.stderr
+          sha256sum soak/candidates/ada_full_weave_gmp_v164/bin/*             > evidence/binaries.sha256
+      - name: Exhaustively check every rank of seven small families
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 262144
+            timeout --signal=KILL 45s               ./soak/candidates/ada_full_weave_gmp_v164/bin/test_issue29_gmp_v164
+          ) > evidence/small.stdout 2> evidence/small.stderr
+          grep -F V164_ALL_SEVEN_GMP_EXHAUSTIVE_CASES_PASS_NO_CALENDAR_F evidence/small.stdout
+          grep -c '^V164_GMP_SMALL_EXHAUSTIVE_PASS_' evidence/small.stdout | grep -Fx 7
+      - name: Bounded synthetic 45-month 4244-day count and rank-one unranking
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            ulimit -v 524288
+            /usr/bin/time -v timeout --signal=KILL 90s               ./soak/candidates/ada_full_weave_gmp_v164/bin/benchmark_issue29_gmp_v164
+          ) > evidence/large.stdout 2> evidence/large.stderr
+          grep -F V164_GMP_45_MONTH_4244_DAY_SYNTHETIC_RANK1_PASS_NO_F evidence/large.stdout
+          echo "QA_SYNTHETIC_ONLY_NO_FCT_CALLS; NO_SOAK_YEARS" > evidence/verdict.txt
+      - name: Hash every saved diagnostic member even if a test failed
+        if: always()
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence")
+          h={x.name:{"bytes":x.stat().st_size,
+                     "sha256":hashlib.sha256(x.read_bytes()).hexdigest()}
+             for x in sorted(p.iterdir()) if x.is_file()}
+          (p/"members.sha256.json").write_text(json.dumps(h,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Archive QA-only GMP logs and bounded resource receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v164-gmp-exact-synthetic-only-no-F
+          path: evidence/
+          retention-days: 30
