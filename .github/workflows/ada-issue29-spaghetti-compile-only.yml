@@ -1,0 +1,110 @@
+name: Ada Telugu Issue29 spaghetti original-branch GNAT/GMP build only (NO F)
+on:
+  push:
+    branches:
+      - 'Ada+తెలుగు'
+    paths:
+      - '.github/workflows/ada-issue29-spaghetti-compile-only.yml'
+      - 'src/normative_oracle.adb'
+      - 'src/canonical_full_weave_gmp_v164.*'
+      - 'src/canonical_wide_rank_gmp_v164.*'
+      - 'pastafari_calendar.gpr'
+      - 'pastafari_calendar_stage41.gpr'
+      - 'run_stage41_remote_seventeen.sh'
+permissions:
+  contents: read
+jobs:
+  immutable-source-scope-and-no-F-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify historical Ada source untouched outside exactly one month weave replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          from pathlib import Path
+          import hashlib,subprocess,json
+          old=subprocess.check_output(["git","show","a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72:src/normative_oracle.adb"])
+          got=subprocess.check_output(["git","hash-object","--stdin"],input=old).decode().strip()
+          assert got=="923733d4f8face03586aee304640bf7540c28b4c", got
+          new=Path("src/normative_oracle.adb").read_bytes()
+          original=old.decode("utf-8")
+          patched=new.decode("utf-8")
+          ctx="with Month_Weaving;\n"
+          added=("with Canonical_Full_Weave_GMP_V164;\n"
+                 "with Canonical_Wide_Rank_GMP_V164;\n"
+                 "with GNATCOLL.GMP.Integers;\n")
+          patched=patched.replace(ctx+added,ctx,1)
+          start="   -- Canonical two-rail family: open every month in order, rank an exact\n"
+          end="   function Calendar_Date\n"
+          bad_begin=original.index(start)
+          bad_end=original.index(end)
+          new_begin=patched.index("   --  Issue29 PATCH (minimal spaghetti)")
+          new_end=patched.index(end)
+          reverted=patched[:new_begin]+original[bad_begin:bad_end]+patched[new_end:]
+          assert reverted==original, "unrelated production source diff"
+          for name,blob in {
+            "canonical_full_weave_gmp_v164.ads":"0b68edf7eddbc33869358bcfcc21e32465fc591e",
+            "canonical_full_weave_gmp_v164.adb":"845bd8905943a54e63d6aba0334404a5051fe666",
+            "canonical_wide_rank_gmp_v164.ads":"14b94e81534e98cfdb07be3824076bd7082385ea",
+            "canonical_wide_rank_gmp_v164.adb":"52b8814c2ab1924cdebafe893a65d97cd3ccfa61",
+          }.items():
+            b=Path("src",name).read_bytes()
+            h=hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
+            assert h==blob,(name,h)
+          print("ISSUE29_ADA_ORIGINAL_SCOPE_EXACTLY_ONE_FUNCTION_AND_4_VERIFIED_HELPERS")
+          PY
+          git rev-parse HEAD > evidence/tested-head.txt
+          sh -n run_stage41_remote_seventeen.sh
+      - name: Install GNAT + GPRBuild + GNATCOLL GMP
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gmp-versions.txt
+          gprbuild --version > evidence/gpr-version.txt
+      - name: Compile original branch Stage01 main binary without calling it
+        shell: bash
+        run: |
+          set -euo pipefail
+          gprbuild -p -j2 -P pastafari_calendar.gpr > evidence/stage01-build.stdout 2> evidence/stage01-build.stderr
+          test -x bin/stage01_tests
+          echo "ISSUE29_STAGE01_PATCHED_SOURCE_BUILD_ONLY_PASS_NO_F" > evidence/stage01-build-verdict.txt
+      - name: Compile original branch Stage41 Native 131-observation code without calling it
+        shell: bash
+        run: |
+          set -euo pipefail
+          gprbuild -p -j2 -P pastafari_calendar_stage41.gpr > evidence/stage41-build.stdout 2> evidence/stage41-build.stderr
+          test -x bin/stage41_remote_seventeen_observer
+          sha256sum bin/stage01_tests bin/stage41_remote_seventeen_observer > evidence/binaries.sha256
+          ldd bin/stage41_remote_seventeen_observer > evidence/stage41-ldd.txt
+          nm bin/stage41_remote_seventeen_observer | grep -E '(normative_oracle__calendar_date|canonical_full_weave_gmp_v164__unrank|canonical_wide_rank_gmp_v164__choose_rank)' > evidence/patch-symbols.txt
+          test -s evidence/patch-symbols.txt
+          echo "ISSUE29_ADA_ORIGINAL_STAGE41_PATCHED_NATIVE_LINK_PASS_NO_F" > evidence/stage41-build-verdict.txt
+          echo "ALL_CALENDAR_F_CALLS=0; SOAK_YEARS=0; MAIN_UNCHANGED_BY_WORKFLOW=true" >> evidence/stage41-build-verdict.txt
+      - name: Hash all evidence members even on failure
+        if: always()
+        shell: bash
+        run: |
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("evidence")
+          manifest={f.name:{"bytes":f.stat().st_size,"sha256":hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.iterdir()) if f.is_file()}
+          (p/"members.sha256.json").write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Archive original branch Ada patch compile/link receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-ada-original-spaghetti-gmp-stage01-stage41-compile-only-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
