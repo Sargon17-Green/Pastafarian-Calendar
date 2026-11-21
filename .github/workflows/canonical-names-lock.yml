@@ -1618,6 +1618,25 @@ jobs:
           PY
           git -C .external-canonical-source status --porcelain --untracked-files=all > stage56-external-evidence/canonical-post-gates-status.txt
           test ! -s stage56-external-evidence/canonical-post-gates-status.txt
+      - name: Verify independent Scroll gate comparator mutations
+        run: node --test tests/stage56_independent_gates.test.mjs
+      - name: Independently reproduce all 27 gate positions (QA only)
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s node tools/stage56_verify_independent_gates.mjs \
+            --canonical-repo .external-canonical-source \
+            --input stage56-external-evidence/external-gates.json \
+            --report stage56-external-evidence/scroll-gates-report.json \
+            > stage56-external-evidence/scroll-gates.stdout 2> stage56-external-evidence/scroll-gates.stderr
+          rc=$?
+          printf '%s\n' "$rc" > stage56-external-evidence/scroll-gates.exit
+          cat stage56-external-evidence/scroll-gates.stdout
+          cat stage56-external-evidence/scroll-gates.stderr >&2
+          test "$rc" -eq 0
+          test ! -s stage56-external-evidence/scroll-gates.stderr
+          test -s stage56-external-evidence/scroll-gates-report.json
+          test -z "$(git -C .external-canonical-source status --porcelain --untracked-files=all)"
       - name: Export source-bound Python semantic samples
         shell: bash
         run: |
