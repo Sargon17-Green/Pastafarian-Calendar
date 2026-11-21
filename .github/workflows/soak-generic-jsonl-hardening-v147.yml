@@ -1,0 +1,95 @@
+name: Soak v147 generic multi-engine JSONL fail-closed validator, original Fct STOP
+on:
+  push:
+    branches:
+      - qa/soak-generic-jsonl-hardening-v147
+    paths:
+      - 'soak/runner/year_validator.py'
+      - 'soak/process_tests/test_soak_generic_jsonl_hardening_v147.py'
+      - 'soak/tests/test_year_validator.py'
+      - 'soak/tests/test_two_lane_scheduler.py'
+      - 'soak/runner/two_lane_scheduler.py'
+      - '.github/workflows/soak-generic-jsonl-hardening-v147.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  synthetic-generic-jsonl-regression-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Confirm original-mismatch halt and forbid converter execution
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' | tee evidence/v147-preflight.log
+          import ast,json,urllib.request
+          from pathlib import Path
+          m=json.loads(Path("soak/control/confirmed_first_original_mismatch_dispatch_halt_v108.json").read_text(encoding="utf-8"))
+          assert m["decision"]=="STOP_NEW_NATIVE_SOAK_DISPATCH"
+          assert m["incident_issue"]==29 and m["main_changes_permitted"] is False
+          assert m["successful_ten_thousand_soak_years"]==0
+          assert m["successful_original_source_full_years"]==0
+          for source in ("soak/runner/year_validator.py",
+                         "soak/runner/two_lane_scheduler.py",
+                         "soak/process_tests/test_soak_generic_jsonl_hardening_v147.py",
+                         "soak/tests/test_year_validator.py",
+                         "soak/tests/test_two_lane_scheduler.py"):
+              tree=ast.parse(Path(source).read_text(encoding="utf-8"))
+              for n in ast.walk(tree):
+                  if isinstance(n,ast.Import):
+                      assert all(x.name.split(".")[0] not in
+                          ("subprocess","ctypes","multiprocessing","pastafari_calendar")
+                          for x in n.names),source
+                  elif isinstance(n,ast.ImportFrom):
+                      assert (n.module or "").split(".")[0] not in
+                          ("subprocess","ctypes","multiprocessing","pastafari_calendar"),source
+          import os
+          url="https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/branches/main"
+          req=urllib.request.Request(url,headers={
+              "Authorization":"Bearer "+os.environ["GITHUB_TOKEN"],
+              "User-Agent":"soak-v147-no-dispatch-main-check",
+              "Accept":"application/vnd.github+json"})
+          with urllib.request.urlopen(req,timeout=20) as f:
+              live=json.load(f)
+          assert live["commit"]["sha"]=="56bc4173aae4975ded019ef5ab5a36249f1424df"
+          print("V147_ORIGINAL_FCT_DISPATCH_STOP_TRUE")
+          print("V147_MAIN_FROZEN_SOURCE_SHA_VERIFIED")
+          print("V147_PYTHON_ONLY_NO_NATIVE_CONVERTER_IMPORTS")
+          PY
+      - name: Existing whole-year JSONL parser regression
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests -p 'test_year_validator.py' -v 2>&1 | tee evidence/v147-existing-year-validator-tests.log
+          grep -Eq '^Ran 10 tests ' evidence/v147-existing-year-validator-tests.log
+          grep -Fx 'OK' evidence/v147-existing-year-validator-tests.log
+      - name: Existing two-lane no-kill scheduler regression
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/tests -p 'test_two_lane_scheduler.py' -v 2>&1 | tee evidence/v147-existing-scheduler-tests.log
+          grep -Eq '^Ran 12 tests ' evidence/v147-existing-scheduler-tests.log
+          grep -Fx 'OK' evidence/v147-existing-scheduler-tests.log
+      - name: Adversarial cross-engine raw JSONL ambiguity and mismatch tests
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s soak/process_tests -p 'test_soak_generic_jsonl_hardening_v147.py' -v 2>&1 | tee evidence/v147-adversarial-24-tests.log
+          grep -Eq '^Ran 24 tests ' evidence/v147-adversarial-24-tests.log
+          grep -Fx 'OK' evidence/v147-adversarial-24-tests.log
+          printf 'V147_ADVERSARIAL_JSONL_24_TESTS_PASS\nV147_EXISTING_GENERIC_REGRESSIONS_22_TESTS_PASS\nV147_ORIGINAL_CALENDAR_FCT_CALLS=0\nV147_ORIGINAL_FULL_YEARS_CERTIFIED=0\nV147_SCIENTIFIC_10000_YEAR_SOAK_PASS=FALSE\n' | tee evidence/v147-verdict.log
+      - name: Archive synthetic-only logs (never engine binaries)
+        uses: actions/upload-artifact@v4
+        with:
+          name: soak-v147-generic-jsonl-hardening-46-python-tests-logs-only
+          path: |
+            evidence/v147-preflight.log
+            evidence/v147-existing-year-validator-tests.log
+            evidence/v147-existing-scheduler-tests.log
+            evidence/v147-adversarial-24-tests.log
+            evidence/v147-verdict.log
+          if-no-files-found: error
+          retention-days: 30
