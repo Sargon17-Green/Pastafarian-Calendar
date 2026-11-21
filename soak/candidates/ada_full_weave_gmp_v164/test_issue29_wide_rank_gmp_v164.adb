@@ -9,6 +9,7 @@ procedure Test_Issue29_Wide_Rank_GMP_V164 is
    package Std renames Ada.Numerics.Big_Numbers.Big_Integers;
    package G renames GNATCOLL.GMP.Integers;
    use G;
+   use Std;
 
    M : constant Std.Big_Integer :=
      (Std.To_Big_Integer (2) ** 127) - Std.To_Big_Integer (1);
