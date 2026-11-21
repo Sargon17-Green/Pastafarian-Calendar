@@ -72,8 +72,11 @@ begin
          if P /= Word'First then
             Ada.Text_IO.Put (",");
          end if;
-         Ada.Text_IO.Put
-           (Natural'Image (Word (P)) (2 .. Natural'Image (Word (P))'Last));
+         declare
+            Number_Text : constant String := Natural'Image (Word (P));
+         begin
+            Ada.Text_IO.Put (Number_Text (Number_Text'First + 1 .. Number_Text'Last));
+         end;
       end loop;
       Ada.Text_IO.New_Line;
       Ada.Text_IO.Put_Line
