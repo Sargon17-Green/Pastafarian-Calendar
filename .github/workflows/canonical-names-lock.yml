@@ -1433,3 +1433,98 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  external-reference-differential:
+    if: github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - name: Checkout PHP feature branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout independent pinned canonical source
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/pastafari-calendar
+          ref: cc2cf0b422757a5e7c33218ce30cffa8f99c6786
+          path: .external-canonical-source
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and capture provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage56-external-evidence
+          git -C .external-canonical-source rev-parse HEAD | tee stage56-external-evidence/canonical-head.txt
+          test "$(git -C .external-canonical-source rev-parse HEAD)" = 'cc2cf0b422757a5e7c33218ce30cffa8f99c6786'
+          test -z "$(git -C .external-canonical-source status --porcelain --untracked-files=all)"
+          for file in implementations/python/pastafari_calendar/core.py browser/pastafari-calendar-fast.js verification/reference-oracle/reference.mjs; do
+            digest="$(git -C .external-canonical-source show "HEAD:$file" | sha256sum | cut -d' ' -f1)"
+            printf '%s  %s\n' "$digest" "$file" >> stage56-external-evidence/canonical-source.sha256
+          done
+          git rev-parse HEAD > stage56-external-evidence/php-branch-head.txt
+      - name: Export real external reference years (not PHP input)
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 3600s python3 tools/stage56_export_external_canonical_reference.py \
+            --canonical-repo .external-canonical-source \
+            --source-commit cc2cf0b422757a5e7c33218ce30cffa8f99c6786 \
+            --calculation-jdn=-13334246 \
+            --output stage56-external-evidence/reference.json \
+            > stage56-external-evidence/export.stdout 2> stage56-external-evidence/export.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/export.exit
+          cat stage56-external-evidence/export.stdout
+          cat stage56-external-evidence/export.stderr >&2
+          exit "$rc"
+      - name: Export source-bound Python semantic samples
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s python3 tools/stage56_external_semantic_samples.py \
+            --canonical-repo .external-canonical-source \
+            --input stage56-external-evidence/reference.json \
+            --output stage56-external-evidence/python-tuples.json \
+            > stage56-external-evidence/samples.stdout 2> stage56-external-evidence/samples.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/samples.exit
+          cat stage56-external-evidence/samples.stdout
+          cat stage56-external-evidence/samples.stderr >&2
+          exit "$rc"
+      - name: Compare full month weaving and JS/Python/Scroll semantic tuples
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s node tools/stage56_verify_external_reference.mjs \
+            --canonical-repo .external-canonical-source \
+            --calculation-jdn=-13334246 \
+            --input stage56-external-evidence/reference.json \
+            --python-samples stage56-external-evidence/python-tuples.json \
+            --report stage56-external-evidence/differential-report.json \
+            > stage56-external-evidence/differential.stdout 2> stage56-external-evidence/differential.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/differential.exit
+          cat stage56-external-evidence/differential.stdout
+          cat stage56-external-evidence/differential.stderr >&2
+          exit "$rc"
+      - name: Emit evidence hashes
+        if: always()
+        shell: bash
+        run: |
+          set -eu
+          find stage56-external-evidence -maxdepth 1 -type f -print0 | sort -z | xargs -0 -r sha256sum > stage56-evidence-files.sha256
+          cat stage56-evidence-files.sha256
+      - name: Upload evidence even if differential fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-external-qa-${{ github.sha }}
+          path: |
+            stage56-external-evidence/
+            stage56-evidence-files.sha256
+          if-no-files-found: error
+          retention-days: 30
