@@ -2,10 +2,11 @@
 """Synthetic fail-closed tests only; real JVM oracle is a separate CI step."""
 from __future__ import annotations
 import unittest
+from independent_year_geometry_oracle import Year
 
 from audit_production_seven_field_unseeded import (
     FOUNDATION, TARGETS, HALF_WIDTH, QUESTION_COUNT, SevenFieldAuditError,
-    canonical_number, compare_rows, expected_indices, parse_production,
+    boundary_targets, canonical_number, compare_rows, expected_indices, parse_production,
     validate_ledger_trace,
 )
 
@@ -89,6 +90,35 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
                 SevenFieldAuditError, "E_UNSEEDED_SIGNED_TRACE"
             ):
                 validate_ledger_trace(rows)
+
+
+    def test_boundary_target_oracle(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        self.assertEqual(boundary_targets(year), (
+            FOUNDATION - 300, FOUNDATION - 299,
+            FOUNDATION + 400, FOUNDATION + 401))
+
+    def test_boundary_target_fails_closed(self):
+        for year in (
+            Year(5001, -10, 10, FOUNDATION - 300, FOUNDATION + 400),
+            Year(5000, -10, 10, FOUNDATION + 1, FOUNDATION + 400),
+            Year(5000, -10, 10, FOUNDATION - 100, FOUNDATION + 100),
+        ):
+            with self.subTest(year=year), self.assertRaisesRegex(
+                SevenFieldAuditError, "E_INDEPENDENT_YEAR_BOUNDARY"
+            ):
+                boundary_targets(year)
+
+    def test_nine_real_row_protocol_with_boundary_witnesses(self):
+        year = Year(5000, -10, 10, FOUNDATION - 300, FOUNDATION + 400)
+        targets = TARGETS + boundary_targets(year)
+        payload = "".join(self.record(target) for target in targets)
+        rows = parse_production(payload, targets)
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(len(compare_rows(
+            rows, [(5000, 7, 24, 12, 3)] * 9, targets)), 9)
+        with self.assertRaisesRegex(SevenFieldAuditError, "E_SEVEN_INPUT_ECHO"):
+            parse_production(payload, targets[:-2] + (targets[-1], targets[-2]))
 
     def test_boolean_oracle_field_rejected(self):
         rows = parse_production(self.valid())

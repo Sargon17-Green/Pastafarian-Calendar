@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Five real seven-column FOUNDATION-neighborhood dates vs unseeded oracle.
+"""Nine real seven-column dates: FOUNDATION neighborhood and year-5000 edges.
 
 Project PC-BRANCH-KOTLIN-CYMRAEG, QA only, NOT CERTIFIED.
-Production: actual JDK21/Kotlin1.9 bridge, one JVM and five independent
-convert() requests. Oracle: branch-local, separately authored Python sauce,
+Production: actual JDK21/Kotlin1.9 bridge, one JVM and nine independently checked
+convert() requests, including both sides of year-5000 boundaries. Oracle: branch-local, separately authored Python sauce,
 year geometry, composition and combinatorial month weaving; no pinned Python
 reference, checkpoint, production output seed or cross-branch fixture.
 The independent techniques are not proof of GLOBAL algorithmic independence.
@@ -20,8 +20,8 @@ import subprocess
 import sys
 from time import monotonic
 
-from independent_five_field_date import date_with_independent_sauce, independent_signed_gap
-from independent_year_geometry_oracle import FOUNDATION, GateLedger
+from independent_five_field_date import date_with_independent_sauce, independent_signed_gap, independent_rank
+from independent_year_geometry_oracle import FOUNDATION, GateLedger, IndependentYearGeometry, Year
 import independent_date_combinatorics
 import independent_month_weaving_oracle
 import independent_sauce_oracle
@@ -34,7 +34,7 @@ TARGETS = tuple(FOUNDATION + offset for offset in (-2, -1, 0, 1, 2))
 HALF_WIDTH = 280
 QUESTION_COUNT = HALF_WIDTH * 2
 GATE_LIMIT = 8192
-PASS = "PASS_BOUNDED_UNSEEDED_INDEPENDENT_FIVE_DATE_FIELDS_NOT_CERTIFIED"
+PASS = "PASS_BOUNDED_UNSEEDED_YEAR_EDGE_NINE_DATES_NOT_CERTIFIED"
 DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z", re.ASCII)
 MODULES = (independent_date_combinatorics, independent_month_weaving_oracle,
            independent_sauce_oracle, independent_year_geometry_oracle,
@@ -85,6 +85,18 @@ def validate_ledger_trace(pairs: list[tuple[int, int]], count: int = QUESTION_CO
         raise SevenFieldAuditError("E_UNSEEDED_SIGNED_TRACE")
 
 
+def boundary_targets(year: Year) -> tuple[int, int, int, int]:
+    """Last/first day across both independently located year-5000 edges."""
+    if (not isinstance(year, Year) or year.number != 5000
+            or not year.open_day < FOUNDATION <= year.close_day
+            or year.close_day - year.open_day < 252):
+        raise SevenFieldAuditError("E_INDEPENDENT_YEAR_BOUNDARY")
+    result = (year.open_day, year.open_day + 1, year.close_day, year.close_day + 1)
+    if len(set(result)) != 4:
+        raise SevenFieldAuditError("E_YEAR_BOUNDARY_DUPLICATE")
+    return result
+
+
 def verified_source(root: Path, jar: Path) -> dict:
     root = root.resolve(strict=True)
     sha = subprocess.check_output(
@@ -114,11 +126,12 @@ def verified_source(root: Path, jar: Path) -> dict:
             "production_navigator_sha256": hashlib.sha256(source.read_bytes()).hexdigest()}
 
 
-def compare_rows(production: list[list[int]], oracle: list[tuple[int, ...]]) -> list[dict]:
-    if len(production) != len(TARGETS) or len(oracle) != len(TARGETS):
+def compare_rows(production: list[list[int]], oracle: list[tuple[int, ...]],
+                 targets: tuple[int, ...] = TARGETS) -> list[dict]:
+    if len(production) != len(targets) or len(oracle) != len(targets):
         raise SevenFieldAuditError("E_COMPARE_CASE_COUNT")
     out = []
-    for i, target in enumerate(TARGETS):
+    for i, target in enumerate(targets):
         reference = oracle[i]
         if (type(reference) is not tuple or len(reference) != 5
                 or any(type(x) is not int for x in reference)):
@@ -145,20 +158,6 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     deadline = begun + timeout_seconds
     root = Path(__file__).resolve().parent.parent
     provenance = verified_source(root, jar)
-    cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",
-           "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge"]
-    input_text = "".join(f"{FOUNDATION}\t{target}\n" for target in TARGETS)
-    remaining = max(1, int(deadline - monotonic()))
-    try:
-        proc = subprocess.run(cmd, input=input_text, capture_output=True,
-                              text=True, timeout=min(remaining, 480), check=False)
-    except subprocess.TimeoutExpired as exc:
-        raise SevenFieldAuditError("E_NATIVE_TIMEOUT") from exc
-    atomic_text(transcript, proc.stdout)
-    if proc.returncode != 0:
-        raise SevenFieldAuditError("E_NATIVE_EXIT_" + str(proc.returncode) +
-                                   "_STDERR_" + proc.stderr[-300:])
-    rows = parse_production(proc.stdout)
     trace: list[tuple[int, int]] = []
 
     def independent_gap(index: int) -> int:
@@ -172,18 +171,43 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
                         max_questions=QUESTION_COUNT, segment_limit=HALF_WIDTH,
                         deadline=deadline)
     validate_ledger_trace(trace)
+    choose_year = independent_rank(FOUNDATION, deadline=deadline)
+    year5000 = IndependentYearGeometry(ledger).year5000(
+        FOUNDATION, lambda day, seal, count: choose_year(day, 1, seal, count))
+    edges = boundary_targets(year5000)
+    targets = TARGETS + edges
+    # Reuse five accepted neighborhood dates as a regression baseline.
+    # Four additional questions cross the independently selected year edges.
+    if len(targets) != 9:
+        raise SevenFieldAuditError("E_NINE_DATE_SCOPE")
+    cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",
+           "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge"]
+    input_text = "".join(f"{FOUNDATION}\t{target}\n" for target in targets)
+    remaining = max(1, int(deadline - monotonic()))
+    try:
+        proc = subprocess.run(cmd, input=input_text, capture_output=True,
+                              text=True, timeout=min(remaining, 480), check=False)
+    except subprocess.TimeoutExpired as exc:
+        raise SevenFieldAuditError("E_NATIVE_TIMEOUT") from exc
+    atomic_text(transcript, proc.stdout)
+    if proc.returncode != 0:
+        raise SevenFieldAuditError("E_NATIVE_EXIT_" + str(proc.returncode) +
+                                   "_STDERR_" + proc.stderr[-300:])
+    rows = parse_production(proc.stdout, targets)
     trace_raw = "".join(f"{index}\t{width}\n" for index, width in trace)
     trace_digest = atomic_text(gaps_file, trace_raw)
     references = []
-    for target in TARGETS:
+    for target in targets:
         if monotonic() >= deadline:
             raise SevenFieldAuditError("E_INDEPENDENT_TIME_BUDGET")
         references.append(date_with_independent_sauce(ledger, target, deadline=deadline))
-    matches = compare_rows(rows, references)
+    matches = compare_rows(rows, references, targets)
     return {
         "status": PASS, "project_id": PROJECT_ID, "branch": BRANCH,
         "source": provenance, "calculation_day": FOUNDATION,
-        "target_offsets": [-2, -1, 0, 1, 2],
+        "target_offsets": [t - FOUNDATION for t in targets],
+        "year5000_edges": list(edges),
+        "year5000_open_close": [year5000.open_day, year5000.close_day],
         "production_calls": len(rows), "production_columns": 7,
         "independent_five_field_comparisons": len(matches) * 5,
         "matches": matches, "mismatches": 0,
