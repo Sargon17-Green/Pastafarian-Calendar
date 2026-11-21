@@ -467,7 +467,7 @@ jobs:
                   obj=json.load(response)
               assert obj["type"]=="file" and obj["encoding"]=="base64"
               assert obj["sha"]==spec["git_blob_sha1"]
-              data=base64.b64decode(obj["content"],validate=True)
+              data=base64.b64decode("".join(obj["content"].split()),validate=True)
               assert blob_sha(data)==spec["git_blob_sha1"]
               dest=root/"Ada-Telugu"/spec["commit"]/spec["path"]
               dest.parent.mkdir(parents=True,exist_ok=True)
