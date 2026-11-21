@@ -1,0 +1,66 @@
+name: Logo Stage 2 Discovery 21 near-M QA Native
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-d21-choose-short-near'
+permissions:
+  contents: read
+jobs:
+  d21-qa-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA SHA
+        uses: actions/checkout@v4
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+          echo "HEADLESS_LOGO_SOURCE_SHA=$actual"
+      - name: Verify source locks and run independent D21 differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
+          test "$(git hash-object src/stage02_choose_short_near.logo)" = 883ceb75007bb799330dd9c14e7e854e21bfdcf1
+          test "$(git hash-object test/stage02_discovery21_tests.logo)" = f62f8fd583a9e25fcd536580bdee275df102e11b
+          log="$RUNNER_TEMP/stage02-discovery21-qa.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 600s stdbuf -oL -eL "$LOGO_BIN" test/stage02_discovery21_tests.logo >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::D21 QA Native failed or timed out, exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'STAGE_2_DISCOVERY_21_CASES_PASIS 36' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_21_CHECKS_PASIS 110' "$log"
+          grep -Fxq 'STAGE_2_DISCOVERY_21_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::D21 QA Native reported a failure"
+            exit 1
+          fi
+          echo 'NATIVE_STAGE_2_DISCOVERY_21_QA=PASS'
+      - name: Preserve source-locked QA log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d21-qa-native-log
+          path: ${{ runner.temp }}/stage02-discovery21-qa.log
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,16 @@
+; D21 QA: exact near-M subset of Appendix-A CHOOSE.SHORT, no unrestricted N.
+to monster.stage02.choose.short.near :stream :N
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if bi.gt :N nr.M [output []]
+  if bi.lt :N (bi.sub nr.M (bi.small 31)) [output []]
+  localmake "firstv monster.stage02.answer.at :stream 0
+  if equalp :firstv [] [output []]
+  output monster.stage02.choose.short.near.work :stream :N 0
+end
+
+to monster.stage02.choose.short.near.work :stream :N :k
+  if :k > 31 [output []]
+  localmake "candidate monster.stage02.answer.at :stream :k
+  if bi.le :candidate :N [output :candidate]
+  output monster.stage02.choose.short.near.work :stream :N (:k + 1)
+end

@@ -1,0 +1,129 @@
+; Stage2 D21 QA: oracle iterates exact-BI and never indexes with D20.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_answer_at.logo
+load "src/stage02_choose_short_near.logo
+make "D21.CASES 0
+make "D21.CHECKS 0
+make "D21.FAIL "false
+
+to d21.require :condition :tag
+  make "D21.CHECKS (:D21.CHECKS + 1)
+  if not :condition [
+    make "D21.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_21_TESTO_FALIIS:] :tag
+  ]
+end
+
+to d21.safe.equal :actual :expected
+  if not (monster.stage02.bi.canonical :actual) [output "false]
+  output bi.eq :actual :expected
+end
+
+to d21.safe.range :actual :N
+  if not (monster.stage02.bi.canonical :actual) [output "false]
+  output and (bi.ge :actual (bi.small 1)) (bi.le :actual :N)
+end
+
+; Exact BI independent successor, with explicit boundary wrap.
+to d21.advance :current :direction
+  if :direction = 1 [
+    if bi.eq :current nr.M [output bi.small 1]
+    output bi.add :current (bi.small 1)
+  ]
+  if bi.eq :current (bi.small 1) [output nr.M]
+  output bi.sub :current (bi.small 1)
+end
+
+to d21.oracle :current :direction :N :k
+  if bi.le :current :N [output (list :current :k)]
+  if :k = 31 [output []]
+  output d21.oracle (d21.advance :current :direction) :direction :N (:k + 1)
+end
+
+to d21.valid :stream :N :tag
+  localmake "independent d21.oracle (first :stream) (last :stream) :N 0
+  if emptyp :independent [
+    make "D21.FAIL "true
+    print sentence [STAGE_2_DISCOVERY_21_ORACLE_FALIIS:] :tag
+    stop
+  ]
+  localmake "expected first :independent
+  localmake "actual monster.stage02.choose.short.near :stream :N
+  make "D21.CASES (:D21.CASES + 1)
+  d21.require (monster.stage02.bi.canonical :actual) (list :tag [canonical_shape])
+  d21.require (d21.safe.equal :actual :expected) (list :tag [independent_walk])
+  d21.require (d21.safe.range :actual :N) (list :tag [range])
+  d21.require (equalp :actual (monster.stage02.choose.short.near :stream :N)) (list :tag [determinism])
+end
+
+to d21.group :N :starts :direction :tag
+  if emptyp :starts [stop]
+  d21.valid (list (first :starts) :direction) :N (list :tag :direction)
+  d21.group :N butfirst :starts :direction :tag
+end
+
+to d21.matrix
+  localmake "max nr.M
+  localmake "oneBelow bi.sub :max (bi.small 1)
+  localmake "low bi.sub :max (bi.small 31)
+  localmake "oneAboveLow bi.add :low (bi.small 1)
+  localmake "maxStarts (list (bi.small 1) (bi.small 2) :oneBelow :max)
+  localmake "belowStarts (list (bi.small 1) (bi.sub :max (bi.small 2)) :oneBelow :max)
+  localmake "lowStarts (list (bi.small 1) :low :oneAboveLow :max)
+  d21.group :max :maxStarts 1 [N_max_plus]
+  d21.group :max :maxStarts -1 [N_max_minus]
+  d21.group :oneBelow :belowStarts 1 [N_M_minus_1_plus]
+  d21.group :oneBelow :belowStarts -1 [N_M_minus_1_minus]
+  d21.group :low :lowStarts 1 [N_M_minus_31_plus]
+  d21.group :low :lowStarts -1 [N_M_minus_31_minus]
+end
+
+to d21.boundary.checks
+  localmake "low bi.sub nr.M (bi.small 31)
+  localmake "start bi.add :low (bi.small 1)
+  localmake "plusWalk d21.oracle :start 1 :low 0
+  localmake "minusWalk d21.oracle nr.M -1 :low 0
+  d21.require ((last :plusWalk) = 31) [positive_wrap_exactly_31_steps]
+  d21.require ((last :minusWalk) = 31) [negative_walk_exactly_31_steps]
+end
+
+to d21.invalid :stream :N :tag
+  make "D21.CASES (:D21.CASES + 1)
+  d21.require (equalp (monster.stage02.choose.short.near :stream :N) []) :tag
+end
+
+to d21.invalid.cases
+  d21.invalid "not_a_stream nr.M [stream_not_list]
+  d21.invalid (list (bi.small 1)) nr.M [stream_length_one]
+  d21.invalid (list (bi.small 1) 1 0) nr.M [stream_length_three]
+  d21.invalid (list bi.zero 1) nr.M [first_zero]
+  d21.invalid (list (bi.add nr.M (bi.small 1)) 1) nr.M [first_above_M]
+  d21.invalid (list (bi.small 1) 0) nr.M [step_zero]
+  d21.invalid (list (bi.small 1) 2) nr.M [step_two]
+  d21.invalid (list (bi.small 1) 0.5) nr.M [step_fraction]
+  d21.invalid (list (bi.small 1) 1) "invalid [N_non_BI]
+  d21.invalid (list (bi.small 1) 1) bi.zero [N_zero]
+  d21.invalid (list (bi.small 1) 1) (bi.add nr.M (bi.small 1)) [N_above_M]
+  d21.invalid (list (bi.small 1) 1) (bi.sub nr.M (bi.small 32)) [N_below_domain]
+end
+
+to d21.run
+  print [STAGE_2_DISCOVERY_21_STEP 24_synthetic_differential_cases]
+  d21.matrix
+  print [STAGE_2_DISCOVERY_21_STEP two_exact_boundaries]
+  d21.boundary.checks
+  print [STAGE_2_DISCOVERY_21_STEP twelve_rejections]
+  d21.invalid.cases
+  if :D21.FAIL [print [STAGE_2_DISCOVERY_21_FALIIS] stop]
+  if :D21.CASES <> 36 [print [STAGE_2_DISCOVERY_21_CASE_COUNT_FALIIS] stop]
+  if :D21.CHECKS <> 110 [print [STAGE_2_DISCOVERY_21_CHECK_COUNT_FALIIS] stop]
+  print sentence [STAGE_2_DISCOVERY_21_CASES_PASIS] :D21.CASES
+  print sentence [STAGE_2_DISCOVERY_21_CHECKS_PASIS] :D21.CHECKS
+  print [STAGE_2_DISCOVERY_21_PASIS]
+end
+
+d21.run
