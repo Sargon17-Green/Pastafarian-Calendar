@@ -1,0 +1,77 @@
+name: Rust Azerbaijani Reconstructed Day-tag RED Native
+
+on:
+  push:
+    branches:
+      - 'reconstruction/rust-az-stage03-daytag-red-20261121'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/rust-az-reconstructed-daytag-red.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconstructed-daytag-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 80
+      - name: Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Verify original Stage03 ancestor and exact code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 716e5a6f335b1a15464029b446edb468f3a8482c "$GITHUB_SHA"
+          grep -Fq 'pub mod discovery02_legacy_day_tag;' src/lib.rs
+          test -f src/discovery02_legacy_day_tag.rs
+          test -f tests/reconstruction_stage03_daytag_red.rs
+      - name: Run native Rust RED and prior stage regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nBRANCH=%s\nSHA=%s\nRECONSTRUCTION=YES\n' "$GITHUB_REF_NAME" "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s \
+            cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          if [ "$code" -ne 0 ]; then
+            cat evidence/stderr.txt >&2
+            exit "$code"
+          fi
+          grep -Fq 'RECONSTRUCTED_RUST_DAYTAG_RED=3 CONTROL=3 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
+          grep -Fq 'STAGE03_PATCH01_BOUNDARY_OK=8' evidence/stdout.txt
+          grep -Fq 'STAGE03_PATCH01_LEGACY_RED=3 CONTROL=1 UNEXPECTED=0' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 16 passed; 0 failed' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 3 passed; 0 failed' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 4 passed; 0 failed' evidence/stdout.txt
+          grep -Eq 'test result: ok\. 1 passed; 0 failed' evidence/stdout.txt
+          printf 'RECONSTRUCTION_NATIVE_RED=PASS\nRECONSTRUCTION_EXPECTED_RED=3 CONTROL=3\nORIGINAL_STAGE04=NOT_CLAIMED\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve exact SHA, toolchain, exit and output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-reconstructed-daytag-red
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
