@@ -1,0 +1,120 @@
+name: Issue29 v168 EXACT Ada development-source foundation one-shot (no Soak)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-native-foundation-v168
+    paths:
+      - '.github/workflows/issue29-v168-single-development-foundation.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v168-single-corrected-development-source-foundation
+  cancel-in-progress: false
+jobs:
+  exact-one-native-development-foundation:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-native-foundation-v168' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Checkout locked corrected Ada development-source QA fork
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify development-source byte locks, canonical main contract and exact activation commit WITHOUT F
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY' > evidence/source-preflight.json
+          import ast,json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,"tests")
+          import issue29_v168_single_native_guard as guard
+          ast.parse(Path("tests/issue29_v168_single_native_guard.py").read_text())
+          env,source=guard.verify_all()
+          assert env["base_original_development_branch"]=="e17ab44aa3fd1d08eb14644164735a7c5c87721d"
+          assert len(source["locked_original_development_sources"])==7
+          print(json.dumps({"workflow":env,"sources":source,"original_calendar_calls":0,
+                            "soak_years":0,"main_changes_allowed":False},
+                           sort_keys=True,indent=2))
+          PY
+          git rev-parse HEAD > evidence/workflow-commit.txt
+          echo "V168_SEVEN_ORIGINAL_DEVELOPMENT_SOURCE_BLOBS_LOCKED_NO_F" | tee evidence/source-lock-verdict.txt
+      - name: Install Ada 2022/GPRBuild and GMP build-time dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          gnat --version > evidence/gnat-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gmp-packages.txt
+      - name: Compile and link one-source-branch Ada foundation probe, without executing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          (ulimit -v 1048576; timeout --signal=KILL 120s gprbuild -p -j2 -P issue29_v168_native_foundation.gpr > evidence/native-build.stdout 2> evidence/native-build.stderr)
+          test -x bin_v168/issue29_v168_native_foundation_probe
+          sha256sum bin_v168/issue29_v168_native_foundation_probe > evidence/linked-native-binary.sha256
+          ldd bin_v168/issue29_v168_native_foundation_probe > evidence/linked-native-libraries.txt
+          nm bin_v168/issue29_v168_native_foundation_probe > evidence/all-native-symbols.txt
+          grep -E '(normative_oracle__calendar_date|canonical_full_weave_gmp_v164__unrank|canonical_wide_rank_gmp_v164__choose_rank)' evidence/all-native-symbols.txt > evidence/verified-native-symbols.txt
+          test -s evidence/verified-native-symbols.txt
+          echo "ISSUE29_V168_CORRECTED_ADA_DEVELOPMENT_ORIGINAL_SOURCE_LINK_OK_NO_F" | tee evidence/native-link-verdict.txt
+      - name: Seal independent binary hash preflight before launching a native date process
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v168_single_native_guard.py preflight --evidence evidence | tee evidence/binary-preflight.stdout
+          grep -Fx ISSUE29_V168_SOURCE_PINNED_COMPILED_PRECHECK_NO_F evidence/binary-preflight.stdout
+          test -f evidence/preflight.json
+          test ! -f evidence/RUN_STARTED_ONCE
+          test ! -f evidence/result.json
+      - name: Invoke exactly one corrected original-development Ada foundation date, enforce caps and no rerun
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v168_single_native_guard.py run-once --evidence evidence > evidence/native-run-verdict.stdout 2> evidence/native-run-verdict.stderr
+          grep -Fx ISSUE29_V168_CORRECTED_ADA_NATIVE_FOUNDATION_FIVE_FIELDS_PASS evidence/native-run-verdict.stdout
+          python3 -B - <<'PY' | tee evidence/independent-result-verdict.txt
+          import json
+          from pathlib import Path
+          d=json.loads(Path("evidence/result.json").read_bytes())
+          assert d["status"]=="PASS_SINGLE_CORRECTED_NATIVE_FOUNDATION_ONLY"
+          assert d["observed_result"]==[5000,10,503,20,56]
+          assert d["date_call_attempts"]==1
+          assert d["historical_original_mismatch"]==[5000,10,503,30,52]
+          assert d["original_historical_source_calls"]==0
+          assert d["soak_years"]==0 and d["soak_dispatch_allowed"] is False
+          assert d["process"]["exit_code"]==0
+          assert d["process"]["limit_violation"] is None
+          assert Path("evidence/RUN_STARTED_ONCE").is_file()
+          print("V168_ORIGINAL_DEV_ADA_ONE_FOUNDATION_MATCHES_CANONICAL_NOT_PRODUCTION_CERTIFIED")
+          PY
+      - name: Preserve original native output/error and independent hashes on both PASS and FAIL
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          folder=Path("evidence")
+          folder.mkdir(exist_ok=True)
+          mapping={}
+          for f in sorted(folder.iterdir()):
+              if f.is_file() and f.name!="evidence-members-sha256.json":
+                  raw=f.read_bytes()
+                  mapping[f.name]={"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest()}
+          with (folder/"evidence-members-sha256.json").open("xb") as o:
+              o.write((json.dumps(mapping,sort_keys=True,indent=2)+"\n").encode())
+          PY
+      - name: Archive one-shot development Ada evidence, never 10k-year Soak outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v168-corrected-original-development-Ada-one-native-foundation-no-rerun
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
