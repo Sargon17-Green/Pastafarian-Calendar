@@ -81,6 +81,7 @@ begin
 end;
 
 begin
+  SetTextCodePage(Output, CP_UTF8);
   Passed := 0;
   Failed := 0;
   Cases := 0;
@@ -93,8 +94,8 @@ begin
       Writeln('EXCEÇÃO: ', E.ClassName, ': ', E.Message);
     end;
   end;
-  Writeln('Resumo aritmética com sinal: ', Cases, ' casos; ',
-    Passed, ' passaram; ', Failed, ' falharam.');
+  Writeln(UTF8Encode(UnicodeString('Resumo aritmética com sinal: ')),
+    Cases, ' casos; ', Passed, ' passaram; ', Failed, ' falharam.');
   if (Cases <> ExpectedCases) or (Passed <> ExpectedChecks)
     or (Failed <> 0) then Halt(1);
 end.

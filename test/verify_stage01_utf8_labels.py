@@ -17,6 +17,10 @@ LABEL_STEMS = (
 
 def verify(raw: bytes) -> tuple[int, list[str]]:
     errors: list[str] = []
+    try:
+        raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        errors.append(f"whole log is not UTF-8 at byte offset {exc.start}: {exc.reason}")
     checked = 0
     for stem in LABEL_STEMS:
         for i in range(1, 7):
@@ -36,6 +40,8 @@ def main() -> int:
     parser.add_argument("log_file", type=Path, help="Raw tee log, not decoded job-log text")
     args = parser.parse_args()
     checked, errors = verify(args.log_file.read_bytes())
+    whole_log_ok = not any(e.startswith("whole log is not UTF-8") for e in errors)
+    print("UTF8_FULL_LOG_SUMMARY: PASS" if whole_log_ok else "UTF8_FULL_LOG_SUMMARY: FAIL")
     if errors:
         for error in errors:
             print(f"UTF8_LABEL_FAIL: {error}")
