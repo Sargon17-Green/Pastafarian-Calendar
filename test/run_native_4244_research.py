@@ -59,6 +59,33 @@ def run_native(binary, outdir, direction, word=None):
                 "source": "Native Chapel binary"}, ensure_ascii=False) + "\n")
     begin = time.monotonic()
     reason = None
+    observed_peak_rss_kib = 0
+    observed_depths = set()
+    progress_path = outdir / (name + ".progress.jsonl")
+    progress_path.write_text("", encoding="utf-8")
+    next_progress_sample = begin
+
+    def observe_partial_stdout(elapsed_seconds, rss_kib):
+        """Diagnostic-only observation; no partial transcript can grant PASS."""
+        try:
+            payload = stdout_path.read_bytes()
+        except FileNotFoundError:
+            return
+        for match in re.finditer(
+                rb"(?m)^NATIVE_MEDIAN_CHECKPOINT=([1-9][0-9]*);[0-9]+\n",
+                payload):
+            depth = int(match.group(1))
+            if depth not in DEPTHS or depth in observed_depths:
+                continue
+            observed_depths.add(depth)
+            with progress_path.open("a", encoding="utf-8") as progress:
+                progress.write(json.dumps({
+                    "checkpoint_depth": depth,
+                    "first_observed_wall_seconds": round(elapsed_seconds, 3),
+                    "sampled_rss_kib": rss_kib or None,
+                    "acceptance": "DIAGNOSTIC_ONLY",
+                }, sort_keys=True) + "\n")
+
     with stdout_path.open("wb") as stdout, stderr_path.open("wb") as stderr:
         process = subprocess.Popen(command, stdout=stdout, stderr=stderr,
                                    start_new_session=True)
@@ -66,6 +93,11 @@ def run_native(binary, outdir, direction, word=None):
             elapsed = time.monotonic() - begin
             rss = max((read_rss_kib(c) for c in direct_children(process.pid)),
                       default=0)
+            observed_peak_rss_kib = max(observed_peak_rss_kib, rss)
+            now = time.monotonic()
+            if now >= next_progress_sample:
+                observe_partial_stdout(elapsed, rss)
+                next_progress_sample = now + 1.0
             if rss > LIMIT_RSS_KIB:
                 reason = "INCONCLUSIVE_RSS_LIMIT"
             elif elapsed >= LIMIT_SECONDS:
@@ -76,20 +108,32 @@ def run_native(binary, outdir, direction, word=None):
             time.sleep(0.025)
         exit_code = process.wait()
     wall = time.monotonic() - begin
+    observe_partial_stdout(wall, observed_peak_rss_kib)
     metrics = {}
     if metrics_path.exists():
         for line in metrics_path.read_text(errors="replace").splitlines():
             if "=" in line:
                 key, value = line.split("=", 1)
                 metrics[key] = value
-    rss = int(metrics.get("OS_MAX_RSS_KIB", "0"))
-    if not reason and (wall > LIMIT_SECONDS or rss > LIMIT_RSS_KIB):
+    os_peak_rss_kib = int(metrics.get("OS_MAX_RSS_KIB", "0"))
+    measured_peak_rss_kib = max(observed_peak_rss_kib, os_peak_rss_kib) or None
+    if not reason and (wall > LIMIT_SECONDS or
+                       (measured_peak_rss_kib is not None and
+                        measured_peak_rss_kib > LIMIT_RSS_KIB)):
         reason = "INCONCLUSIVE_RESOURCE_LIMIT"
     if not reason and exit_code != 0:
         reason = "NONZERO_NATIVE_EXIT"
-    outcome = {"direction":direction, "exit_code":exit_code,
-               "wall_seconds":round(wall,6),"peak_rss_kib":rss,
-               "status":reason or "COMPLETE", "pid":process.pid}
+    outcome = {"direction": direction, "exit_code": exit_code,
+               "wall_seconds": round(wall, 6),
+               "peak_rss_kib": measured_peak_rss_kib,
+               "rss_source": ("proc_sample_and_os_time" if os_peak_rss_kib and
+                              observed_peak_rss_kib else
+                              "os_time" if os_peak_rss_kib else
+                              "proc_sample" if observed_peak_rss_kib else
+                              "unavailable"),
+               "last_observed_checkpoint": max(observed_depths, default=0),
+               "observed_checkpoints": sorted(observed_depths),
+               "status": reason or "COMPLETE", "pid": process.pid}
     (outdir / (name + ".os-result.json")).write_text(
         json.dumps(outcome, sort_keys=True) + "\n")
     return outcome, stdout_path
