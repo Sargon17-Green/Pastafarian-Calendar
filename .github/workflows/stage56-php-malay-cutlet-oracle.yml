@@ -1,0 +1,56 @@
+name: Stage56 PHP Malay Cutlet Semantic Oracle
+
+on:
+  push:
+    branches:
+      - PHP+Bahasa-Melayu
+
+permissions:
+  contents: read
+
+jobs:
+  cutlet-semantic-oracle:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Verify PHP 8.3 64-bit runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -v
+          php -r 'if (PHP_VERSION_ID < 80300 || PHP_INT_SIZE !== 8) { fwrite(STDERR, "PHP 8.3 64-bit required\\n"); exit(1); }'
+      - name: Lint independent oracle and test harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage56-cutlet-oracle-evidence
+          php -l tests/stage56_cutlet_semantic_oracle.php | tee stage56-cutlet-oracle-evidence/lint-oracle.txt
+          php -l tests/stage56_cutlet_semantic_oracle_tests.php | tee stage56-cutlet-oracle-evidence/lint-tests.txt
+      - name: Run bounded DFS, rank-unrank cross-checks, and negative mutations
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 300s php -d memory_limit=512M tests/stage56_cutlet_semantic_oracle_tests.php > stage56-cutlet-oracle-evidence/stdout.txt 2> stage56-cutlet-oracle-evidence/stderr.txt
+          status=$?
+          printf 'exit=%s\\n' "$status" > stage56-cutlet-oracle-evidence/exit.txt
+          cat stage56-cutlet-oracle-evidence/stdout.txt
+          if (( status != 0 )); then
+            cat stage56-cutlet-oracle-evidence/stderr.txt >&2
+            exit 1
+          fi
+          [[ ! -s stage56-cutlet-oracle-evidence/stderr.txt ]] || exit 1
+          grep -F 'actual_structure=PASS status=PASS' stage56-cutlet-oracle-evidence/stdout.txt
+      - name: Retain source-free oracle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage56-php-malay-cutlet-oracle-${{ github.sha }}
+          path: stage56-cutlet-oracle-evidence/
+          if-no-files-found: error
+          retention-days: 30
