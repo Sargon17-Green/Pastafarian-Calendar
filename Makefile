@@ -166,3 +166,12 @@ build/calendar_bowl_step.o: build/calendar.o src/runtime/calendar_bowl_step.asm 
 build/calendar_bowl_step.gb: build/calendar_bowl_step.o
 	$(RGBLINK) -n build/calendar_bowl_step.sym -m build/calendar_bowl_step.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+
+# Native389 isolated initializer; accepted 370..388 binaries unchanged.
+build/calendar_bowl_init.o: build/calendar.o src/runtime/calendar_bowl_init.asm src/tests/calendar_bowl_init_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_BOWL_INIT_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_bowl_init.gb: build/calendar_bowl_init.o
+	$(RGBLINK) -n build/calendar_bowl_init.sym -m build/calendar_bowl_init.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@

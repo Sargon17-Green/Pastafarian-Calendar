@@ -206,6 +206,7 @@ wCalendarBowlTemp:: ds 16
 wCalendarBowlQ:: ds 1
 wCalendarBowlRepeat:: ds 1
 wCalendarBowlSeen:: ds 1
+; Native389 initializer shares the 96-byte bowl scratch.
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -289,6 +290,10 @@ ELIF DEF(STAGE1_BOWL_STEP_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarBowlStepBench
+ELIF DEF(STAGE1_BOWL_INIT_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarBowlInitBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -420,6 +425,7 @@ INCLUDE "src/runtime/calendar_hidden_visible6_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible46_chain.asm"
 INCLUDE "src/runtime/calendar_bowl_order.asm"
 INCLUDE "src/runtime/calendar_bowl_step.asm"
+INCLUDE "src/runtime/calendar_bowl_init.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -514,4 +520,7 @@ ENDC
 
 IF DEF(STAGE1_BOWL_STEP_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_bowl_step_native_test.asm"
+ENDC
+IF DEF(STAGE1_BOWL_INIT_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_bowl_init_native_test.asm"
 ENDC
