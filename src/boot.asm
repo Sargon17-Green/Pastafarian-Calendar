@@ -194,6 +194,18 @@ wCalendarBowlBitFlag:: ds 1
 wCalendarBowlDivisor:: ds 1
 wCalendarBowlDigit:: ds 1
 wCalendarBowlPosition:: ds 1
+; Stage1 Native388 single-iteration simultaneous six-bowl update.
+wCalendarBowlsOld:: ds 96
+wCalendarBowlsNext:: ds 96
+wCalendarBowlNewScratch:: ds 96
+wCalendarBowlPours:: ds 48
+wCalendarBowlCur:: ds 16
+wCalendarBowlPrev:: ds 16
+wCalendarBowlNextNeighbor:: ds 16
+wCalendarBowlTemp:: ds 16
+wCalendarBowlQ:: ds 1
+wCalendarBowlRepeat:: ds 1
+wCalendarBowlSeen:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -273,6 +285,10 @@ ELIF DEF(STAGE1_BOWL_ORDER_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarBowlOrderBench
+ELIF DEF(STAGE1_BOWL_STEP_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarBowlStepBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -403,6 +419,7 @@ INCLUDE "src/runtime/calendar_hidden_visible5_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible6_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible46_chain.asm"
 INCLUDE "src/runtime/calendar_bowl_order.asm"
+INCLUDE "src/runtime/calendar_bowl_step.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -493,4 +510,8 @@ ENDC
 
 IF DEF(STAGE1_BOWL_ORDER_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_bowl_order_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_BOWL_STEP_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_bowl_step_native_test.asm"
 ENDC
