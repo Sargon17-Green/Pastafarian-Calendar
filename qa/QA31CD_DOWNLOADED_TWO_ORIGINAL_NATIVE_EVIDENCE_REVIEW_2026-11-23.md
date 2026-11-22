@@ -13,6 +13,10 @@ Scope: finite QA31CD acceptance ONLY. Stage 1 remains OPEN.
 - Immutable production blob `src/interleaved_work_counts.b98`: Git SHA1 `560d6aa5807a7f766213a33835cce85eab0fa40c`; runner checked it before execution.
 - PyFunge 0.5-rc2 tar SHA256 `e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac`, checked in the completed run.
 
+## Durable archive
+- The exact downloaded 727,967-byte ZIP was additionally uploaded to the existing ChatGPT Library folder as 
+  `/Befunge_QA_Artifacts/QA31CD_BEFUNGE98_KYRGYZ_TWO_ORIGINAL_NATIVE_20261123.zip` (Library file ID `libfile_316f07fb4ee88191ba55af52cb5ac64c`; archive SHA256 `a8a48737663cdcfcae6df4c93bc62dde81f02c5159803a7d3484aee7363c9db1`). The Library upload completed and the stored item's size (727,967 bytes) was read back. This retains the evidence beyond GitHub Actions' 30-day artifact retention. The source snapshot used for the upload is the one whose SHA/CRC were independently checked.
+
 ## Independent ZIP/trace recheck
 Independently decompressed both original artifact traces and scanned **all** 24,977 JSONL physical STEP records per case (49,954 total), without importing the CI auditor. Rechecked STEP indices and next IP/delta continuity; p/g stack arity, storage-offset address computation and put/get value semantics; the exact consumed raw bytes and read-cursor continuity; accumulated stdout; the case trace SHA256 against the per-case receipt. Each case had 309 p/g receipts, two stdin-read events and a final HALT at tick 24977. The 20 distinct detached hostile-result entries in the artifact all record rejection; their actual execution is separately corroborated by the successful CI independent-audit log. This independent recheck did not re-execute Native or regenerate hostile mutations.
 
