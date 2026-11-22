@@ -1,0 +1,88 @@
+name: APL German Stage1 counterfactual six witnesses (QA ONLY)
+on:
+  push:
+    branches: [qa/apl-german-nars-interface-20261116]
+    paths:
+      - '.github/workflows/apl-german-stage01-counterfactual.yml'
+      - 'qa/nars-interface/stage01_counterfactual_probe.py'
+      - 'qa/nars-interface/test_stage01_counterfactual_probe.py'
+      - 'qa/nars-interface/bounded_stage01_counterfactual_probe.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  counterfactual-native-diagnostic:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch official pinned NARS installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $ProgressPreference='SilentlyContinue'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release' | Out-Null
+          $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          Invoke-WebRequest -Uri 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe' -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+          if ((Get-Item -LiteralPath $installer).Length -ne 9430788 -or
+              (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+              '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b') {
+            throw 'PINNED_INSTALLER_LOCK_FAILED'
+          }
+          Write-Output 'NARS_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
+      - name: Provision pinned runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence counterfactual_font_evidence -Runtime verified_runtime
+      - name: Test exact source anchors and bounded candidate generation
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_counterfactual_probe.py' -v
+          if($LASTEXITCODE -ne 0){throw 'COUNTERFACTUAL_PYTHON_TEST_FAILED'}
+      - name: Run only six counterfactual witnesses in native NARS
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_counterfactual_probe.ps1 -Runtime verified_runtime -Evidence counterfactual_probe_evidence
+      - name: Independent QA diagnostic gate, never Stage1
+        shell: pwsh
+        run: |
+          $a=Get-Content counterfactual_probe_evidence/native_counterfactual.json -Raw | ConvertFrom-Json
+          $b=Get-Content counterfactual_probe_evidence/counterfactual_candidate.json -Raw | ConvertFrom-Json
+          if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or
+             $b.source_commit -cne $a.source_commit){throw 'SOURCE_LOCK_MISMATCH'}
+          if($a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED' -or
+             $b.original_stage01_acceptance_token_present -ne $false){throw 'FALSE_ACCEPTANCE'}
+          if($a.status -cne 'COUNTERFACTUAL_WITNESSES_CONFIRMED_DIAGNOSTIC_ONLY' -or
+             $a.native_executed -ne $true -or $a.runtime_verified -ne $true -or
+             $a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or
+             $a.init_exact -ne $true -or $a.helper_exact -ne $true -or
+             $a.final_marker_exact -ne $true -or $a.witnesses.Count -ne 6){throw 'NATIVE_WITNESSES_NOT_VERIFIED'}
+          if(@($a.witnesses | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or
+             $_.ec_success -ne $true -or $_.value_match -ne $true}).Count -gt 0){throw 'COUNTERFACTUAL_WITNESS_MISMATCH'}
+          $names=@('ownership_original','ownership_corrected','poststir_original',
+            'poststir_corrected','poststir_original_rank','poststir_corrected_rank')
+          if(($a.witnesses.name -join ',') -cne ($names -join ',')){throw 'COUNTERFACTUAL_INVENTORY_CHANGED'}
+          Write-Output 'SIX_COUNTERFACTUAL_WITNESSES_NATIVE_CONFIRMED_DIAGNOSTIC_ONLY'
+      - name: Hash evidence files
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force counterfactual_probe_evidence,counterfactual_font_evidence | Out-Null
+          Get-ChildItem counterfactual_probe_evidence,counterfactual_font_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $hash=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.FullName)"
+          } | Set-Content -Encoding utf8 counterfactual_receipts.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-six-counterfactual-native-v1
+          path: |
+            counterfactual_probe_evidence/
+            counterfactual_font_evidence/
+            counterfactual_receipts.sha256
+          retention-days: 21
