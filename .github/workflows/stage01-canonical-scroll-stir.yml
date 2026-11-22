@@ -91,6 +91,18 @@ jobs:
           grep -Fxq 'STAGE01_SCROLL_CUTLETS_SELFTEST=2168/2168' build/stage01-scroll-cutlets-foundation.log
           grep -Fxq 'STAGE01_SCROLL_CUTLETS_FOUNDATION_DIAGNOSTIC=PASS' build/stage01-scroll-cutlets-foundation.log
           grep -Fxq 'STAGE01_SCROLL_CUTLETS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-cutlets-foundation.log
+      - name: Verify Hebrew Scroll month count and lexicographic books seals 30/31 (diagnostic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_months_independent.py
+          timeout --signal=TERM --kill-after=5s 180s \
+            python3 -u test/stage01_scroll_months_independent.py \
+              --self-test --foundation --output build/stage01-scroll-months-foundation.json \
+              | tee build/stage01-scroll-months-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTHS_SELFTEST=1010/1010' build/stage01-scroll-months-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTHS_FOUNDATION_DIAGNOSTIC=PASS' build/stage01-scroll-months-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTHS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-months-foundation.log
       - name: Preserve canonical component evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -106,5 +118,7 @@ jobs:
             build/stage01-scroll-gate-foundation.json
             build/stage01-scroll-cutlets-foundation.log
             build/stage01-scroll-cutlets-foundation.json
+            build/stage01-scroll-months-foundation.log
+            build/stage01-scroll-months-foundation.json
           if-no-files-found: warn
           retention-days: 30
