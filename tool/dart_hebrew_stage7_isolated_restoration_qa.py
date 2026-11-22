@@ -183,6 +183,9 @@ def main() -> None:
                     assert git_blob(source_after_format) == expected_blob, (
                         f"Source blob changed after format diagnostic: {label}"
                     )
+                    # Worktree does not inherit the root package configuration.
+                    # Resolve its package URI before full-package static analysis.
+                    pub_get = run("dart", "pub", "get", cwd=wd, timeout=360)
                     analyze = run("dart", "analyze", cwd=wd, timeout=360)
                     log = run("dart", "run", "tool/stage7_qa_probe.dart", "tool/stage7_qa_expected.json", label,
                               cwd=wd, timeout=600)
@@ -191,6 +194,7 @@ def main() -> None:
                         "format": fmt,
                         "format_status": format_status,
                         "source_blob_after_format": git_blob(source_after_format),
+                        "pub_get": pub_get,
                         "analyze": analyze,
                         "run": log,
                     }
