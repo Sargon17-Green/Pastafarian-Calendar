@@ -1,0 +1,81 @@
+name: Issue29 v181 GMP exact lex extrema at 5778-day synthetic maximum; NO F
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-max-unrank-extrema-v181
+    paths:
+      - '.github/workflows/issue29-v181-gmp-max-unrank-extrema.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v181-one-shot-gmp-extrema
+  cancel-in-progress: false
+jobs:
+  exact-extreme-unrank:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-ada-gmp-max-unrank-extrema-v181'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout pinned corrected Ada source; never F
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Create independently proven exact first/last rank witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile tests/issue29_v181_unrank_extrema.py
+          python3 -B tests/issue29_v181_unrank_extrema.py preflight | tee evidence/preflight-verdict.txt
+          grep -Fx V181_MAX_LEX_EXTREMA_REFERENCE_READY_ZERO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install native GNAT13 GNATCOLL GMP and binutils
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build isolated GMP Unrank executable and block any calendar import
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v181_unrank_extrema.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v181/issue29_v181_unrank_extrema_tests
+          if nm bin_v181/issue29_v181_unrank_extrema_tests | grep -iq normative_oracle; then
+            echo V181_FORBIDDEN_F_SOURCE_LINKED >&2
+            exit 1
+          fi
+          echo V181_GMP_ONLY_EXTREMA_BINARY_LINKED_ZERO_F > evidence/build-verdict.txt
+      - name: One bounded GMP-only Unrank execution, no F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v181_unrank_extrema.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V181_MAX_5778_DAY_GMP_UNRANK_EXTREMA_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Hash every evidence file on success or failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence')
+          entries={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+                   for p in sorted(root.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (root/'members.sha256.json').write_text(json.dumps(entries,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Preserve whole GMP-only bounded evidence, never overwrite
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v181-max-domain-gmp-unrank-extrema-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn

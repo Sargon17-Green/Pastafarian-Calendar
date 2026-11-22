@@ -1,0 +1,10 @@
+with "gnatcoll_gmp.gpr";
+project Issue29_V181_Unrank_Extrema is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v181";
+   for Exec_Dir use "bin_v181";
+   for Main use ("issue29_v181_unrank_extrema_tests.adb");
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
+   end Compiler;
+end Issue29_V181_Unrank_Extrema;
