@@ -1,0 +1,136 @@
+name: WAT Stage02 canonical Names47 Native QA (isolated)
+
+on:
+  push:
+    branches:
+      - qa/wat-canonical-names47-native-20261122
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  names47:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify immutable source and exact QA commit
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/normative_selector.wat)" = 'e23f013ab96b498b0ac365dbb1b25273c845e790'
+          echo '18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980  tests/normative_selector.wat' | sha256sum -c -
+          printf 'PROJECT=PC-BRANCH-WAT-SPANISH QA_SHA=%s\n' "$GITHUB_SHA"
+      - name: Install WABT and derive independent canonical-family oracle
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wabt
+          node --version
+          python3 --version
+          wat2wasm --version
+          mkdir -p evidence/wat-names47
+          python3 tests/stage02_canonical_names47_oracle.py > evidence/wat-names47/oracle.json
+          cat evidence/wat-names47/oracle.json
+      - name: Instrument locked source copy, compile and validate
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          source=Path("tests/normative_selector.wat").read_bytes()
+          assert hashlib.sha256(source).hexdigest()=="18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980"
+          original=source.decode("utf-8")
+          index=original.rfind(")")
+          assert index>=0 and not original[index+1:].strip()
+          tail='\n  ;; QA-only: source copy, externally seeded N, original $choose.\n'
+          tail+='  (func (export "qa_names47_forward")\n'
+          tail+='    (call $init_constants)\n'
+          tail+='    (call $copy (global.get $FIRST) (global.get $ONE))\n'
+          tail+='    (call $choose (global.get $FIRST) (i32.const 1) (global.get $N) (global.get $RESULT)))\n'
+          tail+='  (func (export "qa_names47_backward")\n'
+          tail+='    (call $init_constants)\n'
+          tail+='    (call $copy (global.get $FIRST) (global.get $M))\n'
+          tail+='    (call $choose (global.get $FIRST) (i32.const -1) (global.get $N) (global.get $RESULT)))\n'
+          modified=original[:index]+tail+original[index:]
+          assert modified.replace(tail,"")==original
+          Path("evidence/wat-names47/instrumented.wat").write_text(modified)
+          PY
+          wat2wasm evidence/wat-names47/instrumented.wat -o evidence/wat-names47/instrumented.wasm
+          wasm-validate evidence/wat-names47/instrumented.wasm
+          sha256sum evidence/wat-names47/instrumented.wat evidence/wat-names47/instrumented.wasm | tee evidence/wat-names47/source-hashes.txt
+      - name: Run only the two new canonical N=47 factorial Native modes
+        run: |
+          set -euo pipefail
+          timeout 120s node <<'JS' | tee evidence/wat-names47/native.log
+          const fs=require('fs'),crypto=require('crypto');
+          const base='evidence/wat-names47/';
+          const oracle=JSON.parse(fs.readFileSync(base+'oracle.json'));
+          const N=BigInt(oracle.n), RADIX=1n<<30n;
+          const m=(1n<<127n)-1n;
+          if(!(m<N && N<m*m && N.toString(2).length===198))throw Error('N_OUT_OF_SCOPE');
+          const buf=fs.readFileSync(base+'instrumented.wasm');
+          const digest=x=>crypto.createHash('sha256').update(x).digest('hex');
+          const out={project:'PC-BRANCH-WAT-SPANISH',qa_sha:process.env.GITHUB_SHA,
+            run_id:process.env.GITHUB_RUN_ID,run_attempt:process.env.GITHUB_RUN_ATTEMPT,
+            node:process.version,source_commit:'871f9b70216c16c57abcd552ec6fb0ed1010e305',
+            wasm_sha256:digest(buf),scope:'canonical_family_names47_only',
+            original_stage02_provenance:false,overall_stage02_accepted:false,cases:[]};
+          function writeN(v,at,n) {
+            let words=[];
+            while(n>0n){words.push(Number(n%RADIX));n/=RADIX;}
+            if(words.length>1100)throw Error('LIMB_CAPACITY');
+            v.setUint32(at,words.length,true);
+            for(let i=0;i<words.length;i++)v.setUint32(at+4*(i+1),words[i],true);
+            return words.length;
+          }
+          function readN(v,at) {
+            let len=v.getUint32(at,true),n=0n;
+            if(len<1||len>1100)throw Error('INVALID_LENGTH');
+            for(let i=len-1;i>=0;i--){
+              const digit=v.getUint32(at+4*(i+1),true);
+              if(BigInt(digit)>=RADIX ||(i===len-1&&digit===0))throw Error('NONCANONICAL_LIMB');
+              n=n*RADIX+BigInt(digit);
+            }
+            return {n,len};
+          }
+          async function main(){
+            for(const mode of ['forward','backward']){
+              const obj=(await WebAssembly.instantiate(buf,{})).instance;
+              const memory=obj.exports.memory;
+              if(!(memory instanceof WebAssembly.Memory) || memory.buffer.byteLength!==96*65536)throw Error('MEMORY_IDENTITY');
+              const view=new DataView(memory.buffer);
+              const nw=writeN(view,83200,N);
+              const func=obj.exports['qa_names47_'+mode];
+              if(typeof func!=='function')throw Error('QA_EXPORT_MISSING');
+              const start=process.hrtime.bigint();
+              const ret=func();
+              const elapsed_ms=Number(process.hrtime.bigint()-start)/1e6;
+              if(ret!==undefined||readN(view,83200).n!==N||readN(view,83200).len!==nw)throw Error('N_MUTATED');
+              const actual=readN(view,145024);
+              const expected=oracle[mode];
+              const hash=digest(Buffer.from(actual.n.toString(),'ascii'));
+              if(actual.n!==BigInt(expected.rank_decimal)||hash!==expected.rank_sha256)throw Error('NATIVE_ORACLE_MISMATCH_'+mode);
+              const result={mode,status:'PASS',exit_code:0,elapsed_ms,
+                rank_sha256_decimal:hash,result_limbs:actual.len,n_limbs:nw,
+                independent_rejection_expected:expected.rejected};
+              fs.writeFileSync(base+mode+'.result.json',JSON.stringify(result,null,2)+'\n');
+              out.cases.push(result);console.log('NAMES47_CASE',JSON.stringify(result));
+            }
+            out.gate='FOCUSED_NATIVE_PASS';
+            fs.writeFileSync(base+'summary.json',JSON.stringify(out,null,2)+'\n');
+            console.log('NAMES47_SUMMARY FOCUSED_NATIVE_PASS');
+          }
+          main().catch(e=>{out.gate='FOCUSED_NATIVE_FAIL';out.error=String(e.stack||e);
+            fs.writeFileSync(base+'summary.json',JSON.stringify(out,null,2)+'\n');
+            console.error(e.stack||e);process.exitCode=1;});
+          JS
+      - name: Upload focused evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-names47-canonical-native
+          path: evidence/wat-names47/
+          if-no-files-found: warn
+          retention-days: 30
