@@ -253,6 +253,13 @@ jobs:
           timeout --signal=TERM --kill-after=5s 120s \
             v test ./pastafari/normative_oracle_test.v -run-only 'test_stage36_adjacent_ballot_lexical_ranks_at_17_and_47_months' \
             2>&1 | tee stage36_adjacent.log
+      - name: Stage 37 — exact Catalan first-prefix fork (17/47 months)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage37_catalan_first_prefix_fork_at_17_and_47_months' \
+            2>&1 | tee stage37_prefix_fork.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |
@@ -323,4 +330,5 @@ jobs:
             stage33_weave_unrank.log
             stage34_catalan.log
             stage36_adjacent.log
+            stage37_prefix_fork.log
           if-no-files-found: ignore

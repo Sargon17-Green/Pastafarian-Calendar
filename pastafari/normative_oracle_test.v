@@ -2060,3 +2060,47 @@ fn test_stage36_adjacent_ballot_lexical_ranks_at_17_and_47_months() {
 	stage36_check_adjacent_ballot_ranks(47)
 	println('V_AMHARIC_STAGE36_ADJACENT_RANK_PASS MONTHS=17,47 PAIRS=14')
 }
+// Stage37: the exact first Dyck-prefix fork, not an arbitrary sampled rank.
+// The [1,1] block contains Catalan(n-1) words, so ranks C(n-1)
+// and C(n-1)+1 must straddle [1,1] / [1,2] in lexical order.
+fn stage37_check_first_prefix_fork(month_count int) {
+	assert month_count >= 2
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	previous := month_count - 1
+	choose_previous := oracle_weave_choose_exact(2 * previous, previous)
+	left_rank := oracle_weave_div_small(choose_previous, month_count)
+	choose_total := oracle_weave_choose_exact(2 * month_count, month_count)
+	total := oracle_weave_div_small(choose_total, month_count + 1)
+	assert big_eq(candidate.count_all(), total)
+	assert big_eq(stage35_ballot_suffix_count(month_count, 1, 1), left_rank)
+	right_rank := big_add(left_rank, big_one())
+	assert big_cmp(left_rank, big_one()) >= 0
+	assert big_cmp(right_rank, total) <= 0
+
+	mut expected_left := [1, 1]
+	for label in 2 .. month_count + 1 {
+		expected_left << label
+	}
+	for label in 2 .. month_count + 1 {
+		expected_left << label
+	}
+	mut expected_right := [1, 2, 1, 2]
+	for label in 3 .. month_count + 1 {
+		expected_right << label
+		expected_right << label
+	}
+	left := candidate.unrank1(left_rank)
+	right := candidate.unrank1(right_rank)
+	assert left == expected_left
+	assert right == expected_right
+	assert left[0] == right[0] && left[1] < right[1]
+	assert big_eq(stage35_independent_lexical_rank(month_count, left), left_rank)
+	assert big_eq(stage35_independent_lexical_rank(month_count, right), right_rank)
+}
+
+fn test_stage37_catalan_first_prefix_fork_at_17_and_47_months() {
+	stage37_check_first_prefix_fork(17)
+	stage37_check_first_prefix_fork(47)
+	println('V_AMHARIC_STAGE37_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
+}
