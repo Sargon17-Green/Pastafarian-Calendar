@@ -179,6 +179,61 @@ proc checkpoint(phaseName: string) {
   try! stdout.flush();
 }
 
+// Source-fresh, bounded attribution of production sparse unrank steps.
+// Calls the unchanged production sparse primitives; it is not an oracle or
+// a substitute for full chooseMonthWeaving / calendarDate acceptance.
+proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
+                              const ref expectedRoot: bigint,
+                              const ref selectedRank: bigint) {
+  const m = monthLengths.size;
+  var lens: [1..m] int;
+  for i in 1..m do lens[i] = monthLengths[i-1];
+  var specs: [1..m] SparseWeavingGapSpec;
+  var states: [1..m] SparseWeavingVec;
+  var sizes: [1..m] int;
+  var total = sparseWeavingSetup(lens, states, sizes, specs);
+  check(total == expectedRoot, "diagnostic prefix root matches source-fresh root");
+  if total != expectedRoot then return;
+  check(selectedRank >= 1 && selectedRank <= total,
+        "diagnostic selected rank within exact root");
+  if selectedRank < 1 || selectedRank > total then return;
+
+  var residual = selectedRank - new bigint(1);
+  var used: [1..m] int;
+  var opened = 0, closed = 0;
+  var completed = 0;
+  var prefixTimer: stopwatch;
+  prefixTimer.start();
+  for step in 1..min(32, sizes[m]) {
+    const blocks = sparseWeavingCandidateBlocks(lens, states, sizes, specs,
+                                                 used, opened, closed, total);
+    var chosen = 0;
+    for c in 1..m {
+      if residual >= blocks[c] then residual -= blocks[c];
+      else {
+        chosen = c;
+        sparseWeavingTake(c, lens, states, sizes, specs, used,
+                          opened, closed, total, blocks[c]);
+        break;
+      }
+    }
+    if chosen == 0 then halt("Diagnostic sparse prefix failed to select a block");
+    completed = step;
+    if step == 1 || step == 4 || step == 8 || step == 16 || step == 32 {
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_SECONDS=", prefixTimer.elapsed());
+      try! stdout.flush();
+    }
+    if prefixTimer.elapsed() >= 30.0 then break;
+  }
+  prefixTimer.stop();
+  writeln("YEAR_BOUNDARY_PREFIX_COMPLETED_STEPS=", completed);
+  writeln("YEAR_BOUNDARY_PREFIX_ELAPSED_SECONDS=", prefixTimer.elapsed());
+  writeln("YEAR_BOUNDARY_PREFIX_MAX_STEPS=32");
+  writeln("YEAR_BOUNDARY_PREFIX_SOFT_BUDGET_SECONDS=30");
+  writeln("YEAR_BOUNDARY_PREFIX_RESULT=RESEARCH_ONLY");
+  try! stdout.flush();
+}
+
 proc main() {
   checkSparseWeavingDifferential();
   const calculationDay = FOUNDATION_DAY;
@@ -256,6 +311,21 @@ proc main() {
   writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_RESULT=RESEARCH_ONLY");
   try! stdout.flush();
   checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_END");
+  checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_BEGIN");
+  var rankTimer: stopwatch;
+  rankTimer.start();
+  const rankStream = askBowl(r, 4, SEAL_MONTH_WEAVING);
+  const selectedRank = chooseRank(rankStream, diagnosticRoot);
+  rankTimer.stop();
+  check(selectedRank >= 1 && selectedRank <= diagnosticRoot,
+        "source-fresh production rank is within sparse root");
+  writeln("YEAR_BOUNDARY_RANK_SELECTION_SECONDS=", rankTimer.elapsed());
+  writeln("YEAR_BOUNDARY_RANK_SELECTION_RESULT=RESEARCH_ONLY");
+  try! stdout.flush();
+  checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_END");
+  checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_BEGIN");
+  probeSparseWeavingPrefix(structure.monthLengths, diagnosticRoot, selectedRank);
+  checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_END");
   checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
   structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);
   checkpoint("STRUCTURE_MONTH_WEAVING_END");
