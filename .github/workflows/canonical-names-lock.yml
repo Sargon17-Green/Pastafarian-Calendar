@@ -249,11 +249,23 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           echo "PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH"
           echo "SOURCE_SHA=$GITHUB_SHA"
+      - name: Python QA preflight (no Maven dependency)
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf 'PROJECT_ID=PC-BRANCH-CLOJURE-DUTCH\\n'
+            printf 'SOURCE_SHA=%s\\n' "$GITHUB_SHA"
+            python3 -m py_compile qa/clojure-dutch/discovery24_feasibility_oracle.py
+            python3 qa/clojure-dutch/discovery24_feasibility_oracle.py --self-test
+          } 2>&1 | tee qa/clojure-dutch/discovery24_dp_python_selftest.log
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+          cache: maven
+          cache-dependency-path: deps.edn
       - name: Install Clojure CLI
         uses: DeLaGuardo/setup-clojure@13.7.0
         with:
@@ -263,12 +275,10 @@ jobs:
         run: |
           set -euo pipefail
           clojure -Sdeps '{:paths ["src" "test"]}' -M -e "(require 'pastafari.discovery24-dp-feasibility-test) (pastafari.discovery24-dp-feasibility-test/write-canonical-input!)"
-      - name: Run exhaustive small QA and bounded canonical DP feasibility gate
+      - name: Run bounded canonical DP feasibility gate
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile qa/clojure-dutch/discovery24_feasibility_oracle.py
-          python3 qa/clojure-dutch/discovery24_feasibility_oracle.py --self-test
           set +e
           python3 qa/clojure-dutch/discovery24_feasibility_oracle.py --canonical-input qa/clojure-dutch/discovery24_canonical_dp_input.json --diagnostic-output qa/clojure-dutch/discovery24_canonical_dp_result.json
           code=$?
@@ -286,5 +296,6 @@ jobs:
           path: |
             qa/clojure-dutch/discovery24_canonical_dp_input.json
             qa/clojure-dutch/discovery24_canonical_dp_result.json
+            qa/clojure-dutch/discovery24_dp_python_selftest.log
           if-no-files-found: warn
           retention-days: 90
