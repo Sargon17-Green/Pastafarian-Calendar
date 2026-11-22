@@ -35,10 +35,7 @@ pub fn dispatch_discovery_34(
   requested_bowl_ids: List(Int),
   left_bands: List(discovery_27_sum_bands.SumBand),
   right_bands: List(discovery_27_sum_bands.SumBand),
-) -> Result(
-  DiceWindowSimilarity,
-  discovery_19_interval_value.Discovery19Error,
-) {
+) -> Result(DiceWindowSimilarity, discovery_19_interval_value.Discovery19Error) {
   case
     discovery_33_jaccard_bands.dispatch_discovery_33(
       context,

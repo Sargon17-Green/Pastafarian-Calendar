@@ -56,14 +56,15 @@ fn walk_ending_windows(
       let next = sum + gap
       let a = has_sum(left, next)
       let b = has_sum(right, next)
-      let updated = WindowTally(
-        left: tally.left + increment(a),
-        right: tally.right + increment(b),
-        both: tally.both + increment(a && b),
-        either: tally.either + increment(a || b),
-        exclusive: tally.exclusive + increment(a != b),
-        total: tally.total + 1,
-      )
+      let updated =
+        WindowTally(
+          left: tally.left + increment(a),
+          right: tally.right + increment(b),
+          both: tally.both + increment(a && b),
+          either: tally.either + increment(a || b),
+          exclusive: tally.exclusive + increment(a != b),
+          total: tally.total + 1,
+        )
       walk_ending_windows(rest, next, left, right, updated)
     }
   }
@@ -90,7 +91,11 @@ fn gaps(context: bootstrap.MonsterContext, ids: List(Int)) -> List(Int) {
   list.map(samples, fn(sample) { sample.gap })
 }
 
-fn minimum_denominator(numerator: Int, denominator: Int, candidate: Int) -> Int {
+fn minimum_denominator(
+  numerator: Int,
+  denominator: Int,
+  candidate: Int,
+) -> Int {
   case { numerator * candidate } % denominator == 0 {
     True -> candidate
     False -> minimum_denominator(numerator, denominator, candidate + 1)
@@ -118,19 +123,11 @@ fn check_against_direct_windows(
       gaps(context, ids),
       left,
       right,
-      WindowTally(
-        left: 0,
-        right: 0,
-        both: 0,
-        either: 0,
-        exclusive: 0,
-        total: 0,
-      ),
+      WindowTally(left: 0, right: 0, both: 0, either: 0, exclusive: 0, total: 0),
     )
   let #(d_p, d_q) =
     independent_fraction(2 * expected.both, expected.left + expected.right)
-  let #(j_p, j_q) =
-    independent_fraction(expected.both, expected.either)
+  let #(j_p, j_q) = independent_fraction(expected.both, expected.either)
   let assert Ok(actual) =
     discovery_34_dice_bands.dispatch_discovery_34(context, ids, left, right)
   actual.left_windows |> should.equal(expected.left)
@@ -154,19 +151,21 @@ fn power_of_ten(exponent: Int, value: Int) -> Int {
 }
 
 pub fn discovery_34_empty_ids_and_bands_test() {
-  let output = check_against_direct_windows(bootstrap.new_context(11, 21), [], [], [])
+  let output =
+    check_against_direct_windows(bootstrap.new_context(11, 21), [], [], [])
   output.total_windows |> should.equal(0)
   output.dice_numerator |> should.equal(1)
   output.dice_denominator |> should.equal(1)
 }
 
 pub fn discovery_34_empty_ids_unused_bands_test() {
-  let output = check_against_direct_windows(
-    bootstrap.new_context(11, 21),
-    [],
-    [band(20, 19), band(2, 4), band(9, 9)],
-    [band(-4, 1), band(11, 13)],
-  )
+  let output =
+    check_against_direct_windows(
+      bootstrap.new_context(11, 21),
+      [],
+      [band(20, 19), band(2, 4), band(9, 9)],
+      [band(-4, 1), band(11, 13)],
+    )
   output.canonical_left_bands |> should.equal([band(2, 4), band(9, 9)])
   output.canonical_right_bands |> should.equal([band(-4, 1), band(11, 13)])
   output.dice_numerator |> should.equal(1)
@@ -175,9 +174,10 @@ pub fn discovery_34_empty_ids_unused_bands_test() {
 pub fn discovery_34_single_gap_closed_endpoints_test() {
   let context = bootstrap.new_context(11, 21)
   let assert [gap] = gaps(context, [1])
-  let output = check_against_direct_windows(
-    context, [1], [band(gap, gap)], [band(gap, gap)],
-  )
+  let output =
+    check_against_direct_windows(context, [1], [band(gap, gap)], [
+      band(gap, gap),
+    ])
   output.left_windows |> should.equal(1)
   output.intersection_windows |> should.equal(1)
   output.dice_numerator |> should.equal(1)
@@ -187,14 +187,13 @@ pub fn discovery_34_single_gap_closed_endpoints_test() {
 pub fn discovery_34_single_gap_disjoint_or_absent_test() {
   let context = bootstrap.new_context(11, 21)
   let assert [gap] = gaps(context, [1])
-  let one = check_against_direct_windows(
-    context, [1], [band(gap, gap)], [],
-  )
+  let one = check_against_direct_windows(context, [1], [band(gap, gap)], [])
   one.dice_numerator |> should.equal(0)
   one.dice_denominator |> should.equal(1)
-  let absent = check_against_direct_windows(
-    context, [1], [band(gap + 1, gap + 1)], [band(gap + 2, gap + 2)],
-  )
+  let absent =
+    check_against_direct_windows(context, [1], [band(gap + 1, gap + 1)], [
+      band(gap + 2, gap + 2),
+    ])
   absent.dice_numerator |> should.equal(1)
   absent.dice_denominator |> should.equal(1)
 }
@@ -202,14 +201,16 @@ pub fn discovery_34_single_gap_disjoint_or_absent_test() {
 pub fn discovery_34_two_and_three_gap_partial_intersections_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 2, 3]
-  let first = check_against_direct_windows(
-    context, [1, 2], [band(42, 1200)], [band(500, 2000)],
-  )
+  let first =
+    check_against_direct_windows(context, [1, 2], [band(42, 1200)], [
+      band(500, 2000),
+    ])
   { first.intersection_windows <= first.left_windows }
   |> should.equal(True)
-  let second = check_against_direct_windows(
-    context, ids, [band(42, 963)], [band(500, 3000)],
-  )
+  let second =
+    check_against_direct_windows(context, ids, [band(42, 963)], [
+      band(500, 3000),
+    ])
   { second.combined_windows <= 6 } |> should.equal(True)
 }
 
@@ -217,14 +218,16 @@ pub fn discovery_34_reduced_half_and_two_thirds_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let assert [gap, _, _, _] = gaps(context, ids)
-  let half = check_against_direct_windows(
-    context, ids, [band(3 * gap, 3 * gap)], [band(2 * gap, 4 * gap)],
-  )
+  let half =
+    check_against_direct_windows(context, ids, [band(3 * gap, 3 * gap)], [
+      band(2 * gap, 4 * gap),
+    ])
   half.dice_numerator |> should.equal(1)
   half.dice_denominator |> should.equal(2)
-  let two_thirds = check_against_direct_windows(
-    context, ids, [band(gap, 3 * gap)], [band(2 * gap, 4 * gap)],
-  )
+  let two_thirds =
+    check_against_direct_windows(context, ids, [band(gap, 3 * gap)], [
+      band(2 * gap, 4 * gap),
+    ])
   two_thirds.dice_numerator |> should.equal(2)
   two_thirds.dice_denominator |> should.equal(3)
 }
@@ -237,9 +240,10 @@ pub fn discovery_34_empty_side_swap_and_zero_union_test() {
   a.dice_numerator |> should.equal(0)
   a.dice_denominator |> should.equal(1)
   b.dice_numerator |> should.equal(a.dice_numerator)
-  let none = check_against_direct_windows(
-    context, ids, [band(-1000, -900)], [band(100_000, 200_000)],
-  )
+  let none =
+    check_against_direct_windows(context, ids, [band(-1000, -900)], [
+      band(100_000, 200_000),
+    ])
   none.dice_numerator |> should.equal(1)
   none.dice_denominator |> should.equal(1)
 }
@@ -282,9 +286,10 @@ pub fn discovery_34_repeated_bowls_preserve_index_windows_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let assert [gap, _, _, _] = gaps(context, ids)
-  let output = check_against_direct_windows(
-    context, ids, [band(gap, gap)], [band(2 * gap, 2 * gap)],
-  )
+  let output =
+    check_against_direct_windows(context, ids, [band(gap, gap)], [
+      band(2 * gap, 2 * gap),
+    ])
   output.total_windows |> should.equal(10)
   output.left_windows |> should.equal(4)
   output.right_windows |> should.equal(3)
@@ -297,13 +302,17 @@ pub fn discovery_34_error_priority_matches_stage37_test() {
   |> should.equal(Error(discovery_19_interval_value.InvalidBowlId))
   let invalid = bootstrap.MonsterContext(..context, retry_budget: -1)
   discovery_34_dice_bands.dispatch_discovery_34(invalid, [7], [], [])
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(
-    bootstrap.InvalidRetryBudget,
-  )))
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
+  )
   discovery_33_jaccard_bands.dispatch_discovery_33(invalid, [7], [], [])
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(
-    bootstrap.InvalidRetryBudget,
-  )))
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
+  )
 }
 
 pub fn discovery_34_large_limits_symmetry_and_metamorphic_test() {
