@@ -81,7 +81,12 @@ fn deterministic_signed_bigint_dispatcher_differential_is_green() {
         };
         let actual = observe_legacy_day_tag(day.clone())
             .expect("production dispatcher for signed BigInt");
-        assert_eq!(actual.legacy_tag, independent_oracle(&day), "index {}", i);
+        let independent = independent_oracle(&day);
+        println!(
+            "RECONSTRUCTED_RUST_DAYTAG_DIFF_CASE_INDEX={} DAY={} ACTUAL={} ORACLE={}",
+            i, day, actual.legacy_tag, independent
+        );
+        assert_eq!(actual.legacy_tag, independent, "index {}", i);
         assert_eq!(actual.context.metrics.get("discovery02.legacy_day_tag.calls"), 1);
     }
     println!("RECONSTRUCTED_RUST_DAYTAG_DIFFERENTIAL=128 GREEN=128 UNEXPECTED=0");
