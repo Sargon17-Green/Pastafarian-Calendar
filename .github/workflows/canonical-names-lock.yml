@@ -1717,6 +1717,23 @@ jobs:
           printf '%s\n' "$compare_rc" > stage56-php-real-evidence/sauce-compare.exit
           cat stage56-php-real-evidence/sauce-compare.stdout
           cat stage56-php-real-evidence/sauce-compare.stderr >&2
+          # Boundary-only evidence is independent of the still-failing raw gate.
+          timeout 120s python3 -B tools/stage56_source_bound_boundary_gate.py \
+            --canonical-repo .external-canonical-source \
+            --source-manifest stage56-external-evidence/canonical-source.sha256 \
+            --php-input stage56-php-real-evidence/sauce-php.json \
+            --report stage56-php-real-evidence/source-bound-boundary-report.json \
+            --test-mutations \
+            > stage56-php-real-evidence/source-bound-boundary.stdout \
+            2> stage56-php-real-evidence/source-bound-boundary.stderr
+          boundary_rc=$?
+          printf '%s\n' "$boundary_rc" > stage56-php-real-evidence/source-bound-boundary.exit
+          cat stage56-php-real-evidence/source-bound-boundary.stdout
+          cat stage56-php-real-evidence/source-bound-boundary.stderr >&2
+          if test "$boundary_rc" -ne 0 || test -s stage56-php-real-evidence/source-bound-boundary.stderr; then
+            echo '::error::Pinned-source boundary parity/provenance gate failed.'
+            exit 2
+          fi
           if test "$compare_rc" -ne 0 || test -s stage56-php-real-evidence/sauce-compare.stderr; then
             echo '::error::PHP sauce differs from pinned Python; skip redundant 900s year profiles.'
             exit 1
