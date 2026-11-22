@@ -1,0 +1,355 @@
+{
+  "archive_crc_members_pass": 13,
+  "archived_member_sha256_pass": 12,
+  "executed_sha": "faf93de8d27ec112c7c57d6fbfe193c3475a4187",
+  "global_reachability_proven": false,
+  "hostile_tests": [
+    {
+      "path": [
+        "reads",
+        0,
+        "hex"
+      ],
+      "rejected": true,
+      "tick": 292
+    },
+    {
+      "path": [
+        "reads",
+        0,
+        "end"
+      ],
+      "rejected": true,
+      "tick": 9598
+    },
+    {
+      "path": [
+        "pre",
+        1
+      ],
+      "rejected": true,
+      "tick": 10579
+    },
+    {
+      "path": [
+        "pg",
+        "cell_after"
+      ],
+      "rejected": true,
+      "tick": 10614
+    },
+    {
+      "path": [
+        "pg",
+        "target",
+        0
+      ],
+      "rejected": true,
+      "tick": 10629
+    },
+    {
+      "path": [
+        "pg",
+        "pre_toss",
+        1
+      ],
+      "rejected": true,
+      "tick": 10664
+    },
+    {
+      "path": [
+        "pg",
+        "target",
+        0
+      ],
+      "rejected": true,
+      "tick": 10664
+    },
+    {
+      "path": [
+        "pg",
+        "result"
+      ],
+      "rejected": true,
+      "tick": 10900
+    },
+    {
+      "path": [
+        "post",
+        2
+      ],
+      "rejected": true,
+      "tick": 10901
+    },
+    {
+      "path": [
+        "post",
+        0
+      ],
+      "rejected": true,
+      "tick": 10904
+    },
+    {
+      "path": [
+        "pg",
+        "cell_after"
+      ],
+      "rejected": true,
+      "tick": 11135
+    },
+    {
+      "path": [
+        "pg",
+        "cell_before"
+      ],
+      "rejected": true,
+      "tick": 24722
+    },
+    {
+      "path": [
+        "op"
+      ],
+      "rejected": true,
+      "tick": 24723
+    },
+    {
+      "path": [
+        "post",
+        0
+      ],
+      "rejected": true,
+      "tick": 24732
+    },
+    {
+      "path": [
+        "pg",
+        "cell_after"
+      ],
+      "rejected": true,
+      "tick": 24795
+    },
+    {
+      "path": [
+        "fetch",
+        "cell_observed"
+      ],
+      "rejected": true,
+      "tick": 24823
+    }
+  ],
+  "hostile_tests_rejected": 16,
+  "hypothesis": {
+    "assumption": "preservation of the examined control-flow and stack mapping, not established",
+    "conditional_dynamic_code_value": 118,
+    "conditional_owner_value": 1,
+    "conditional_second_operand": 1,
+    "input_string": "1 1 0 100",
+    "native_executed": false,
+    "natural_reachability_proven": false
+  },
+  "independently_walked_full_native_traces": 4,
+  "new_ci_runs": 0,
+  "new_native_executions": 0,
+  "observations": [
+    {
+      "code_fetch_tick": 24823,
+      "code_put_tick": 24795,
+      "dynamic_code_value": 62,
+      "four_operand_stack_tick_10579": [
+        1,
+        0,
+        0,
+        100
+      ],
+      "fourth_operand_put": {
+        "target": [
+          11,
+          1693
+        ],
+        "tick": 10614,
+        "value": 100
+      },
+      "gate_opcode_ticks": [
+        10901,
+        10902,
+        10903,
+        10904
+      ],
+      "owner_get_tick": 24722,
+      "owner_put_tick": 11135,
+      "owner_value": 0,
+      "raw_input": "1 0 0 100",
+      "second_operand_get_tick": 10900,
+      "second_operand_put": {
+        "target": [
+          5,
+          1691
+        ],
+        "tick": 10664,
+        "value": 0
+      },
+      "steps": 24853,
+      "third_operand_put": {
+        "target": [
+          7,
+          1692
+        ],
+        "tick": 10629,
+        "value": 0
+      },
+      "token": 100
+    },
+    {
+      "code_fetch_tick": 24823,
+      "code_put_tick": 24795,
+      "dynamic_code_value": 62,
+      "four_operand_stack_tick_10579": [
+        1,
+        0,
+        0,
+        199
+      ],
+      "fourth_operand_put": {
+        "target": [
+          11,
+          1693
+        ],
+        "tick": 10614,
+        "value": 199
+      },
+      "gate_opcode_ticks": [
+        10901,
+        10902,
+        10903,
+        10904
+      ],
+      "owner_get_tick": 24722,
+      "owner_put_tick": 11135,
+      "owner_value": 0,
+      "raw_input": "1 0 0 199",
+      "second_operand_get_tick": 10900,
+      "second_operand_put": {
+        "target": [
+          5,
+          1691
+        ],
+        "tick": 10664,
+        "value": 0
+      },
+      "steps": 24853,
+      "third_operand_put": {
+        "target": [
+          7,
+          1692
+        ],
+        "tick": 10629,
+        "value": 0
+      },
+      "token": 199
+    },
+    {
+      "code_fetch_tick": 24823,
+      "code_put_tick": 24795,
+      "dynamic_code_value": 62,
+      "four_operand_stack_tick_10579": [
+        1,
+        0,
+        0,
+        500
+      ],
+      "fourth_operand_put": {
+        "target": [
+          11,
+          1693
+        ],
+        "tick": 10614,
+        "value": 500
+      },
+      "gate_opcode_ticks": [
+        10901,
+        10902,
+        10903,
+        10904
+      ],
+      "owner_get_tick": 24722,
+      "owner_put_tick": 11135,
+      "owner_value": 0,
+      "raw_input": "1 0 0 500",
+      "second_operand_get_tick": 10900,
+      "second_operand_put": {
+        "target": [
+          5,
+          1691
+        ],
+        "tick": 10664,
+        "value": 0
+      },
+      "steps": 24853,
+      "third_operand_put": {
+        "target": [
+          7,
+          1692
+        ],
+        "tick": 10629,
+        "value": 0
+      },
+      "token": 500
+    },
+    {
+      "code_fetch_tick": 24823,
+      "code_put_tick": 24795,
+      "dynamic_code_value": 62,
+      "four_operand_stack_tick_10579": [
+        1,
+        0,
+        0,
+        999
+      ],
+      "fourth_operand_put": {
+        "target": [
+          11,
+          1693
+        ],
+        "tick": 10614,
+        "value": 999
+      },
+      "gate_opcode_ticks": [
+        10901,
+        10902,
+        10903,
+        10904
+      ],
+      "owner_get_tick": 24722,
+      "owner_put_tick": 11135,
+      "owner_value": 0,
+      "raw_input": "1 0 0 999",
+      "second_operand_get_tick": 10900,
+      "second_operand_put": {
+        "target": [
+          5,
+          1691
+        ],
+        "tick": 10664,
+        "value": 0
+      },
+      "steps": 24853,
+      "third_operand_put": {
+        "target": [
+          7,
+          1692
+        ],
+        "tick": 10629,
+        "value": 0
+      },
+      "token": 999
+    }
+  ],
+  "original_artifact_zip_sha256": "ea247b7c907d9cd0e1fb8e211619ff538b99b435dd43bcdaef70f084f6e499be",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "run_id": "44996727508",
+  "schema": "qa31cc-offline-original-four-stack-lineage-v1",
+  "source_git_blob_sha1": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "source_modified": false,
+  "stage1_accepted": false,
+  "total_physically_inspected_steps": 99412
+}
