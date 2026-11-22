@@ -2676,3 +2676,57 @@ jobs:
           path: build/stage51-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage52-reversed-same-sign-borrow-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Stage52 strict Native and independent reverse-order oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage52-native.log
+          node test/stage52_planning_oracle.mjs 2>&1 | tee -a build/stage52-native.log
+          compile_sources=(
+            test/stage52_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage52-reversed-same-sign-borrow "${compile_sources[@]}" 2>&1 | tee -a build/stage52-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage52-reversed-same-sign-borrow 2>&1 | tee -a build/stage52-native.log
+          for fact in 'CASES=25/25' 'ARITHMETIC=250/250' 'ORIENTATION=250/250' 'SIGN_AND_ENDPOINT_SYMMETRY=500/500' 'UNIQUE_PAIRS=25' 'MAX_WIDTH_CASES=5' 'SLOT_BALANCE=5,5,5,5,5' 'GATE=PASS_NOT_NATIVE'; do
+            grep -Fxq "STAGE52_PLANNING_${fact}" build/stage52-native.log
+          done
+          grep -Fxq 'STAGE52_HEAP_MEASURED=YES' build/stage52-native.log
+          grep -Fxq 'RESULT=PASS_STAGE52_REVERSED_SAME_SIGN_BORROW_NATIVE' build/stage52-native.log
+          for gate in INIT_VALIDATION TO_TEXT FREE_A TO_TEXT_OVERFLOW; do
+            grep -Fxq "STAGE52_${gate}_GATE=PASS" build/stage52-native.log
+          done
+          for pair in 'INIT_VALIDATION_REJECTS 75' 'TO_TEXT_REJECTS 50' 'TO_TEXT_OVERFLOW_REJECTS 1' 'FREE_A_REJECTS 50' 'INITIAL_OWNERS 125' 'INPUT_REBUILDS 100' 'PRESERVED_AFTER_INPUT_CHANGE 125' 'OCCUPIED_REJECTS 25' 'INVALID_SIGN_REJECTS 25' 'PRESERVED_AFTER_REJECT 125' 'SURVIVORS_AFTER_FREE 100' 'SURVIVORS_AFTER_REUSE 100' 'REPLACEMENT_OWNERS 25' 'RESTORED_OWNERS 25' 'RESTORED_SNAPSHOTS 125' 'FINAL_CLEANUP 25' 'TARGET_SLOT_1 5' 'TARGET_SLOT_2 5' 'TARGET_SLOT_3 5' 'TARGET_SLOT_4 5' 'TARGET_SLOT_5 5' 'RUNS 25' 'PASS 25' 'UNEXPECTED_FAILURES 0' 'HEAP_LIVE_POST_RELEASE 0'; do
+            read -r key value <<<"$pair"
+            grep -Eq "^STAGE52_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage52-native.log
+          done
+          echo 'STAGE52_NATIVE_GATE=PASS' | tee -a build/stage52-native.log
+      - name: Preserve Stage52 evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage52-reversed-same-sign-borrow-evidence
+          path: build/stage52-native.log
+          if-no-files-found: warn
+          retention-days: 30
