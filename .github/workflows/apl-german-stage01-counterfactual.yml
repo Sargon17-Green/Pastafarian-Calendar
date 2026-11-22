@@ -65,7 +65,7 @@ jobs:
           if(@($a.witnesses | Where-Object {$_.start_exact -ne $true -or $_.captured_exact -ne $true -or
              $_.ec_success -ne $true -or $_.value_match -ne $true}).Count -gt 0){throw 'COUNTERFACTUAL_WITNESS_MISMATCH'}
           $names=@('ownership_original','ownership_corrected','poststir_original',
-            'poststir_corrected','poststir_original_rank','poststir_corrected_rank')
+            'poststir_corrected','poststir_original_unboxed_rank','poststir_corrected_rank')
           if(($a.witnesses.name -join ',') -cne ($names -join ',')){throw 'COUNTERFACTUAL_INVENTORY_CHANGED'}
           Write-Output 'SIX_COUNTERFACTUAL_WITNESSES_NATIVE_CONFIRMED_DIAGNOSTIC_ONLY'
       - name: Hash evidence files

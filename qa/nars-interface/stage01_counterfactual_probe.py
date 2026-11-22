@@ -19,7 +19,7 @@ WITNESSES = (
     ("ownership_corrected", "(,2)≡⍴MonsterBaseSemanticState QACFCtx", [1]),
     ("poststir_original", "PostStirSavedSum (⊂1 2 3 4 5 6) 1", [150,151,152,153,154,155]),
     ("poststir_corrected", "QACounterfactualSavedSum (⊂1 2 3 4 5 6) 1", [170]),
-    ("poststir_original_rank", "⍴⍴PostStirSavedSum (⊂1 2 3 4 5 6) 1", [1]),
+    ("poststir_original_unboxed_rank", "⍴⍴⊃PostStirSavedSum (⊂1 2 3 4 5 6) 1", [1]),
     ("poststir_corrected_rank", "⍴⍴QACounterfactualSavedSum (⊂1 2 3 4 5 6) 1", [0]),
 )
 HELPER = [
