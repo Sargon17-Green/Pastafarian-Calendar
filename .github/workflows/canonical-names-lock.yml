@@ -851,7 +851,7 @@ jobs:
           if-no-files-found: error
 
   dart-hebrew-stage7-isolated-restoration-qa-only:
-    if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[stage7-restoration-only]')
+    if: github.ref == 'refs/heads/Dart+עברית' && (contains(github.event.head_commit.message, '[stage7-restoration-only]') || contains(github.event.head_commit.message, '[stage7-qa-only]'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
