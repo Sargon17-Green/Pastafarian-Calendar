@@ -1,0 +1,64 @@
+name: Issue29 Stage41 build provenance v12 (compile/link only; NO F)
+
+on:
+  push:
+    branches:
+      - 'qa/issue29-ada-gmp-build-stream-v176'
+    paths:
+      - '.github/workflows/issue29-stage41-build-provenance-v12.yml'
+      - 'qa/issue29_stage41_provenance_runner_v12.py'
+      - 'QA_REVIEW_v12_HE.md'
+      - 'README_v12_HE.md'
+      - 'pastafari_calendar_stage41.gpr'
+      - 'src/**'
+      - 'tests/stage41_remote_seventeen*'
+      - 'tests/stage14_real_oracle.py'
+      - '.github/workflows/canonical-names-lock.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  stage41-build-link-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install GNAT 13, GPRBuild, GNATCOLL GMP and binutils
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            gnat-13 gprbuild libgnatcoll-gmp-dev binutils python3
+
+      - name: Test direct-child split-stream capture using Python fixtures only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B qa/issue29_stage41_provenance_runner_v12.py \
+            --selftest --output qa-selftest-v12
+
+      - name: Build and attest Stage41 source-to-binary link (never execute observer)
+        shell: bash
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          python3 -B qa/issue29_stage41_provenance_runner_v12.py \
+            --build-only --expected-head "$EXPECTED_HEAD" --output evidence-v12
+
+      - name: Archive build and self-test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-stage41-build-provenance-v12-no-observer-execution
+          path: |
+            evidence-v12/
+            qa-selftest-v12/
+          retention-days: 30
+          if-no-files-found: warn
