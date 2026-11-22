@@ -1,0 +1,66 @@
+name: Fortran Stage1 independent Scroll seal32 endpoint DP
+
+on:
+  push:
+    branches:
+      - 'Fortran+English'
+    paths:
+      - 'test/stage01_scroll_weaving_endpoint_dp.py'
+      - '.github/workflows/stage01-scroll-endpoint-dp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  independent-seal32-count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact branch SHA
+        uses: actions/checkout@v4
+      - name: Bounded independent small-shape exhaustive oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          ulimit -v 1048576
+          timeout 120s python3 -B test/stage01_scroll_weaving_endpoint_dp.py --self-test | tee build/stage01-seal32-endpoint-small.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_SHAPES=115' build/stage01-seal32-endpoint-small.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_RANKS=1408' build/stage01-seal32-endpoint-small.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_BRUTE_DIFFERENTIAL=PASS' build/stage01-seal32-endpoint-small.log
+      - name: Exact 44-month 4399-day Foundation count and seal32 rank
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -v 1048576
+          timeout 120s python3 -B test/stage01_scroll_weaving_endpoint_dp.py --foundation --output build/stage01-seal32-endpoint-foundation.json --max-seconds 100 --max-states 100000 | tee build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_FOUNDATION_MONTHS=44' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_FOUNDATION_DAYS=4399' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_FOUNDATION_COUNT_DIGITS=7021' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_FOUNDATION_COUNT_SHA256=c6d66ea1cf3aa809393bcee7b3232a2f5ff8705897f1016f6d8532d7800d5ab3' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_WHOLE_WEAVING_COMPARED=False' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_FIVE_FIELDS_COMPARED=False' build/stage01-seal32-endpoint-foundation.log
+          grep -Fxq 'STAGE01_ENDPOINT_DP_COMPONENT_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-seal32-endpoint-foundation.log
+          python3 - <<'PY'
+          import json
+          p=json.load(open('build/stage01-seal32-endpoint-foundation.json'))
+          assert p['project_id']=='PC-BRANCH-FORTRAN-ENGLISH'
+          assert p['full_stage1_accepted'] is False
+          assert p['months']==44 and p['days']==4399
+          assert len(p['rank_sha256'])==64 and int(p['rank_zero_based'])>=0
+          assert int(p['rank_zero_based'])<int(p['count_decimal'])
+          PY
+          sha256sum test/stage01_scroll_weaving_endpoint_dp.py build/stage01-seal32-endpoint-foundation.json > build/stage01-seal32-endpoint-SHA256SUMS.txt
+      - name: Preserve all independent evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-seal32-independent-endpoint-dp
+          path: |
+            build/stage01-seal32-endpoint-small.log
+            build/stage01-seal32-endpoint-foundation.log
+            build/stage01-seal32-endpoint-foundation.json
+            build/stage01-seal32-endpoint-SHA256SUMS.txt
+          if-no-files-found: warn
+          retention-days: 30
