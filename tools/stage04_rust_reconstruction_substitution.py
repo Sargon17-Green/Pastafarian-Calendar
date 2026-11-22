@@ -24,8 +24,8 @@ HISTORICAL_VERIFIER_BLOB = "4969623f859827a603f88c5811d03ac9463bbd3c"
 OBSERVED_SHA256 = "cf4c5f12392e04a3e39a80b209e155fb19b0e0f0795920a8bb459f1556ffcd6f"
 EXPECTED_SHA256 = "9fb7051a993abe6c37980848ef912c8f5a438c51a782fb7e0d786944a45ffb80"
 F = -15_055_671
-DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\\Z")
-SHA = re.compile(r"[0-9a-f]{40}\\Z")
+DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z")
+SHA = re.compile(r"[0-9a-f]{40}\Z")
 
 
 class AdmissionError(ValueError):
@@ -67,8 +67,8 @@ def rows(path: Path, header: str, digest: str) -> list[list[int | str]]:
         raise AdmissionError("Fixture header or row count mismatch: " + path.name)
     parsed: list[list[int | str]] = []
     for line in lines[1:]:
-        fields = line.split("\\t")
-        if len(fields) != len(header.split("\\t")):
+        fields = line.split("\t")
+        if len(fields) != len(header.split("\t")):
             raise AdmissionError("Fixture column count mismatch: " + path.name)
         if not all(DECIMAL.fullmatch(s) for s in fields[:3]):
             raise AdmissionError("Noncanonical numerical field: " + path.name)
@@ -77,8 +77,8 @@ def rows(path: Path, header: str, digest: str) -> list[list[int | str]]:
 
 
 def verify_numeric(expected: Path, observed: Path) -> dict[str, object]:
-    a = rows(expected, "index\\tday\\toracle_tag\\tregion\\tdistance", EXPECTED_SHA256)
-    b = rows(observed, "index\\tday\\tnative_tag", OBSERVED_SHA256)
+    a = rows(expected, "index\tday\toracle_tag\tregion\tdistance", EXPECTED_SHA256)
+    b = rows(observed, "index\tday\tnative_tag", OBSERVED_SHA256)
     before = 0
     after = 0
     for i, (e, o) in enumerate(zip(a, b)):

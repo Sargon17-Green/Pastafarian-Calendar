@@ -14,15 +14,15 @@ import stage04_rust_reconstruction_substitution as gate
 
 
 def fixture_rows() -> tuple[str, str]:
-    expect = ["index\\tday\\toracle_tag\\tregion\\tdistance"]
-    observed = ["index\\tday\\tnative_tag"]
+    expect = ["index\tday\toracle_tag\tregion\tdistance"]
+    observed = ["index\tday\tnative_tag"]
     for i in range(128):
         d = ((i + 1) << (i % 120)) + 37 * i + 3
         day = gate.F - d if i % 2 == 0 else gate.F + d
         tag = 2 * d + (0 if i % 2 == 0 else 1)
-        expect.append(f"{i}\\t{day}\\t{tag}\\t{'BEFORE' if i % 2 == 0 else 'ON_OR_AFTER'}\\t{d}")
-        observed.append(f"{i}\\t{day}\\t{tag}")
-    return "\\n".join(expect) + "\\n", "\\n".join(observed) + "\\n"
+        expect.append(f"{i}\t{day}\t{tag}\t{'BEFORE' if i % 2 == 0 else 'ON_OR_AFTER'}\t{d}")
+        observed.append(f"{i}\t{day}\t{tag}")
+    return "\n".join(expect) + "\n", "\n".join(observed) + "\n"
 
 
 class TestStage04ApprovedSubstitution(unittest.TestCase):
@@ -51,17 +51,17 @@ class TestStage04ApprovedSubstitution(unittest.TestCase):
 
     def test_tampered_observed_actual_rejected(self):
         data = self.o.read_text()
-        self.o.write_text(data.replace("0\\t-15055675\\t8", "0\\t-15055675\\t9", 1))
+        self.o.write_text(data.replace("0\t-15055675\t8", "0\t-15055675\t9", 1))
         with self.assertRaisesRegex(gate.AdmissionError, "digest mismatch"):
             gate.verify_numeric(self.e, self.o)
 
     def test_truncated_native_rows_rejected(self):
-        self.o.write_text("\\n".join(self.o.read_text().splitlines()[:-1]) + "\\n")
+        self.o.write_text("\n".join(self.o.read_text().splitlines()[:-1]) + "\n")
         with self.assertRaisesRegex(gate.AdmissionError, "digest mismatch"):
             gate.verify_numeric(self.e, self.o)
 
     def test_wrong_independent_oracle_rejected(self):
-        self.e.write_text(self.e.read_text().replace("0\\t-15055675\\t8", "0\\t-15055675\\t7", 1))
+        self.e.write_text(self.e.read_text().replace("0\t-15055675\t8", "0\t-15055675\t7", 1))
         with self.assertRaisesRegex(gate.AdmissionError, "digest mismatch"):
             gate.verify_numeric(self.e, self.o)
 
