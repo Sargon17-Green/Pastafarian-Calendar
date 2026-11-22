@@ -67,6 +67,18 @@ jobs:
               | tee build/stage01-foundation-candidate.log
           grep -Fxq 'STAGE01_FOUNDATION_CANDIDATE_CAPTURE=PASS' build/stage01-foundation-candidate.log
           grep -Fxq 'STAGE01_FOUNDATION_CANDIDATE_ONLY_NOT_CANONICAL' build/stage01-foundation-candidate.log
+      - name: Verify independent Hebrew Scroll day/sauce/gate oracle (diagnostic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_gate_independent.py
+          timeout --signal=TERM --kill-after=5s 180s \
+            python3 -u test/stage01_scroll_gate_independent.py \
+              --self-test --foundation --output build/stage01-scroll-gate-foundation.json \
+              | tee build/stage01-scroll-gate-foundation.log
+          grep -Fq 'STAGE01_SCROLL_GATE_SELFTEST=15/15' build/stage01-scroll-gate-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_FOUNDATION_YEAR5000_DIAGNOSTIC=PASS' build/stage01-scroll-gate-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_GATE_COMPONENT_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-gate-foundation.log
       - name: Preserve canonical component evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -78,5 +90,7 @@ jobs:
             build/stage01-scroll-stir.json
             build/stage01-foundation-candidate.log
             build/stage01-foundation-candidate.json
+            build/stage01-scroll-gate-foundation.log
+            build/stage01-scroll-gate-foundation.json
           if-no-files-found: warn
           retention-days: 30
