@@ -1,0 +1,94 @@
+name: MATLAB Stage55 Sixty-second Day Native Python Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/run_stage55_year5000_sixty_second_native.m'
+      - 'tools/stage55_after62_suffix_distance_witness.py'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-sixty-second-day-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: stage55-sixty-second-day-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  sixty-second-day:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+      - name: Download certified AFTER61 checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: stage55-sixty-first-day-differential
+          run-id: 45065329815
+          github-token: ${{ github.token }}
+          path: logs
+      - name: Verify pinned AFTER61
+        run: |
+          echo 'cddc573d509cc6f0cbe705d57125ebbc3baa9cd4f7ab0d0e22edcfb0681d382f  logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_61.json' | sha256sum -c -
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+      - name: Preflight AFTER62 independent suffix-distance witness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f tools/stage55_after62_suffix_distance_witness.py
+          grep -Fqx 'PARENT_SHA256 = "cddc573d509cc6f0cbe705d57125ebbc3baa9cd4f7ab0d0e22edcfb0681d382f"' tools/stage55_after62_suffix_distance_witness.py
+          python3 -m py_compile tools/stage55_after62_suffix_distance_witness.py
+          python3 tools/stage55_after62_suffix_distance_witness.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_61.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --report logs/STAGE55_AFTER62_PREFLIGHT.json \
+            | tee logs/STAGE55_AFTER62_PREFLIGHT.log
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native sixty-second-day exact cursor and PATCH25 projection
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_sixty_second_native
+      - name: Python independent child intervals and strict five-field differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/stage55_after62_suffix_distance_witness.py \
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_61.json \
+            tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --after62 logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_62.json \
+            --report logs/STAGE55_AFTER62_CERTIFICATION.json \
+            | tee logs/STAGE55_SIXTY_SECOND_PYTHON.log
+          grep '^STAGE55_SIXTY_SECOND_ROW ' logs/STAGE55_SIXTY_SECOND_PYTHON.log > logs/STAGE55_SIXTY_SECOND_PYTHON_ROW.txt
+          grep '^STAGE55_SIXTY_SECOND_ROW ' logs/STAGE55_SIXTY_SECOND_NATIVE.log > logs/STAGE55_SIXTY_SECOND_NATIVE_ROW.txt
+          test "$(wc -l < logs/STAGE55_SIXTY_SECOND_PYTHON_ROW.txt)" -eq 1
+          test "$(wc -l < logs/STAGE55_SIXTY_SECOND_NATIVE_ROW.txt)" -eq 1
+          diff -u logs/STAGE55_SIXTY_SECOND_PYTHON_ROW.txt logs/STAGE55_SIXTY_SECOND_NATIVE_ROW.txt
+          expected="STAGE55_SIXTY_SECOND_ROW POSITION=62 YEAR=5000 CUTLET_INDEX=15 CUTLET_DAY=62 MONTH_INDEX=35 MONTH_DAY=3"
+          grep -Fqx "$expected" logs/STAGE55_SIXTY_SECOND_NATIVE_ROW.txt
+          grep -Fqx "$expected" logs/STAGE55_SIXTY_SECOND_PYTHON_ROW.txt
+          sha256sum logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_62.json | tee logs/STAGE55_SIXTY_SECOND_DIGEST.txt
+          echo 'STAGE55_SIXTY_SECOND_DAY_DIFFERENTIAL_PASS CASES=1 FIELDS=5 NEGATIVE=2'
+      - name: Preserve PASS or FAIL artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-sixty-second-day-differential
+          path: |
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_61.json
+            logs/STAGE55_REAL_YEAR_INNER_CURSOR_AFTER_62.json
+            logs/STAGE55_SIXTY_SECOND_NATIVE.log
+            logs/STAGE55_SIXTY_SECOND_PYTHON.log
+            logs/STAGE55_SIXTY_SECOND_PYTHON_ROW.txt
+            logs/STAGE55_SIXTY_SECOND_NATIVE_ROW.txt
+            logs/STAGE55_SIXTY_SECOND_DIGEST.txt
+            logs/STAGE55_AFTER62_PREFLIGHT.json
+            logs/STAGE55_AFTER62_PREFLIGHT.log
+            logs/STAGE55_AFTER62_CERTIFICATION.json
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
