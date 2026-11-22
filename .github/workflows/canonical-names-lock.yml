@@ -246,6 +246,13 @@ jobs:
           timeout --signal=TERM --kill-after=5s 120s \
             v test ./pastafari/normative_oracle_test.v -run-only 'test_stage35_ballot_lexical_rank_roundtrip_at_17_and_47_months' \
             2>&1 | tee stage35_ballot.log
+      - name: Stage 36 — independent adjacent Ballot lexical ranks (17/47 months)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage36_adjacent_ballot_lexical_ranks_at_17_and_47_months' \
+            2>&1 | tee stage36_adjacent.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |
@@ -315,4 +322,5 @@ jobs:
             stage32_boundaries.log
             stage33_weave_unrank.log
             stage34_catalan.log
+            stage36_adjacent.log
           if-no-files-found: ignore

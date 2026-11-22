@@ -2016,3 +2016,47 @@ fn test_stage35_ballot_lexical_rank_roundtrip_at_17_and_47_months() {
 	stage35_check_ballot_lexical_ranks(47)
 	println('V_AMHARIC_STAGE35_BALLOT_LEXICAL_RANK_PASS MONTHS=17,47 SAMPLES=14')
 }
+
+// Stage36: consecutive lexical ranks must be distinct, sorted and consecutive
+// under the independent reflection-principle Ballot ranking oracle.
+fn stage36_check_adjacent_ballot_ranks(month_count int) {
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	total := stage35_ballot_suffix_count(month_count, 0, 0)
+	assert big_eq(candidate.count_all(), total)
+	quarter := big_floor_div(total, big_from_int(4))
+	half := big_floor_div(big_add(total, big_one()), big_from_int(2))
+	ranks := [
+		big_one(),
+		big_from_int(2),
+		quarter,
+		half,
+		big_sub(total, quarter),
+		big_sub(total, big_from_int(2)),
+		big_sub(total, big_one()),
+	]
+	for rank in ranks {
+		assert big_cmp(rank, big_one()) >= 0
+		assert big_cmp(rank, total) < 0
+		successor_rank := big_add(rank, big_one())
+		current := candidate.unrank1(rank)
+		successor := candidate.unrank1(successor_rank)
+		assert big_eq(stage35_independent_lexical_rank(month_count, current), rank)
+		assert big_eq(stage35_independent_lexical_rank(month_count, successor), successor_rank)
+		mut first_diff := -1
+		for idx in 0 .. current.len {
+			if current[idx] != successor[idx] {
+				first_diff = idx
+				break
+			}
+		}
+		assert first_diff >= 0
+		assert current[first_diff] < successor[first_diff]
+	}
+}
+
+fn test_stage36_adjacent_ballot_lexical_ranks_at_17_and_47_months() {
+	stage36_check_adjacent_ballot_ranks(17)
+	stage36_check_adjacent_ballot_ranks(47)
+	println('V_AMHARIC_STAGE36_ADJACENT_RANK_PASS MONTHS=17,47 PAIRS=14')
+}
