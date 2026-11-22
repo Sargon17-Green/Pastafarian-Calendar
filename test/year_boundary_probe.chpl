@@ -22,47 +22,99 @@ proc sameWord(const ref a: list(int), const ref b: list(int)): bool {
   return true;
 }
 
+// Production Chapel sparse counter is compared against the retained legacy
+// algorithm. The fixture domain matches the independent branch-local
+// occurrence-poset oracle, but no oracle implementation is reused here.
+proc checkSparseWeavingFamily(const ref lens: list(int),
+                              ref families: int,
+                              ref rankChecks: int) {
+  var legacy: WeavingCounter;
+  var sparseCounter: SparseWeavingCounter;
+  for length in lens {
+    legacy.lengths.pushBack(length);
+    sparseCounter.lengths.pushBack(length);
+  }
+  const legacyRoot = legacy.countAll();
+  const sparseRoot = sparseCounter.countAll();
+  check(legacyRoot == sparseRoot,
+        "sparse/legacy root mismatch family=" + families:string);
+  if legacyRoot == sparseRoot {
+    const rootCount = legacyRoot:int;
+    for r in 1..rootCount {
+      const rank1 = new bigint(r);
+      const legacyWord = legacy.unrank1(rank1);
+      const sparseWord = sparseCounter.unrank1(rank1);
+      check(sameWord(legacyWord,sparseWord),
+            "sparse/legacy unrank mismatch family=" + families:string +
+            " rank=" + r:string);
+      check(sparseCounter.rank1(sparseWord) == rank1,
+            "sparse rank roundtrip family=" + families:string +
+            " rank=" + r:string);
+      rankChecks += 2;
+    }
+  }
+  families += 1;
+}
+
 proc checkSparseWeavingDifferential() {
   var families = 0;
   var rankChecks = 0;
+  // All length-1..4 vectors with at most four months and at most eight days.
+  // The original base-3 loop accidentally omitted length 4.
   for m in 1..4 {
     var possibilities = 1;
-    for j in 1..m do possibilities *= 3;
+    for j in 1..m do possibilities *= 4;
     for raw in 0..<possibilities {
       var digits = raw;
-      var lens: [1..m] int;
+      var lensArray: [1..m] int;
       var days = 0;
       for j in 1..m by -1 {
-        lens[j] = 1 + digits%3;
-        digits /= 3;
-        days += lens[j];
+        lensArray[j] = 1 + digits%4;
+        digits /= 4;
+        days += lensArray[j];
       }
       if days > 8 then continue;
-      var legacy: WeavingCounter;
-      var sparseCounter: SparseWeavingCounter;
-      for j in 1..m {
-        legacy.lengths.pushBack(lens[j]);
-        sparseCounter.lengths.pushBack(lens[j]);
-      }
-      const legacyRoot = legacy.countAll();
-      const sparseRoot = sparseCounter.countAll();
-      check(legacyRoot == sparseRoot,
-            "sparse/legacy root mismatch family=" + families:string);
-      if legacyRoot == sparseRoot {
-        const rootCount = legacyRoot:int;
-        for r in 1..rootCount {
-          const rank1 = new bigint(r);
-          const legacyWord = legacy.unrank1(rank1);
-          const sparseWord = sparseCounter.unrank1(rank1);
-          check(sameWord(legacyWord,sparseWord) && sparseCounter.rank1(sparseWord) == rank1,
-                "sparse/legacy rank roundtrip family=" + families:string +
-                " rank=" + r:string);
-          rankChecks += 1;
-        }
-      }
-      families += 1;
+      var lens = new list(int);
+      for j in 1..m do lens.pushBack(lensArray[j]);
+      checkSparseWeavingFamily(lens,families,rankChecks);
     }
   }
+
+  // Seven additional distinct boundary families, also used by the independent
+  // branch-local oracle. Its two other extras are already in the base domain.
+  var extra0 = new list(int);
+  extra0.pushBack(2); extra0.pushBack(2); extra0.pushBack(2);
+  extra0.pushBack(2); extra0.pushBack(2);
+  checkSparseWeavingFamily(extra0,families,rankChecks);
+
+  var extra1 = new list(int);
+  extra1.pushBack(2); extra1.pushBack(3);
+  extra1.pushBack(2); extra1.pushBack(2);
+  checkSparseWeavingFamily(extra1,families,rankChecks);
+
+  var extra2 = new list(int);
+  extra2.pushBack(3); extra2.pushBack(2);
+  extra2.pushBack(3); extra2.pushBack(2);
+  checkSparseWeavingFamily(extra2,families,rankChecks);
+
+  var extra3 = new list(int);
+  extra3.pushBack(2); extra3.pushBack(2);
+  extra3.pushBack(3); extra3.pushBack(3);
+  checkSparseWeavingFamily(extra3,families,rankChecks);
+
+  var extra4 = new list(int);
+  extra4.pushBack(3); extra4.pushBack(3);
+  extra4.pushBack(2); extra4.pushBack(2);
+  checkSparseWeavingFamily(extra4,families,rankChecks);
+
+  var extra5 = new list(int);
+  extra5.pushBack(4); extra5.pushBack(3); extra5.pushBack(2);
+  checkSparseWeavingFamily(extra5,families,rankChecks);
+
+  var extra6 = new list(int);
+  extra6.pushBack(2); extra6.pushBack(4); extra6.pushBack(3);
+  checkSparseWeavingFamily(extra6,families,rankChecks);
+
   writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_FAMILIES=",families);
   writeln("YEAR_BOUNDARY_SPARSE_DIFFERENTIAL_RANKS=",rankChecks);
   check(families == 137 && rankChecks == 1982,
