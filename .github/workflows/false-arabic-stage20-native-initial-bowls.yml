@@ -1,0 +1,76 @@
+name: FALSE Arabic Stage 20 initial bowls original-runtime Native
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  stage20-native:
+    if: contains(github.event.head_commit.message, '[false-arabic-stage20-native]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: ${{ github.sha }}
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact source and original FALSE interpreter commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage20_native upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git cat-file -e "$SOURCE_PIN^{commit}"
+          git rev-parse "$SOURCE_PIN" > evidence/stage20_native/source_observed.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage20_native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage20_native/runtime_observed.txt
+          test "$(cat evidence/stage20_native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+      - name: Build original interpreter and prove UTF-8 pick parsing
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/stage20_native/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/stage20_native/compiler_stdout.txt \
+            2> evidence/stage20_native/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/stage20_native/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/stage20_native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage20_native/unicode_pick.false \
+            > evidence/stage20_native/unicode_pick.stdout.txt \
+            2> evidence/stage20_native/unicode_pick.stderr.txt
+          test "$(cat evidence/stage20_native/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/stage20_native/preflight.txt
+      - name: Generate oracle-independent fixtures and run Native gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          node --version > evidence/stage20_native/node_version.txt
+          node tools/stage20_initial_bowls_design_oracle.mjs > evidence/stage20_native/design_oracle.log
+          python3 -m py_compile tools/stage20_initial_bowls_fixture.py tools/stage20_initial_bowls_ci.py tools/stage20_initial_bowls_offline_audit.py
+          PYTHONPATH=tools python3 tools/stage20_initial_bowls_fixture.py > evidence/stage20_native/fixture_generation.json
+          PYTHONPATH=tools python3 tools/stage20_initial_bowls_ci.py
+      - name: Preserve source-pinned Native programs, byte-exact logs and exits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage20-initial-bowls-native
+          path: |
+            evidence/stage20_native/
+          if-no-files-found: error
+          retention-days: 30
