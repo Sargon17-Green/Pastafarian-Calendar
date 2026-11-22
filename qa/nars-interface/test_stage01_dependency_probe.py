@@ -4,6 +4,7 @@ import pathlib
 import unittest
 from stage01_dependency_probe import build_dependency_probe, FINAL, qa_fixed_fx_programs
 from stage01_statement_probe import build_statement_probe
+from stage01_fx_prefix_probe import nested_fx_expression
 from stage01_import_workspace import SOURCE_COMMIT
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -110,13 +111,21 @@ class RootCauseTests(unittest.TestCase):
         copy = ["∇ z←QAFixedPostStir12 bowls;stir", "  z←bowls", "∇"]
         fixed = qa_fixed_fx_programs(helper, copy)
         self.assertEqual(len(fixed), 2)
-        self.assertTrue(fixed[0].startswith("QAFixedFXHelper←⎕EC ⎕FX "))
-        self.assertTrue(fixed[1].startswith("QAFixedFXCopy←⎕EC ⎕FX "))
-        self.assertEqual([x.count("(⎕UCS ") for x in fixed], [3, 3])
+        # Regression: the previous QA builder included editor delimiters ∇
+        # which NARS ⎕FX must not receive even if Python generation succeeds.
+        expected_helper = nested_fx_expression(
+            ["z←QAFixedPostStirSavedSum args;bowls;stir", "  z←Save 1"])
+        expected_copy = nested_fx_expression(
+            ["z←QAFixedPostStir12 bowls;stir", "  z←bowls"])
+        self.assertEqual(fixed[0], "QAFixedFXHelper←⎕EC ⎕FX " + expected_helper)
+        self.assertEqual(fixed[1], "QAFixedFXCopy←⎕EC ⎕FX " + expected_copy)
+        self.assertEqual([x.count("(⎕UCS ") for x in fixed], [2, 2])
         self.assertEqual(len(self.receipt["qa_fixed_poststir"]["fx_program_sha256s"]), 2)
         self.assertTrue(all(len(x) == 64 for x in self.receipt["qa_fixed_poststir"]["fx_program_sha256s"]))
         with self.assertRaisesRegex(ValueError, "QA_FX_COPY_HEADER_INVALID"):
             qa_fixed_fx_programs(helper, [])
+        with self.assertRaisesRegex(ValueError, "FX_BLOCK_MISSING_EDITOR_DELIMITERS"):
+            qa_fixed_fx_programs(helper, ["∇ z←QAFixedPostStir12 bowls;stir", "  z←bowls"])
 
     def test_determinism_and_crlf(self):
         c2, r2 = build_dependency_probe(BASE, ROOT, MARKER)

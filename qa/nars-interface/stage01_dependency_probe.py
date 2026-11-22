@@ -7,7 +7,8 @@ import json
 import pathlib
 import sys
 from chunked_fx_probe import marker_write
-from stage01_import_workspace import SOURCE_COMMIT, _codes, load_locked_sources
+from stage01_import_workspace import SOURCE_COMMIT, _codes, fx_definition_lines, load_locked_sources
+from stage01_fx_prefix_probe import nested_fx_expression
 from stage01_statement_probe import build_statement_probe, decode_programs
 
 FINAL = "APL_GERMAN_ROOTCAUSE_DIAGNOSTIC_V4_COMPLETE_NOT_STAGE01"
@@ -30,14 +31,22 @@ def anchor(blocks, name, needle=None, required_line=None):
 
 
 def qa_fixed_fx_programs(helper_lines, copy_lines):
-    """Emit two individual native ⎕FX definitions, never one multi-function body."""
+    """Fix each QA function with the already-proven native NARS ⎕FX transport.
+
+    Editor-style ∇ delimiters must be removed before ⎕FX. Preserve each
+    function body, its independent ⎕EC capture, and the locked source.
+    """
     if not helper_lines or not helper_lines[0].startswith("∇ z←QAFixedPostStirSavedSum "):
         raise ValueError("QA_FX_HELPER_HEADER_INVALID")
     if not copy_lines or not copy_lines[0].startswith("∇ z←QAFixedPostStir12 "):
         raise ValueError("QA_FX_COPY_HEADER_INVALID")
+    helper_definition = fx_definition_lines(
+        {"name": "QAFixedPostStirSavedSum", "lines": helper_lines})
+    copy_definition = fx_definition_lines(
+        {"name": "QAFixedPostStir12", "lines": copy_lines})
     return [
-        "QAFixedFXHelper←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in helper_lines),
-        "QAFixedFXCopy←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in copy_lines),
+        "QAFixedFXHelper←⎕EC ⎕FX " + nested_fx_expression(helper_definition),
+        "QAFixedFXCopy←⎕EC ⎕FX " + nested_fx_expression(copy_definition),
     ]
 
 
