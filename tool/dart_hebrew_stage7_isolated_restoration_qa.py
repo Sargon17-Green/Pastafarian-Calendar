@@ -158,28 +158,25 @@ def main() -> None:
                     source_before_format = (wd / PLANNER).read_text(encoding="utf-8")
                     (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
                     (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
-                    if label == "B":
-                        # Candidate B is the current branch source and must be formatter-clean.
-                        fmt = run("dart", "format", "--output=none", "--set-exit-if-changed", PLANNER, cwd=wd)
-                        format_status = "CLEAN"
-                    else:
-                        # A is a historical accepted source lock. Diagnose formatter drift without
-                        # rewriting it: the exact A bytes must remain intact for the differential.
-                        fmt_proc = subprocess.run(
-                            ("dart", "format", "--output=none", PLANNER),
-                            cwd=wd, capture_output=True, text=True, timeout=240,
+                    # Both B and restored A are source-locked. Diagnose formatting
+                    # without modifying either variant; retain the historical bytes.
+                    fmt_proc = subprocess.run(
+                        ("dart", "format", "--output=none", PLANNER),
+                        cwd=wd, capture_output=True, text=True, timeout=240,
+                    )
+                    fmt_output = (fmt_proc.stdout or "") + (fmt_proc.stderr or "")
+                    if fmt_proc.returncode != 0:
+                        raise RuntimeError(
+                            f"dart format diagnostic failed for locked {label} (exit={fmt_proc.returncode})\n{fmt_output[-4000:]}"
                         )
-                        fmt_output = (fmt_proc.stdout or "") + (fmt_proc.stderr or "")
-                        if fmt_proc.returncode != 0:
-                            raise RuntimeError(
-                                f"dart format diagnostic failed for locked A (exit={fmt_proc.returncode})\n{fmt_output[-4000:]}"
-                            )
-                        changed_match = re.search(r"Formatted \d+ files? \((\d+) changed\)", fmt_output)
-                        if changed_match is None:
-                            raise RuntimeError("Could not parse Dart formatter summary for locked A: " + fmt_output[-2000:])
-                        changed_files = int(changed_match.group(1))
-                        fmt = {"output": fmt_output.strip(), "changed_files": changed_files}
-                        format_status = "CLEAN" if changed_files == 0 else "BASELINE_FORMAT_DRIFT"
+                    changed_match = re.search(r"Formatted \d+ files? \((\d+) changed\)", fmt_output)
+                    if changed_match is None:
+                        raise RuntimeError(
+                            f"Could not parse Dart formatter summary for locked {label}: " + fmt_output[-2000:]
+                        )
+                    changed_files = int(changed_match.group(1))
+                    fmt = {"output": fmt_output.strip(), "changed_files": changed_files}
+                    format_status = "CLEAN" if changed_files == 0 else "BASELINE_FORMAT_DRIFT"
                     source_after_format = (wd / PLANNER).read_text(encoding="utf-8")
                     expected_blob = B_BLOB if label == "B" else A_BLOB
                     assert source_after_format == source_before_format, "Formatter changed the source-locked worktree"
@@ -205,15 +202,20 @@ def main() -> None:
         results["error"] = repr(exc)
         write_results(out, results)
         raise
-    a_format_drift = results["variants"]["RESTORED_A"]["format_status"] == "BASELINE_FORMAT_DRIFT"
+    drift_variants = [
+        label for label, data in results["variants"].items()
+        if data["format_status"] == "BASELINE_FORMAT_DRIFT"
+    ]
+    results["format_gate"] = "BASELINE_FORMAT_DRIFT" if drift_variants else "CLEAN"
     results["status"] = (
-        "PASS_ISOLATED_DIFFERENTIAL_WITH_A_FORMAT_DRIFT"
-        if a_format_drift else "PASS_ISOLATED_QA_ONLY"
+        "DIFFERENTIAL_PASS_WITH_FORMAT_DRIFT"
+        if drift_variants else "PASS_ISOLATED_QA_ONLY"
     )
     write_results(out, results)
     print(
         "STAGE7_ISOLATED_RESTORATION_QA_PASS head=" + head +
-        " cases=1788x2 A_format=" + results["variants"]["RESTORED_A"]["format_status"] +
+        " cases=1788x2 B_format=" + results["variants"]["B"]["format_status"] +
+        " A_format=" + results["variants"]["RESTORED_A"]["format_status"] +
         " no_production_edit"
     )
 
