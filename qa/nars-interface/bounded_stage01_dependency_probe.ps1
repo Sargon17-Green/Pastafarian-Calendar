@@ -63,7 +63,7 @@ try{
  $m=Get-Content $receipt -Raw | ConvertFrom-Json
  if($m.schema -cne 'APL_GERMAN_STAGE01_ROOTCAUSE_DIAGNOSTIC_V4' -or $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or $m.calls.Count -ne 3 -or $m.tests.Count -ne 3 -or $m.dependency_probes.Count -ne 61 -or
-    $m.program_count -ne 96 -or $m.final_original_stage01_tests_executed -ne $false -or $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
+    $m.program_count -ne 97 -or $m.final_original_stage01_tests_executed -ne $false -or $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
  if((Get-FileHash $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
  $r['candidate_sha256']=$m.candidate_sha256
  foreach($c in $m.chunk_records){if(Test-Path $c.marker_path){throw 'OLD_FX_RECEIPT'}}

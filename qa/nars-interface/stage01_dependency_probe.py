@@ -195,9 +195,13 @@ def build_dependency_probe(raw, root, marker):
         "  z←Save ((+/bowls)+(149×stir))",
         "∇",
     ]
-    fx_lines = fixed_saved_lines + fixed_post_lines
-    fx_program = "QAFixedFX←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fx_lines)
-    programs.append(fx_program)
+    # Each ⎕FX fixes exactly one function. V4 sent two definitions in one
+    # call; native evidence showed ⎕NC=0 for the purported QA helper.
+    fx_programs = [
+        "QAFixedFXHelper←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fixed_saved_lines),
+        "QAFixedFXCopy←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fixed_post_lines),
+    ]
+    programs.extend(fx_programs)
     fixed_receipt = {
         "source_function": "PostStir12",
         "source_sha256": hashlib.sha256("\n".join(post_block["lines"]).encode("utf-8")).hexdigest(),
@@ -206,7 +210,7 @@ def build_dependency_probe(raw, root, marker):
         "helper_function": "QAFixedPostStirSavedSum",
         "helper_sha256": hashlib.sha256("\n".join(fixed_saved_lines).encode("utf-8")).hexdigest(),
         "only_logic_change": "PostStirSavedSum (⊂old) stir -> QAFixedPostStirSavedSum (⊂old) stir; helper uses bowls←⊃⊃args[1]",
-        "fx_program_sha256": hashlib.sha256(fx_program.encode("utf-8")).hexdigest(),
+        "fx_program_sha256s": [hashlib.sha256(x.encode("utf-8")).hexdigest() for x in fx_programs],
     }
     for index, (name, setup, expression, mode, origin) in enumerate(specs, 1):
         prefix = f"APL_GERMAN_ROOT_V4|SOURCE={SOURCE_COMMIT}|INDEX={index:02d}|NAME={name}"

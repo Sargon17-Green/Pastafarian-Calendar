@@ -3,7 +3,7 @@ import hashlib
 import pathlib
 import unittest
 from stage01_dependency_probe import build_dependency_probe, FINAL
-from stage01_statement_probe import build_statement_probe
+from stage01_statement_probe import build_statement_probe, decode_programs
 from stage01_import_workspace import SOURCE_COMMIT
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -32,7 +32,7 @@ class RootCauseTests(unittest.TestCase):
         self.assertEqual(self.receipt["prior_candidate_sha256"], hashlib.sha256(previous).hexdigest())
         self.assertEqual((self.receipt["function_count"], self.receipt["chunk_count"]), (95, 23))
         self.assertEqual((len(self.receipt["tests"]), len(self.receipt["calls"])), (3, 3))
-        self.assertEqual(self.receipt["program_count"], 96)
+        self.assertEqual(self.receipt["program_count"], 97)
 
     def test_exact_original_source_lines_and_diagnostic_anchors(self):
         anchors = self.receipt["source_dependency_anchors"]
@@ -53,7 +53,7 @@ class RootCauseTests(unittest.TestCase):
         self.assertFalse(r["final_original_stage01_tests_executed"])
         self.assertFalse(r["original_stage01_acceptance_token_present"])
         self.assertEqual(r["marker_token"], FINAL)
-        self.assertEqual(r["program_count"], 96)
+        self.assertEqual(r["program_count"], 97)
         self.assertEqual(len(r["dependency_probes"]), 61)
         self.assertEqual(len({p["start_path"] for p in r["dependency_probes"]}), 61)
         self.assertEqual(len({p["message_path"] for p in r["dependency_probes"]}), 61)
@@ -104,6 +104,20 @@ class RootCauseTests(unittest.TestCase):
             self.assertTrue(p["captured_token"].endswith("CAPTURED_NOT_PASS"))
             self.assertNotEqual(p["start_path"], p["captured_path"])
             self.assertRegex(p["program_sha256"], "^[0-9a-f]{64}$")
+
+    def test_fixed_functions_are_separate_fx_calls(self):
+        _, _, _, programs = decode_programs(self.candidate)
+        fixed = [x for x in programs if x.startswith("QAFixedFX")]
+        self.assertEqual(len(programs), 97)
+        self.assertEqual(len(fixed), 2)
+        self.assertTrue(fixed[0].startswith("QAFixedFXHelper←⎕EC ⎕FX "))
+        self.assertTrue(fixed[1].startswith("QAFixedFXCopy←⎕EC ⎕FX "))
+        self.assertEqual(fixed[0].count("(⎕UCS "), 4)
+        self.assertGreater(fixed[1].count("(⎕UCS "), 10)
+        self.assertEqual(
+            self.receipt["qa_fixed_poststir"]["fx_program_sha256s"],
+            [hashlib.sha256(x.encode("utf-8")).hexdigest() for x in fixed],
+        )
 
     def test_determinism_and_crlf(self):
         c2, r2 = build_dependency_probe(BASE, ROOT, MARKER)
