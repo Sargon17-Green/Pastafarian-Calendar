@@ -3465,6 +3465,45 @@ BEGIN {
     expect_exact("wide original eighty-eighth+1 eighty-ninth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
 
+    # Eighty-ninth-digit to ninetieth-digit transition at original M=2^127-1.
+    # Independent positional BigInt vs rational closed forms 4/4:
+    # boundary/backward 3403 decimal digits; rejection rank 1; wrap 3367.
+    WIDE_EIGHTY_NINTH=bi_mul(WIDE_EIGHTY_EIGHTH,M)
+    STREAM_FIRST=bi_sub(M,"89"); STREAM_STEP=1
+    choose_rank_wide(WIDE_EIGHTY_NINTH)
+    EXPECTED_EIGHTY_NINTH=WIDE_EIGHTY_NINTH
+    QA_POWER="1"
+    for (QA_I=0;QA_I<89;QA_I++) {
+        EXPECTED_EIGHTY_NINTH=bi_sub(EXPECTED_EIGHTY_NINTH,bi_mul_small(QA_POWER,89-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighty-ninth eighty-ninth-digit boundary", CHOSEN_RANK, EXPECTED_EIGHTY_NINTH)
+
+    WIDE_N=bi_add(WIDE_EIGHTY_NINTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original eighty-ninth+1 ninetieth-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_EIGHTY_NINTH
+    QA_POWER=M
+    for (QA_I=1;QA_I<89;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"90")
+    expect_exact("wide original eighty-ninth+1 ninetieth-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"88")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<89;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original eighty-ninth+1 ninetieth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
