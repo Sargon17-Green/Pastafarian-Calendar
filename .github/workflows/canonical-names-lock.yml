@@ -1687,6 +1687,8 @@ jobs:
           php -l src/BigInt.php > stage56-php-real-evidence/lint-bigint.txt 2>&1 || exit 1
           php -l src/Patches/MonthWeavingInterleaving56.php > stage56-php-real-evidence/lint-interleaving.txt 2>&1 || exit 1
           php -l src/Patches/MonthWeavingRanker56.php > stage56-php-real-evidence/lint-ranker.txt 2>&1 || exit 1
+          php -l src/Patches/UnboundedUniformChoice56.php > stage56-php-real-evidence/lint-choice.txt 2>&1 || exit 1
+          php -l src/Patches/YearStructureProvider56.php > stage56-php-real-evidence/lint-provider.txt 2>&1 || exit 1
           php -l tests/stage56_source_bound_php_year.php > stage56-php-real-evidence/lint.txt 2>&1 || exit 1
           bad=0
           for year in 4999 5000 5001; do
@@ -1708,6 +1710,20 @@ jobs:
             if [ "$rc" -ne 0 ] || [ -s "stage56-php-real-evidence/$year.stderr" ] || [ ! -s "stage56-php-real-evidence/$year.json" ]; then bad=1; fi
           done
           test "$bad" -eq 0
+      - name: Verify PHP month-count choice stream against pinned canonical source
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          python3 -B tools/stage56_verify_php_month_count_trace.py \
+            --canonical-repo .external-canonical-source \
+            --reference stage56-external-evidence/reference.json \
+            --profile-dir stage56-php-real-evidence \
+            --report stage56-php-real-evidence/month-count-choice-trace.json
+          rc=$?
+          printf '%s\n' "$rc" > stage56-php-real-evidence/month-count-choice-trace.exit
+          exit "$rc"
       - name: Emit evidence hashes
         if: always()
         shell: bash

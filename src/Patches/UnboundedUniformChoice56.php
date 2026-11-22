@@ -43,6 +43,29 @@ final class UnboundedUniformChoice56
     }
 
     /**
+     * QA trace variant: return the exact source stream alongside its selected rank.
+     *
+     * @return array{choice:BigInt,stream:array{first:BigInt,step:int}}
+     */
+    public function chooseFromKernelWithTrace(
+        BootstrapKernel $kernel,
+        int $calculationJdn,
+        int $targetJdn,
+        int $bowlId,
+        int $seal,
+        BigInt $count
+    ): array {
+        if ($bowlId < 1 || $bowlId > 6 || $seal < 0) {
+            throw new InvalidArgumentException('STAGE56_CHOICE_BOWL_OR_SEAL');
+        }
+        $stream = $kernel->askBowl($calculationJdn, $targetJdn, $bowlId, $seal);
+        return [
+            'choice' => $this->chooseFromStream($stream, $count),
+            'stream' => $stream,
+        ];
+    }
+
+    /**
      * @param array{first:BigInt,step:int} $stream
      * @return BigInt An exact one-based rank in 1..$count.
      */

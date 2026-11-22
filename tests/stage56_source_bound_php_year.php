@@ -171,8 +171,25 @@ function s56Main(array $args): int {
     echo "STAGE56_PHP_REAL_YEAR_BEGIN year={$args[5]} source_commit=" . S56_SOURCE . "\n";
     flush();
     $provider = new YearStructureProvider56(new BootstrapKernel());
+    $profilePath = $args[6] . '.profile.jsonl';
+    @unlink($profilePath);
+    $profile = static function(string $type,string $stage,array $metadata) use ($profilePath,$args):void {
+        $record = [
+            'project_id'=>S56_PROJECT,
+            'year'=>(int)$args[5],
+            'source_commit'=>S56_SOURCE,
+            'branch_sha'=>getenv('GITHUB_SHA') ?: null,
+            'type'=>$type,
+            'stage'=>$stage,
+            'timestamp_ns'=>hrtime(true)
+        ] + $metadata;
+        $line=json_encode($record,JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES)."\n";
+        if (@file_put_contents($profilePath,$line,FILE_APPEND|LOCK_EX)!==strlen($line)) {
+            throw new RuntimeException('STAGE56_PROFILE_WRITE');
+        }
+    };
     $structure = $provider->buildVerified(S56_JDN, $candidate,
-        $trustedAnchor, $years[$idx], $trustedYear, $gateDay);
+        $trustedAnchor, $years[$idx], $trustedYear, $gateDay, $profile);
     unset($provider);
     gc_collect_cycles();
     $providerSeconds = (hrtime(true)-$start)/1e9;
