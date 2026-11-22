@@ -1,0 +1,71 @@
+name: Lua Haitian Sparse Prefix Differential QA
+
+on:
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_sparse_path_qa.py'
+      - 'test/lua_haitian_sparse_path_independent_qa.py'
+      - 'docs/LUA_HAITIAN_SPARSE_PREFIX_DIFFERENTIAL_2026-11-22.md'
+      - '.github/workflows/lua-haitian-sparse-prefix-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  python_sparse_prefix_differential:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source and SHA lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p lua-sparse-prefix-evidence
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 20
+          test "$(git rev-parse HEAD:test/lua_haitian_sparse_path_qa.py)" = "9bea27751e7a9c76ed0d2c9e5a486f3d437a614a" || exit 21
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSOURCE_SHA=%s\nSCOPE=PYTHON_QA_ONLY\nREAL_WEAVING=NOT_RUN\nFULL_DATE=NOT_RUN\n' "$GITHUB_SHA" > lua-sparse-prefix-evidence/manifest.txt
+          sha256sum test/lua_haitian_sparse_path_qa.py test/lua_haitian_sparse_path_independent_qa.py docs/LUA_HAITIAN_SPARSE_PREFIX_DIFFERENTIAL_2026-11-22.md .github/workflows/lua-haitian-sparse-prefix-qa.yml > lua-sparse-prefix-evidence/sha256.txt
+      - name: Original bounded endpoint-polynomial QA
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          timeout --signal=TERM --kill-after=2s 100s python3 test/lua_haitian_sparse_path_qa.py > lua-sparse-prefix-evidence/original_stdout.txt 2> lua-sparse-prefix-evidence/original_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > lua-sparse-prefix-evidence/original_exit.txt
+          test "$code" -eq 0 || exit "$code"
+          test ! -s lua-sparse-prefix-evidence/original_stderr.txt || exit 31
+          grep -Fxq 'SPARSE_PATH_QA_CASES: 43' lua-sparse-prefix-evidence/original_stdout.txt || exit 32
+          grep -Fxq 'SPARSE_PATH_PREFIX_ORACLE: 290' lua-sparse-prefix-evidence/original_stdout.txt || exit 33
+          grep -Fxq 'SPARSE_PATH_LEX_UNRANK: 122' lua-sparse-prefix-evidence/original_stdout.txt || exit 34
+          grep -Fxq 'REAL_47_MONTHS=NOT_EVALUATED_QA_DOMAIN; FULL_DATE=NOT_RUN; PRODUCTION=UNCHANGED' lua-sparse-prefix-evidence/original_stdout.txt || exit 35
+      - name: Independent DP and negative mutations
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          timeout --signal=TERM --kill-after=2s 100s python3 test/lua_haitian_sparse_path_independent_qa.py > lua-sparse-prefix-evidence/independent_stdout.txt 2> lua-sparse-prefix-evidence/independent_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > lua-sparse-prefix-evidence/independent_exit.txt
+          cat lua-sparse-prefix-evidence/independent_stdout.txt
+          test "$code" -eq 0 || exit "$code"
+          test ! -s lua-sparse-prefix-evidence/independent_stderr.txt || exit 41
+          grep -Fxq 'LUA_HAITIAN_SPARSE_INDEPENDENT_COUNTS_PASS: 43/43' lua-sparse-prefix-evidence/independent_stdout.txt || exit 42
+          grep -Fxq 'LUA_HAITIAN_SPARSE_INDEPENDENT_PREFIX_PASS: 290/290' lua-sparse-prefix-evidence/independent_stdout.txt || exit 43
+          grep -Fxq 'LUA_HAITIAN_SPARSE_INDEPENDENT_UNRANK_PASS: 122/122' lua-sparse-prefix-evidence/independent_stdout.txt || exit 44
+          grep -Fxq 'LUA_HAITIAN_SPARSE_MUTATIONS_REJECTED: 2/2' lua-sparse-prefix-evidence/independent_stdout.txt || exit 45
+          grep -Fxq 'LUA_HAITIAN_SPARSE_GUARD_PASS: 5/5' lua-sparse-prefix-evidence/independent_stdout.txt || exit 46
+          grep -Fxq 'REAL_47_MONTHS_5294_DAYS: NOT_EVALUATED; FULL_DATE: NOT_RUN; PRODUCTION: UNCHANGED' lua-sparse-prefix-evidence/independent_stdout.txt || exit 47
+      - name: Upload QA evidence regardless of failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-sparse-prefix-differential-evidence
+          path: lua-sparse-prefix-evidence/
+          retention-days: 30
+          if-no-files-found: warn
