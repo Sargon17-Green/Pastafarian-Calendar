@@ -1,0 +1,45 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 19,
+  "decision": "ACCEPTED_BOUNDED_CONTRACT_ONLY",
+  "date": "2026-11-22",
+  "scope": "Exact allocated 2-cell tuple [table_handle,bowl_id], valid six-entry direct table, first 1-based occurrence or zero; no input mutation",
+  "run": {
+    "id": 45065591190,
+    "job": 137340893421,
+    "commit": "cab8ae7e2be3735e431a5547eb2ac149f02df438",
+    "status": "completed",
+    "conclusion": "success",
+    "original_false_runtime": "eb3135565a8670cced3f6bbca4dbf7b014c45634"
+  },
+  "artifact": {
+    "id": 14770988105,
+    "sha256": "ce1341de1e71e4ae66c50f1ce0a32052af2348cdb39c8c34fd4bf0a82e561868",
+    "zip_entries": 64,
+    "crc": "PASS"
+  },
+  "independent_audit": {
+    "result": "PASS",
+    "script_sha256": "30a3080501765dc2e0223eaabfd4d23960416acebc1c77b86b63ed577fc28bf8",
+    "checks": {
+      "exhaustive_first_match_cases": 4320,
+      "exact_order_markers": 720,
+      "table_cell_assertions": 5040,
+      "probes": 12,
+      "negative_bad_table_headers": 2,
+      "mutants_rejected": 2,
+      "corrupted_evidence_rejected": 2
+    },
+    "source_git_blobs": {
+      "src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+      "src/monster_bootstrap.false": "0619f901ba065c7849ca445c9abb04e3e8b2b871"
+    }
+  },
+  "caveats": [
+    "Unallocated/invalid physical pointers not assessed",
+    "Physically truncated tuples or tables not assessed",
+    "Corrupted heap and non-small-integer handles not assessed",
+    "Exploratory non-gating tuple diagnostic returned exit=1 and stack-not-empty; not claimed PASS"
+  ],
+  "next": "Stage20 contract design from normative reference; no production/main/merge change"
+}
