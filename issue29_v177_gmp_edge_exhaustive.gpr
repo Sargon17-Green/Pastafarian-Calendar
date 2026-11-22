@@ -1,0 +1,14 @@
+with "gnatcoll_gmp.gpr";
+
+-- Isolated GMP component test. Build dependencies do not include Normative_Oracle.
+project Issue29_V177_GMP_Edge_Exhaustive is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v177";
+   for Exec_Dir use "bin_v177";
+   for Main use ("issue29_v177_gmp_edge_exhaustive_tests.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        ("-gnat2022", "-gnatW8", "-gnata", "-gnatwa");
+   end Compiler;
+end Issue29_V177_GMP_Edge_Exhaustive;
