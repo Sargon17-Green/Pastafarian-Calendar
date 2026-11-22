@@ -37,9 +37,13 @@ jobs:
           test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           grep -Fxq 'CURRENT_STAGE=5' DEVELOPMENT_STAGE.md
-          grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md
           grep -Fxq 'CURRENT_KIND=PATCH02' DEVELOPMENT_STAGE.md
-          grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          if grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          else
+            grep -Fxq 'LAST_COMPLETED_STAGE=5' DEVELOPMENT_STAGE.md
+            grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_ACCEPTED_READY_STAGE06' DEVELOPMENT_STAGE.md
+          fi
           grep -Fq 'pub mod patch02_work_counts;' src/lib.rs
           test -f audit/STAGE_05_PATCH02_WORK_COUNTS_CONTRACT_2026-11-23.md
           cargo fmt --all -- --check

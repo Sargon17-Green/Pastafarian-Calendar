@@ -46,12 +46,21 @@ jobs:
           set -euo pipefail
           test -f audit/STAGE_04_DISCOVERY02_BASELINE_CONTRACT_2026-10-31.md
           test -f audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
-          grep -Eq '^CURRENT_STAGE=(4|5)$' DEVELOPMENT_STAGE.md
-          if grep -Fxq 'CURRENT_STAGE=5' DEVELOPMENT_STAGE.md; then
+          if grep -Fxq 'CURRENT_STAGE=4' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=DISCOVERY02' DEVELOPMENT_STAGE.md
+            grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md
+            grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY02_STAGE04_ACCEPTED_HOLD_NO_STAGE05' DEVELOPMENT_STAGE.md
+          elif grep -Fxq 'CURRENT_STAGE=5' DEVELOPMENT_STAGE.md; then
             grep -Fxq 'CURRENT_KIND=PATCH02' DEVELOPMENT_STAGE.md
-            grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=5' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_ACCEPTED_READY_STAGE06' DEVELOPMENT_STAGE.md
+            fi
+          else
+            exit 1
           fi
-          grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md
           test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
