@@ -182,6 +182,18 @@ wCalendarVisibleRing:: ds 112
 wCalendarVisibleRingIndex:: ds 1
 ; Restore the caller's previous final output if the extended chain fails.
 wCalendarVisibleSavedOutput:: ds 16
+; Stage1 Native387 bowl ordering: separate immutable residue and atomic 6-ID output.
+wCalendarBowlOrderInput:: ds 16
+wCalendarBowlOrder:: ds 6
+wCalendarBowlOrderScratch:: ds 6
+wCalendarBowlAvailable:: ds 6
+wCalendarBowlRankLo:: ds 1
+wCalendarBowlRankHi:: ds 1
+wCalendarBowlBitByte:: ds 1
+wCalendarBowlBitFlag:: ds 1
+wCalendarBowlDivisor:: ds 1
+wCalendarBowlDigit:: ds 1
+wCalendarBowlPosition:: ds 1
 
 SECTION "Bootstrap", ROM0[$0150]
 Bootstrap:
@@ -257,6 +269,10 @@ ELIF DEF(STAGE1_CHAIN46_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarHiddenVisible46ChainBench
+ELIF DEF(STAGE1_BOWL_ORDER_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarBowlOrderBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -386,6 +402,7 @@ INCLUDE "src/runtime/calendar_hidden_visible4_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible5_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible6_chain.asm"
 INCLUDE "src/runtime/calendar_hidden_visible46_chain.asm"
+INCLUDE "src/runtime/calendar_bowl_order.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -472,4 +489,8 @@ ENDC
 
 IF DEF(STAGE1_CHAIN46_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_hidden_visible46_chain_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_BOWL_ORDER_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_bowl_order_native_test.asm"
 ENDC

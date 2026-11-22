@@ -45,3 +45,10 @@ After Native386 is accepted, implement the six simultaneous bowl updates using t
 - Only `dmg-chain3-native` job 137131110106 failed *before* RGBDS and PyBoy at `tests/test_sm83_stage1_visible3_abi.py`: old static assertion required `"cp 3" in visible`, while the production visible routine now correctly checks `cp 1; jp c, .invalid; cp 47; jp nc, .invalid` for the inclusive 1..46 interval.
 - Scoped corrective change: replace the stale assertion by a regex checking the actual inclusive range and its rejection branches. Keep ASM, input fixtures, mathematical recurrences, workflow and existing accepted IDs unchanged.
 - This commit is **test/QA repair only**; until a new exact-SHA run achieves all 18 completed/success jobs with checkout SHA verified, Native386's aggregate gate is **not accepted**. Stage1 remains OPEN/READY. No main/merge/Stage2.
+
+## Acceptance on exact SHA 3c7c0a14 (2026-11-22)
+
+- [CI 45065393851](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45065393851): completed/success, all 18 jobs success, and each job's checkout log contains exact SHA 3c7c0a14dc4ab95597e7580016556373f603c532.
+- Native386 dedicated job 137340279178: HOST visible46 72 pairs and bowl 72 pairs, 276 simultaneous Host updates, 12 post-stirs, 720 permutation checks; ROM_HEADER PASS; ROM0 allocated=16166 free=218; PyBoy A5/386/40 frames=8253; retained hidden/visible, S46, ring, invalid and owner/SRAM checks PASS.
+- Default Native370 job 137340279364: ROM0 allocated=16374 free=10, A5/370/40 frames=8585. All isolated Native371..385 jobs completed/success at the same SHA.
+- Decision: Native386 aggregate ACCEPTED. This does NOT accept Stage1, Native bowls or post-stirs. First new Native milestone is isolated bowl-order/rank Native387 candidate; no acceptance until completed exact-SHA job evidence.
