@@ -26,6 +26,12 @@ jobs:
           mkdir -p qa31cb-out "$RUNNER_TEMP/qa31cb-traces"
           python3 -m py_compile qa/qa31cb_independent_audit.py
           python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'qa')
+          import qa31cb_independent_audit as auditor
+          auditor.archive_self_test()
+          PY
+          python3 - <<'PY'
           import json
           m=json.load(open('qa/qa31cb_source_cells.json',encoding='utf-8'))
           assert m['project_id']=='PC-BRANCH-BEFUNGE98-KYRGYZ'

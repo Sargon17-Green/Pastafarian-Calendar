@@ -271,6 +271,56 @@ def validate_case(receipt, rows, raw, trace_bytes):
     }
 
 
+
+def preserve_frozen_trace(source_path, destination, trace_bytes):
+    """Keep Docker-produced boundary evidence without overwriting read-only files."""
+    need(not destination.is_symlink(), "archived trace must not be a symlink")
+    expected = sha(trace_bytes)
+    if destination.exists():
+        need(destination.is_file(), "existing archive must be a regular file")
+        need(sha(destination.read_bytes()) == expected,
+             "existing archived trace differs from audited Native trace")
+        return "VERIFIED_EXISTING"
+    shutil.copyfile(source_path, destination)
+    need(destination.is_file() and not destination.is_symlink()
+         and sha(destination.read_bytes()) == expected,
+         "new archived trace differs from audited Native trace")
+    return "COPIED"
+
+
+def archive_self_test():
+    """Pre-Native regression: new file, read-only duplicate, tamper and symlink."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="qa31cb-archive-") as root:
+        tmp = Path(root)
+        source = tmp / "source.gz"
+        target = tmp / "target.gz"
+        frozen = b"qa31cb-original-native-evidence"
+        source.write_bytes(frozen)
+        need(preserve_frozen_trace(source, target, frozen) == "COPIED",
+             "fresh archive self-test")
+        target.chmod(0o444)
+        need(preserve_frozen_trace(source, target, frozen) == "VERIFIED_EXISTING",
+             "read-only archive self-test")
+        target.chmod(0o644)
+        target.write_bytes(b"tampered")
+        try:
+            preserve_frozen_trace(source, target, frozen)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("tampered frozen trace accepted")
+        target.unlink()
+        target.symlink_to(source)
+        try:
+            preserve_frozen_trace(source, target, frozen)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("symlink frozen trace accepted")
+    print("QA31CB_ARCHIVE_PREFLIGHT_PASS new=1 readonly-existing=1 tamper-reject=1 symlink-reject=1")
+
+
 def hostile_controls(receipt, rows, raw, trace_bytes):
     attacks = [
         ("project_id", lambda r, rs: r.update(project_id="OTHER")),
@@ -374,9 +424,8 @@ def main():
                 route_divergence.append(summary["label"])
             if summary["anomaly"]:
                 anomalies.append(summary["label"])
-                shutil.copyfile(trace_path, args.out / trace_name)
-            if token in (100, 199, 500, 999):
-                shutil.copyfile(trace_path, args.out / trace_name)
+            if summary["anomaly"] or token in (100, 199, 500, 999):
+                preserve_frozen_trace(trace_path, args.out / trace_name, trace_bytes)
 
             if best_hostile is None or len(rows) < best_hostile[1]:
                 best_hostile = (receipt, len(rows), rows, raw, trace_bytes)
