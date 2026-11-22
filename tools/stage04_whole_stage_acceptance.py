@@ -124,10 +124,15 @@ def verify_repo(repo:Path,sha:str):
     for path,blob in (APPROVAL,PRIOR_QA,HISTORICAL):
         require(git("rev-parse","HEAD:"+path)==blob,"pinned audit/source blob changed: "+path)
     s=(repo/"DEVELOPMENT_STAGE.md").read_text(encoding="utf-8").splitlines()
-    require("CURRENT_STAGE=4" in s and "LAST_COMPLETED_STAGE=4" in s
-            and "CURRENT_KIND=DISCOVERY02" in s, "stage counters changed prematurely")
-    require("EXPECTED_REPOSITORY_STATE=DISCOVERY02_STAGE04_ACCEPTED_HOLD_NO_STAGE05" in s,
-            "expected stage state changed")
+    stage04_accepted = ("CURRENT_STAGE=4" in s
+                        and "CURRENT_KIND=DISCOVERY02" in s
+                        and "EXPECTED_REPOSITORY_STATE=DISCOVERY02_STAGE04_ACCEPTED_HOLD_NO_STAGE05" in s)
+    stage05_started = ("CURRENT_STAGE=5" in s
+                       and "CURRENT_KIND=PATCH02" in s
+                       and "CURRENT_PATCH=PATCH02" in s
+                       and "EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_PENDING_NATIVE" in s)
+    require("LAST_COMPLETED_STAGE=4" in s and (stage04_accepted or stage05_started),
+            "Stage04 accepted provenance or Stage05 transition invalid")
     record=(repo/"audit/STAGE_04_RUST_FINAL_ACCEPTANCE_2026-11-22.md").read_text(encoding="utf-8")
     for pin in ("STAGE04_FINAL_DISPOSITION=ACCEPTED", "SOURCE_CI_SHA=fd0d125a2621c99fb9b356a845d40ebb91aa3e53",
                 "STAGE04_CI_RUN=45069086364", "NAMES_LOCK_RUN=45069086363",

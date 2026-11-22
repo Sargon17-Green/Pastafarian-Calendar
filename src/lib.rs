@@ -5,6 +5,7 @@ pub mod discovery01_legacy_save;
 pub mod discovery02_day_tag_probe;
 pub mod discovery02_work_counts_probe;
 pub mod patch01_save;
+pub mod patch02_work_counts;
 #[rustfmt::skip]
 pub mod source_language_catalog;
 
@@ -77,6 +78,8 @@ pub struct MonsterContext {
     pub legacy_save_observation: Option<BigInt>,
     // Stage3: düzgün SAVE yalnız bu çağırışın kontekstində saxlanır.
     pub save_observation: Option<BigInt>,
+    // Stage05: yalnız bu çağırışa aid normativ iki-gün iş sayları.
+    pub work_counts_observation: Option<patch02_work_counts::WorkCounts>,
 }
 
 impl MonsterContext {
@@ -98,6 +101,7 @@ impl MonsterContext {
             validation_failures: Vec::new(),
             legacy_save_observation: None,
             save_observation: None,
+            work_counts_observation: None,
         }
     }
 }
