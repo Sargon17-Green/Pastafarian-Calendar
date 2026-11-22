@@ -216,9 +216,15 @@ wide.invalid (list (list 1 [1 0]) 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [
 """
 
 
-def main(output: Path, max_width: int | None = None) -> None:
+def main(output: Path, max_width: int | None = None, only_width: int | None = None) -> None:
     all_cases = valid_cases()
-    cases = [c for c in all_cases if max_width is None or c[0] == "two" or min_width(c[3])[0] <= max_width]
+    if only_width is not None:
+        if max_width is not None or only_width not in WIDTHS:
+            raise ValueError("Specify one supported exact width or a maximum width, not both")
+        cases = [c for c in all_cases if c[0] == "general" and min_width(c[3])[0] == only_width]
+        assert len(cases) == (5 if only_width in (32, 33) else 4)
+    else:
+        cases = [c for c in all_cases if max_width is None or c[0] == "two" or min_width(c[3])[0] <= max_width]
     lines = [HEADER, f'make "WIDE.M {logo_bi(M)}\n']
     rejected = plus = minus = 0
     for index, (kind, first, direction, count, expected, tag) in enumerate(cases, 1):
@@ -267,5 +273,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--max-width", type=int, default=None)
+    parser.add_argument("--only-width", type=int, choices=WIDTHS, default=None)
     args = parser.parse_args()
-    main(args.output, args.max_width)
+    main(args.output, args.max_width, args.only_width)
