@@ -1,0 +1,90 @@
+name: Logo Stage2 QA Horner Fastpath Native Smoke (QA-only)
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-wide-horner-fastpath-20261123'
+permissions:
+  contents: read
+jobs:
+  native-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [4, 64]
+    env:
+      WIDTH: "${{ matrix.width }}"
+    steps:
+      - name: Checkout source-locked QA optimization branch
+        uses: actions/checkout@v4
+      - name: Verify provenance and independent QA source locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/logo-ido-wide-horner-fastpath-20261123
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = f72d3c9480338b28de60366fa492da4bf3f5f12a
+          test "$(git hash-object qa/logo_stage2_wide_horner_fastpath_native_vectors.py)" = 400cfad3f1c64e527492745dbe7b1ae8a95ca425
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 26f39a1894f614fd6f2f2657737b8df515a8d034
+          python3 -m py_compile qa/logo_stage2_wide_horner_fastpath_native_vectors.py
+          git rev-parse HEAD > "$RUNNER_TEMP/qa-fast-commit.txt"
+          sha256sum src/stage02_choose_wide_general.logo qa/logo_stage2_wide_horner_fastpath_native_vectors.py > "$RUNNER_TEMP/qa-fast-sources.sha256"
+      - name: Produce independently expected exact-BI Native fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/logo_stage2_wide_horner_fastpath_native_vectors.py --width "$WIDTH" --output "$RUNNER_TEMP/qa-fast-native.logo" | tee "$RUNNER_TEMP/qa-fast-generation.log"
+          sha256sum "$RUNNER_TEMP/qa-fast-native.logo" > "$RUNNER_TEMP/qa-fast-fixture.sha256"
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Execute targeted exact source/Native/independent-oracle probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "WIDE_FAST_QA_WIDTH=$WIDTH LIMIT_SECONDS=360"
+          set +e
+          printf 'bye\n' | timeout --signal=TERM --kill-after=5s 360s \
+            stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/qa-fast-native.logo" 2>&1 \
+            | awk '{ print strftime("%Y-%m-%dT%H:%M:%SZ"), $0; fflush() }' \
+            | tee "$RUNNER_TEMP/qa-fast-native.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${codes[1]}" > "$RUNNER_TEMP/qa-fast-exit-code.txt"
+          echo "WIDE_FAST_QA_NATIVE_EXIT_CODE=${codes[1]}"
+          test "${codes[1]}" -eq 0
+          grep -Fq "WIDE_FAST_QA_COMPLETED_$WIDTH" "$RUNNER_TEMP/qa-fast-native.log"
+          if grep -Eq 'WIDE_FAST_BAD_SHAPE|WIDE_FAST_WRONG_RANK|WIDE_FAST_CASE_COUNT_FALIIS|doesn.t like|FALIIS' "$RUNNER_TEMP/qa-fast-native.log"; then exit 1; fi
+          echo "WIDE_FAST_QA_PROBE_PASSED_ONLY=YES; STAGE2_ACCEPTED=NO"
+      - name: Save probe artifacts including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-qa-horner-fastpath-k${{ matrix.width }}
+          path: |
+            ${{ runner.temp }}/qa-fast-commit.txt
+            ${{ runner.temp }}/qa-fast-sources.sha256
+            ${{ runner.temp }}/qa-fast-generation.log
+            ${{ runner.temp }}/qa-fast-fixture.sha256
+            ${{ runner.temp }}/qa-fast-native.logo
+            ${{ runner.temp }}/qa-fast-native.log
+            ${{ runner.temp }}/qa-fast-exit-code.txt
+          if-no-files-found: warn
+          retention-days: 30

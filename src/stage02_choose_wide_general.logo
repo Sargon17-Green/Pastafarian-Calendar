@@ -29,28 +29,51 @@ to monster.stage02.choose.wide.general.prepare :firstv :step :N :m :space :width
   output monster.stage02.choose.wide.general.prepare :firstv :step :N :m (bi.mul :space :m) (:width + 1)
 end
 
+; QA-only Horner fastpath: same mathematical k-digit value, no wide-weight table.
+; For N>space/2, floor(space/N)=1; limit=N and accepted rank=wide.
+; Exact BI throughout. Original canonical branch and QA test source stay untouched.
+to monster.stage02.choose.wide.general.next :digit :step :m
+  if :step = 1 [
+    if bi.eq :digit :m [output bi.small 1]
+    output bi.add :digit (bi.small 1)
+  ]
+  if bi.eq :digit (bi.small 1) [output :m]
+  output bi.sub :digit (bi.small 1)
+end
+
+to monster.stage02.choose.wide.general.seek :digit :step :m :remaining
+  if :remaining = 0 [output :digit]
+  output monster.stage02.choose.wide.general.seek (monster.stage02.choose.wide.general.next :digit :step :m) :step :m (:remaining - 1)
+end
+
+; Horner over high-to-low stream digits: accumulator <- accumulator*M+(digit-1).
+to monster.stage02.choose.wide.general.horner :digit :reverseStep :m :remaining :acc
+  if :remaining = 0 [output :acc]
+  localmake "nextAcc bi.add (bi.mul :acc :m) (bi.sub :digit (bi.small 1))
+  if :remaining = 1 [output :nextAcc]
+  localmake "nextDigit monster.stage02.choose.wide.general.next :digit :reverseStep :m
+  output monster.stage02.choose.wide.general.horner :nextDigit :reverseStep :m (:remaining - 1) :nextAcc
+end
+
 to monster.stage02.choose.wide.general.build :step :N :m :space :width :digit :index :wide :weight
-  if :index >= :width [
-    localmake "remainder bi.regmod :space :N
-    localmake "limit bi.sub :space :remainder
-    if bi.le :wide :limit [
-      output bi.add (bi.small 1) (bi.regmod (bi.sub :wide (bi.small 1)) :N)
-    ]
+  localmake "highDigit monster.stage02.choose.wide.general.seek :digit :step :m (:width - 1)
+  localmake "digitsValue monster.stage02.choose.wide.general.horner :highDigit (0 - :step) :m :width bi.zero
+  localmake "rankSample bi.add (bi.small 1) :digitsValue
+
+  ; General quotient-one fastpath, including N=space.
+  localmake "gap bi.sub :space :N
+  if bi.gt :N :gap [
+    if bi.le :rankSample :N [output :rankSample]
     if :step = 1 [output bi.small 1]
     output :N
   ]
-  localmake "digitOffset bi.sub :digit (bi.small 1)
-  localmake "term bi.mul :digitOffset :weight
-  localmake "nextWide bi.add :wide :term
-  localmake "nextWeight bi.mul :weight :m
-  localmake "nextDigit :digit
-  if :step = 1 [
-    if bi.eq :digit :m [make "nextDigit bi.small 1]
-    if not (bi.eq :digit :m) [make "nextDigit bi.add :digit (bi.small 1)]
+
+  ; Preserve generic exact BI behavior for all other N.
+  localmake "remainder bi.regmod :space :N
+  localmake "limit bi.sub :space :remainder
+  if bi.le :rankSample :limit [
+    output bi.add (bi.small 1) (bi.regmod (bi.sub :rankSample (bi.small 1)) :N)
   ]
-  if :step = -1 [
-    if bi.eq :digit (bi.small 1) [make "nextDigit :m]
-    if not (bi.eq :digit (bi.small 1)) [make "nextDigit bi.sub :digit (bi.small 1)]
-  ]
-  output monster.stage02.choose.wide.general.build :step :N :m :space :width :nextDigit (:index + 1) :nextWide :nextWeight
+  if :step = 1 [output bi.small 1]
+  output :N
 end

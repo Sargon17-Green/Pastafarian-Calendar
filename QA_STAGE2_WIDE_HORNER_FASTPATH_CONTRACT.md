@@ -1,0 +1,13 @@
+# PC-BRANCH-LOGO-IDO — wide Stage2 QA-only Horner performance candidate
+
+- Branch: `qa/logo-ido-wide-horner-fastpath-20261123`; exact parent: `a7f02bee58be609708648992d76ef5978121c626`.
+- Canonical `Logo+Ido` is not changed; this is not a Stage2 acceptance, promotion or merge.
+- Baseline proof: run 45076886853 exact SHA a7f02bee58be609708648992d76ef5978121c626: diagnostic Native k32/k33 completed/success on single-case oracles; k64 timeout exit 124 in term multiplication for index 54 (after 240s). Source locks and per-width artifact digests recorded in GitHub.
+- Cause: previous low-to-high build performs both digitOffset*weight and weight*M at each position; each operand grows with k. The k32/k33 probes additionally spent ~112/~96 s in the exact division/remainder.
+- Change: replace sample-building strategy with high-to-low Horner; a short BI-digit walk locates highest stream digit. Each Horner stage multiplies the accumulator by M once. Special case N > space/2 (so floor(space/N)=1, including N=space) returns sample directly when <=N, or the documented endpoint on rejection, eliminating two heavy general big-int modulo operations. All other N retain exact division and modulo. No floats.
+- Input: stream [canonical first BI in 1..M, step +/-1], canonical N > M^2; same invalid-input policy, existing source routines unchanged except QA candidate `src/stage02_choose_wide_general.logo`.
+- Oracle: independently computed Python integers via `general_rank`, not Logo source or copied cross-branch fixtures. Bounded Native fixture k4: four cases including general-division, upper-half and no-rejection; k64: one exact N=M^64 no-rejection case. Python oracle uses low-to-high power-weight summation, algorithmically distinct from Horner.
+- Static math preflight: 48 comparisons (k=3,4,5,32,33,64; 2 directions; four starting ranks) between independent weighted summation and Horner BigInts passed before commit.
+- Native: pinned UCBLogo 6.2.5 at a0215433f07384e4c42fe247525867f11e6f32f7. CI matrix k4/k64, 360-second per-job Native bound, SHA and source blob locks; fail-fast disabled; independent fixture and logs/artifacts preserved. New run is a QA-only smoke probe and may be queued/in_progress, NOT PASS until completed/log/artifact verified.
+- Excluded: no original six-width Native rerun, no k64 rejection/transition guarantee, no Stage2 acceptance, no main, no canonical update.
+- NEXT: inspect exact-SHA completed k4/k64 jobs and logs/artifacts; if PASS compare observed time to original. Then target expensive arbitrary-N exact modulo for k32/k33/k64 remaining shards; preserve baseline regression gates and run full original shards only on a qualified candidate.
