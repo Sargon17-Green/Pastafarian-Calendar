@@ -6,7 +6,8 @@ WITH ordering AS MATERIALIZED (
  SELECT pastafari_sql_tamil.bowl_order_from_drop(d) AS ord
  WHERE i BETWEEN 1 AND 46 AND d=trunc(d) AND d<>'NaN'::numeric
  AND array_ndims(b)=1 AND array_lower(b,1)=1 AND array_length(b,1)=6
- AND array_position(b,NULL::numeric) IS NULL
+ -- Multidimensional arrays must never reach array_position (WHERE is unordered).
+ AND (CASE WHEN array_ndims(b)=1 THEN array_position(b,NULL::numeric) IS NULL ELSE FALSE END)
 ), st AS MATERIALIZED (
  SELECT pastafari_sql_tamil.stone_state(i) AS stone FROM ordering
 ), positions AS (
@@ -33,6 +34,15 @@ SELECT array_agg(pastafari_sql_tamil.save_value(
  mix*mix+5*b[prev_id]*b[next_id]+i*pos) ORDER BY id)
 FROM mixtures
 $candidate$;
+-- Fast regression before 368 expensive comparisons: invalid 2-D input must be NULL, not ERROR.
+DO $preflight$
+BEGIN
+ IF pastafari_sql_tamil_qa.bowl_round_one_stone(
+      ARRAY[[1,2,3],[4,5,6]]::numeric[],1::numeric,1) IS NOT NULL THEN
+  RAISE EXCEPTION 'SQL_TAMIL_TWO_DIMENSION_GUARD accepted invalid dimensions';
+ END IF;
+ RAISE NOTICE 'SQL_TAMIL_TWO_DIMENSION_GUARD=PASS';
+END $preflight$;
 DO $qa$
 DECLARE j integer; d numeric; s integer; a numeric[]; before numeric[]; after numeric[];
 n integer:=0; bad record; neg integer:=0;
