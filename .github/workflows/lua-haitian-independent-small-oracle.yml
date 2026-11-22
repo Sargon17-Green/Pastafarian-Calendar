@@ -1,12 +1,7 @@
 name: Lua Haitian independent small oracle and BigInt QA
 
 'on':
-  push:
-    branches:
-      - 'Lua+Kreyòl-ayisyen'
-    paths:
-      - 'test/lua_haitian_independent_small_oracle_bigint_qa.lua'
-      - '.github/workflows/lua-haitian-independent-small-oracle.yml'
+  workflow_call:
 
 permissions:
   contents: read

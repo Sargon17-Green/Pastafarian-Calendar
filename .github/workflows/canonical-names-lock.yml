@@ -3013,3 +3013,9 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/lua-haitian-polynomial-weaving-qa.yml
+
+  lua_haitian_independent_small_oracle:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lua-haitian-independent-small-oracle.yml
