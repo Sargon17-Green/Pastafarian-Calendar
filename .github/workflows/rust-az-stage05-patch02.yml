@@ -53,7 +53,7 @@ jobs:
           cargo --version >> evidence/toolchain.txt
           set +e
           timeout --signal=TERM --kill-after=5s 900s \
-            cargo test --locked --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+            cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
           code=$?
           set -e
           printf '%s\n' "$code" > evidence/exit.txt
