@@ -57,7 +57,7 @@ function Test-FrozenStage42MetadataBytes {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true)][AllowNull()][AllowEmptyCollection()][byte[]]$CandidateBytes,
-        [Parameter(Mandatory=$true)][ValidateNotNullOrEmpty()][string]$RepositoryRoot
+        [Parameter(Mandatory=$true)][AllowNull()][AllowEmptyString()][string]$RepositoryRoot
     )
     if ($null -eq $CandidateBytes) {
         return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'INVALID_INPUT'
@@ -70,24 +70,34 @@ function Test-FrozenStage42MetadataBytes {
     }
     $required = @('TOTAL_STAGES', 'CURRENT_STAGE', 'CURRENT_DISCOVERY',
         'LAST_COMPLETED_STAGE', 'STAGE42_RUNTIME_VERIFICATION', 'NATURAL_LANGUAGE')
-    $frozen = ConvertFrom-StrictStageMetadataBytes -Bytes $expectedBytes -RequiredKeys $required
-    if (-not $frozen.Success -or $frozen.Values.Count -ne 728) {
-        return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
-    }
-    if ($frozen.Values['TOTAL_STAGES'] -cne '55' -or
-        $frozen.Values['CURRENT_STAGE'] -cne '42' -or
-        $frozen.Values['CURRENT_DISCOVERY'] -cne '27' -or
-        $frozen.Values['LAST_COMPLETED_STAGE'] -cne '42' -or
-        $frozen.Values['STAGE42_RUNTIME_VERIFICATION'] -cne 'EVIDENCE_ONLY_CONFIRMED') {
-        return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
-    }
-    foreach ($key in $frozen.Values.Keys) {
-        if ($key.StartsWith('STAGE43_', [System.StringComparison]::Ordinal)) {
+    try {
+        $frozen = ConvertFrom-StrictStageMetadataBytes -Bytes $expectedBytes -RequiredKeys $required
+        if (-not $frozen.Success -or $frozen.Values.Count -ne 728) {
             return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
         }
+        if ($frozen.Values['TOTAL_STAGES'] -cne '55' -or
+            $frozen.Values['CURRENT_STAGE'] -cne '42' -or
+            $frozen.Values['CURRENT_DISCOVERY'] -cne '27' -or
+            $frozen.Values['LAST_COMPLETED_STAGE'] -cne '42' -or
+            $frozen.Values['STAGE42_RUNTIME_VERIFICATION'] -cne 'EVIDENCE_ONLY_CONFIRMED') {
+            return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
+        }
+        foreach ($key in $frozen.Values.Keys) {
+            if ($key.StartsWith('STAGE43_', [System.StringComparison]::Ordinal)) {
+                return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
+            }
+        }
+    } catch {
+        return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'BASELINE_INVALID'
     }
 
-    $candidate = ConvertFrom-StrictStageMetadataBytes -Bytes $CandidateBytes -RequiredKeys @()
+    try {
+        # A parser must not be able to mutate the caller's original candidate array.
+        [byte[]]$candidateSnapshot = [byte[]]$CandidateBytes.Clone()
+        $candidate = ConvertFrom-StrictStageMetadataBytes -Bytes $candidateSnapshot -RequiredKeys @()
+    } catch {
+        return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'CANDIDATE_LEXICAL_INVALID' -ParsedReason 'PARSER_EXCEPTION'
+    }
     if (-not $candidate.Success) {
         return New-FrozenStage42ComparisonResult -Success $false -ReasonCode 'CANDIDATE_LEXICAL_INVALID' -ParsedReason $candidate.ReasonCode
     }
