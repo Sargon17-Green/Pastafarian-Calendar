@@ -103,6 +103,18 @@ jobs:
           grep -Fxq 'STAGE01_SCROLL_MONTHS_SELFTEST=1010/1010' build/stage01-scroll-months-foundation.log
           grep -Fxq 'STAGE01_SCROLL_MONTHS_FOUNDATION_DIAGNOSTIC=PASS' build/stage01-scroll-months-foundation.log
           grep -Fxq 'STAGE01_SCROLL_MONTHS_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-months-foundation.log
+      - name: Verify Hebrew Scroll 47 canonical month names seal 33 (diagnostic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_month_names_independent.py
+          timeout --signal=TERM --kill-after=5s 180s \
+            python3 -u test/stage01_scroll_month_names_independent.py \
+              --self-test --foundation --output build/stage01-scroll-month-names-foundation.json \
+              | tee build/stage01-scroll-month-names-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_SELFTEST=2458/2458' build/stage01-scroll-month-names-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_FOUNDATION_DIAGNOSTIC=PASS' build/stage01-scroll-month-names-foundation.log
+          grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-month-names-foundation.log
       - name: Preserve canonical component evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,5 +132,7 @@ jobs:
             build/stage01-scroll-cutlets-foundation.json
             build/stage01-scroll-months-foundation.log
             build/stage01-scroll-months-foundation.json
+            build/stage01-scroll-month-names-foundation.log
+            build/stage01-scroll-month-names-foundation.json
           if-no-files-found: warn
           retention-days: 30
