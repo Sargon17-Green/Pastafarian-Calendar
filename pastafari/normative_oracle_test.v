@@ -1959,8 +1959,8 @@ fn stage35_ballot_suffix_count(month_count int, opened int, closed int) BigInt {
 	unopened := month_count - opened
 	active := opened - closed
 	slots := 2 * unopened + active
-	return big_sub(oracle_weave_choose_exact(slots, unopened),
-		oracle_weave_choose_exact(slots, unopened - 1))
+	return big_sub(oracle_weave_choose_exact(slots, unopened), oracle_weave_choose_exact(slots,
+		unopened - 1))
 }
 
 fn stage35_independent_lexical_rank(month_count int, word []int) BigInt {
