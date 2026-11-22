@@ -37,3 +37,11 @@ After Native386 is accepted, implement the six simultaneous bowl updates using t
 - `dmg-chain6-native` failed an outdated Host static check for `cp 6`. `CalendarVisibleDrop1` now legitimately validates the inclusive interval 1..46 (`cp 1`, `cp 47`, reject >=47), so its test guard is updated to the current range without altering the computation.
 - Repair: convert all three `.restoreFailure` conditional exits and all eighteen `.fail` conditional exits in the V46 bench from range-limited `JR nz` to `JP nz`. Add a Host static guard against their reintroduction. Preserve all normative recurrences and expected fixtures. This is a **source repair candidate**, not CI, RGBDS-link, ROM_HEADER or PyBoy PASS.
 - Accept Native386 only after a completed exact-SHA run with all 18 jobs successful and log-verified SHA, independent Host72, ROM_HEADER, ROM0 free >=10, real PyBoy A5/386/40 <=30000 frames, default Native370 <=9000 and 371..385 regressions. Stage1 stays open; no main/merge/Stage2.
+
+## CI 44997336212 — Native386 succeeded, full 18-job gate failed (2026-11-22)
+
+- Exact parent SHA `259f30ae5f86b1f976a2f62961168946b2d17644`: [CI 44997336212](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44997336212) completed with 17/18 jobs successful.
+- `dmg-chain46-native` job 137131110137 completed/success: Host visible46 independent 72 pairs; bowls Host 72 pairs, 276 simultaneous updates, 12 post-stirs and 720 order permutations; RGBDS linked; ROM_HEADER PASS; measured ROM0 free218; real PyBoy A5/386/40 in 8253 frames.
+- Only `dmg-chain3-native` job 137131110106 failed *before* RGBDS and PyBoy at `tests/test_sm83_stage1_visible3_abi.py`: old static assertion required `"cp 3" in visible`, while the production visible routine now correctly checks `cp 1; jp c, .invalid; cp 47; jp nc, .invalid` for the inclusive 1..46 interval.
+- Scoped corrective change: replace the stale assertion by a regex checking the actual inclusive range and its rejection branches. Keep ASM, input fixtures, mathematical recurrences, workflow and existing accepted IDs unchanged.
+- This commit is **test/QA repair only**; until a new exact-SHA run achieves all 18 completed/success jobs with checkout SHA verified, Native386's aggregate gate is **not accepted**. Stage1 remains OPEN/READY. No main/merge/Stage2.

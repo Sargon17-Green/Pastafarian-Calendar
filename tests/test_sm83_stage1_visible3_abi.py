@@ -53,7 +53,9 @@ def main():
     assert "wCalendarHiddenRetained+64" in chain
     assert "CalendarStoneRunValidated.validateSource" in transition
     assert "wCalendarVisibleSecond:: ds 16" in boot
-    assert "STAGE1_CHAIN3_NATIVE_BENCH" in boot and "cp 3" in visible
+    assert "STAGE1_CHAIN3_NATIVE_BENCH" in boot
+    # CalendarVisibleDrop1 now validates inclusive i=1..46, not the old i=3 gate.
+    assert re.search(r"ld a, \[wCalendarVisibleIteration\]\s+cp 1\s+jp c, \.invalid\s+cp 47\s+jp nc, \.invalid", visible)
     assert "ld a, 126" in a and ".checkSecond:" in a
     assert "build/calendar_chain3.gb" in (ROOT/"Makefile").read_text()
     assert "dmg-chain3-native:" in (ROOT/".github/workflows/canonical-names-lock.yml").read_text()
