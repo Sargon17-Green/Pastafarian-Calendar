@@ -416,3 +416,39 @@ z;36=~["E_BOWL_POSITION_LAYOUT"0 0/]?
  ]#
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+{ المرحلة 20: العملية 37؛ ست كرات ابتدائية من سجل workCounts دون نسخ المرجع. }
+{ الوسيطة [counts]، والسجل [5,C,T,D,S,q]؛ أربع قيم BigInt غير سالبة واتجاه 1..3. }
+{ الناتج جدول جديد مباشر [6,B1,B2,B3,B4,B5,B6]؛ المدخلات لا تتغير. }
+{ B(i)=SAVE(C+i*T+D+S+q+coefficient(i)^2+i)؛ القيم الموجبة المضاعفة لـ M تعود M. }
+{ كل الجداول/المؤشرات مخصصة بالكامل؛ الفساد الفيزيائي خارج العقد المحدود. }
+z;37=~["E_INITIAL_BOWLS_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:
+ y;g;!5=~["E_INITIAL_BOWLS_LENGTH"0 0/]?
+ y;1+g;!u:y;2+g;!v:y;3+g;!w:y;4+g;!t:y;5+g;!n:
+ n;1<["E_INITIAL_BOWLS_DIRECTION"0 0/]?
+ n;3>["E_INITIAL_BOWLS_DIRECTION"0 0/]?
+ u;g;!0<["E_INITIAL_BOWLS_NEGATIVE"0 0/]?
+ v;g;!0<["E_INITIAL_BOWLS_NEGATIVE"0 0/]?
+ w;g;!0<["E_INITIAL_BOWLS_NEGATIVE"0 0/]?
+ t;g;!0<["E_INITIAL_BOWLS_NEGATIVE"0 0/]?
+ z;b:u;a;!w;a;!b;9h;!!d:
+ z;b:d;a;!t;a;!b;9h;!!d:
+ z;b:d;a;!n;a;!b;22h;!!d:
+ z;p:0i:[i;6<][0a;!i;1+i:]#
+ 1i:
+ [i;7<][
+  0m:
+  i;1=[289m:]?i;2=[361m:]?i;3=[529m:]?
+  i;4=[841m:]?i;5=[961m:]?i;6=[1369m:]?
+  z;b:v;a;!i;a;!b;23h;!!e:
+  z;b:d;a;!e;a;!b;9h;!!e:
+  z;b:e;a;!m;i;+a;!b;22h;!!e:
+  z;b:e;a;!b;25h;!!e:
+  p;i;1-+e;!
+  i;1+i:
+ ]#
+ z;r:6a;!0i:[i;6<][p;i;+g;!a;!i;1+i:]#
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
