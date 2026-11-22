@@ -239,6 +239,13 @@ jobs:
           timeout --signal=TERM --kill-after=5s 120s \
             v test ./pastafari/normative_oracle_test.v -run-only 'test_stage34_catalan_boundary_months_and_lexical_edges' \
             2>&1 | tee stage34_catalan.log
+      - name: Stage 35 — independent Ballot lexical rank/unrank (17/47 months)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage35_ballot_lexical_rank_roundtrip_at_17_and_47_months' \
+            2>&1 | tee stage35_ballot.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |

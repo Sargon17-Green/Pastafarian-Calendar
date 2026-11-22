@@ -1949,3 +1949,70 @@ fn test_stage34_catalan_boundary_months_and_lexical_edges() {
 	stage34_check_catalan_month_boundary(47)
 	println('V_AMHARIC_STAGE34_CATALAN_BOUNDARIES_PASS MONTHS=17,47')
 }
+
+// Stage35: independent Ballot-number prefix count for two-occurrence months.
+// Unlike the weave counter, this ranks Dyck-path closing moves before opening
+// moves and uses only a reflection-principle binomial difference.
+fn stage35_ballot_suffix_count(month_count int, opened int, closed int) BigInt {
+	assert opened >= closed
+	assert month_count >= opened
+	unopened := month_count - opened
+	active := opened - closed
+	slots := 2 * unopened + active
+	return big_sub(oracle_weave_choose_exact(slots, unopened),
+		oracle_weave_choose_exact(slots, unopened - 1))
+}
+
+fn stage35_independent_lexical_rank(month_count int, word []int) BigInt {
+	assert word.len == 2 * month_count
+	mut opened := 0
+	mut closed := 0
+	mut rank := big_one()
+	for label in word {
+		if opened == closed {
+			assert opened < month_count
+			assert label == opened + 1
+			opened++
+		} else if label == closed + 1 {
+			closed++
+		} else {
+			assert opened < month_count
+			assert label == opened + 1
+			rank = big_add(rank, stage35_ballot_suffix_count(month_count, opened, closed + 1))
+			opened++
+		}
+	}
+	assert opened == month_count
+	assert closed == month_count
+	return rank
+}
+
+fn stage35_check_ballot_lexical_ranks(month_count int) {
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	total := stage35_ballot_suffix_count(month_count, 0, 0)
+	assert big_eq(candidate.count_all(), total)
+	quarter := big_floor_div(total, big_from_int(4))
+	half := big_floor_div(big_add(total, big_one()), big_from_int(2))
+	ranks := [
+		big_one(),
+		big_from_int(2),
+		quarter,
+		half,
+		big_sub(total, quarter),
+		big_sub(total, big_one()),
+		total,
+	]
+	for expected_rank in ranks {
+		assert big_cmp(expected_rank, big_one()) >= 0
+		assert big_cmp(expected_rank, total) <= 0
+		word := candidate.unrank1(expected_rank)
+		assert big_eq(stage35_independent_lexical_rank(month_count, word), expected_rank)
+	}
+}
+
+fn test_stage35_ballot_lexical_rank_roundtrip_at_17_and_47_months() {
+	stage35_check_ballot_lexical_ranks(17)
+	stage35_check_ballot_lexical_ranks(47)
+	println('V_AMHARIC_STAGE35_BALLOT_LEXICAL_RANK_PASS MONTHS=17,47 SAMPLES=14')
+}
