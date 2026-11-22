@@ -14,6 +14,7 @@ import os
 import re
 import selectors
 import shutil
+import shlex
 import signal
 import subprocess
 import sys
@@ -563,7 +564,13 @@ def build_only(root: Path, expected_head: str, output: Path) -> dict[str, Any]:
         trace_text += "\n".join(line for line in map_text.splitlines() if "gmp" in line.lower()) + "\n"
         (output / "gmp-link-trace.txt").write_text(trace_text, encoding="utf-8")
 
-        path_tokens = set(re.findall(r"/(?:[^\s'\"()]+/)*[^\s'\"()]*gmp[^\s'\"()]*", combined + "\n" + map_text, flags=re.IGNORECASE))
+        # Whitespace tokenization is linear in input size. The earlier nested
+        # path regular expression backtracked exponentially on non-GMP paths.
+        path_tokens = {
+            token.rstrip(",;:]")
+            for token in (combined + "\n" + map_text).split()
+            if token.startswith("/") and "gmp" in token.lower()
+        }
         linked_files = []
         for token in sorted(path_tokens):
             p = Path(token.rstrip(",;:]")).resolve()
@@ -585,12 +592,26 @@ def build_only(root: Path, expected_head: str, output: Path) -> dict[str, Any]:
         compile_units = []
         seen_units = set()
         for line in stdout_text.splitlines():
-            m = re.match(r"\s*\[Ada\]\s+([^\s]+\.adb)\s*$", line)
-            if m:
-                unit = m.group(1)
-                if unit not in seen_units:
-                    compile_units.append(unit)
-                    seen_units.add(unit)
+            # GPRBuild -v emits compiler commands, not [Ada] progress lines.
+            # Record only observed Ada compilations, excluding linker commands.
+            try:
+                compiler_argv = shlex.split(line)
+            except ValueError:
+                continue
+            if not compiler_argv:
+                continue
+            compiler = Path(compiler_argv[0]).name
+            if "gcc" not in compiler or "-c" not in compiler_argv or "-x" not in compiler_argv:
+                continue
+            x_index = compiler_argv.index("-x")
+            if x_index + 1 >= len(compiler_argv) or compiler_argv[x_index + 1] != "ada":
+                continue
+            for arg in compiler_argv:
+                if arg.endswith(".adb"):
+                    unit = Path(arg).name
+                    if unit not in seen_units:
+                        compile_units.append(unit)
+                        seen_units.add(unit)
         if not compile_units:
             raise RuntimeError("GPRBuild output did not enumerate any Ada compile units")
 
