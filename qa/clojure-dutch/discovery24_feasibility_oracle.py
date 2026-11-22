@@ -6,9 +6,22 @@ Cost is abstract cached states + legal transitions, NOT production insertion cel
 import argparse
 import json
 import os
+import sys
 from collections import Counter
 
 LIMIT = 5_000_000
+# Python 3.11+ defaults to 4300 decimal digits. The canonical rank has
+# 5288 digits; any legal profile has at most 5778 symbols, so its number
+# of weavings is bounded by 5778! (< 20000 decimal digits). This is a
+# conversion-only ceiling, not an algorithmic work or production budget.
+CANONICAL_DECIMAL_DIGIT_CAP = 25_000
+
+
+def enable_canonical_bigint_conversion():
+    setter = getattr(sys, "set_int_max_str_digits", None)
+    if setter is not None:
+        setter(CANONICAL_DECIMAL_DIGIT_CAP)
+
 
 class Unproven(Exception):
     def __init__(self, reason="abstract-budget-exceeded", spent=(0, 0),
@@ -143,6 +156,8 @@ def unrank_diagnostic(profile, rank, position, budget=LIMIT,
 
 
 def run_canonical_diagnostic(input_path, output_path):
+    # Set before json.load too, in case a future producer emits JSON numbers.
+    enable_canonical_bigint_conversion()
     with open(input_path, "r", encoding="utf-8") as stream:
         data = json.load(stream)
     if data.get("project_id") != "PC-BRANCH-CLOJURE-DUTCH":
@@ -263,8 +278,20 @@ def test():
             raise AssertionError("unexpected long-profile proof")
         except Unproven:
             pass
+    # Regression: a genuine 5288-digit canonical-rank-sized decimal must
+    # round-trip on Python 3.11+ without changing the 5_000_000 work cap.
+    if hasattr(sys, "get_int_max_str_digits"):
+        previous_limit = sys.get_int_max_str_digits()
+        try:
+            enable_canonical_bigint_conversion()
+            large_decimal = "9" * 5288
+            assert len(str(int(large_decimal))) == 5288
+            assert LIMIT == 5_000_000
+        finally:
+            sys.set_int_max_str_digits(previous_limit)
     print(f"STATIC_QA_PASS profiles={len(profiles)} words={words} "
-          f"rank_position_checks={checks} max_abstract_cells={max_spent}")
+          f"rank_position_checks={checks} max_abstract_cells={max_spent} "
+          f"canonical_bigint_roundtrip_digits=5288")
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
