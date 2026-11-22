@@ -1,14 +1,7 @@
 name: Lua Haitian Sparse Prefix Differential QA
 
 on:
-  push:
-    branches:
-      - 'Lua+Kreyòl-ayisyen'
-    paths:
-      - 'test/lua_haitian_sparse_path_qa.py'
-      - 'test/lua_haitian_sparse_path_independent_qa.py'
-      - 'docs/LUA_HAITIAN_SPARSE_PREFIX_DIFFERENTIAL_2026-11-22.md'
-      - '.github/workflows/lua-haitian-sparse-prefix-qa.yml'
+  workflow_call:
 
 permissions:
   contents: read

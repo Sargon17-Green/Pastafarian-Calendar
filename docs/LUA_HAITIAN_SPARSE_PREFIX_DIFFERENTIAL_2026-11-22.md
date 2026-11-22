@@ -21,7 +21,7 @@ Trivial 47-month (2 copies each, L94): 1176 DP states. This synthetic case is **
 
 ## CI gate
 
-.github/workflows/lua-haitian-sparse-prefix-qa.yml is a push-triggered scoped QA-only gate. It runs the original sparse polynomial script and the independent DP/differential test under time/resource caps; separate stdout/stderr/exit codes and exact source SHA are retained as an artifact even on failure. Until a completed exact-SHA run, this is authored code, not CI PASS.
+.github/workflows/lua-haitian-sparse-prefix-qa.yml is a workflow_call scoped QA-only gate, invoked once by the existing canonical workflow on the Lua branch. It runs the original sparse polynomial script and the independent DP/differential test under time/resource caps; separate stdout/stderr/exit codes and exact source SHA are retained as an artifact even on failure. Until a completed exact-SHA run, this is authored code, not CI PASS.
 
 ## Limits and NEXT
 
