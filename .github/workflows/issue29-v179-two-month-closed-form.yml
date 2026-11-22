@@ -1,0 +1,79 @@
+name: Issue29 v179 exact binomial closed form for every legal two-month GMP family
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-two-month-closed-form-v179
+    paths:
+      - '.github/workflows/issue29-v179-two-month-closed-form.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v179-closed-form-one-shot
+  cancel-in-progress: false
+jobs:
+  two-month-binomial-gmp:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-gmp-two-month-closed-form-v179' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact corrected source and synthetic QA-only fixture
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify source-lock and independently generate all 14884 binomial counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m py_compile tests/issue29_v179_closed_form.py
+          mkdir -p evidence
+          python3 -B tests/issue29_v179_closed_form.py preflight | tee evidence/preflight-verdict.txt
+          grep -Fx V179_CLOSED_FORM_ALL_14884_PAIRS_REFERENCE_READY_ZERO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install GNAT 13 and GNATCOLL GMP; capture toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/toolchain-packages.txt
+      - name: Compile isolated Count/Unrank native GMP test only
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v179_two_month_closed_form.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v179/issue29_v179_two_month_closed_form_tests
+          if nm bin_v179/issue29_v179_two_month_closed_form_tests | grep -iq normative_oracle; then
+            echo FORBIDDEN_CALENDAR_F_LINK >&2
+            exit 1
+          fi
+          echo V179_GMP_ONLY_LINKED_ZERO_F > evidence/build-verdict.txt
+      - name: Execute bounded native verification exactly once
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v179_closed_form.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V179_ALL_14884_BINOMIAL_PAIRS_GMP_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Preserve independent evidence member checksums
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          d=Path('evidence')
+          m={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+             for p in sorted(d.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (d/'members.sha256.json').write_text(json.dumps(m,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload all QA evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v179-two-month-complete-matrix-binomial-vs-GMP-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
