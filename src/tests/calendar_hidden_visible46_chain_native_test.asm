@@ -24,13 +24,13 @@ RunCalendarHiddenVisible46ChainBench::
     call CalendarHiddenVisible46Chain
     ld a, [wCalendarStatus]
     cp 6
-    jr nz, .fail
+    jp nz, .fail
     ld hl, wCalendarVisibleOutput
     ld b, 16
 .checkInitialOutput:
     ld a, [hli]
     cp $5a
-    jr nz, .fail
+    jp nz, .fail
     dec b
     jr nz, .checkInitialOutput
 
@@ -49,7 +49,7 @@ RunCalendarHiddenVisible46ChainBench::
     call CalendarInvocationBegin
     ld a, [wCalendarStatus]
     or a
-    jr nz, .fail
+    jp nz, .fail
 
     ; Preserve a bank-3 SRAM sentinel across the complete V46 calculation.
     ld a, 3
@@ -62,7 +62,7 @@ RunCalendarHiddenVisible46ChainBench::
     call CalendarHiddenVisible46Chain
     ld a, [wCalendarStatus]
     or a
-    jr nz, .fail
+    jp nz, .fail
 
     ld hl, wCalendarHiddenRetained
     ld de, .hiddenExpected
@@ -105,13 +105,13 @@ RunCalendarHiddenVisible46ChainBench::
     call .checkBytes
     ld a, [wCalendarVisibleRingIndex]
     cp 3
-    jr nz, .fail
+    jp nz, .fail
     ld a, [wCalendarVisibleIteration]
     cp 47
-    jr nz, .fail
+    jp nz, .fail
     ld a, [wCalendarStoneIteration]
     cp 46
-    jr nz, .fail
+    jp nz, .fail
 
     ; The five-stone S46 snapshot is retained in both old and output buffers.
     ld hl, wCalendarStoneOld
@@ -129,23 +129,23 @@ RunCalendarHiddenVisible46ChainBench::
 .checkOffsets:
     ld a, [hli]
     or a
-    jr nz, .fail
+    jp nz, .fail
     dec b
     jr nz, .checkOffsets
     ld a, [wCalendarActive]
     cp 1
-    jr nz, .fail
+    jp nz, .fail
     ld a, [wCalendarActiveOwner]
     cp 70
-    jr nz, .fail
+    jp nz, .fail
     ld a, [wLeaseTable+3]
     cp 72
-    jr nz, .fail
+    jp nz, .fail
     ld a, 3
     ld [$4000], a
     ld a, [$a000]
     cp $6e
-    jr nz, .fail
+    jp nz, .fail
 
     ; Negative zero must be rejected without changing the published V46.
     ld a, 1
@@ -153,7 +153,7 @@ RunCalendarHiddenVisible46ChainBench::
     call CalendarHiddenVisible46Chain
     ld a, [wCalendarStatus]
     cp 2
-    jr nz, .fail
+    jp nz, .fail
     xor a
     ld [wCalendarOrdinalSign], a
     ld hl, wCalendarVisibleOutput
@@ -165,21 +165,21 @@ RunCalendarHiddenVisible46ChainBench::
     call CalendarInvocationAbort
     ld a, [wCalendarStatus]
     or a
-    jr nz, .fail
+    jp nz, .fail
     ld a, [wLeaseTable+3]
     or a
-    jr nz, .fail
+    jp nz, .fail
     ld a, 3
     ld [$4000], a
     ld a, [$a000]
     or a
-    jr nz, .fail
+    jp nz, .fail
 
     ; Idle rejection after abort must also preserve V46.
     call CalendarHiddenVisible46Chain
     ld a, [wCalendarStatus]
     cp 6
-    jr nz, .fail
+    jp nz, .fail
     ld hl, wCalendarVisibleOutput
     ld de, .visible46Expected
     ld b, 16
@@ -192,7 +192,7 @@ RunCalendarHiddenVisible46ChainBench::
 .checkBytes:
     ld a, [de]
     cp [hl]
-    jr nz, .fail
+    jp nz, .fail
     inc de
     inc hl
     dec b

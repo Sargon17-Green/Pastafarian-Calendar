@@ -13,7 +13,7 @@ CalendarHiddenVisible46Chain::
     call CalendarHiddenVisible6Chain
     ld a, [wCalendarStatus]
     or a
-    jr nz, .restoreFailure
+    jp nz, .restoreFailure
 
     ; Keep V6 separately; the public output register becomes V7..V46.
     ld hl, wCalendarVisibleOutput
@@ -57,7 +57,7 @@ CalendarHiddenVisible46Chain::
     call CalendarStoneTransitionStep
     ld a, [wCalendarStatus]
     or a
-    jr nz, .restoreFailure
+    jp nz, .restoreFailure
 
     ; VisibleDrop reads the current S[i] from wCalendarStoneOld.
     ld hl, wCalendarStoneOutput
@@ -95,7 +95,7 @@ CalendarHiddenVisible46Chain::
     call CalendarVisibleDrop1
     ld a, [wCalendarStatus]
     or a
-    jr nz, .restoreFailure
+    jp nz, .restoreFailure
 
     ; The next ring slot replaces D[i-7] only after it has been consumed.
     ld a, [wCalendarVisibleRingIndex]

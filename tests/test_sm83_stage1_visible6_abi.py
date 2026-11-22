@@ -53,7 +53,8 @@ def main():
     assert "wCalendarHiddenRetained+16" in chain and "wCalendarVisibleFifth" in chain and "wCalendarVisibleThird" in chain
     assert "CalendarStoneRunValidated.validateSource" in transition
     assert "wCalendarVisibleFifth:: ds 16" in boot and "STAGE1_CHAIN6_NATIVE_BENCH" in boot
-    assert "cp 6" in visible and "ld a, 129" in bench and ".checkFifth:" in bench
+    assert "cp 1" in visible and "cp 47" in visible and "jp nc, .invalid" in visible
+    assert "ld a, 129" in bench and ".checkFifth:" in bench
     assert "build/calendar_chain6.gb" in (ROOT/"Makefile").read_text()
     assert "dmg-chain6-native:" in (ROOT/".github/workflows/canonical-names-lock.yml").read_text()
     print("HOST_STAGE1_VISIBLE6=PASS independent_pairs=72 signed32_endpoints=YES V1_V2_V3_V4_V5_RETAINED=YES predecessor=V5_V3_H2 i6_stones=5 Native385=CI_REQUIRED",flush=True)

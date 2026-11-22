@@ -58,6 +58,12 @@ def main() -> None:
     assert "wCalendarVisibleRing+96" in chain_source
     assert "wCalendarVisibleRing:: ds 112" in boot_source
     assert "wCalendarVisibleSixth:: ds 16" in boot_source
+    # RGBDS JR is signed 8-bit; the V46 error exit is not in range.
+    assert chain_source.count("jp nz, .restoreFailure") == 3
+    assert "jr nz, .restoreFailure" not in chain_source
+    bench_source = (ROOT / "src/tests/calendar_hidden_visible46_chain_native_test.asm").read_text()
+    assert "jp nz, .fail" in bench_source
+    assert "jr nz, .fail" not in bench_source
 
     print(
         "HOST_STAGE1_VISIBLE46=PASS pairs=72 hidden=7/7 visible=46/46 "

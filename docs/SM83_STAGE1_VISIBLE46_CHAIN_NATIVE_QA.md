@@ -29,3 +29,11 @@ The implementation and tests are committed, but Native386 has not been executed 
 ## Next
 
 After Native386 is accepted, implement the six simultaneous bowl updates using the previous six-bowl snapshot for every i, then retain the 12 post-stir S_r values for order/u, followed by A0 and direction. This document does not claim those later gates.
+
+## CI link failure and scoped repair (2026-11-22)
+
+- Push CI [44961336450](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/44961336450), exact `fd51aa347a4555d3d4c605db363af9c10b036e6a`, completed: `verify` success, 17 DMG Native jobs failure. Native386 is **not accepted**.
+- The `dmg-chain46-native` RGBDS v1.0.4 linker reported 10 out-of-range `JR nz` branches: 2 in `src/runtime/calendar_hidden_visible46_chain.asm` to `.restoreFailure`, 8 in the Native386 test to `.fail`. The default `dmg-native-smoke` reported the same 2 production-file errors before emulator execution.
+- `dmg-chain6-native` failed an outdated Host static check for `cp 6`. `CalendarVisibleDrop1` now legitimately validates the inclusive interval 1..46 (`cp 1`, `cp 47`, reject >=47), so its test guard is updated to the current range without altering the computation.
+- Repair: convert all three `.restoreFailure` conditional exits and all eighteen `.fail` conditional exits in the V46 bench from range-limited `JR nz` to `JP nz`. Add a Host static guard against their reintroduction. Preserve all normative recurrences and expected fixtures. This is a **source repair candidate**, not CI, RGBDS-link, ROM_HEADER or PyBoy PASS.
+- Accept Native386 only after a completed exact-SHA run with all 18 jobs successful and log-verified SHA, independent Host72, ROM_HEADER, ROM0 free >=10, real PyBoy A5/386/40 <=30000 frames, default Native370 <=9000 and 371..385 regressions. Stage1 stays open; no main/merge/Stage2.
