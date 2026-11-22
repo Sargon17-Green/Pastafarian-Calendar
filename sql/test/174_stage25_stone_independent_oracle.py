@@ -84,7 +84,7 @@ def sql():
                   "DO $oracle$", "DECLARE", " v_stone pastafari_sql_tamil.stone5;",
                   " v_bowls numeric[];", "BEGIN"]
     for i, v in model_stones().items():
-        statements.append(f" SELECT pastafari_sql_tamil.stone_state({i}) INTO v_stone;")
+        statements.append(f" v_stone := pastafari_sql_tamil.stone_state({i});")
         checks = " OR ".join(f"(v_stone).{name} IS DISTINCT FROM {number}::numeric"
                              for name, number in zip(("wheat", "barley", "salt", "bitter", "red"), v))
         statements.append(f" IF v_stone IS NULL OR {checks} THEN RAISE EXCEPTION 'stone oracle mismatch index {i}'; END IF;")
@@ -110,7 +110,10 @@ def self_test():
     assert len(all_cases) == 32
     assert all(len(result) == 6 and all(1 <= v <= M for v in result)
                for _, _, _, result in all_cases)
-    assert sql() == sql()
+    generated = sql()
+    assert generated == sql()
+    assert generated.count(" v_stone := pastafari_sql_tamil.stone_state(") == 46
+    assert " INTO v_stone;" not in generated
     print("SQL_TAMIL_INDEPENDENT_ORACLE_STATIC=PASS; stone=46x5; bowl=32")
     print("SQL_TAMIL_INDEPENDENT_ORACLE_NATIVE=NOT_EXECUTED")
 
