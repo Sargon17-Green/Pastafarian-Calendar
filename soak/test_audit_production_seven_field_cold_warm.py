@@ -76,7 +76,7 @@ class ColdWarmProtocolTests(unittest.TestCase):
         args = list(fixture())
         args[1] = args[1].replace("\t5000\t7\t24\t12\t3", "\t5000\t7\t24\t12\t4", 1)
         args[0]["production_stdout_sha256"] = digest(args[1].encode())
-        with self.assertRaisesRegex(ColdWarmError, "E_MATCH_EVIDENCE"):
+        with self.assertRaisesRegex(ValueError, "E_ORDER_DEPENDENT_PRODUCTION"):
             inspect_records(*args, SHA)
 
     def test_metrics_order_drift_rejected_even_with_updated_digest(self):
