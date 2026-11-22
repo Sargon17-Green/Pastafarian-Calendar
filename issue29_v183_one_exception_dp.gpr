@@ -1,0 +1,10 @@
+with "gnatcoll_gmp.gpr";
+project Issue29_V183_One_Exception_DP is
+   for Source_Dirs use ("src", "tests");
+   for Object_Dir use "obj_v183";
+   for Exec_Dir use "bin_v183";
+   for Main use ("issue29_v183_one_exception_tests.adb");
+   package Compiler is
+      for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
+   end Compiler;
+end Issue29_V183_One_Exception_DP;

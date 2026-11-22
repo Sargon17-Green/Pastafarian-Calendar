@@ -1,0 +1,81 @@
+name: Issue29 v183 independent one-exception 47-month DP vs native GMP Unrank; NO F
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-one-exception-dp-v183
+    paths:
+      - '.github/workflows/issue29-v183-gmp-one-exception-dp.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v183-one-shot-47month-heterogeneous
+  cancel-in-progress: false
+jobs:
+  exact-47month-heterogeneous-inner-ranks:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-ada-gmp-one-exception-dp-v183'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - name: Checkout exact corrected GMP source, never original converter
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Source and dispatch-halt pins, finite enumeration, and compact independent DP
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile tests/issue29_v183_one_exception_oracle.py
+          python3 -B tests/issue29_v183_one_exception_oracle.py preflight | tee evidence/preflight-verdict.txt
+          grep -Fx V183_ONE_EXCEPTION_INDEPENDENT_DP_REFERENCE_READY_ZERO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install isolated GNAT13/GMP tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Link only Count/Unrank GMP and reject any Calendar F symbol
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v183_one_exception_dp.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v183/issue29_v183_one_exception_tests
+          if nm bin_v183/issue29_v183_one_exception_tests | grep -iq normative_oracle; then
+            echo V183_FORBIDDEN_CALENDAR_F_LINKED >&2
+            exit 1
+          fi
+          echo V183_ONLY_GMP_COUNT_UNRANK_LINKED_ZERO_F > evidence/build-verdict.txt
+      - name: Single bounded GMP test of 35 lexicographic ranks; NEVER calendar F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v183_one_exception_oracle.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V183_47MONTH_HETEROGENEOUS_DP_GMP_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Hash all evidence files on success or failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence')
+          entries={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+            for p in sorted(root.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (root/'members.sha256.json').write_text(json.dumps(entries,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Preserve bounded GMP-only QA evidence, no original F
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v183-47month-one-exception-inner-rank-dp-gmp-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
