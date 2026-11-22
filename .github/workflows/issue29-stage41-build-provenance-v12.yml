@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -B qa/issue29_stage41_provenance_runner_v12.py \
-            --selftest --output qa-selftest-v12
+            --selftest --output "$RUNNER_TEMP/qa-selftest-v12"
 
       - name: Build and attest Stage41 source-to-binary link (never execute observer)
         shell: bash
@@ -51,6 +51,15 @@ jobs:
           set -euo pipefail
           python3 -B qa/issue29_stage41_provenance_runner_v12.py \
             --build-only --expected-head "$EXPECTED_HEAD" --output evidence-v12
+
+      - name: Stage self-test evidence after source-clean build gate
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -d "$RUNNER_TEMP/qa-selftest-v12" ]; then
+            cp -a "$RUNNER_TEMP/qa-selftest-v12" qa-selftest-v12
+          fi
 
       - name: Archive build and self-test evidence
         if: always()
