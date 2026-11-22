@@ -1,0 +1,92 @@
+name: Lua Haitian independent small oracle and BigInt QA
+
+'on':
+  push:
+    branches:
+      - 'Lua+Kreyòl-ayisyen'
+    paths:
+      - 'test/lua_haitian_independent_small_oracle_bigint_qa.lua'
+      - '.github/workflows/lua-haitian-independent-small-oracle.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lua53_independent_small_oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install stock Lua 5.3
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.3 zip unzip time
+          lua5.3 -v
+      - name: Execute independent QA and preserve raw evidence
+        id: execute
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          E=lua-haitian-small-oracle-evidence
+          mkdir -p "$E"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          SRC=test/lua_haitian_independent_small_oracle_bigint_qa.lua
+          test "$(git hash-object "$SRC")" = "$(git rev-parse "HEAD:$SRC")"
+          git hash-object "$SRC" > "$E/source_blob.txt"
+          sha256sum "$SRC" > "$E/source_sha256.txt"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nBRANCH=Lua+Kreyòl-ayisyen\nSHA=%s\nBLOB=%s\nSCOPE=QA_ONLY_SMALL_ORACLE_BIGINT\n' \
+            "$GITHUB_SHA" "$(cat "$E/source_blob.txt")" > "$E/manifest.txt"
+          set +e
+          (
+            ulimit -v 262144
+            ulimit -t 110
+            timeout --signal=TERM --kill-after=5s 120s \
+              /usr/bin/time -f 'wall_s=%e\nuser_s=%U\nsys_s=%S\npeak_rss_kib=%M' -o "$E/resource.txt" \
+              lua5.3 "$SRC" > "$E/stdout.txt" 2> "$E/stderr.txt"
+          )
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > "$E/exit_code.txt"
+          cat "$E/stdout.txt"
+          test "$rc" -eq 0
+          test ! -s "$E/stderr.txt"
+          grep -Fxq 'BIGINT_ROUNDTRIPS=14 BIGINT_DIVMOD=4 BIGINT_BOUNDARY_2P53_2P63=PASS' "$E/stdout.txt"
+          grep -Fxq 'SMALL_ORACLE=PASS vectors=210 words=46771 prefixes=220238 unrank=630 memo_states=6501 max_m=4 max_L=12' "$E/stdout.txt"
+          grep -Fxq 'QA_ONLY=PASS NORMATIVE_DATE_NOT_INVOKED=1 REAL_VECTOR_NOT_TESTED=1' "$E/stdout.txt"
+          python3 - "$E/resource.txt" <<'PY'
+          import sys
+          metrics = {}
+          for line in open(sys.argv[1], encoding='utf-8'):
+              key, sep, value = line.strip().partition('=')
+              if sep:
+                  metrics[key] = float(value)
+          assert metrics['wall_s'] <= 120, metrics
+          assert metrics['user_s'] + metrics['sys_s'] <= 110, metrics
+          assert metrics['peak_rss_kib'] <= 262144, metrics
+          print('RESOURCE_ENVELOPE=PASS', metrics)
+          PY
+      - name: Package immutable raw evidence, checksums and CRC
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          E=lua-haitian-small-oracle-evidence
+          mkdir -p "$E"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\n' "$GITHUB_SHA" > "$E/identity.txt"
+          (cd "$E" && sha256sum ./*.txt > SHA256SUMS.txt)
+          zip -X -q -r lua-haitian-small-oracle-evidence.zip "$E"
+          sha256sum lua-haitian-small-oracle-evidence.zip > lua-haitian-small-oracle-evidence.zip.sha256
+          unzip -t lua-haitian-small-oracle-evidence.zip
+      - name: Upload audit evidence even on QA failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-independent-small-oracle-bigint-qa
+          path: |
+            lua-haitian-small-oracle-evidence.zip
+            lua-haitian-small-oracle-evidence.zip.sha256
+          if-no-files-found: error
+          retention-days: 30
