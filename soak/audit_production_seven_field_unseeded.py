@@ -34,6 +34,8 @@ TARGETS = tuple(FOUNDATION + offset for offset in (-2, -1, 0, 1, 2))
 HALF_WIDTH = 280
 QUESTION_COUNT = HALF_WIDTH * 2
 GATE_LIMIT = 8192
+MAX_EXPANDED_GATE_COUNT = GATE_LIMIT * 2 + 1  # indices -8192..8192, including gate zero
+ORDER_NAMES = ("natural", "reverse", "interleaved")
 PASS = "PASS_BOUNDED_UNSEEDED_THREE_ORDER_YEAR_EDGE_NOT_CERTIFIED"
 DECIMAL = re.compile(r"(?:0|-?[1-9][0-9]*)\Z", re.ASCII)
 MODULES = (independent_date_combinatorics, independent_month_weaving_oracle,
@@ -150,6 +152,78 @@ def validate_order_invariance(groups: list[list[list[int]]],
             raise SevenFieldAuditError("E_ORDER_DEPENDENT_PRODUCTION")
         baseline = actual
 
+
+def parse_gate_metrics(raw: str, expected_targets: tuple[int, ...]) -> list[tuple[int, int]]:
+    """Parse one strict stderr metric for every real production request."""
+    if (type(expected_targets) is not tuple or len(expected_targets) != 33
+            or any(type(target) is not int for target in expected_targets)):
+        raise SevenFieldAuditError("E_GATE_METRIC_EXPECTED_SCOPE")
+    if not isinstance(raw, str) or not raw.endswith("\n") or "\r" in raw:
+        raise SevenFieldAuditError("E_GATE_METRIC_PROTOCOL")
+    lines = raw.splitlines()
+    if len(lines) != 33:
+        raise SevenFieldAuditError("E_GATE_METRIC_COUNT")
+    metrics = []
+    for expected, line in zip(expected_targets, lines):
+        fields = line.split("\t")
+        if len(fields) != 3 or fields[0] != "GATE_METRIC":
+            raise SevenFieldAuditError("E_GATE_METRIC_PROTOCOL")
+        target = canonical_number(fields[1])
+        count = canonical_number(fields[2])
+        if target != expected:
+            raise SevenFieldAuditError("E_GATE_METRIC_TARGET_ORDER")
+        if not 1 <= count <= MAX_EXPANDED_GATE_COUNT:
+            raise SevenFieldAuditError("E_GATE_METRIC_BOUNDS")
+        metrics.append((target, count))
+    return metrics
+
+
+def validate_gate_metric_invariance(
+    metrics: list[tuple[int, int]],
+    orders: tuple[tuple[int, ...], ...]
+) -> dict[int, int]:
+    """Require 33 bounded metrics and the same count for each target in all orders."""
+    if type(metrics) is not list or len(metrics) != 33 or type(orders) is not tuple or len(orders) != 3:
+        raise SevenFieldAuditError("E_GATE_METRIC_GROUP_COUNT")
+    if orders != target_orders(orders[0]):
+        raise SevenFieldAuditError("E_GATE_METRIC_ORDER_SCOPE")
+    baseline: dict[int, int] | None = None
+    for group_index, order in enumerate(orders):
+        group = metrics[group_index * 11:(group_index + 1) * 11]
+        actual: dict[int, int] = {}
+        for (target, count), expected in zip(group, order):
+            if type(target) is not int or type(count) is not int or target != expected:
+                raise SevenFieldAuditError("E_GATE_METRIC_TARGET_ORDER")
+            if not 1 <= count <= MAX_EXPANDED_GATE_COUNT:
+                raise SevenFieldAuditError("E_GATE_METRIC_BOUNDS")
+            actual[target] = count
+        if len(actual) != 11:
+            raise SevenFieldAuditError("E_GATE_METRIC_TARGET_DUPLICATE")
+        if baseline is not None and actual != baseline:
+            raise SevenFieldAuditError("E_GATE_METRIC_ORDER_DEPENDENT")
+        baseline = actual
+    return baseline or {}
+
+
+def render_gate_metrics_tsv(
+    metrics: list[tuple[int, int]],
+    orders: tuple[tuple[int, ...], ...]
+) -> str:
+    validate_gate_metric_invariance(metrics, orders)
+    rows = ["order\ttarget\texpanded_gate_count"]
+    position = 0
+    for order_name, order in zip(ORDER_NAMES, orders):
+        for target in order:
+            metric_target, count = metrics[position]
+            if metric_target != target:
+                raise SevenFieldAuditError("E_GATE_METRIC_TARGET_ORDER")
+            rows.append(f"{order_name}\t{target}\t{count}")
+            position += 1
+    if position != 33:
+        raise SevenFieldAuditError("E_GATE_METRIC_COUNT")
+    return "\n".join(rows) + "\n"
+
+
 def verified_source(root: Path, jar: Path) -> dict:
     root = root.resolve(strict=True)
     sha = subprocess.check_output(
@@ -160,11 +234,19 @@ def verified_source(root: Path, jar: Path) -> dict:
             re.fullmatch(r"[0-9a-f]{40}", sha) is None):
         raise SevenFieldAuditError("E_EXACT_SOURCE_REF")
     source = root / "src/main/kotlin/pastafari/ProductionYearNavigator.kt"
+    engine = root / "src/main/kotlin/pastafari/ProductionGateYear5000Engine.kt"
     bridge = root / "soak/Post55ProductionDateBridge.kt"
-    if ("maxGateAbsIndex: Int = 8192" not in source.read_text(encoding="utf-8")
-            or "ProductionYearNavigator()" not in bridge.read_text(encoding="utf-8")
-            or "E_POST55_GATE_GEOMETRIC_LIMIT" not in bridge.read_text(encoding="utf-8")):
-        raise SevenFieldAuditError("E_PRODUCTION_BUDGET_OR_BRIDGE_DRIFT")
+    source_text = source.read_text(encoding="utf-8")
+    engine_text = engine.read_text(encoding="utf-8")
+    bridge_text = bridge.read_text(encoding="utf-8")
+    if ("maxGateAbsIndex: Int = 8192" not in source_text
+            or "val expandedGateCount: Int get() = gateTable.expandedGateCount" not in source_text
+            or "val expandedGateCount: Int get() = gates.size" not in engine_text
+            or "index.abs() <= ExactInt.of(maxGateAbsIndex.toLong())" not in engine_text
+            or "ProductionYearNavigator()" not in bridge_text
+            or "E_POST55_GATE_GEOMETRIC_LIMIT" not in bridge_text
+            or "GATE_METRIC" not in bridge_text):
+        raise SevenFieldAuditError("E_PRODUCTION_BUDGET_OR_GATE_METRIC_SEMANTICS")
     fingerprints = {}
     for module in MODULES:
         source_path = Path(module.__file__).resolve(strict=True)
@@ -176,7 +258,8 @@ def verified_source(root: Path, jar: Path) -> dict:
     return {"git_sha": sha, "jar_sha256": hashlib.sha256(jar.read_bytes()).hexdigest(),
             "oracle_module_sha256": fingerprints,
             "bridge_sha256": hashlib.sha256(bridge.read_bytes()).hexdigest(),
-            "production_navigator_sha256": hashlib.sha256(source.read_bytes()).hexdigest()}
+            "production_navigator_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+            "production_gate_engine_sha256": hashlib.sha256(engine.read_bytes()).hexdigest()}
 
 
 def compare_rows(production: list[list[int]], oracle: list[tuple[int, ...]],
@@ -204,7 +287,7 @@ def atomic_text(path: Path, value: str) -> str:
 
 
 def audit(jar: Path, timeout_seconds: int, evidence: Path,
-          transcript: Path, gaps_file: Path) -> dict:
+          transcript: Path, gaps_file: Path, metrics_file: Path) -> dict:
     if type(timeout_seconds) is not int or not 60 <= timeout_seconds <= 1200:
         raise SevenFieldAuditError("E_TOTAL_BUDGET")
     begun = monotonic()
@@ -235,7 +318,8 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     if len(targets) != 11:
         raise SevenFieldAuditError("E_ELEVEN_DATE_SCOPE")
     cmd = ["java", "-XX:ActiveProcessorCount=1", "-Xmx1200m", "-Xss8m",
-           "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge"]
+           "-cp", str(jar.resolve()), "pastafari.Post55ProductionDateBridge",
+           "--emit-gate-metrics"]
     orders = target_orders(targets)
     input_text = "".join(f"{FOUNDATION}\t{target}\n"
                          for order in orders for target in order)
@@ -249,6 +333,10 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
     if proc.returncode != 0:
         raise SevenFieldAuditError("E_NATIVE_EXIT_" + str(proc.returncode) +
                                    "_STDERR_" + proc.stderr[-300:])
+    metric_targets = tuple(target for order in orders for target in order)
+    gate_metrics = parse_gate_metrics(proc.stderr, metric_targets)
+    gate_counts_by_target = validate_gate_metric_invariance(gate_metrics, orders)
+    metrics_digest = atomic_text(metrics_file, render_gate_metrics_tsv(gate_metrics, orders))
     output_lines = proc.stdout.splitlines(keepends=True)
     if len(output_lines) != len(targets) * len(orders):
         raise SevenFieldAuditError("E_ORDER_TOTAL_ROW_COUNT")
@@ -286,7 +374,17 @@ def audit(jar: Path, timeout_seconds: int, evidence: Path,
         "signed_gate_gap_sha256": trace_digest,
         "production_stdout_sha256": hashlib.sha256(proc.stdout.encode("utf-8")).hexdigest(),
         "production_configured_gate_limit": GATE_LIMIT,
-        "production_actual_gate_count_exposed": False,
+        "production_actual_gate_count_exposed": True,
+        "production_gate_metric_count": len(gate_metrics),
+        "production_gate_metric_min": min(count for _, count in gate_metrics),
+        "production_gate_metric_max": max(count for _, count in gate_metrics),
+        "production_gate_metric_max_allowed": MAX_EXPANDED_GATE_COUNT,
+        "production_gate_metric_order_invariant": True,
+        "production_gate_metric_sha256": metrics_digest,
+        "production_expanded_gate_counts": [
+            {"target": target, "expanded_gate_count": gate_counts_by_target[target]}
+            for target in targets
+        ],
         "checkpoint_seed_used": False, "pinned_reference_used": False,
         "shared_cross_branch_fixture_used": False,
         "full_date_certified": False, "tablets_certified": False,
@@ -302,11 +400,12 @@ def main(argv=None) -> int:
     ap.add_argument("--evidence", type=Path, required=True)
     ap.add_argument("--transcript", type=Path, required=True)
     ap.add_argument("--gaps", type=Path, required=True)
+    ap.add_argument("--metrics", type=Path, required=True)
     ap.add_argument("--timeout-seconds", type=int, default=900)
     args = ap.parse_args(argv)
     try:
         result = audit(args.jar, args.timeout_seconds, args.evidence,
-                       args.transcript, args.gaps)
+                       args.transcript, args.gaps, args.metrics)
     except Exception as exc:
         result = {"status": "FAIL_SEVEN_FIELD_UNSEEDED_DIFFERENTIAL",
                   "project_id": PROJECT_ID,

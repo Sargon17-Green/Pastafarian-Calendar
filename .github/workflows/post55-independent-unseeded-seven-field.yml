@@ -5,6 +5,7 @@ on:
     paths:
       - 'soak/audit_production_seven_field_unseeded.py'
       - 'soak/test_audit_production_seven_field_unseeded.py'
+      - 'soak/Post55ProductionDateBridge.kt'
       - '.github/workflows/post55-independent-unseeded-seven-field.yml'
   workflow_dispatch:
 permissions:
@@ -36,7 +37,11 @@ jobs:
           test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           grep -Fq 'maxGateAbsIndex: Int = 8192' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          grep -Fq 'val expandedGateCount: Int get() = gateTable.expandedGateCount' src/main/kotlin/pastafari/ProductionYearNavigator.kt
+          grep -Fq 'val expandedGateCount: Int get() = gates.size' src/main/kotlin/pastafari/ProductionGateYear5000Engine.kt
+          grep -Fq 'index.abs() <= ExactInt.of(maxGateAbsIndex.toLong())' src/main/kotlin/pastafari/ProductionGateYear5000Engine.kt
           grep -Fq 'ProductionYearNavigator()' soak/Post55ProductionDateBridge.kt
+          grep -Fq 'GATE_METRIC' soak/Post55ProductionDateBridge.kt
           echo 'UNSEEDED_SEVEN_FIELD_SOURCE_LOCK_GREEN'
       - name: Run mutation and protocol unit tests
         shell: bash
@@ -62,7 +67,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -B soak/audit_production_seven_field_unseeded.py --jar "$RUNNER_TEMP/seven-field-unseeded.jar" --timeout-seconds 900 --evidence evidence/seven-field-unseeded-report.json --transcript evidence/seven-field-unseeded-production.tsv --gaps evidence/seven-field-unseeded-gaps.tsv 2>&1 | tee evidence/seven-field-unseeded-run.log
+          python3 -B soak/audit_production_seven_field_unseeded.py --jar "$RUNNER_TEMP/seven-field-unseeded.jar" --timeout-seconds 900 --evidence evidence/seven-field-unseeded-report.json --transcript evidence/seven-field-unseeded-production.tsv --gaps evidence/seven-field-unseeded-gaps.tsv --metrics evidence/seven-field-unseeded-metrics.tsv 2>&1 | tee evidence/seven-field-unseeded-run.log
       - name: Preserve evidence including failed runs
         if: always()
         uses: actions/upload-artifact@v4

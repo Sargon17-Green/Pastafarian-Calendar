@@ -17,7 +17,14 @@ object Post55ProductionDateBridge {
     private val foundation = ExactInt.of(-15055671L)
     private val conservativeMaxDistance = ExactInt.of(8192L * 963L - 5778L)
 
-    fun convert(calculationDay: ExactInt, targetDay: ExactInt): List<String> {
+    private data class ConversionMeasurement(
+        val fields: List<String>,
+        val expandedGateCount: Int
+    )
+
+    private fun convertMeasured(
+        calculationDay: ExactInt, targetDay: ExactInt
+    ): ConversionMeasurement {
         require((calculationDay - foundation).abs() <= conservativeMaxDistance) {
             "E_POST55_GATE_GEOMETRIC_LIMIT"
         }
@@ -37,13 +44,18 @@ object Post55ProductionDateBridge {
         val offset0 = (targetDay - year.openDay - 1L).toIntExact()
         val wovenDay = weaving.dayAt(BigInteger(rank.toString()), offset0)
         val monthIndex = months.canonicalIndices[wovenDay.monthOrdinal - 1]
-        return listOf(calculationDay.toString(), targetDay.toString(), year.number.toString(),
+        val fields = listOf(calculationDay.toString(), targetDay.toString(), year.number.toString(),
             cutlet.canonicalIndex.toString(), (targetDay-cutlet.firstDay+1L).toString(),
             monthIndex.toString(), wovenDay.dayInMonth.toString())
+        return ConversionMeasurement(fields, navigator.expandedGateCount)
     }
 
+    fun convert(calculationDay: ExactInt, targetDay: ExactInt): List<String> =
+        convertMeasured(calculationDay, targetDay).fields
+
     @JvmStatic fun main(args: Array<String>) {
-        require(args.isEmpty()) { "E_POST55_BRIDGE_ARGS" }
+        val emitGateMetrics = args.size == 1 && args[0] == "--emit-gate-metrics"
+        require(args.isEmpty() || emitGateMetrics) { "E_POST55_BRIDGE_ARGS" }
         while (true) {
             val line = readLine() ?: break
             val fields = line.split('\t')
@@ -52,7 +64,11 @@ object Post55ProductionDateBridge {
             }
             val calculationDay = ExactInt.parse(fields[0])
             val targetDay = ExactInt.parse(fields[1])
-            println(convert(calculationDay, targetDay).joinToString("\t"))
+            val measured = convertMeasured(calculationDay, targetDay)
+            println(measured.fields.joinToString("\t"))
+            if (emitGateMetrics) {
+                System.err.println("GATE_METRIC\t${targetDay}\t${measured.expandedGateCount}")
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ from audit_production_seven_field_unseeded import (
     FOUNDATION, TARGETS, HALF_WIDTH, QUESTION_COUNT, SevenFieldAuditError,
     boundary_targets, canonical_number, compare_rows, expected_indices, parse_production,
     target_orders, validate_order_invariance, validate_boundary_years, validate_ledger_trace,
+    parse_gate_metrics, validate_gate_metric_invariance, render_gate_metrics_tsv,
+    MAX_EXPANDED_GATE_COUNT,
 )
 
 
@@ -194,6 +196,72 @@ class SevenFieldIndependentProtocolTests(unittest.TestCase):
         groups[1][1][0] += 1
         with self.assertRaisesRegex(SevenFieldAuditError, "E_ORDER_ROW_PROTOCOL"):
             validate_order_invariance(groups, orders)
+
+
+
+class ProductionGateMetricProtocolTests(unittest.TestCase):
+    @staticmethod
+    def orders():
+        targets = tuple(FOUNDATION + offset for offset in range(11))
+        return target_orders(targets)
+
+    @staticmethod
+    def metrics_for(orders):
+        counts = {target: 100 + index for index, target in enumerate(orders[0])}
+        return [(target, counts[target]) for order in orders for target in order]
+
+    @staticmethod
+    def payload(metrics):
+        return "".join(f"GATE_METRIC\\t{target}\\t{count}\\n" for target, count in metrics)
+
+    def test_exact_33_metrics_are_bounded_order_invariant_and_archived(self):
+        orders = self.orders()
+        expected = tuple(target for order in orders for target in order)
+        metrics = parse_gate_metrics(self.payload(self.metrics_for(orders)), expected)
+        counts = validate_gate_metric_invariance(metrics, orders)
+        self.assertEqual(len(metrics), 33)
+        self.assertEqual(counts, {target: 100 + index for index, target in enumerate(orders[0])})
+        tsv = render_gate_metrics_tsv(metrics, orders)
+        self.assertEqual(len(tsv.splitlines()), 34)
+        self.assertEqual(tsv.splitlines()[0], "order\\ttarget\\texpanded_gate_count")
+        self.assertEqual(MAX_EXPANDED_GATE_COUNT, 16385)
+
+    def test_missing_extra_and_malformed_metrics_fail_closed(self):
+        orders = self.orders()
+        expected = tuple(target for order in orders for target in order)
+        raw = self.payload(self.metrics_for(orders))
+        invalid = (
+            "\\n".join(raw.splitlines()[:-1]) + "\\n",
+            raw + raw.splitlines()[0] + "\\n",
+            raw.replace("GATE_METRIC", "GATE_METRIC_BAD", 1),
+        )
+        codes = ("E_GATE_METRIC_COUNT", "E_GATE_METRIC_COUNT", "E_GATE_METRIC_PROTOCOL")
+        for payload, code in zip(invalid, codes):
+            with self.subTest(code=code), self.assertRaisesRegex(SevenFieldAuditError, code):
+                parse_gate_metrics(payload, expected)
+
+    def test_metrics_must_follow_the_exact_request_order(self):
+        orders = self.orders()
+        expected = tuple(target for order in orders for target in order)
+        lines = self.payload(self.metrics_for(orders)).splitlines()
+        lines[0], lines[1] = lines[1], lines[0]
+        with self.assertRaisesRegex(SevenFieldAuditError, "E_GATE_METRIC_TARGET_ORDER"):
+            parse_gate_metrics("\\n".join(lines) + "\\n", expected)
+
+    def test_metric_bounds_and_cross_order_counts_fail_closed(self):
+        orders = self.orders()
+        expected = tuple(target for order in orders for target in order)
+        raw = self.payload(self.metrics_for(orders))
+        for bad in ("0", "16386", "-0", "0100"):
+            changed = raw.replace("\\t100\\n", f"\\t{bad}\\n", 1)
+            with self.subTest(bad=bad), self.assertRaisesRegex(
+                SevenFieldAuditError, "E_GATE_METRIC_BOUNDS" if bad in ("0", "16386") else "E_SEVEN_NONCANONICAL"
+            ):
+                parse_gate_metrics(changed, expected)
+        metrics = parse_gate_metrics(raw, expected)
+        metrics[-1] = (metrics[-1][0], metrics[-1][1] + 1)
+        with self.assertRaisesRegex(SevenFieldAuditError, "E_GATE_METRIC_ORDER_DEPENDENT"):
+            validate_gate_metric_invariance(metrics, orders)
 
 
 if __name__ == "__main__":
