@@ -1,0 +1,81 @@
+name: Issue29 v182 exact GMP rank over 248 radix-M places; NO Calendar F
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-rank-p248-v182
+    paths:
+      - '.github/workflows/issue29-v182-gmp-rank-p248.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v182-rank-p248-one-shot
+  cancel-in-progress: false
+jobs:
+  max-width-rank-only:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-ada-gmp-rank-p248-v182'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout SHA-pinned corrected Ada QA without date converter
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Lock sources, prove safety, generate independent exact rank fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile tests/issue29_v182_rank_p248.py
+          python3 -B tests/issue29_v182_rank_p248.py preflight | tee evidence/preflight-verdict.txt
+          grep -Fx V182_248_DIGIT_CLOSED_FORM_REFERENCE_READY_ZERO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install GNAT13 and GMP for isolated component QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build GMP rank-only executable and audit linked symbols
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v182_rank_p248.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v182/issue29_v182_rank_p248_tests
+          if nm bin_v182/issue29_v182_rank_p248_tests | grep -iq normative_oracle; then
+            echo V182_FORBIDDEN_CALENDAR_SOURCE_LINKED >&2
+            exit 1
+          fi
+          echo V182_ONLY_GMP_GLOBAL_RANK_LINKED_ZERO_F > evidence/build-verdict.txt
+      - name: Execute 248-digit GMP wide rank once, bounded, no calendar F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v182_rank_p248.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V182_GMP_P248_CLOSED_FORM_SIX_STREAMS_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Hash evidence even if native test fails
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('evidence')
+          m={f.name:{'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()}
+             for f in sorted(p.iterdir()) if f.is_file() and f.name!='members.sha256.json'}
+          (p/'members.sha256.json').write_text(json.dumps(m,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload full QA evidence, never rewrite prior runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v182-gmp-global-rank-p248-six-closed-form-goldens-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
