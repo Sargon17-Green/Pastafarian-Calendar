@@ -34,8 +34,8 @@ jobs:
           test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
           test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
           test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
-          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 275f0404aff142b3c5742493a7d24f233e84b821
-          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md)" = 423cf43eaec55bda97ff19201124ef7859a1edef
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 26f39a1894f614fd6f2f2657737b8df515a8d034
+          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md)" = 63cffd730cf8a4f3273a97d9fc68a86e80afa473
           git rev-parse HEAD > "$RUNNER_TEMP/shard-commit.txt"
           git hash-object .github/workflows/logo-stage02-wide-general-shards-native.yml > "$RUNNER_TEMP/shard-workflow-blob.txt"
           for path in src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md .github/workflows/logo-stage02-wide-general-shards-native.yml; do

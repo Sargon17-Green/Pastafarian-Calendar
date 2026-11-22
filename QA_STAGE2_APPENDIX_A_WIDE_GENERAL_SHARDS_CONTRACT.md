@@ -14,7 +14,7 @@ The previous full-general-k Native run 44960408541 / job 137017741464 timed out 
 
 ## Independent oracle and selection semantics
 
-The existing QA fixture generator computes every expected rank with Python arbitrary-precision integers, with no calls to the Logo candidate, Logo normative reference, or prior-branch fixtures. The existing independent host enumerator validates 42,748 bounded finite cases against a different direct equation. This branch adds a strict selector `--only-width K`, where K is one of 3,4,5,32,33,64. This selector preserves historical `--max-width 3` behavior but selects exactly one width and **no k=2 controls** in each new shard.
+The existing QA fixture generator computes every expected rank with Python arbitrary-precision integers, with no calls to the Logo candidate, Logo normative reference, or prior-branch fixtures. The existing independent host enumerator validates 42,748 bounded finite cases against a different direct equation. This branch adds a strict selector `--only-width K`, where K is one of 3,4,5,6,32,33,64. This selector preserves historical `--max-width 3` behavior but selects exactly one width and **no k=2 controls** in each new shard.
 
 For a selected width k, valid vectors contain the N=M^k no-rejection boundary; both +1 and -1 rejection directions at N=(M^k+1)//2; the N=M^(k-1)+1 transition; and, for k=32,33 only, the N=M^(k-1)+M transition. M=2^127-1. Every vector has four Native assertions: canonical exact-BI result, Python-integer expected rank, in-range [1,N], and deterministic repeat. The fixed 18 independent invalid-input guards each require output [] without failure. The explicit coverage oracle is:
 
