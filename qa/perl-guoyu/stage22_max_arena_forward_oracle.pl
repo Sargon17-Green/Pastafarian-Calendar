@@ -184,8 +184,9 @@ if ($mode eq 'count') {
     my $total = decimal(substr($bits, 0, 16));
     open my $fh, '<:raw', $file or die "cannot open word file: $!\n";
     my $line = <$fh>;
-    close $fh;
     die "empty word file\n" unless defined $line;
+    die "extra CSV lines\n" if defined(<$fh>);
+    close $fh or die "cannot close word file: $!\n";
     $line =~ s/\r?\n\z//;
     die "invalid CSV format\n" unless $line =~ /\A[1-9][0-9]*(?:,[1-9][0-9]*)*\z/;
     my @word = split /,/, $line;

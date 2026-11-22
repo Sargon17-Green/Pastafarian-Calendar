@@ -10,8 +10,9 @@ trap 'rc=$?; printf "%s\n" "$rc" > "$LOG/harness.exit"; exit "$rc"' EXIT
 PRODUCER=lib/Pastafari/Monster/WeavingPrimitive.pm
 ORACLE=qa/perl-guoyu/stage22_max_arena_forward_oracle.pl
 SMALL=qa/perl-guoyu/stage22_perl_only_small_contract.pl
+NEGATIVE=qa/perl-guoyu/stage22_oracle_csv_negative_input.t
 EXPECTED_PRODUCER=4a7cd53e7132a6b3ab5fdaffd2d93a498e9296a6
-EXPECTED_ORACLE=6745f95942bd3376185ce0bc822f15271806bf4f
+EXPECTED_ORACLE=b6f6e055c41e31be369b11fbacc33f6d0279856e
 EXPECTED_COUNT=214592873590014046152008360029870
 MIDDLE=107296436795007023076004180014935
 {
@@ -31,7 +32,7 @@ test "$(git rev-parse "HEAD:$ORACLE")" = "$EXPECTED_ORACLE"
 test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
 test "$GITHUB_REF_NAME" = 'Perl+國語'
 test ! -e qa/perl-guoyu/stage22_max_arena_forward_oracle.cpp
-sha256sum "$PRODUCER" "$ORACLE" "$SMALL" t/00_bootstrap.t > "$LOG/source.sha256"
+sha256sum "$PRODUCER" "$ORACLE" "$SMALL" "$NEGATIVE" t/00_bootstrap.t > "$LOG/source.sha256"
 run_case() {
   local name="$1" status=0 rss
   shift
@@ -61,12 +62,17 @@ run_case small_contract perl "$SMALL"
 grep -Fxq '1..45' "$LOG/small_contract.stdout"
 grep -Fxq 'STAGE22_PERL_ORACLE_BRUTE_FORCE_CONTRACT=PASS' "$LOG/small_contract.stdout"
 test ! -s "$LOG/small_contract.stderr"
+run_case negative_contract perl "$NEGATIVE"
+grep -Fxq "STAGE22_ORACLE_CSV_NEGATIVE_CONTRACT=PASS" "$LOG/negative_contract.stdout"
+test ! -s "$LOG/negative_contract.stderr"
 run_case producer_syntax perl -Ilib -c "$PRODUCER"
 grep -Fq 'syntax OK' "$LOG/producer_syntax.stderr"
 run_case oracle_syntax perl -c "$ORACLE"
 grep -Fq 'syntax OK' "$LOG/oracle_syntax.stderr"
 run_case small_syntax perl -c "$SMALL"
 grep -Fq 'syntax OK' "$LOG/small_syntax.stderr"
+run_case negative_syntax perl -c "$NEGATIVE"
+grep -Fq 'syntax OK' "$LOG/negative_syntax.stderr"
 run_case oracle_count perl "$ORACLE" count
 test "$(cat "$LOG/oracle_count.stdout")" = "$EXPECTED_COUNT"
 grep -Fq 'profile_months=12 days=52 capacity=4021367' "$LOG/oracle_count.stderr"
