@@ -1,0 +1,76 @@
+name: Issue29 v178 independent prefix-state DP GMP component only
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-independent-state-dp-v178
+    paths:
+      - '.github/workflows/issue29-v178-gmp-independent-state-dp.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v178-once
+  cancel-in-progress: false
+jobs:
+  independent-dp-vs-gmp:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-gmp-independent-state-dp-v178' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify immutable sources, one-shot identity and generate independent reference
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m py_compile tests/issue29_v178_independent_state_dp.py
+          mkdir -p evidence
+          python3 -B tests/issue29_v178_independent_state_dp.py preflight | tee evidence/preflight-verdict.txt
+          grep -Fx V178_INDEPENDENT_STATE_DP_REFERENCE_READY_NO_F evidence/preflight-verdict.txt
+      - name: Install Ada/GMP toolchain with separate build diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: GMP native compile and link, forbidden F symbol preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v178_gmp_state_dp.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v178/issue29_v178_gmp_state_dp_tests
+          if nm bin_v178/issue29_v178_gmp_state_dp_tests | grep -iq normative_oracle; then
+            echo FORBIDDEN_ORIGINAL_F_LINK >&2
+            exit 1
+          fi
+          echo V178_GMP_ONLY_NATIVE_LINKED_ZERO_F > evidence/build-verdict.txt
+      - name: One resource-bounded native execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v178_independent_state_dp.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V178_INDEPENDENT_PREFIX_STATE_DP_GMP_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Write immutable evidence member digests
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          d=Path("evidence")
+          manifest={p.name:{"bytes":p.stat().st_size,"sha256":hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(d.iterdir()) if p.is_file() and p.name!="members.sha256.json"}
+          (d/"members.sha256.json").write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Upload all evidence including on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v178-independent-prefix-state-dp-vs-gmp-zero-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
