@@ -10,6 +10,8 @@ on:
       - 'tools/stage04_cross_runtime_diff.py'
       - 'tools/stage04_rust_witness_provenance.py'
       - 'tools/stage04_rust_callability_eligibility.py'
+      - 'tools/stage04_whole_stage_acceptance.py'
+      - 'audit/STAGE_04_RUST_WHOLE_STAGE_ACCEPTANCE_CONTRACT_2026-11-22.md'
       - 'audit/STAGE_04_RUST_CALLABILITY_ELIGIBILITY_CONTRACT_2026-11-03.md'
       - 'tools/tests/test_stage04_*.py'
       - 'Cargo.toml'
@@ -198,6 +200,22 @@ jobs:
           python3 -c 'import json; p=json.load(open("evidence/stage04_reconstructed_substitution.json")); assert p["reconstruction_substitution_static_eligible"] is True and p["historical_pre_stage03_rust_red_proven"] is False and p["independently_verified_observed_rows"] == 128 and p["stage04_closure"] == "NOT_CLAIMED"'
           printf 'STAGE04_AUTHORIZED_RECONSTRUCTION_STATIC_ADMISSION=PASS\nSTAGE04_ORIGINAL_HISTORICAL_RED=NOT_PROVEN\nSTAGE04_CLOSURE=NOT_CLAIMED\n' >> evidence/result.txt
           cat evidence/stage04_reconstructed_substitution.json >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify whole-Stage04 completion evidence consistency (not closure)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 25s \
+            python3 tools/stage04_whole_stage_acceptance.py --self-test \
+            > evidence/stage04_whole_stage_contract_tests.txt 2>&1
+          cat evidence/stage04_whole_stage_contract_tests.txt
+          grep -Fq 'Ran 5 tests' evidence/stage04_whole_stage_contract_tests.txt
+          grep -Fxq 'OK' evidence/stage04_whole_stage_contract_tests.txt
+          timeout --signal=TERM --kill-after=5s 30s \
+            python3 tools/stage04_whole_stage_acceptance.py --repo . --evidence evidence \
+              --branch-head "$GITHUB_SHA" > evidence/stage04_whole_stage_candidate.json
+          python3 -c 'import json; p=json.load(open("evidence/stage04_whole_stage_candidate.json")); assert p["closure_candidate"] is True and p["stage04_closure"]=="NOT_CLAIMED" and p["historical_pre_stage03_rust_red_proven"] is False and p["validated_original_rust_tsv_rows"]==15 and p["validated_reconstructed_native_observed_rows"]==128'
+          printf 'STAGE04_WHOLE_STAGE_EVIDENCE_CONSISTENCY=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' >> evidence/result.txt
+          cat evidence/stage04_whole_stage_candidate.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence on success or failure
         if: always()
         uses: actions/upload-artifact@v4
