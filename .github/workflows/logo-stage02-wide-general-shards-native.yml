@@ -31,7 +31,7 @@ jobs:
           test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
           test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
           test "$(git hash-object src/stage02_choose_wide_general.logo)" = 5a624a2f3ade5b356b0569e3a1165904ad7e9c1d
-          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b6f29ed3649cf
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
           test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
           test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
           test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 275f0404aff142b3c5742493a7d24f233e84b821
