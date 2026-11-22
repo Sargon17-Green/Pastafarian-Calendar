@@ -1,6 +1,7 @@
 use BigInteger;
 use IO;
 use List;
+use Time;
 use ExactMath;
 use SourceLanguageCatalog;
 use NormativeOracle;
@@ -237,6 +238,24 @@ proc main() {
   // Constructive lower bound: all months opened, none closed, each remaining in 1..length-1.
   writeln("YEAR_BOUNDARY_WEAVING_GUARANTEED_REACHABLE_STATES=", weavingGuaranteedReachable);
   try! stdout.flush();
+  // Research-only source-fresh setup attribution. Do not treat this as
+  // production Stage 6 acceptance or as a replacement for chooseMonthWeaving.
+  // Measure the same sparse root setup on the exact production month vector,
+  // then preserve the original production call below unchanged.
+  checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_BEGIN");
+  var setupDiagnostic: SparseWeavingCounter;
+  setupDiagnostic.lengths = structure.monthLengths;
+  var setupTimer: stopwatch;
+  setupTimer.start();
+  const diagnosticRoot = setupDiagnostic.countAll();
+  setupTimer.stop();
+  check(diagnosticRoot > 0, "source-fresh sparse weaving root is positive");
+  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_SECONDS=", setupTimer.elapsed());
+  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_MONTHS=", structure.monthCount);
+  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_DAYS=", weavingInputTotal);
+  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_RESULT=RESEARCH_ONLY");
+  try! stdout.flush();
+  checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_END");
   checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
   structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);
   checkpoint("STRUCTURE_MONTH_WEAVING_END");
