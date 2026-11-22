@@ -1,0 +1,102 @@
+name: Issue29 v177 independent GMP edge exhaustive and Catalan47 (NO Calendar_Date)
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-edge-exhaustive-v177
+    paths:
+      - '.github/workflows/issue29-v177-gmp-edge-exhaustive.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v177-one-shot-independent-gmp-edge
+  cancel-in-progress: false
+jobs:
+  bounded-independent-gmp-weave-edge:
+    if: ${{ github.run_attempt == 1 && github.ref == 'refs/heads/qa/issue29-ada-gmp-edge-exhaustive-v177' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact corrected Ada production source and isolated v177 fixture
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify Python syntax before invoking any GNAT tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m py_compile tests/issue29_v177_gmp_edge_exhaustive_runner.py
+          mkdir -p evidence
+          echo V177_PYTHON_SYNTAX_OK_ZERO_F > evidence/syntax-verdict.txt
+      - name: Install Ada GMP dependencies and record toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W libgnatcoll-gmp-dev libgmp10 > evidence/gnatcoll-gmp-packages.txt
+      - name: Pin original source and independently enumerate ALL 562078 distinct permutations in 10 families
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v177_gmp_edge_exhaustive_runner.py preflight \
+            | tee evidence/preflight-verdict.txt
+          grep -Fx V177_TEN_INDEPENDENT_FULL_ENUMERATIONS_305_RANKS_READY_NO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Compile isolated production GMP Count/Unrank harness; assert Normative_Oracle not linked
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v177_gmp_edge_exhaustive_runner.py build \
+            | tee evidence/build-verdict.txt
+          grep -Fx V177_ISOLATED_NATIVE_GMP_TEST_COMPILED_LINKED_NO_F evidence/build-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Run one bounded GMP component test against all legal ranks and Catalan47
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v177_gmp_edge_exhaustive_runner.py run-once \
+            | tee evidence/native-verdict.txt
+          grep -Fx V177_TEN_FAMILIES_305_EXHAUSTIVE_RANKS_CATALAN47_PASS_ZERO_F evidence/native-verdict.txt
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("evidence/result.json").read_bytes())
+          p=json.loads(Path("evidence/preflight.json").read_bytes())
+          assert d["status"]=="PASS_INDEPENDENT_EXHAUSTIVE_GMP_EDGE_NO_CALENDAR_F"
+          assert d["cases"]==len(p["families"])==10
+          assert d["ranks"]==p["all_legal_ranks"]==305
+          assert d["assertions"]>1000
+          assert d["process_exit_code"]==0
+          assert d["stderr_bytes"]==0
+          assert d["resource_violation"] is None
+          assert d["calendar_date_calls"]==d["soak_years"]==0
+          assert d["catalan47"]=="33868773757191046886429490"
+          print("V177_INDEPENDENT_NATIVE_GMP_10_EDGE_FAMILIES_305_LEXICOGRAPHIC_RANKS_PASS")
+          PY
+      - name: Hash all raw fixtures and stdout/stderr on any result
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path("evidence")
+          manifest={f.name:{"bytes":f.stat().st_size,
+            "sha256":hashlib.sha256(f.read_bytes()).hexdigest()}
+            for f in sorted(root.iterdir())
+            if f.is_file() and f.name!="members.sha256.json"}
+          with (root/"members.sha256.json").open("xb") as output:
+              output.write((json.dumps(manifest,sort_keys=True,indent=2)+"\n").encode())
+          PY
+      - name: Preserve v177 GMP-only exhaustive and mutation-gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v177-exhaustive-small-edge-families-Catalan47-production-GMP-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
