@@ -29,6 +29,18 @@ def anchor(blocks, name, needle=None, required_line=None):
                 source_sha256=hashlib.sha256(source_text.encode("utf-8")).hexdigest())
 
 
+def qa_fixed_fx_programs(helper_lines, copy_lines):
+    """Emit two individual native ⎕FX definitions, never one multi-function body."""
+    if not helper_lines or not helper_lines[0].startswith("∇ z←QAFixedPostStirSavedSum "):
+        raise ValueError("QA_FX_HELPER_HEADER_INVALID")
+    if not copy_lines or not copy_lines[0].startswith("∇ z←QAFixedPostStir12 "):
+        raise ValueError("QA_FX_COPY_HEADER_INVALID")
+    return [
+        "QAFixedFXHelper←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in helper_lines),
+        "QAFixedFXCopy←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in copy_lines),
+    ]
+
+
 def build_dependency_probe(raw, root, marker):
     root = pathlib.Path(root).resolve()
     old, base = build_statement_probe(raw, root, marker)
@@ -197,10 +209,7 @@ def build_dependency_probe(raw, root, marker):
     ]
     # Each ⎕FX fixes exactly one function. V4 sent two definitions in one
     # call; native evidence showed ⎕NC=0 for the purported QA helper.
-    fx_programs = [
-        "QAFixedFXHelper←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fixed_saved_lines),
-        "QAFixedFXCopy←⎕EC ⎕FX " + " ".join("(⎕UCS " + _codes(x) + ")" for x in fixed_post_lines),
-    ]
+    fx_programs = qa_fixed_fx_programs(fixed_saved_lines, fixed_post_lines)
     programs.extend(fx_programs)
     fixed_receipt = {
         "source_function": "PostStir12",

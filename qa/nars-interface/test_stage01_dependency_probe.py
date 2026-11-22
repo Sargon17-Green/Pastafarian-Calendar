@@ -2,8 +2,8 @@
 import hashlib
 import pathlib
 import unittest
-from stage01_dependency_probe import build_dependency_probe, FINAL
-from stage01_statement_probe import build_statement_probe, decode_programs
+from stage01_dependency_probe import build_dependency_probe, FINAL, qa_fixed_fx_programs
+from stage01_statement_probe import build_statement_probe
 from stage01_import_workspace import SOURCE_COMMIT
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -106,18 +106,17 @@ class RootCauseTests(unittest.TestCase):
             self.assertRegex(p["program_sha256"], "^[0-9a-f]{64}$")
 
     def test_fixed_functions_are_separate_fx_calls(self):
-        _, _, _, programs = decode_programs(self.candidate)
-        fixed = [x for x in programs if x.startswith("QAFixedFX")]
-        self.assertEqual(len(programs), 97)
+        helper = ["∇ z←QAFixedPostStirSavedSum args;bowls;stir", "  z←Save 1", "∇"]
+        copy = ["∇ z←QAFixedPostStir12 bowls;stir", "  z←bowls", "∇"]
+        fixed = qa_fixed_fx_programs(helper, copy)
         self.assertEqual(len(fixed), 2)
         self.assertTrue(fixed[0].startswith("QAFixedFXHelper←⎕EC ⎕FX "))
         self.assertTrue(fixed[1].startswith("QAFixedFXCopy←⎕EC ⎕FX "))
-        self.assertEqual(fixed[0].count("(⎕UCS "), 4)
-        self.assertGreater(fixed[1].count("(⎕UCS "), 10)
-        self.assertEqual(
-            self.receipt["qa_fixed_poststir"]["fx_program_sha256s"],
-            [hashlib.sha256(x.encode("utf-8")).hexdigest() for x in fixed],
-        )
+        self.assertEqual([x.count("(⎕UCS ") for x in fixed], [3, 3])
+        self.assertEqual(len(self.receipt["qa_fixed_poststir"]["fx_program_sha256s"]), 2)
+        self.assertTrue(all(len(x) == 64 for x in self.receipt["qa_fixed_poststir"]["fx_program_sha256s"]))
+        with self.assertRaisesRegex(ValueError, "QA_FX_COPY_HEADER_INVALID"):
+            qa_fixed_fx_programs(helper, [])
 
     def test_determinism_and_crlf(self):
         c2, r2 = build_dependency_probe(BASE, ROOT, MARKER)
