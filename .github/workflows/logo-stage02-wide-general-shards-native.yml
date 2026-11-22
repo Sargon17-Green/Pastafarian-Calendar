@@ -1,0 +1,130 @@
+name: Logo Stage2 Appendix-A Exact-Width Native QA Shards
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-wide-general-shards-20261122'
+permissions:
+  contents: read
+
+jobs:
+  general-wide-exact-width:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        width: [4, 5, 6, 32, 33, 64]
+    env:
+      WIDTH: "${{ matrix.width }}"
+    steps:
+      - name: Checkout QA-only exact-width shard branch
+        uses: actions/checkout@v4
+
+      - name: Lock source and run independent finite host oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/qa/logo-ido-stage2-wide-general-shards-20261122
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = 5a624a2f3ade5b356b0569e3a1165904ad7e9c1d
+          test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b6f29ed3649cf
+          test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
+          test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 275f0404aff142b3c5742493a7d24f233e84b821
+          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md)" = 423cf43eaec55bda97ff19201124ef7859a1edef
+          git rev-parse HEAD > "$RUNNER_TEMP/shard-commit.txt"
+          git hash-object .github/workflows/logo-stage02-wide-general-shards-native.yml > "$RUNNER_TEMP/shard-workflow-blob.txt"
+          for path in src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md .github/workflows/logo-stage02-wide-general-shards-native.yml; do
+            printf '%s %s\n' "$(git hash-object "$path")" "$path"
+          done > "$RUNNER_TEMP/shard-git-blobs.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py QA_STAGE2_APPENDIX_A_WIDE_GENERAL_SHARDS_CONTRACT.md .github/workflows/logo-stage02-wide-general-shards-native.yml > "$RUNNER_TEMP/shard-source-sha256.txt"
+          python3 qa/logo_stage2_wide_general_host_oracle.py | tee "$RUNNER_TEMP/shard-host.log"
+          grep -Fxq 'WIDE_GENERAL_ENUM_CASES 42748' "$RUNNER_TEMP/shard-host.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_ORACLE=PASS' "$RUNNER_TEMP/shard-host.log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE=NOT_RUN' "$RUNNER_TEMP/shard-host.log"
+
+      - name: Generate isolated exact-width Native fixture with independent Python integers
+        shell: bash
+        run: |
+          set -euo pipefail
+          valid=4
+          if [ "$WIDTH" = 32 ] || [ "$WIDTH" = 33 ]; then valid=5; fi
+          cases=$((valid+18))
+          checks=$((valid*4+18))
+          printf '%s\n' "$valid $cases $checks" > "$RUNNER_TEMP/shard-counts.txt"
+          python3 qa/logo_stage2_wide_general_native_vectors.py --output "$RUNNER_TEMP/shard-native.logo" --only-width "$WIDTH" | tee "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq "WIDE_GENERAL_HOST_VALID $valid" "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_INVALID 18' "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED 2' "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_PLUS 1' "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_MINUS 1' "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq "WIDE_GENERAL_HOST_CASES $cases" "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq "WIDE_GENERAL_HOST_CHECKS $checks" "$RUNNER_TEMP/shard-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_ORACLE=PASS' "$RUNNER_TEMP/shard-vectors.log"
+
+      - name: Build source-pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          test "$(git -C "$source_dir" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+
+      - name: Execute exact-width k Native with bounded runtime and observable case markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          valid=4
+          if [ "$WIDTH" = 32 ] || [ "$WIDTH" = 33 ]; then valid=5; fi
+          cases=$((valid+18))
+          checks=$((valid*4+18))
+          seconds=300
+          if [ "$WIDTH" -ge 32 ]; then seconds=900; fi
+          log="$RUNNER_TEMP/shard-native.log"
+          echo "WIDE_GENERAL_SHARD_K=$WIDTH LIMIT_SECONDS=$seconds"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s "${seconds}s" stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/shard-native.logo" > "$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::Width k=$WIDTH Native failure/timeout exit=$code; inspect final case-start marker"
+            exit 1
+          fi
+          grep -Fxq "WIDE_GENERAL_NATIVE_CASES_PASIS $cases" "$log"
+          grep -Fxq "WIDE_GENERAL_NATIVE_CHECKS_PASIS $checks" "$log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE_PASIS' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::Native Logo error/failure marker in k=$WIDTH"
+            exit 1
+          fi
+          echo "NATIVE_LOGO_STAGE2_WIDE_GENERAL_K${WIDTH}=PASS"
+
+      - name: Preserve per-width immutable input and output evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-wide-general-native-k${{ matrix.width }}-evidence
+          path: |
+            ${{ runner.temp }}/shard-commit.txt
+            ${{ runner.temp }}/shard-workflow-blob.txt
+            ${{ runner.temp }}/shard-git-blobs.txt
+            ${{ runner.temp }}/shard-source-sha256.txt
+            ${{ runner.temp }}/shard-host.log
+            ${{ runner.temp }}/shard-counts.txt
+            ${{ runner.temp }}/shard-vectors.log
+            ${{ runner.temp }}/shard-native.logo
+            ${{ runner.temp }}/shard-native.log
+          if-no-files-found: warn
+          retention-days: 30
