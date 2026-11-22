@@ -1,0 +1,38 @@
+name: Stage 2 Native Object Pascal
+on:
+  push:
+    branches:
+      - 'Object-Pascal\+Português'
+    paths:
+      - '.github/workflows/stage02-native-object-pascal.yml'
+      - 'src/Stage02WorkCounts.pas'
+      - 'test/stage02_workcounts_regression.pas'
+      - 'test/build_and_run_stage02_workcounts.sh'
+      - 'docs/stage02_workcounts_oracle.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage02-native-fpc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+      - name: Install Free Pascal
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+      - name: Independent oracle, native compilation, differential and negative checks
+        shell: bash
+        run: bash test/build_and_run_stage02_workcounts.sh
+      - name: Upload Stage02 evidence log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage02-native-fpc-log
+          path: evidence/stage02-native-fpc.log
+          if-no-files-found: warn
+          retention-days: 30
