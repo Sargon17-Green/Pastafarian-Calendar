@@ -1,0 +1,88 @@
+name: SQL Tamil Stage25 one-stone bowl QA
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/175_stage25_one_stone_bowl_qa.sql'
+      - '.github/workflows/sql-tamil-one-stone-bowl-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate original independent Python oracle and candidate vectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p bowl-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > bowl-evidence/versions.txt
+          python3 sql/test/174_stage25_stone_independent_oracle.py --root . --out-dir bowl-evidence > bowl-evidence/generator.log
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("bowl-evidence/independent_stone_bowl.sql").read_text()
+          assert s.count("pastafari_sql_tamil.bowl_round(")==32
+          Path("bowl-evidence/candidate_oracle.sql").write_text(s.replace("pastafari_sql_tamil.bowl_round(","pastafari_sql_tamil_qa.bowl_round_one_stone("))
+          PY
+          : > bowl-evidence/source-blobs.txt
+          for i in $(seq -f '%02g' 0 8); do
+            src=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "$(printf '%s\n' "$src" | grep -c .)" = 1
+            git hash-object "$src" >> bowl-evidence/source-blobs.txt
+          done
+          test "$(wc -l < bowl-evidence/source-blobs.txt)" -eq 9
+          sha256sum sql/test/175_stage25_one_stone_bowl_qa.sql bowl-evidence/candidate_oracle.sql > bowl-evidence/hashes.txt
+      - name: Start isolated native PostgreSQL 17.12
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name one-stone-tamil --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres one-stone-tamil pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres one-stone-tamil pg_isready -q -U postgres
+          docker exec -u postgres one-stone-tamil postgres --version >> bowl-evidence/versions.txt
+      - name: Validate source, differential, invalid, timings, independent vectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > bowl-evidence/exits.txt
+          : > bowl-evidence/source-load.log
+          for i in $(seq -f '%02g' 0 8); do
+            src=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            if ! docker exec -u postgres one-stone-tamil psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f "/work/$src" >> bowl-evidence/source-load.log 2>&1; then
+              echo SOURCE_LOAD_EXIT=1 >> bowl-evidence/exits.txt
+              tail -30 bowl-evidence/source-load.log
+              exit 3
+            fi
+          done
+          echo SOURCE_LOAD_EXIT=0 >> bowl-evidence/exits.txt
+          if docker exec -u postgres one-stone-tamil psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/175_stage25_one_stone_bowl_qa.sql > bowl-evidence/candidate.log 2>&1; then rc=0; else rc=$?; fi
+          echo "CANDIDATE_EXIT=$rc" >> bowl-evidence/exits.txt
+          tail -30 bowl-evidence/candidate.log || true
+          test "$rc" -eq 0
+          grep -q 'SQL_TAMIL_CANDIDATE_DIFFERENTIAL=368/368 PASS' bowl-evidence/candidate.log
+          grep -q 'SQL_TAMIL_CANDIDATE_INVALID=12/12 PASS' bowl-evidence/candidate.log
+          if docker exec -u postgres one-stone-tamil psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/bowl-evidence/candidate_oracle.sql > bowl-evidence/oracle.log 2>&1; then rc=0; else rc=$?; fi
+          echo "ORACLE_EXIT=$rc" >> bowl-evidence/exits.txt
+          tail -15 bowl-evidence/oracle.log || true
+          test "$rc" -eq 0
+          grep -q 'SQL_TAMIL_INDEPENDENT_STONE=230/230 PASS' bowl-evidence/oracle.log
+          grep -q 'SQL_TAMIL_INDEPENDENT_BOWL=32/32 PASS' bowl-evidence/oracle.log
+      - name: Save original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-one-stone-bowl-qa
+          path: bowl-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove PG container
+        if: always()
+        run: docker rm -f one-stone-tamil 2>/dev/null || true
