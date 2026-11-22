@@ -70,7 +70,9 @@ impl PhaseHandler for WorkCountsPatch02 {
             &context.target_day,
         ));
         context.metrics.bump("patch02.work_counts.calls");
-        context.logs.push("PATCH02: normativ iki-gün iş sayları hesablandı.");
+        context
+            .logs
+            .push("PATCH02: normativ iki-gün iş sayları hesablandı.");
         Ok(())
     }
 }
@@ -82,10 +84,7 @@ pub fn calculate_work_counts(
 ) -> Result<Patch02Observation, MonsterError> {
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(WorkCountsPatch02);
-    let context = manager.execute_bootstrap_shell(
-        calculation_day.clone(),
-        target_day.clone(),
-    )?;
+    let context = manager.execute_bootstrap_shell(calculation_day.clone(), target_day.clone())?;
     let counts = context
         .work_counts_observation
         .clone()

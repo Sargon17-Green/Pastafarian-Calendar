@@ -3,7 +3,7 @@
 mod support;
 
 use num_bigint::BigInt;
-use num_traits::One;
+use num_traits::{One, Signed};
 use pastafarian_calendar_rust_az::discovery01_legacy_save::observe_legacy_save;
 use pastafarian_calendar_rust_az::discovery02_work_counts_probe::candidate_work_counts;
 use pastafarian_calendar_rust_az::patch01_save::calculate_save;
@@ -30,7 +30,10 @@ fn exact_foundation_cases_use_real_production_dispatcher() {
     for offset in -3i64..=3 {
         let day = &f + BigInt::from(offset);
         let observed = calculate_work_counts(day.clone(), day.clone()).unwrap();
-        assert_eq!(normative_day_tag(&day), BigInt::from(expected[(offset + 3) as usize]));
+        assert_eq!(
+            normative_day_tag(&day),
+            BigInt::from(expected[(offset + 3) as usize])
+        );
         assert_same(&observed.counts, &oracle::work_counts(&day, &day));
         assert_eq!(observed.counts.distance, BigInt::one());
         assert_eq!(observed.counts.direction, 2);
@@ -43,7 +46,10 @@ fn exact_foundation_cases_use_real_production_dispatcher() {
             Some(observed.counts.clone())
         );
         assert_eq!(observed.context.metrics.get("patch02.work_counts.calls"), 1);
-        assert_eq!(observed.context.metrics.get("dispatcher.handler.completed"), 1);
+        assert_eq!(
+            observed.context.metrics.get("dispatcher.handler.completed"),
+            1
+        );
         assert_eq!(observed.context.save_observation, None);
         assert_eq!(observed.context.legacy_save_observation, None);
         assert_eq!(
@@ -66,7 +72,10 @@ fn every_nearby_pair_matches_independent_oracle_and_swap_invariants() {
             assert_eq!(observed, repeated, "per-invocation isolation");
             assert_eq!(observed.calculation_day, calculation);
             assert_eq!(observed.target_day, target);
-            assert_same(&observed.counts, &oracle::work_counts(&calculation, &target));
+            assert_same(
+                &observed.counts,
+                &oracle::work_counts(&calculation, &target),
+            );
             let reversed = normative_work_counts(&target, &calculation);
             assert_eq!(observed.counts.action, reversed.target);
             assert_eq!(observed.counts.target, reversed.action);
@@ -90,7 +99,10 @@ fn huge_signed_pairs_compare_exactly_without_integer_narrowing() {
             let target = &f - &delta;
             let result = calculate_work_counts(calculation.clone(), target.clone()).unwrap();
             assert_same(&result.counts, &oracle::work_counts(&calculation, &target));
-            assert_eq!(result.counts.distance, (&delta * BigInt::from(2u8)).abs() + BigInt::one());
+            assert_eq!(
+                result.counts.distance,
+                (&delta * BigInt::from(2u8)).abs() + BigInt::one()
+            );
             assert_eq!(result.counts.direction, if sign > 0 { 1 } else { 3 });
             assert_eq!(result.counts.action, oracle::day_count(&calculation));
             assert_eq!(result.counts.target, oracle::day_count(&target));
@@ -104,7 +116,12 @@ fn huge_signed_pairs_compare_exactly_without_integer_narrowing() {
 #[test]
 fn stage03_save_and_stage04_probe_remain_unchanged() {
     let m = oracle::m_bigint();
-    let days = [m.clone(), &m * BigInt::from(2u8), -m.clone(), &m + BigInt::one()];
+    let days = [
+        m.clone(),
+        &m * BigInt::from(2u8),
+        -m.clone(),
+        &m + BigInt::one(),
+    ];
     for day in days {
         let before = calculate_save(day.clone()).unwrap();
         let legacy_before = observe_legacy_save(day.clone()).unwrap();
