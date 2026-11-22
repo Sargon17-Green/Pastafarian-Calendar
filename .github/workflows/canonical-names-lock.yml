@@ -1680,6 +1680,16 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p stage56-php-real-evidence
+          php -l src/Patches/CanonicalJdnBoundary56.php > stage56-php-real-evidence/lint-coordinate-boundary.txt 2>&1 || exit 2
+          php -l tests/stage56_canonical_jdn_boundary56.php > stage56-php-real-evidence/lint-coordinate-tests.txt 2>&1 || exit 2
+          timeout 120s php -d memory_limit=512M tests/stage56_canonical_jdn_boundary56.php \
+            > stage56-php-real-evidence/coordinate-boundary.stdout \
+            2> stage56-php-real-evidence/coordinate-boundary.stderr
+          coordinate_rc=$?
+          printf '%s\n' "$coordinate_rc" > stage56-php-real-evidence/coordinate-boundary.exit
+          cat stage56-php-real-evidence/coordinate-boundary.stdout
+          cat stage56-php-real-evidence/coordinate-boundary.stderr >&2
+          if test "$coordinate_rc" -ne 0 || test -s stage56-php-real-evidence/coordinate-boundary.stderr; then exit 2; fi
           php -l tests/stage56_php_sauce_probe.php > stage56-php-real-evidence/lint-sauce-probe.txt 2>&1
           lint_rc=$?
           python3 -B tools/stage56_compare_php_sauce.py --help > /dev/null
