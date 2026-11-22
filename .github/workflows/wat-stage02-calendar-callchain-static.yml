@@ -1,0 +1,45 @@
+name: WAT Stage02 calendar Choose call-chain static QA
+
+on:
+  push:
+    branches:
+      - "WAT+Español"
+    paths:
+      - "tests/stage02_calendar_choose_callchain_audit.cjs"
+      - ".github/workflows/wat-stage02-calendar-callchain-static.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-callchain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate exact source and audit script
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object oracle/normative_calendar_wide.wat)" = '70267bb5730678f81d6138a2224d6b8d9a193eb8'
+          test "$(git hash-object tests/normative_selector.wat)" = 'e23f013ab96b498b0ac365dbb1b25273c845e790'
+          node --version
+          node --check tests/stage02_calendar_choose_callchain_audit.cjs
+          mkdir -p evidence/wat-callchain
+          printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nHEAD=%s\nRUN_ID=%s\nRUN_ATTEMPT=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" | tee evidence/wat-callchain/identity.txt
+          git hash-object oracle/normative_calendar_wide.wat tests/normative_selector.wat tests/stage02_calendar_choose_callchain_audit.cjs | tee evidence/wat-callchain/git-blobs.txt
+      - name: Audit actual calendar caller graph (static only)
+        run: |
+          set -euo pipefail
+          node tests/stage02_calendar_choose_callchain_audit.cjs | tee evidence/wat-callchain/report.json
+          grep -q '"result": "PASS"' evidence/wat-callchain/report.json
+          sha256sum tests/stage02_calendar_choose_callchain_audit.cjs oracle/normative_calendar_wide.wat tests/normative_selector.wat evidence/wat-callchain/report.json | tee evidence/wat-callchain/sha256.txt
+      - name: Upload evidence (also on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-calendar-callchain-static
+          path: evidence/wat-callchain/
+          if-no-files-found: warn
+          retention-days: 30
