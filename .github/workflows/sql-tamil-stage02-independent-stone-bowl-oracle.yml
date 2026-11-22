@@ -1,0 +1,73 @@
+name: SQL Tamil Slice25 independent stone and bowl oracle
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/174_stage25_stone_independent_oracle.py'
+      - '.github/workflows/sql-tamil-stage02-independent-stone-bowl-oracle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-stone-bowl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate source-locked independent mathematical oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p oracle-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nSHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > oracle-evidence/versions.txt
+          python3 sql/test/174_stage25_stone_independent_oracle.py --self-test | tee oracle-evidence/static.txt
+          python3 sql/test/174_stage25_stone_independent_oracle.py --root . --out-dir oracle-evidence | tee oracle-evidence/generation.txt
+          sha256sum oracle-evidence/independent_stone_bowl.sql sql/test/174_stage25_stone_independent_oracle.py > oracle-evidence/sha256.txt
+      - name: Start isolated PostgreSQL 17.12
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-independent-oracle --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-independent-oracle pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-independent-oracle pg_isready -q -U postgres
+          docker exec -u postgres tamil-independent-oracle postgres --version | tee -a oracle-evidence/versions.txt
+      - name: Load exact source 00 through 08 and run 262 independent assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          : > oracle-evidence/source-blobs.txt
+          : > oracle-evidence/exits.txt
+          for i in $(seq -f '%02g' 0 8); do
+            found=$(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "$(printf '%s\n' "$found" | grep -c .)" = 1
+            args+=(-f "/work/$found")
+            git hash-object "$found" >> oracle-evidence/source-blobs.txt
+          done
+          test "${#args[@]}" -eq 18
+          test "$(wc -l < oracle-evidence/source-blobs.txt)" -eq 9
+          if docker exec -u postgres tamil-independent-oracle psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > oracle-evidence/source-load.log 2>&1; then load_exit=0; else load_exit=$?; fi
+          printf 'SOURCE_LOAD_EXIT=%s\n' "$load_exit" >> oracle-evidence/exits.txt
+          if [ "$load_exit" -ne 0 ]; then cat oracle-evidence/source-load.log; exit 3; fi
+          if docker exec -u postgres tamil-independent-oracle psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/oracle-evidence/independent_stone_bowl.sql > oracle-evidence/oracle.log 2>&1; then oracle_exit=0; else oracle_exit=$?; fi
+          printf 'ORACLE_EXIT=%s\n' "$oracle_exit" >> oracle-evidence/exits.txt
+          tail -30 oracle-evidence/oracle.log || true
+          if [ "$oracle_exit" -ne 0 ]; then exit 4; fi
+          grep -q 'SQL_TAMIL_INDEPENDENT_STONE=230/230 PASS' oracle-evidence/oracle.log || exit 5
+          grep -q 'SQL_TAMIL_INDEPENDENT_BOWL=32/32 PASS' oracle-evidence/oracle.log || exit 6
+      - name: Preserve full original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-independent-stone-bowl
+          path: oracle-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL container
+        if: always()
+        run: docker rm -f tamil-independent-oracle 2>/dev/null || true
