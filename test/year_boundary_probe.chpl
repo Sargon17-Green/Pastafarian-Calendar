@@ -202,18 +202,40 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
   var used: [1..m] int;
   var opened = 0, closed = 0;
   var completed = 0;
+  // Bounded source-fresh phase attribution, with production code unchanged.
+  var candidateSeconds = 0.0;
+  var forwardSeconds = 0.0;
+  var candidateCalls = 0;
+  var transposeCalls = 0;
+  var trialForwardCalls = 0;
+  var takeForwardCalls = 0;
   var prefixTimer: stopwatch;
   prefixTimer.start();
   for step in 1..min(32, sizes[m]) {
+    var candidateTimer: stopwatch;
+    candidateTimer.start();
     const blocks = sparseWeavingCandidateBlocks(lens, states, sizes, specs,
                                                  used, opened, closed, total);
+    candidateTimer.stop();
+    candidateSeconds += candidateTimer.elapsed();
+    candidateCalls += 1;
+    transposeCalls += max(0, m-1);
+    for candidate in 2..m {
+      if sparseWeavingEligible(candidate, lens, used, opened, closed) then
+        trialForwardCalls += 1;
+    }
     var chosen = 0;
     for c in 1..m {
       if residual >= blocks[c] then residual -= blocks[c];
       else {
         chosen = c;
+        var forwardTimer: stopwatch;
+        forwardTimer.start();
         sparseWeavingTake(c, lens, states, sizes, specs, used,
                           opened, closed, total, blocks[c]);
+        forwardTimer.stop();
+        forwardSeconds += forwardTimer.elapsed();
+        takeForwardCalls += max(0, m - max(2,c) + 1);
         break;
       }
     }
@@ -221,6 +243,14 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
     completed = step;
     if step == 1 || step == 4 || step == 8 || step == 16 || step == 32 {
       writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_SECONDS=", prefixTimer.elapsed());
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_BLOCKS_SECONDS=", candidateSeconds);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_TAKE_SECONDS=", forwardSeconds);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_TRANSPOSE_CALLS=", transposeCalls);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_TRIAL_FORWARD_CALLS=", trialForwardCalls);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_TAKE_FORWARD_CALLS=", takeForwardCalls);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_LAST_MONTH=", chosen);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_OPENED=", opened);
+      writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_CLOSED=", closed);
       try! stdout.flush();
     }
     if prefixTimer.elapsed() >= 30.0 then break;
@@ -228,6 +258,12 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
   prefixTimer.stop();
   writeln("YEAR_BOUNDARY_PREFIX_COMPLETED_STEPS=", completed);
   writeln("YEAR_BOUNDARY_PREFIX_ELAPSED_SECONDS=", prefixTimer.elapsed());
+  writeln("YEAR_BOUNDARY_PREFIX_CANDIDATE_SECONDS=", candidateSeconds);
+  writeln("YEAR_BOUNDARY_PREFIX_FORWARD_SECONDS=", forwardSeconds);
+  writeln("YEAR_BOUNDARY_PREFIX_CANDIDATE_CALLS=", candidateCalls);
+  writeln("YEAR_BOUNDARY_PREFIX_TRANSPOSE_CALLS=", transposeCalls);
+  writeln("YEAR_BOUNDARY_PREFIX_TRIAL_FORWARD_CALLS=", trialForwardCalls);
+  writeln("YEAR_BOUNDARY_PREFIX_TAKE_FORWARD_CALLS=", takeForwardCalls);
   writeln("YEAR_BOUNDARY_PREFIX_MAX_STEPS=32");
   writeln("YEAR_BOUNDARY_PREFIX_SOFT_BUDGET_SECONDS=30");
   writeln("YEAR_BOUNDARY_PREFIX_RESULT=RESEARCH_ONLY");
