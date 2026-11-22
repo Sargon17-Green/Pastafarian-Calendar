@@ -180,6 +180,24 @@ jobs:
           printf 'STAGE04_DIRECT_RUNTIME_DIFFERENTIAL=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' \
             >> evidence/result.txt
           cat evidence/stage04_differential_stdout.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify user-approved reconstructed Rust RED-GREEN substitution (static contract)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          timeout --signal=TERM --kill-after=5s 40s \\
+            python3 -m unittest discover -s tools/tests -p 'test_stage04_rust_reconstruction_substitution.py' -v \\
+            > evidence/stage04_substitution_unit_tests.txt 2>&1
+          cat evidence/stage04_substitution_unit_tests.txt
+          grep -Fq 'Ran 5 tests' evidence/stage04_substitution_unit_tests.txt
+          grep -Fxq 'OK' evidence/stage04_substitution_unit_tests.txt
+          git fetch --no-tags --depth=100 origin refs/heads/reconstruction/rust-az-stage03-daytag-red-20261121
+          timeout --signal=TERM --kill-after=5s 30s \\
+            python3 tools/stage04_rust_reconstruction_substitution.py \\
+            --repo . --branch-head "$GITHUB_SHA" > evidence/stage04_reconstructed_substitution.json
+          python3 -c 'import json; p=json.load(open("evidence/stage04_reconstructed_substitution.json")); assert p["reconstruction_substitution_static_eligible"] is True and p["historical_pre_stage03_rust_red_proven"] is False and p["independently_verified_observed_rows"] == 128 and p["stage04_closure"] == "NOT_CLAIMED"'
+          printf 'STAGE04_AUTHORIZED_RECONSTRUCTION_STATIC_ADMISSION=PASS\\nSTAGE04_ORIGINAL_HISTORICAL_RED=NOT_PROVEN\\nSTAGE04_CLOSURE=NOT_CLAIMED\\n' >> evidence/result.txt
+          cat evidence/stage04_reconstructed_substitution.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence on success or failure
         if: always()
         uses: actions/upload-artifact@v4
