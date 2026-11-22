@@ -105,6 +105,32 @@ def compare(probe: dict, canonical: Path) -> dict:
     }
 
 
+
+def compare_shifted(probe: dict, canonical: Path) -> dict:
+    """Additional QA only: map both PHP JDNs onto PHP's own foundation."""
+    import pastafari_calendar.core as core
+    diagnostic = probe.get("foundation_coordinate_diagnostic")
+    if not isinstance(diagnostic, dict):
+        raise ValueError("Missing source coordinate diagnostic")
+    if (core.FOUNDATION_JDN != CALCULATION or
+        diagnostic.get("php_origin_jdn") != -15055671 or
+        diagnostic.get("reference_origin_jdn") != core.FOUNDATION_JDN or
+        diagnostic.get("shift_jdn") != -1721425 or
+        diagnostic.get("translated_calculation_jdn") != -15055671 or
+        not isinstance(diagnostic.get("translated_records"), list) or
+        len(diagnostic["translated_records"]) != len(TARGETS)):
+        raise ValueError("Source coordinate diagnostic failed provenance checks")
+    translated_probe = dict(probe)
+    translated_probe["records"] = diagnostic["translated_records"]
+    translated_result = compare(translated_probe, canonical)
+    return {
+        "status": translated_result["status"],
+        "php_coordinate_shift": diagnostic["shift_jdn"],
+        "translated_years": translated_result["years"],
+        "raw_mismatch_still_fails": True,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--canonical-repo", type=Path, required=True)
@@ -114,6 +140,7 @@ def main() -> int:
     try:
         probe = json.loads(args.php_input.read_text(encoding="utf-8"))
         result = compare(probe, args.canonical_repo.resolve())
+        result["foundation_coordinate_diagnostic"] = compare_shifted(probe, args.canonical_repo.resolve())
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"STAGE56_SAUCE_COMPARE_INPUT_ERROR: {error}", file=sys.stderr)
         return 2
@@ -121,6 +148,7 @@ def main() -> int:
     args.report.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     for year in result["years"]:
         print(json.dumps(year, ensure_ascii=False, sort_keys=True))
+    print("STAGE56_COORDINATE_DIAGNOSTIC status=" + result["foundation_coordinate_diagnostic"]["status"])
     print("STAGE56_SAUCE_COMPARE status=" + result["status"])
     return 0 if result["status"] == "PASS" else 1
 
