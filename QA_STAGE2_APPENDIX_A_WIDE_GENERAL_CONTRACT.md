@@ -136,3 +136,9 @@ The current WIDE2 Native run 44947067097 is already accepted at its exact SHA an
 - No canonical promotion, main, merge, publication or Stage-2 completion.
 - LAST_COMPLETED_STAGE remains 1.
 - Next: implement only monster.stage02.choose.wide.general on this QA branch, add the Native fixture generator and source-locked workflow, then verify the exact new SHA. Do not change the accepted k=2 reporter or D20's 0..31 contract.
+
+## 9. Diagnostic update after exact-SHA timeout (2026-11-22)
+
+Full-k Native run 44960408541 / job 137017741464 completed FAILURE on c4371498a7bae80f3fae1dcf6a31aa2a08f1c6ef. Independent Python host enumerator (42,748 cases), fixture generation (48 / 138 planned checks), and pinned UCBLogo build passed. Native timed out after 1,200 seconds (exit 124); artifact 14729549954, ZIP SHA-256 25a0a2c043cd5dba9d8641f51e0126443e332cac39345e224f559445b5fcb4b7, contains a zero-byte Native log. No individual Native case or general-k PASS can be inferred. Generated invalid fixtures also referenced `nr.M`, but the normative reference was not loaded.
+
+This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replaces uninitialized `nr.M`, emits boot and case-start markers, and limits Native to four accepted-interface k=2 probes and four k=3 large-M probes plus 18 invalid guards: 26 cases / 50 checks; 300-second bounded runtime. This is NOT the full general-k acceptance gate, and a diagnostic PASS cannot be promoted to all-k PASS. Wider k=4,5,6,32,33,64 Native vectors are still unverified; keep Stage2 incomplete. Updated fixture-generator Git blob: 4e5eef7d8f8558579bf9a466adf7d126212e2bc2.

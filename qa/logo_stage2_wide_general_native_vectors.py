@@ -146,6 +146,7 @@ load \"src/stage02_choose_wide_general.logo
 make \"WIDE.CASES 0
 make \"WIDE.CHECKS 0
 make \"WIDE.FAILED \"false
+print [WIDE_GENERAL_NATIVE_BOOT]
 
 to wide.require :condition :tag
   make \"WIDE.CHECKS (:WIDE.CHECKS + 1)
@@ -167,6 +168,7 @@ end
 
 to wide.good.two :stream :N :expected :tag
   make \"WIDE.CASES (:WIDE.CASES + 1)
+  print sentence [WIDE_GENERAL_NATIVE_CASE_START] :tag
   localmake \"actual monster.stage02.choose.wide :stream :N
   wide.require (monster.stage02.bi.canonical :actual) (list :tag [canonical_shape])
   wide.require (wide.safe.equal :actual :expected) (list :tag [legacy_k2_exact])
@@ -176,6 +178,7 @@ end
 
 to wide.good.general :stream :N :expected :tag
   make \"WIDE.CASES (:WIDE.CASES + 1)
+  print sentence [WIDE_GENERAL_NATIVE_CASE_START] :tag
   localmake \"actual monster.stage02.choose.wide.general :stream :N
   wide.require (monster.stage02.bi.canonical :actual) (list :tag [canonical_shape])
   wide.require (wide.safe.equal :actual :expected) (list :tag [python_integer_differential])
@@ -185,36 +188,38 @@ end
 
 to wide.invalid :stream :N :tag
   make \"WIDE.CASES (:WIDE.CASES + 1)
+  print sentence [WIDE_GENERAL_NATIVE_CASE_START] :tag
   wide.require (equalp (monster.stage02.choose.wide.general :stream :N) []) :tag
 end
 
 """
 
 
-BAD = """wide.invalid \"not_a_list (bi.add nr.M (bi.small 1)) [stream_nonlist]
-wide.invalid (list (bi.small 1)) (bi.add (bi.square nr.M) (bi.small 1)) [stream_length_one]
-wide.invalid (list (bi.small 1) 1 2) (bi.add (bi.square nr.M) (bi.small 1)) [stream_length_three]
-wide.invalid (list bi.zero 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_zero]
-wide.invalid (list (bi.add nr.M (bi.small 1)) 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_over_M]
-wide.invalid (list \"not_bi 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_non_BI]
-wide.invalid (list (bi.small 1) 0) (bi.add (bi.square nr.M) (bi.small 1)) [step_zero]
-wide.invalid (list (bi.small 1) 2) (bi.add (bi.square nr.M) (bi.small 1)) [step_two]
-wide.invalid (list (bi.small 1) 0.5) (bi.add (bi.square nr.M) (bi.small 1)) [step_fraction]
-wide.invalid (list (bi.small 1) \"wrong) (bi.add (bi.square nr.M) (bi.small 1)) [step_word]
+BAD = """wide.invalid \"not_a_list (bi.add :WIDE.M (bi.small 1)) [stream_nonlist]
+wide.invalid (list (bi.small 1)) (bi.add (bi.square :WIDE.M) (bi.small 1)) [stream_length_one]
+wide.invalid (list (bi.small 1) 1 2) (bi.add (bi.square :WIDE.M) (bi.small 1)) [stream_length_three]
+wide.invalid (list bi.zero 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_zero]
+wide.invalid (list (bi.add :WIDE.M (bi.small 1)) 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_over_M]
+wide.invalid (list \"not_bi 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_non_BI]
+wide.invalid (list (bi.small 1) 0) (bi.add (bi.square :WIDE.M) (bi.small 1)) [step_zero]
+wide.invalid (list (bi.small 1) 2) (bi.add (bi.square :WIDE.M) (bi.small 1)) [step_two]
+wide.invalid (list (bi.small 1) 0.5) (bi.add (bi.square :WIDE.M) (bi.small 1)) [step_fraction]
+wide.invalid (list (bi.small 1) \"wrong) (bi.add (bi.square :WIDE.M) (bi.small 1)) [step_word]
 wide.invalid (list (bi.small 1) 1) \"invalid [N_non_BI]
 wide.invalid (list (bi.small 1) 1) bi.zero [N_zero]
-wide.invalid (list (bi.small 1) 1) (bi.square nr.M) [N_not_k3]
+wide.invalid (list (bi.small 1) 1) (bi.square :WIDE.M) [N_not_k3]
 wide.invalid (list (bi.small 1) 1) (bi.small -1) [N_negative]
-wide.invalid (list (list 2 [1]) 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_invalid_sign]
-wide.invalid (list (list 1 []) 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_empty_digits]
+wide.invalid (list (list 2 [1]) 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_invalid_sign]
+wide.invalid (list (list 1 []) 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_empty_digits]
 wide.invalid (list (bi.small 1) 1) (list 1 [10000]) [N_digit_out_of_base]
-wide.invalid (list (list 1 [1 0]) 1) (bi.add (bi.square nr.M) (bi.small 1)) [first_trailing_zero]
+wide.invalid (list (list 1 [1 0]) 1) (bi.add (bi.square :WIDE.M) (bi.small 1)) [first_trailing_zero]
 """
 
 
-def main(output: Path) -> None:
-    cases = valid_cases()
-    lines = [HEADER]
+def main(output: Path, max_width: int | None = None) -> None:
+    all_cases = valid_cases()
+    cases = [c for c in all_cases if max_width is None or c[0] == "two" or min_width(c[3])[0] <= max_width]
+    lines = [HEADER, f'make "WIDE.M {logo_bi(M)}\n']
     rejected = plus = minus = 0
     for index, (kind, first, direction, count, expected, tag) in enumerate(cases, 1):
         width, _ = min_width(count)
@@ -261,5 +266,6 @@ print [WIDE_GENERAL_NATIVE_PASIS]
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--max-width", type=int, default=None)
     args = parser.parse_args()
-    main(args.output)
+    main(args.output, args.max_width)
