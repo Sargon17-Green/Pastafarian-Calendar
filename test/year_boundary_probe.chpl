@@ -39,13 +39,13 @@ proc checkSparseWeavingDifferential() {
       }
       if days > 8 then continue;
       var legacy: WeavingCounter;
-      var sparse: SparseWeavingCounter;
+      var sparseCounter: SparseWeavingCounter;
       for j in 1..m {
         legacy.lengths.pushBack(lens[j]);
-        sparse.lengths.pushBack(lens[j]);
+        sparseCounter.lengths.pushBack(lens[j]);
       }
       const legacyRoot = legacy.countAll();
-      const sparseRoot = sparse.countAll();
+      const sparseRoot = sparseCounter.countAll();
       check(legacyRoot == sparseRoot,
             "sparse/legacy root mismatch family=" + families:string);
       if legacyRoot == sparseRoot {
@@ -53,8 +53,8 @@ proc checkSparseWeavingDifferential() {
         for r in 1..rootCount {
           const rank1 = new bigint(r);
           const legacyWord = legacy.unrank1(rank1);
-          const sparseWord = sparse.unrank1(rank1);
-          check(sameWord(legacyWord,sparseWord) && sparse.rank1(sparseWord) == rank1,
+          const sparseWord = sparseCounter.unrank1(rank1);
+          check(sameWord(legacyWord,sparseWord) && sparseCounter.rank1(sparseWord) == rank1,
                 "sparse/legacy rank roundtrip family=" + families:string +
                 " rank=" + r:string);
           rankChecks += 1;
