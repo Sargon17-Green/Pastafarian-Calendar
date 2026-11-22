@@ -1675,6 +1675,42 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
+      - name: Stage56 fast PHP sauce differential before real-year profiles (not acceptance)
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          php -l tests/stage56_php_sauce_probe.php > stage56-php-real-evidence/lint-sauce-probe.txt 2>&1
+          lint_rc=$?
+          python3 -B tools/stage56_compare_php_sauce.py --help > /dev/null
+          python_rc=$?
+          if test "$lint_rc" -ne 0 || test "$python_rc" -ne 0; then
+            cat stage56-php-real-evidence/lint-sauce-probe.txt >&2
+            exit 2
+          fi
+          timeout 120s php -d memory_limit=512M tests/stage56_php_sauce_probe.php \
+            > stage56-php-real-evidence/sauce-php.json \
+            2> stage56-php-real-evidence/sauce-php.stderr
+          php_rc=$?
+          printf '%s\n' "$php_rc" > stage56-php-real-evidence/sauce-php.exit
+          if test "$php_rc" -ne 0 || test -s stage56-php-real-evidence/sauce-php.stderr; then
+            cat stage56-php-real-evidence/sauce-php.stderr >&2
+            exit 2
+          fi
+          timeout 120s python3 -B tools/stage56_compare_php_sauce.py \
+            --canonical-repo .external-canonical-source \
+            --php-input stage56-php-real-evidence/sauce-php.json \
+            --report stage56-php-real-evidence/sauce-compare-report.json \
+            > stage56-php-real-evidence/sauce-compare.stdout \
+            2> stage56-php-real-evidence/sauce-compare.stderr
+          compare_rc=$?
+          printf '%s\n' "$compare_rc" > stage56-php-real-evidence/sauce-compare.exit
+          cat stage56-php-real-evidence/sauce-compare.stdout
+          cat stage56-php-real-evidence/sauce-compare.stderr >&2
+          if test "$compare_rc" -ne 0 || test -s stage56-php-real-evidence/sauce-compare.stderr; then
+            echo '::error::PHP sauce differs from pinned Python; skip redundant 900s year profiles.'
+            exit 1
+          fi
       - name: Stage56 source-bound PHP real years and bounded profiles (not acceptance)
         shell: bash
         run: |
