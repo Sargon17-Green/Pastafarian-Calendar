@@ -115,6 +115,19 @@ jobs:
           grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_SELFTEST=2458/2458' build/stage01-scroll-month-names-foundation.log
           grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_FOUNDATION_DIAGNOSTIC=PASS' build/stage01-scroll-month-names-foundation.log
           grep -Fxq 'STAGE01_SCROLL_MONTH_NAMES_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-month-names-foundation.log
+      - name: Independently prove seal32 small weaving count and lexicographic unrank
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_weaving_small_oracle.py
+          timeout --signal=TERM --kill-after=5s 60s \
+            python3 -u test/stage01_scroll_weaving_small_oracle.py --self-test \
+            | tee build/stage01-scroll-weaving-small.log
+          grep -Fxq 'STAGE01_SCROLL_WEAVING_SMALL_SHAPES=115' build/stage01-scroll-weaving-small.log
+          grep -Fxq 'STAGE01_SCROLL_WEAVING_SMALL_RANKS=1408' build/stage01-scroll-weaving-small.log
+          grep -Fxq 'STAGE01_SCROLL_WEAVING_SMALL_ASSERTIONS=3492' build/stage01-scroll-weaving-small.log
+          grep -Fxq 'STAGE01_SCROLL_WEAVING_SMALL_BRUTE_DIFFERENTIAL=PASS' build/stage01-scroll-weaving-small.log
+          grep -Fxq 'STAGE01_SCROLL_WEAVING_SMALL_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-weaving-small.log
       - name: Preserve canonical component evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -134,5 +147,6 @@ jobs:
             build/stage01-scroll-months-foundation.json
             build/stage01-scroll-month-names-foundation.log
             build/stage01-scroll-month-names-foundation.json
+            build/stage01-scroll-weaving-small.log
           if-no-files-found: warn
           retention-days: 30
