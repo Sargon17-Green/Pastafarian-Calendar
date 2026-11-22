@@ -113,7 +113,7 @@ def check_evidence(root:Path, sha:str):
             "archived_python_red":8,"archived_python_control":7,
             "historical_pre_stage03_rust_red_proven":False,
             "live_completed_ci_checked_by_this_script":False,
-            "closure_candidate":True,"stage04_closure":"NOT_CLAIMED"}
+            "closure_candidate":True,"stage04_closure":"ACCEPTED"}
 
 def verify_repo(repo:Path,sha:str):
     def git(*args):
@@ -124,10 +124,17 @@ def verify_repo(repo:Path,sha:str):
     for path,blob in (APPROVAL,PRIOR_QA,HISTORICAL):
         require(git("rev-parse","HEAD:"+path)==blob,"pinned audit/source blob changed: "+path)
     s=(repo/"DEVELOPMENT_STAGE.md").read_text(encoding="utf-8").splitlines()
-    require("CURRENT_STAGE=4" in s and "LAST_COMPLETED_STAGE=3" in s
+    require("CURRENT_STAGE=4" in s and "LAST_COMPLETED_STAGE=4" in s
             and "CURRENT_KIND=DISCOVERY02" in s, "stage counters changed prematurely")
-    require("EXPECTED_REPOSITORY_STATE=DISCOVERY02_DIRECT_RUNTIME_DIFFERENTIAL_NATIVE_VERIFIED_STAGE4_OPEN" in s,
+    require("EXPECTED_REPOSITORY_STATE=DISCOVERY02_STAGE04_ACCEPTED_HOLD_NO_STAGE05" in s,
             "expected stage state changed")
+    record=(repo/"audit/STAGE_04_RUST_FINAL_ACCEPTANCE_2026-11-22.md").read_text(encoding="utf-8")
+    for pin in ("STAGE04_FINAL_DISPOSITION=ACCEPTED", "SOURCE_CI_SHA=fd0d125a2621c99fb9b356a845d40ebb91aa3e53",
+                "STAGE04_CI_RUN=45069086364", "NAMES_LOCK_RUN=45069086363",
+                "ARTIFACT_SHA256=117603bb1f57a8996cba087297cefbe70b0c811f6f646e90652ed24be0ffbbfe",
+                "HISTORICAL_PRE_STAGE03_RUST_RED=NOT_PROVEN",
+                "SUBSTITUTE=AUTHORIZED_2026_RECONSTRUCTED_NATIVE_RED_GREEN"):
+        require(pin in record,"final acceptance record pin missing: "+pin)
     lib=(repo/"src/lib.rs").read_text(encoding="utf-8")
     require("BootstrapOnly" in lib, "Rust production bootstrap boundary absent")
 

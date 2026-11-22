@@ -47,7 +47,7 @@ jobs:
           test -f audit/STAGE_04_DISCOVERY02_BASELINE_CONTRACT_2026-10-31.md
           test -f audit/STAGE_04_DISCOVERY02_ARCHIVED_ROUTE_CONTRACT_2026-10-31.md
           grep -Fxq 'CURRENT_STAGE=4' DEVELOPMENT_STAGE.md
-          grep -Fxq 'LAST_COMPLETED_STAGE=3' DEVELOPMENT_STAGE.md
+          grep -Fxq 'LAST_COMPLETED_STAGE=4' DEVELOPMENT_STAGE.md
           test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           grep -Fq 'pub mod discovery02_day_tag_probe;' src/lib.rs
@@ -213,8 +213,8 @@ jobs:
           timeout --signal=TERM --kill-after=5s 30s \
             python3 tools/stage04_whole_stage_acceptance.py --repo . --evidence evidence \
               --branch-head "$GITHUB_SHA" > evidence/stage04_whole_stage_candidate.json
-          python3 -c 'import json; p=json.load(open("evidence/stage04_whole_stage_candidate.json")); assert p["closure_candidate"] is True and p["stage04_closure"]=="NOT_CLAIMED" and p["historical_pre_stage03_rust_red_proven"] is False and p["validated_original_rust_tsv_rows"]==15 and p["validated_reconstructed_native_observed_rows"]==128'
-          printf 'STAGE04_WHOLE_STAGE_EVIDENCE_CONSISTENCY=PASS\nSTAGE04_CLOSURE=NOT_CLAIMED\n' >> evidence/result.txt
+          python3 -c 'import json; p=json.load(open("evidence/stage04_whole_stage_candidate.json")); assert p["closure_candidate"] is True and p["stage04_closure"]=="ACCEPTED" and p["historical_pre_stage03_rust_red_proven"] is False and p["validated_original_rust_tsv_rows"]==15 and p["validated_reconstructed_native_observed_rows"]==128'
+          printf 'STAGE04_WHOLE_STAGE_EVIDENCE_CONSISTENCY=PASS\nSTAGE04_CLOSURE=ACCEPTED\n' >> evidence/result.txt
           cat evidence/stage04_whole_stage_candidate.json >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence on success or failure
         if: always()
