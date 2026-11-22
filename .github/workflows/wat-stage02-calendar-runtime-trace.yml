@@ -1,0 +1,49 @@
+name: WAT Stage02 calendar runtime trace QA (instrumented copy)
+on:
+  push:
+    branches:
+      - "WAT+Español"
+    paths:
+      - "tests/stage02_calendar_runtime_trace_native.cjs"
+      - ".github/workflows/wat-stage02-calendar-runtime-trace.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  calendar-trace:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify locked source and exact commit
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object oracle/normative_calendar_wide.wat)" = '70267bb5730678f81d6138a2224d6b8d9a193eb8'
+          node --version
+          node --check tests/stage02_calendar_runtime_trace_native.cjs
+          node tests/stage02_calendar_runtime_trace_native.cjs selftest
+          mkdir -p evidence/wat-calendar-trace
+          printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nSHA=%s\nRUN=%s\nATTEMPT=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > evidence/wat-calendar-trace/identity.txt
+      - name: Install WABT, instrument COPY only, compile and validate
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq wabt
+          wat2wasm --version
+          node tests/stage02_calendar_runtime_trace_native.cjs prepare | tee evidence/wat-calendar-trace/prepare.log
+          wat2wasm evidence/wat-calendar-trace/instrumented.wat -o evidence/wat-calendar-trace/instrumented.wasm
+          wasm-validate evidence/wat-calendar-trace/instrumented.wasm
+          sha256sum oracle/normative_calendar_wide.wat tests/stage02_calendar_runtime_trace_native.cjs evidence/wat-calendar-trace/instrumented.wat evidence/wat-calendar-trace/instrumented.wasm | tee evidence/wat-calendar-trace/sha256.txt
+      - name: Full calendar runtime trace with independent rank oracle
+        run: |
+          set -euo pipefail
+          timeout 540s node tests/stage02_calendar_runtime_trace_native.cjs native | tee evidence/wat-calendar-trace/native.log
+      - name: Upload exact-run evidence also on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-calendar-runtime-trace
+          path: evidence/wat-calendar-trace/
+          if-no-files-found: warn
+          retention-days: 30
