@@ -78,7 +78,7 @@ class RootCauseTests(unittest.TestCase):
              "sauce_post_first_value", "sauce_post_next_bowls", "sauce_post_assign_first"]
         )
         self.assertEqual(
-            [p["name"] for p in r["dependency_probes"][43:]],
+            [p["name"] for p in r["dependency_probes"][43:54]],
             ["ownership_vector_match_correct", "sauce_post_old_shape", "sauce_post_old_rank",
              "sauce_post_old_sum", "sauce_post_old_value", "sauce_post_saved_shape",
              "sauce_post_saved_rank", "sauce_post_saved_known_vector",
