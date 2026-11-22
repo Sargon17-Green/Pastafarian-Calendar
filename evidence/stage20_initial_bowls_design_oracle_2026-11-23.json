@@ -1,0 +1,36 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 20,
+  "scope": "LOCAL_MATH_DESIGN_ONLY",
+  "reference_operation": 54,
+  "planned_production_operation": 37,
+  "reference_blob": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+  "formula": "B_i=1+((C+i*T+D+S+q+c_i^2+i-1) mod (2^127-1))",
+  "coefficients": [
+    "17",
+    "19",
+    "23",
+    "29",
+    "31",
+    "37"
+  ],
+  "anchors": 13,
+  "seeded_cases": 384,
+  "cases_checked": 397,
+  "result_comparisons": 2382,
+  "recurrence_checks": 1985,
+  "immutability_checks": 397,
+  "invalid_rejections": 6,
+  "mutation_witnesses": [
+    "drop-plus-index",
+    "swapped-coefficients",
+    "zero-for-positive-M",
+    "drop-weighted-T",
+    "wrong-direction"
+  ],
+  "corrupted_expected_rejected": true,
+  "native": false,
+  "ci": false,
+  "accepted": false,
+  "invalid_pointer_safety_assessed": false
+}
