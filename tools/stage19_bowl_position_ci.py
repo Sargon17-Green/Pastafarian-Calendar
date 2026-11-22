@@ -6,6 +6,10 @@ import stage19_bowl_position_fixture as fixture
 E=Path("evidence/stage19_native");SOURCE=os.environ["SOURCE_PIN"];RUNTIME=os.environ["RUNTIME_PIN"]
 LOCKED=("src/bigint.false","src/monster_bootstrap.false","test/stage19_bowl_position_design_vectors.json","tools/stage19_bowl_position_design_oracle.mjs","tools/stage19_bowl_position_fixture.py","tools/stage19_bowl_position_ci.py","RUN_STAGE19.md","STAGE_19_EXECUTION_STATUS.txt",".github/workflows/canonical-names-lock.yml",".github/workflows/false-arabic-stage19-native-bowl-position.yml")
 def sha(data):return hashlib.sha256(data).hexdigest()
+def marker_stream(data):
+    # Original FALSE may interleave CR/LF inside stdout labels at buffer boundaries.
+    # Remove only line endings; every other byte must still match the exact marker stream.
+    return data.decode("utf-8","replace").replace("\r","").replace("\n","")
 def source_bytes(path):
     expected=subprocess.check_output(["git","show",f"{SOURCE}:{path}"]);actual=Path(path).read_bytes()
     assert actual==expected,("SOURCE_DRIFT",path);return actual
@@ -69,9 +73,11 @@ def main():
     for start,orders in fixture.chunks():
         program,wanted,order_wanted,final,checks=fixture.positive_fixture(orders,start)
         assert sha(program.encode())==next(x["sha256"] for x in summary if x["start_order"]==start)
-        code,out,err=execute("positive_"+str(start),prefix+program.encode(),300);txt=out.decode("utf-8","replace")
+        code,out,err=execute("positive_"+str(start),prefix+program.encode(),300);txt=marker_stream(out)
         labels=re.findall(r"STAGE19_CASE_\d{4}_OK",txt);errors=re.findall(r"STAGE19_[A-Z0-9_]+_FAIL",txt);order_labels=re.findall(r"STAGE19_ORDER_\d{3}_OK",txt)
-        passed=code==0 and err==b"" and labels==wanted and order_labels==order_wanted and not errors and txt.count(final)==1 and txt.rstrip().endswith(final)
+        assert len(wanted)==6*len(order_wanted)
+        expected_stream="".join("".join(wanted[6*i:6*(i+1)])+order_wanted[i] for i in range(len(order_wanted)))+final
+        passed=code==0 and err==b"" and labels==wanted and order_labels==order_wanted and not errors and txt==expected_stream
         positive.append(dict(start_order=start,orders=len(orders),cases=len(wanted),assertions=checks,exit_code=code,labels_seen=len(labels),order_markers_seen=len(order_labels),passed=passed,generated_fixture_sha256=sha(program.encode())))
         verified=verified and passed
         if not passed:
@@ -96,15 +102,15 @@ def main():
             break
     parsed=json.loads(Path("test/stage19_bowl_position_design_vectors.json").read_text(encoding="utf-8"))
     probe_program,probe_wanted,probe_final,probe_checks=fixture.probe_fixture(parsed["probes"])
-    probe_code,probe_out,probe_err=execute("positive_probes",prefix+probe_program.encode(),60);probe_txt=probe_out.decode("utf-8","replace")
+    probe_code,probe_out,probe_err=execute("positive_probes",prefix+probe_program.encode(),60);probe_txt=marker_stream(probe_out)
     probe_labels=re.findall(r"STAGE19_PROBE_\d{3}_OK",probe_txt)
-    probes_passed=probe_code==0 and probe_err==b"" and probe_labels==probe_wanted and not re.findall(r"STAGE19_[A-Z0-9_]+_FAIL",probe_txt) and probe_txt.count(probe_final)==1 and probe_txt.rstrip().endswith(probe_final)
+    probes_passed=probe_code==0 and probe_err==b"" and probe_labels==probe_wanted and not re.findall(r"STAGE19_[A-Z0-9_]+_FAIL",probe_txt) and probe_txt=="".join(probe_wanted)+probe_final
     mutants={}
     for name,marker in (("wrong_expected","STAGE19_CASE_0000_POSITION_FAIL"),("wrong_duplicate_last","STAGE19_PROBE_005_POSITION_FAIL")):
         if name=="wrong_expected":mp=fixture.positive_fixture(fixture.chunks()[0][1][:1],0,mutant=name)[0]
         else:mp=fixture.probe_fixture(parsed["probes"],mutant=name)[0]
         mc,mo,me=execute("mutant_"+name,prefix+mp.encode(),30);mt=mo.decode("utf-8","replace")
-        mutants[name]=dict(exit_code=mc,rejected=mc==1 and marker in mt,expected_error=marker,observed_stdout=mt)
+        mutants[name]=dict(exit_code=mc,rejected=mc==1 and marker in marker_stream(mo),expected_error=marker,observed_stdout=mt)
     bad_lengths={}
     for length in (5,7):
         lc,lo,le=execute("bad_length_"+str(length),prefix+fixture.invalid_length_fixture(length).encode(),30);lt=(lo+le).decode("utf-8","replace")
