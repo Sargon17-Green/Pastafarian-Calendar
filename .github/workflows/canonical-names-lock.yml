@@ -1707,26 +1707,32 @@ jobs:
             cat stage56-php-real-evidence/sauce-php.stderr >&2
             exit 2
           fi
-          timeout 120s python3 -B tools/stage56_compare_php_sauce.py \
+          if timeout 120s python3 -B tools/stage56_compare_php_sauce.py \
             --canonical-repo .external-canonical-source \
             --php-input stage56-php-real-evidence/sauce-php.json \
             --report stage56-php-real-evidence/sauce-compare-report.json \
             > stage56-php-real-evidence/sauce-compare.stdout \
-            2> stage56-php-real-evidence/sauce-compare.stderr
-          compare_rc=$?
+            2> stage56-php-real-evidence/sauce-compare.stderr; then
+            compare_rc=0
+          else
+            compare_rc=$?
+          fi
           printf '%s\n' "$compare_rc" > stage56-php-real-evidence/sauce-compare.exit
           cat stage56-php-real-evidence/sauce-compare.stdout
           cat stage56-php-real-evidence/sauce-compare.stderr >&2
           # Boundary-only evidence is independent of the still-failing raw gate.
-          timeout 120s python3 -B tools/stage56_source_bound_boundary_gate.py \
+          if timeout 120s python3 -B tools/stage56_source_bound_boundary_gate.py \
             --canonical-repo .external-canonical-source \
             --source-manifest stage56-external-evidence/canonical-source.sha256 \
             --php-input stage56-php-real-evidence/sauce-php.json \
             --report stage56-php-real-evidence/source-bound-boundary-report.json \
             --test-mutations \
             > stage56-php-real-evidence/source-bound-boundary.stdout \
-            2> stage56-php-real-evidence/source-bound-boundary.stderr
-          boundary_rc=$?
+            2> stage56-php-real-evidence/source-bound-boundary.stderr; then
+            boundary_rc=0
+          else
+            boundary_rc=$?
+          fi
           printf '%s\n' "$boundary_rc" > stage56-php-real-evidence/source-bound-boundary.exit
           cat stage56-php-real-evidence/source-bound-boundary.stdout
           cat stage56-php-real-evidence/source-bound-boundary.stderr >&2
