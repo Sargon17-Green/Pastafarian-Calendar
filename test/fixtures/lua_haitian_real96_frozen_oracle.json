@@ -1,0 +1,48 @@
+{
+  "project_id": "PC-BRANCH-LUA-HAITIAN",
+  "source_sha": "7bac3d896c332976cde5e97f6527b84084ce95b2",
+  "source_blob_lua_count": "df7a6d31714d111a93aced5ccb74a55c09fd78b1",
+  "vector_csv_sha256": "9c623663a0d48455634df29749e1034a322a412a1898d7b24a77c2e29d708154",
+  "total_digits": 8654,
+  "total_sha256": "e3d498d39d6b4dfc401a85b8d9135ff1089a81ace85565ac5dcb123870c09f34",
+  "oracle": "python_direct_suffix_lex_branch_cardinalities_independent_of_lua",
+  "tiny_exhaustive_pass": 6,
+  "entries": [
+    {
+      "rank": "FIRST",
+      "prefix_len": 96,
+      "prefix_csv": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+      "prefix_sha256": "726d838c4cf1d6bdc12443d30a9151ffcaff6e21fe39c39fdb98c2512cd6ab26",
+      "residual_rank_digits": 1,
+      "residual_rank_sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "residual_rank_first32": "1",
+      "residual_rank_last32": "1",
+      "suffix_count_digits": 8477,
+      "suffix_count_sha256": "b69f6f2e7818e4c66675f5f0ad65757a6e67d9187931bb14eb77cfbf421f54dc"
+    },
+    {
+      "rank": "MIDDLE",
+      "prefix_len": 96,
+      "prefix_csv": "0,1,2,3,4,5,6,7,1,8,9,10,11,12,13,14,15,9,10,11,16,11,17,18,3,19,20,0,13,6,11,21,20,22,11,23,23,15,24,5,25,8,23,26,22,16,27,28,29,22,13,15,22,3,30,8,31,0,32,19,26,33,16,7,19,34,13,18,35,13,7,36,23,37,19,5,29,1,38,16,22,37,4,24,16,33,39,24,27,31,29,10,30,17,17,17",
+      "prefix_sha256": "fd109314ecadebf2253a6e4220eef36f3617a6d91becabd57ff4a507d97749da",
+      "residual_rank_digits": 8550,
+      "residual_rank_sha256": "7d5967a8121f41341cc36792b6ff9a95d57d4a60a12e212c01cb881ec93aa346",
+      "residual_rank_first32": "15995872557413524573052382414599",
+      "residual_rank_last32": "39659137969020386762359400198375",
+      "suffix_count_digits": 8550,
+      "suffix_count_sha256": "8b1a7d37a07e013a3819c06b87bf6be56188d96e89c5bdb3a986ae330ca90ba1"
+    },
+    {
+      "rank": "LAST",
+      "prefix_len": 96,
+      "prefix_csv": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46",
+      "prefix_sha256": "00bd46c7afdee6b03d366c00ee31976c3c5b45932c2fa757b61ee1b80de6aaef",
+      "residual_rank_digits": 8537,
+      "residual_rank_sha256": "24e7ef38e89a991adccfd3bd628c023fe4ceee632e42852d314182644736578c",
+      "residual_rank_first32": "50205848267184809564884158235322",
+      "residual_rank_last32": "00000000000000000000000000000000",
+      "suffix_count_digits": 8537,
+      "suffix_count_sha256": "24e7ef38e89a991adccfd3bd628c023fe4ceee632e42852d314182644736578c"
+    }
+  ]
+}
