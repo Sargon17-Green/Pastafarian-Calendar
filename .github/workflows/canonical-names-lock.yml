@@ -1707,7 +1707,7 @@ jobs:
               raw=p.read_bytes()
               check('00_source_pin','Git_blob_SHA1',hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest(),report['reference_blob'])
               candidate=json.loads(pathlib.Path('build/first-divergence-fortran.json').read_text())
-              if candidate['project_id']!=report['project_id'] or candidate['calculation_day']!=-15055671 or candidate['target_day']!=-15055671 or candidate['candidate_only'] is not True:
+              if candidate['project_id']!=report['project_id'] or int(candidate['calculation_day'])!=-15055671 or int(candidate['target_day'])!=-15055671 or candidate['candidate_only'] is not True:
                   raise ValueError('same-SHA Fortran source identity/input missing')
               spec=importlib.util.spec_from_file_location('pinned_normative_reference',p)
               ref=importlib.util.module_from_spec(spec);sys.modules[spec.name]=ref;spec.loader.exec_module(ref)
@@ -1732,7 +1732,7 @@ jobs:
               report['fortran_year']=year
               report['python_year']=[ry.number,ry.open_gate_index,ry.close_gate_index,ry.open_gate_day,ry.close_gate_day]
               report['fortran_gate_bounds']=bound
-              for i in sorted(gates):
+              for i in sorted(gates,key=lambda i:(abs(i),0 if i<0 else 1)):
                   check('01_gate_table','gate_'+str(i),gates[i],cal.gates.ensure_index(i))
               check('02_year_selection','year_and_span',year,report['python_year'])
               sauce=ref.sauce(-15055671,ry.open_gate_day+1)
@@ -1761,6 +1761,17 @@ jobs:
               report['status']='MATCHED_SINGLE_CASE_ONLY'
           except Found:
               report['status']='DIVERGENCE_IDENTIFIED'
+              if report['first_divergence']['stage']=='01_gate_table':
+                  raw_cal=ref.NormativeCalendar(sauce_function=ref.sauce_raw_sum_mutant)
+                  raw_year=raw_cal.year5000(-15055671)
+                  report['raw_sum_reference_variant']={
+                      'independent_oracle':False,
+                      'context':'Legacy reference contains a historical raw-sum function; compare only upstream gates and year',
+                      'source_scroll_audit':'test/STAGE01_CANONICAL_SCROLL_AUDIT.md',
+                      'matched_gate_days':sum(gates[i]==raw_cal.gates.ensure_index(i) for i in gates),
+                      'tested_gate_days':len(gates),
+                      'year_matches_fortran':year==[raw_year.number,raw_year.open_gate_index,raw_year.close_gate_index,raw_year.open_gate_day,raw_year.close_gate_day]
+                  }
           except Exception as ex:
               report['error']={'kind':type(ex).__name__,'message':str(ex)}
           finally:
