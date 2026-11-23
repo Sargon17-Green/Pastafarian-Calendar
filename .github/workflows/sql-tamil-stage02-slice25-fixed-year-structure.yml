@@ -50,6 +50,8 @@ jobs:
           assert all(x+'(' not in executable for x in ('find_target_year','calendar_date','negative_gate_gap'))
           assert s.count("SET statement_timeout='60s';")==5
           assert s.count('build_year_structure(')==1
+          assert 'SELECT (s).* INTO STRICT v FROM qa_sauce;' in s
+          assert 'SELECT (structure).* INTO STRICT v FROM qa_full;' in s
           assert sum((131,471,251,227,300,839,281,652,213))==3365
           print('S25_STATIC_SOURCE_LOCK=8/8 PASS')
           print('S25_ORACLE_FIXTURE=29/29; YEAR_RECORD=4996; NATIVE=NOT_YET_EXECUTED')
@@ -82,10 +84,13 @@ jobs:
       - name: Five bounded Native steps, timestamps and exit code
         shell: bash
         run: |
-          set -uo pipefail
+          set -euo pipefail
           printf 'START_UTC=%s\n' "$(date -u +%FT%TZ)" > qa-evidence/exit.txt
-          docker exec -u postgres tamil-structure psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/178_stage25_fixed_year_structure_probe.sql > qa-evidence/probe.log 2>&1
-          code=$?
+          if docker exec -u postgres tamil-structure psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/178_stage25_fixed_year_structure_probe.sql > qa-evidence/probe.log 2>&1; then
+            code=0
+          else
+            code=$?
+          fi
           printf 'PSQL_EXIT=%s\nEND_UTC=%s\n' "$code" "$(date -u +%FT%TZ)" >> qa-evidence/exit.txt
           tail -70 qa-evidence/probe.log || true
           test "$code" -eq 0 || exit 3

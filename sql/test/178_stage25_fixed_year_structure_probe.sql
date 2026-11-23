@@ -19,7 +19,7 @@ SET statement_timeout='10s';
 DO $end$
 DECLARE v pastafari_sql_tamil.sauce_result; t timestamptz;
 BEGIN
- SELECT s INTO STRICT v FROM qa_sauce;
+ SELECT (s).* INTO STRICT v FROM qa_sauce;
  SELECT begun INTO STRICT t FROM qa_clock WHERE phase='sauce';
  IF v IS NULL THEN RAISE EXCEPTION 'sauce null'; END IF;
  RAISE NOTICE 'S25_EXIT=sauce elapsed_ms=%',round(extract(epoch from clock_timestamp()-t)*1000,3);
@@ -105,7 +105,7 @@ DECLARE v pastafari_sql_tamil.year_structure; t timestamptz;
  weaving integer[]; month_ids integer[]; lengths integer[];
  mid integer; month_day integer; month_name text; cutlet_name text; cutlet_day numeric;
 BEGIN
- SELECT structure INTO STRICT v FROM qa_full;
+ SELECT (structure).* INTO STRICT v FROM qa_full;
  SELECT begun INTO STRICT t FROM qa_clock WHERE phase='build';
  IF v IS NULL OR (v).year_data IS DISTINCT FROM (SELECT y FROM qa_year) OR
     (v).cutlet_count IS DISTINCT FROM (SELECT k FROM qa_count) OR
