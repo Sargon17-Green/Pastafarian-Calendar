@@ -2157,3 +2157,61 @@ fn test_stage38_catalan_second_prefix_fork_at_17_and_47_months() {
 	stage38_check_second_prefix_fork(47)
 	println('V_AMHARIC_STAGE38_SECOND_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
 }
+// Stage39: the third Dyck-prefix fork, within the [1,2,3] block.
+// Prefix blocks [1,1], [1,2,1] and [1,2,3,1] precede [1,2,3,4].
+// Independent Catalan and reflection-principle Ballot counts fix the rank.
+fn stage39_check_third_prefix_fork(month_count int) {
+	assert month_count >= 4
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	previous := month_count - 1
+	previous_choose := oracle_weave_choose_exact(2 * previous, previous)
+	catalan_previous := oracle_weave_div_small(previous_choose, month_count)
+
+	second_suffix_slots := 2 * month_count - 3
+	second_choose_left := oracle_weave_choose_exact(second_suffix_slots, month_count - 2)
+	second_choose_right := oracle_weave_choose_exact(second_suffix_slots, month_count - 3)
+	second_block := big_sub(second_choose_left, second_choose_right)
+	assert big_eq(second_block, stage35_ballot_suffix_count(month_count, 2, 1))
+
+	third_suffix_slots := 2 * month_count - 4
+	third_choose_left := oracle_weave_choose_exact(third_suffix_slots, month_count - 3)
+	third_choose_right := oracle_weave_choose_exact(third_suffix_slots, month_count - 4)
+	third_block := big_sub(third_choose_left, third_choose_right)
+	assert big_eq(third_block, stage35_ballot_suffix_count(month_count, 3, 1))
+
+	total_choose := oracle_weave_choose_exact(2 * month_count, month_count)
+	total := oracle_weave_div_small(total_choose, month_count + 1)
+	assert big_eq(candidate.count_all(), total)
+	left_rank := big_add(big_add(catalan_previous, second_block), third_block)
+	right_rank := big_add(left_rank, big_one())
+	assert big_cmp(left_rank, big_one()) >= 0
+	assert big_cmp(right_rank, total) <= 0
+
+	mut expected_left := [1, 2, 3, 1]
+	for label in 4 .. month_count + 1 {
+		expected_left << label
+	}
+	for label in 2 .. month_count + 1 {
+		expected_left << label
+	}
+	mut expected_right := [1, 2, 3, 4, 1, 2, 3, 4]
+	for label in 5 .. month_count + 1 {
+		expected_right << label
+		expected_right << label
+	}
+	left := candidate.unrank1(left_rank)
+	right := candidate.unrank1(right_rank)
+	assert left == expected_left
+	assert right == expected_right
+	assert left[0] == 1 && left[1] == 2 && left[2] == 3 && left[3] == 1
+	assert right[0] == 1 && right[1] == 2 && right[2] == 3 && right[3] == 4
+	assert big_eq(stage35_independent_lexical_rank(month_count, left), left_rank)
+	assert big_eq(stage35_independent_lexical_rank(month_count, right), right_rank)
+}
+
+fn test_stage39_catalan_third_prefix_fork_at_17_and_47_months() {
+	stage39_check_third_prefix_fork(17)
+	stage39_check_third_prefix_fork(47)
+	println('V_AMHARIC_STAGE39_THIRD_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
+}
