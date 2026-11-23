@@ -1,0 +1,158 @@
+name: Issue29 v188 corrected Ada GMP F vs pinned original Python one-day only
+on:
+  push:
+    branches:
+      - qa/issue29-ada-month-weave-corrected-one-day-v188
+    paths:
+      - '.github/workflows/issue29-v188-corrected-one-day.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v188-single-authorized-date
+  cancel-in-progress: false
+jobs:
+  corrected-source-one-day-differential:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-ada-month-weave-corrected-one-day-v188'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout isolated corrected Ada source branch
+        uses: actions/checkout@v4
+        with:
+          path: corrected-ada
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Checkout frozen independent Python original
+        uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Exact corrected-source pins and one-date contract preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test -z "$(git -C original-python status --porcelain)"
+          test "$(git -C original-python rev-parse HEAD:tests/normative_reference.py)" = d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53
+          echo '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  original-python/tests/normative_reference.py' | sha256sum -c -
+          for entry in \
+            "src/normative_oracle.adb 0be8f8ab4ddef26d34963d5567707a511ebda50b" \
+            "src/canonical_full_weave_gmp_v164.ads 0b68edf7eddbc33869358bcfcc21e32465fc591e" \
+            "src/canonical_full_weave_gmp_v164.adb 845bd8905943a54e63d6aba0334404a5051fe666" \
+            "src/canonical_wide_rank_gmp_v164.ads 14b94e81534e98cfdb07be3824076bd7082385ea" \
+            "src/canonical_wide_rank_gmp_v164.adb 52b8814c2ab1924cdebafe893a65d97cd3ccfa61"; do
+            set -- $entry
+            test "$(git -C corrected-ada rev-parse "HEAD:$1")" = "$2"
+          done
+          grep -q 'month_weave_issue29_gmp_patch_begin' corrected-ada/src/normative_oracle.adb
+          grep -q 'Canonical_Full_Weave_GMP_V164.Unrank' corrected-ada/src/normative_oracle.adb
+          grep -q 'Canonical_Wide_Rank_GMP_V164.Choose_Rank' corrected-ada/src/normative_oracle.adb
+          test "$(git -C corrected-ada merge-base HEAD 1160096aa847c54cbef27c232771ce1549d7ba8f)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          git -C corrected-ada diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD | sort > evidence/qa-only-changed-files.txt
+          printf '%s\n' \
+            .github/workflows/issue29-v188-corrected-one-day.yml \
+            issue29_v188_one_day.gpr \
+            tests/issue29_v188_one_day.adb \
+            tests/issue29_v188_original_python_oracle.py | sort > evidence/qa-only-expected-files.txt
+          diff -u evidence/qa-only-expected-files.txt evidence/qa-only-changed-files.txt
+          python3 -B corrected-ada/tests/issue29_v188_original_python_oracle.py selftest | tee evidence/parser-selftest.log
+          echo "SOURCE_PINS_AND_SINGLE_DAY_SCOPE_PASS" > evidence/preflight.txt
+          git -C corrected-ada rev-parse HEAD > evidence/qa-head.txt
+      - name: Install GNAT13 and GMP-aware GPR toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          (cd corrected-ada && gprbuild --version) > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Compile actual corrected Ada Calendar_Date including GMP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd corrected-ada
+          timeout -s TERM -k 5s 180s gprbuild -p -j2 -P issue29_v188_one_day.gpr \
+            > ../evidence/ada-build.stdout 2> ../evidence/ada-build.stderr
+          test -x bin_v188/issue29_v188_one_day
+          nm bin_v188/issue29_v188_one_day | grep -E \
+            'canonical_full_weave_gmp_v164__unrank|canonical_wide_rank_gmp_v164__choose_rank' \
+            > ../evidence/gmp-linked-symbols.txt
+          test "$(wc -l < ../evidence/gmp-linked-symbols.txt)" -ge 2
+          sha256sum bin_v188/issue29_v188_one_day > ../evidence/ada-binary.sha256
+      - name: Exactly one corrected Ada original-date invocation, bounded
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -v -o evidence/ada-time.log \
+            timeout -s TERM -k 5s 180s corrected-ada/bin_v188/issue29_v188_one_day \
+            > evidence/ada.stdout 2> evidence/ada.stderr)
+          code=$?
+          set -e
+          echo "$code" > evidence/ada.exitcode
+          test "$code" -eq 0
+          test "$(grep -c '^ISSUE29_V188_CORRECTED_ADA ' evidence/ada.stdout)" -eq 1
+          test "$(wc -c < evidence/ada.stdout)" -le 16384
+          test -z "$(git -C original-python status --porcelain)"
+      - name: One pinned Python original date and independent five-field differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -v -o evidence/python-time.log \
+            timeout -s TERM -k 5s 180s python3 -B \
+            corrected-ada/tests/issue29_v188_original_python_oracle.py compare \
+            evidence/ada.stdout original-python/tests/normative_reference.py evidence/verdict.json \
+            > evidence/python.stdout 2> evidence/python.stderr)
+          code=$?
+          set -e
+          echo "$code" > evidence/python.exitcode
+          test "$code" -eq 0
+          grep -Fx 'ISSUE29_V188_STATUS=ONE_CORRECTED_ADA_DATE_MATCHES_ORIGINAL_PYTHON_NOT_YEAR' evidence/python.stdout
+          test -s evidence/verdict.json
+          test -z "$(git -C original-python status --porcelain)"
+          test "$(git -C corrected-ada ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('evidence/verdict.json').read_text())
+          assert d['ada_final']==d['python_original']['date']==[5000,10,503,20,56]
+          assert d['python_original']['projection_invariants_passed'] is True
+          assert d['python_original']['calls']==d['ada_date_calls']==1
+          assert d['full_years_accepted']==0 and not d['whole_year_or_algorithm_proof']
+          print('V188_ONE_REAL_CORRECTED_DATE_EXACT_5_OF_5_NUMERIC_MATCH_ZERO_YEARS')
+          PY
+      - name: SHA-256 manifest on success or failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path('evidence')
+          rows=[]
+          for item in sorted(p.iterdir()):
+            if item.is_file() and item.name != 'manifest.json':
+              data=item.read_bytes()
+              rows.append({'path':item.name,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+          (p/'manifest.json').write_text(json.dumps({
+              'schema':'ISSUE29_V188_ONE_DAY_EVIDENCE/1',
+              'scope':'one corrected Ada F(c,t), one pinned Python original F(c,t)',
+              'accepted_full_years':0,'files':rows},indent=2,sort_keys=True)+'\n')
+          PY
+      - name: Upload preserved evidence bundle even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v188-corrected-one-day-vs-original-python-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 90
