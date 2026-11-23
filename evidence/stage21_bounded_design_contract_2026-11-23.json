@@ -1,0 +1,51 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "branch": "FALSE+العربية",
+  "timestamp_date": "2026-11-23",
+  "last_accepted_stage": 20,
+  "stage21_status": "DESIGN_CONTRACT_ONLY_NOT_ACCEPTED",
+  "stage20_receipt_commit": "7a673e6ec97dd762af32132614623046868f2ca0",
+  "normative_file": "test/normative_reference.false",
+  "normative_blob": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+  "normative_op": 55,
+  "normative_lines": [
+    383,
+    423
+  ],
+  "proposed_production_op": 38,
+  "input": {
+    "bowls": 6,
+    "visible_drops": 46,
+    "stones_rows": 46,
+    "stones_per_row": 5,
+    "bigint_domain": "1..(2^127-1)"
+  },
+  "output": "direct [2, updated6BigIntBowls, permutationAtDrop46]",
+  "hand_checked_transition": {
+    "input": "all 1, at drop 1",
+    "rank": 1,
+    "aux": [
+      5,
+      7,
+      9,
+      2,
+      2,
+      2
+    ],
+    "bowls_after_first_drop": [
+      19,
+      22,
+      25,
+      19,
+      20,
+      21
+    ]
+  },
+  "source_review": "normative reference operation and dependency contracts inspected at pinned commit",
+  "mathematical_oracle_run": false,
+  "native_run": false,
+  "ci_run": false,
+  "stage21_accepted": false,
+  "next": "Implement and run standalone dual-method mathematical oracle, then implement append-only op38",
+  "no_main_merge": true
+}
