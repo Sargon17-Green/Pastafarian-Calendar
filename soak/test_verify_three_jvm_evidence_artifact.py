@@ -136,6 +136,28 @@ class ArtifactVerifierTests(unittest.TestCase):
         r = audit_zip(p, SHA, digest(p.read_bytes()))
         self.assertEqual(r["signed_gap_rows"], 1680)
 
+    def test_re_signed_symlink_member_rejected(self):
+        # A symlink entry can have correct contents, CRC and all 20 manifest hashes.
+        with zipfile.ZipFile(self.source) as existing:
+            files = {name: existing.read(name) for name in existing.namelist()}
+        path = Path(self.tmp.name) / "symlink.zip"
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as z:
+            for name, payload in sorted(files.items()):
+                if name == "cold-warm/process-1.json":
+                    member = zipfile.ZipInfo(name)
+                    member.create_system = 3
+                    member.external_attr = 0o120777 << 16
+                    member.compress_type = zipfile.ZIP_DEFLATED
+                    z.writestr(member, payload)
+                else:
+                    z.writestr(name, payload)
+        with zipfile.ZipFile(path) as z:
+            link = z.getinfo("cold-warm/process-1.json")
+            self.assertFalse(link.is_dir())
+            self.assertIsNone(z.testzip())
+        with self.assertRaisesRegex(AuditError, "E_UNSAFE_MEMBER_TYPE"):
+            audit_zip(path, SHA, digest(path.read_bytes()))
+
     def test_wrong_artifact_digest(self):
         with self.assertRaisesRegex(AuditError, "E_ARTIFACT_SHA256"):
             audit_zip(self.source, SHA, "f" * 64)

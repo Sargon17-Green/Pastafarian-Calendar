@@ -12,6 +12,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import stat
 import sys
 import zipfile
 
@@ -195,6 +196,10 @@ def audit_zip(path: Path, expected_sha: str, expected_digest: str) -> dict:
                      and not i.filename.startswith("/")
                      and ".." not in i.filename.split("/") for i in infos),
                  "E_UNSAFE_MEMBER")
+            # A named ZIP member can be a Unix symlink even when is_dir() is false.
+            # Treat only regular files and entries with unspecified file type as files.
+            need(all(stat.S_IFMT(i.external_attr >> 16) in (0, stat.S_IFREG)
+                     for i in infos), "E_UNSAFE_MEMBER_TYPE")
             need(z.testzip() is None, "E_ZIP_CRC")
             content = {name: z.read(name) for name in names}
     except (zipfile.BadZipFile, RuntimeError) as exc:

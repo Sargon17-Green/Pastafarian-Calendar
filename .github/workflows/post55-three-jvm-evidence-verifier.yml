@@ -53,7 +53,7 @@ jobs:
           printf '%s\n' "$ACCEPTED_SOURCE_SHA" > evidence/accepted-source-sha.txt
           printf '%s\n' "$ACCEPTED_ARTIFACT_SHA256" > evidence/accepted-artifact-sha256.txt
           echo 'THREE_JVM_PINNED_ARCHIVE_DIGEST_GREEN'
-      - name: Run nine verifier tests against synthetic mutations and authentic archive
+      - name: Run ten verifier tests against synthetic mutations and authentic archive
         shell: bash
         run: |
           set -euo pipefail
@@ -63,7 +63,7 @@ jobs:
           python3 -B -m unittest discover -s soak \
             -p 'test_verify_three_jvm_evidence_artifact.py' -v \
             2>&1 | tee evidence/verifier-tests.log
-          grep -Eq '^Ran 9 tests in ' evidence/verifier-tests.log
+          grep -Eq '^Ran 10 tests in ' evidence/verifier-tests.log
           grep -Eq '^OK$' evidence/verifier-tests.log
           if grep -Eq '^OK \(skipped=' evidence/verifier-tests.log; then
             echo 'Authentic artifact regression was skipped' >&2
