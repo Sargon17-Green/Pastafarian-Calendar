@@ -1,0 +1,90 @@
+name: Kotlin post55 three-JVM evidence verifier QA
+on:
+  push:
+    branches: ['Kotlin\+Cymraeg']
+    paths:
+      - 'soak/verify_three_jvm_evidence_artifact.py'
+      - 'soak/test_verify_three_jvm_evidence_artifact.py'
+      - '.github/workflows/post55-three-jvm-evidence-verifier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  artifact-integrity-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      ACCEPTED_SOURCE_SHA: '25973c99d92c688e7cd4c30db71e2df58cdfb1fd'
+      ACCEPTED_ARTIFACT_ID: '14772808348'
+      ACCEPTED_ARTIFACT_SHA256: '17559d9ecaadae66a522571c6a188edd74fe893963713e35545ec9dc6108388c'
+      POST55_ARTIFACT_ZIP: ${{ runner.temp }}/three-jvm.zip
+    steps:
+      - name: Checkout exact QA source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify branch and exact QA SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Kotlin+Cymraeg'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -f soak/verify_three_jvm_evidence_artifact.py
+          test -f soak/test_verify_three_jvm_evidence_artifact.py
+          echo 'THREE_JVM_VERIFIER_QA_SOURCE_LOCK_GREEN'
+      - name: Retrieve accepted immutable artifact, never rerun production
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          gh api -H 'Accept: application/vnd.github+json' \
+            "/repos/$GITHUB_REPOSITORY/actions/artifacts/$ACCEPTED_ARTIFACT_ID/zip" \
+            > "$POST55_ARTIFACT_ZIP"
+          printf '%s  %s\n' "$ACCEPTED_ARTIFACT_SHA256" "$POST55_ARTIFACT_ZIP" \
+            | sha256sum --check --status
+          python3 -B -c 'import os,zipfile; p=os.environ["POST55_ARTIFACT_ZIP"]; assert zipfile.is_zipfile(p)'
+          printf '%s\n' "$ACCEPTED_SOURCE_SHA" > evidence/accepted-source-sha.txt
+          printf '%s\n' "$ACCEPTED_ARTIFACT_SHA256" > evidence/accepted-artifact-sha256.txt
+          echo 'THREE_JVM_PINNED_ARCHIVE_DIGEST_GREEN'
+      - name: Run nine verifier tests against synthetic mutations and authentic archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m py_compile \
+            soak/verify_three_jvm_evidence_artifact.py \
+            soak/test_verify_three_jvm_evidence_artifact.py
+          python3 -B -m unittest discover -s soak \
+            -p 'test_verify_three_jvm_evidence_artifact.py' -v \
+            2>&1 | tee evidence/verifier-tests.log
+          grep -Eq '^Ran 9 tests in ' evidence/verifier-tests.log
+          grep -Eq '^OK$' evidence/verifier-tests.log
+          if grep -Eq '^OK \(skipped=' evidence/verifier-tests.log; then
+            echo 'Authentic artifact regression was skipped' >&2
+            exit 1
+          fi
+      - name: Run explicit immutable artifact-integrity auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B soak/verify_three_jvm_evidence_artifact.py \
+            --zip "$POST55_ARTIFACT_ZIP" \
+            --source-sha "$ACCEPTED_SOURCE_SHA" \
+            --artifact-sha256 "$ACCEPTED_ARTIFACT_SHA256" \
+            | tee evidence/verifier-report.json
+          python3 -B -c 'import json; r=json.load(open("evidence/verifier-report.json")); assert r["status"]=="PASS_POST55_ARTIFACT_INTEGRITY_ONLY_NOT_CERTIFIED"; assert r["project_id"]=="PC-BRANCH-KOTLIN-CYMRAEG"; assert r["source_sha"]=="25973c99d92c688e7cd4c30db71e2df58cdfb1fd"; assert r["artifact_sha256"]=="17559d9ecaadae66a522571c6a188edd74fe893963713e35545ec9dc6108388c"; assert r["independently_recomputes_oracle"] is False; assert r["certifies_full_date"] is False'
+          echo 'THREE_JVM_ARTIFACT_INTEGRITY_ONLY_GREEN'
+      - name: Preserve verifier evidence on pass or fail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-three-jvm-artifact-verifier-qa
+          path: evidence/**
+          if-no-files-found: warn
+          retention-days: 30
