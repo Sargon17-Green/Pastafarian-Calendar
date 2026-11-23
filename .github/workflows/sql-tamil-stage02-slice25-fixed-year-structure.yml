@@ -1,0 +1,104 @@
+name: SQL Tamil Slice25 bounded structure
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/178_stage25_fixed_year_structure_probe.sql'
+      - '.github/workflows/sql-tamil-stage02-slice25-fixed-year-structure.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source and original fixture lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p qa-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nHEAD=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > qa-evidence/versions.txt
+          while read -r expected file; do
+            actual="$(git hash-object "$file")"
+            printf '%s %s\n' "$actual" "$file" >> qa-evidence/locks.txt
+            test "$expected" = "$actual"
+          done <<'LOCKS'
+          c5c6be7c02c255382ae7c317bfbf17138a12788c sql/10_stage02_sauce.sql
+          d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
+          42acfb80e9eabfd9d091176643763ee7d7bca9ee sql/20_stage02_cutlet_partition.sql
+          5d32a391e1b5609ef790d6a6731ae6713db85a28 sql/21_stage02_cutlet_names.sql
+          faac634a06aee59354de207eb088e4e9996034fa sql/26_stage02_year_structure.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          21f38cd280498070b08b6c3074780f1742c36957 sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl
+          6df7a01df2e96289aeac9aa26746e25443068ece sql/test/152_stage25_selector_locked_years.jsonl
+          LOCKS
+          python3 - <<'PY' | tee qa-evidence/static.txt
+          import pathlib,json
+          p=pathlib.Path('sql/test')
+          gs=[json.loads(s) for s in (p/'151_stage25_calendar_date_locked_goldens_44701320191.jsonl').read_text().splitlines() if s]
+          ys=[json.loads(s) for s in (p/'152_stage25_selector_locked_years.jsonl').read_text().splitlines() if s]
+          z=[g for g in gs if g['case_id']=='prev_3_prev_middle']
+          assert len(gs)==29 and len(ys)==8 and len(z)==1
+          assert z[0]['expected']==dict(year_number=4996,cutlet_name='வெண்கலம்',day_in_cutlet=302,month_name='தவளை',day_in_month=50)
+          assert any(y['year_data']==dict(year_number=4996,open_gate_index=-38,close_gate_index=-29,open_gate_day=-15074038,close_gate_day=-15070673) for y in ys)
+          s=(p/'178_stage25_fixed_year_structure_probe.sql').read_text()
+          executable=s.split('\\set ON_ERROR_STOP on',1)[-1]
+          assert all(x+'(' not in executable for x in ('find_target_year','calendar_date','negative_gate_gap'))
+          assert s.count("SET statement_timeout='60s';")==5
+          assert s.count('build_year_structure(')==1
+          assert sum((131,471,251,227,300,839,281,652,213))==3365
+          print('S25_STATIC_SOURCE_LOCK=8/8 PASS')
+          print('S25_ORACLE_FIXTURE=29/29; YEAR_RECORD=4996; NATIVE=NOT_YET_EXECUTED')
+          PY
+          cp sql/test/178_stage25_fixed_year_structure_probe.sql qa-evidence/probe.sql
+          sha256sum qa-evidence/probe.sql > qa-evidence/sha256.txt
+      - name: PostgreSQL 17.12 isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-structure --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-structure pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-structure pg_isready -q -U postgres
+          docker exec -u postgres tamil-structure postgres --version | tee -a qa-evidence/versions.txt
+      - name: Load unchanged production 00-27
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+            printf '%s %s\n' "$(git hash-object "${found[0]}")" "${found[0]}" >> qa-evidence/production-blobs.txt
+          done
+          docker exec -u postgres tamil-structure psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > qa-evidence/load.log 2>&1 || { tail -60 qa-evidence/load.log; exit 3; }
+      - name: Five bounded Native steps, timestamps and exit code
+        shell: bash
+        run: |
+          set -uo pipefail
+          printf 'START_UTC=%s\n' "$(date -u +%FT%TZ)" > qa-evidence/exit.txt
+          docker exec -u postgres tamil-structure psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/178_stage25_fixed_year_structure_probe.sql > qa-evidence/probe.log 2>&1
+          code=$?
+          printf 'PSQL_EXIT=%s\nEND_UTC=%s\n' "$code" "$(date -u +%FT%TZ)" >> qa-evidence/exit.txt
+          tail -70 qa-evidence/probe.log || true
+          test "$code" -eq 0 || exit 3
+          grep -q 'S25_FIVE_FIELDS=PASS' qa-evidence/probe.log || exit 4
+          grep -q 'S25_FULL_SLICE=NOT_ACCEPTED' qa-evidence/probe.log || exit 5
+      - name: Preserve original logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-fixed-structure
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Cleanup
+        if: always()
+        run: docker rm -f tamil-structure 2>/dev/null || true
