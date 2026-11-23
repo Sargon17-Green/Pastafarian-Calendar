@@ -1,0 +1,30 @@
+# Stage53 / DISCOVERY49 — canonical zero and five-live-output lifetime at maximum width
+
+PROJECT_ID: PC-BRANCH-COBOL-SIMPLIFIED-CHINESE
+Authorized branch: COBOL+简体中文
+Opened: 2026-11-23. Parent HEAD: a005bbafa5d63bd839c04e08ac7d8cfb69923996.
+Prerequisite: Stage52 accepted only on exact tested source SHA c63e4a5be045b1732aa1a9c3e4eb2b5e7c086f6c, natural run 45083047039 (53/53), strict Native job 137395293176 (25/25), artifact 14777914060 SHA256 d69fec662e7cbca50672b0cd9f7fcdac6fe699c121f936e1693a2ebad86ab2d3. Prior acceptance is not inherited by this documentation/planning child.
+
+## Source-grounded distinct question and prior coverage
+
+Stage16 checked signed-zero/leading-zero input normalization in 24 single-output cases, with magnitudes below 320 digits. Stage17 checked long signed zero strings to a 320-byte fixture boundary in 24 single-output cases. Stage50-52 checked five concurrent caller-owned outputs and input reinitialization, but their arithmetic input pairs were nonzero. The untested INTERSECTION is replacing a normalized zero operand by an extreme-width signed nonzero operand, and vice versa, while five independently owned nonzero outputs remain live. In particular, Stage16/17 results do not establish five-live-output independence at 8192 digits. This is a new bounded coverage hypothesis, not evidence of a defect.
+
+Source ABI: src/big_integer.cob PARSE-TEXT-INTO-R permits optional +/- and 1..8192 bytes, NORMALIZE-R removes all-zero chunks before assigning a sign. The zero descriptor must be sign=0, chunks=0, head=NULL and tail=NULL. src/patched_distance.cob computes |T-C|+1, refuses an occupied output (status 175), and delegates release to the existing BIG-INTEGER-SERVICE calls. This test must NEVER invent a negative-zero descriptor or manually set sign -1 on zero. A negative 8192-digit NONZERO operand must be initialized as an unsigned 8192-byte magnitude and have the accepted normalized owned descriptor sign set to -1, as in Stages50-52; do not pass 8193 signed bytes to INIT-TEXT.
+
+## Exact independent inputs and outputs
+
+For width n in {3,9,128,320,8192}, j in {1,2,3,4,5}, B=10^(n-1), M=B+j+5 and s=(-1)^j. There are 25 unique (n,j,T) cases, five at n=8192. M always has n digits. Initial T=s*M; five sequential candidates C_k=s*k for k=0..4, where C_0 is the parsed canonical zero. Preserve five live independently owned results R_k=|T-C_k|+1=M-k+1, each an exact decimal string. C_k may be reinitialized between calculations, but every previous result and its owner metadata must remain unchanged.
+
+Choose signed-zero INIT-TEXT spelling by j: '0', '+000', '-000', 8192 zero digits, or '-' plus 8191 zero digits. All are <=8192 bytes, must canonicalize to the empty zero descriptor, and must not leave heap allocations after normalizing C_0. Cover the same five spellings in rotated order on the reverse-phase T'=0. After all five results are live, release/reinitialize both inputs to a new input pair with T'=0 and C'=-s*M; verify every prior output's descriptor, ownership and exact text survives. Probe an occupied output using the existing safe ABI: require rejected status 175 and no mutation/leak, not a new injection seam.
+
+Select slot k=(caseIndex mod 5). Release ONLY that result and verify four unchanged live survivors. Initialize C'_k=-s*(M+k) with zero T' and compute replacement R'_k=|0-C'_k|+1=M+k+1. Verify distinct live owner pointers; all four surviving strings and descriptors must still match original snapshots. Restore original inputs, free only the replacement, recompute original R_k, verify five original decimal strings and four original survivor identities. Finally release all real owners exactly once and query measured HEAP-LIVE=0. Error paths may release only known independently owned descriptors; no pointer corruption, no fabricated service failure, no fault injection, no aliasing.
+
+## Independent oracle and measurable gates
+
+test/stage53_planning_oracle.mjs compares all 250 exact decimal outputs (125 original + 125 replacement) from JavaScript BigInt absolute difference against independently implemented decimal digit addition/subtraction by small integers and the closed forms above. Separately assert 500 operand-order/global-sign metamorphic identities, 50 zero-text normalization checks (two per case), 25 unique triples, five 8192-digit cases, and target slot balance 5/5/5/5/5. An explicitly conceptual ownership model checks 25 occupied unchanged snapshots, 100 survivors after a free, 100 survivors after replacement and 25 restorations. This model is NOT a Native test or physical heap proof. Require exit code 0 and STAGE53_PLANNING_GATE=PASS_NOT_NATIVE.
+
+NEXT implementation: test-only GnuCOBOL Stage53 harness using the existing branch ABI (no fixtures or algorithms copied from another language branch). GnuCOBOL 3.1.2 -Werror must compile <=300 s and executable complete <=120 s within a <=20 min job; add one strict independent job to the existing canonical workflow (expected 54/54, not a rerun of Stage52). Native success requires 25/25 cases, 125 initial output owners, 50 canonical zero parses, 25 occupied-output rejections, 100/100 survivors on both transitions, 25 replacement and 25 restored outputs, exact strings, distinct live ownership, no unexpected failure, and actual post-release HEAP-LIVE=0. Export raw log on success or failure, with PROJECT_ID+exact HEAD; independently verify completed jobs, job log, artifact ZIP bytes/digest, CRC and embedded identity before acceptance. Refuse to mark PASS on queued, in_progress or planning-only evidence. If an actual Native failure occurs, diagnose its log before classifying any expected-red.
+
+## Present boundary
+
+This commit contains the contract, independent planning oracle and append-only ledger ONLY. Stage53 COBOL Native harness/strict CI have NOT been authored, run, or accepted here. LAST_COMPLETED_STAGE remains 52; four QA51-B injected-service failure classes remain NOT TESTED/NOT ACCEPTED and OUT OF SCOPE; full calendar integration is NOT_YET_AVAILABLE. No production code, protected branch, main, merge, release or new injection interface.
