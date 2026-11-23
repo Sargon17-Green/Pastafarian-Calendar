@@ -1,0 +1,17 @@
+; PC-BRANCH-LOGO-IDO Stage2 QA-only rank dispatch candidate.
+; No canonical promotion. Pure reporter; no global mutation.
+; Input stream [canonical BI first in 1..M, step exactly +/-1].
+; Input N canonical BI >=1, no arbitrary upper cap. Invalid input -> [].
+; Delegated reporters validate stream shape, first-value range, and step.
+to monster.stage02.choose.rank :stream :N
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if bi.lt :N (bi.small 1) [output []]
+  if bi.le :N nr.M [
+    output monster.stage02.choose.short :stream :N
+  ]
+  localmake "square bi.square nr.M
+  if bi.le :N :square [
+    output monster.stage02.choose.wide :stream :N
+  ]
+  output monster.stage02.choose.wide.general :stream :N
+end
