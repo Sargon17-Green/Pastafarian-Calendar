@@ -159,7 +159,29 @@ rank=copy(rank)
 local rem=copy(months)
 local opened,closed,labels=0,0,{}
 local evaluations=0
+local extreme_first=cmp(rank,ONE)==0
+local extreme_last=cmp(rank,rows[0][0])==0
 for step=0,limit-1 do
+if extreme_first or extreme_last then
+local picked
+for j=closed+1,math.min(opened+1,#months) do
+local op,cl=candidate(rem,months,opened,closed,j)
+if op then
+rem[j]=rem[j]-1
+local card=suffix(rem,op,cl,rows,p,step+1)
+rem[j]=rem[j]+1
+if cmp(card,ZERO)>0 then picked={j,op,cl,card} end
+if picked and extreme_first then break end
+end
+end
+assert(picked,'extreme rank has no legal branch')
+local j,op,cl=picked[1],picked[2],picked[3]
+labels[#labels+1]=tostring(j-1)
+rem[j]=rem[j]-1
+opened,closed=op,cl
+rank=extreme_first and ONE or picked[4]
+evaluations=evaluations+1
+else
 local current=suffix(rem,opened,closed,rows,p,step)
 local sum=ZERO
 local selected,rrank
@@ -185,6 +207,7 @@ labels[#labels+1]=tostring(j-1)
 rem[j]=rem[j]-1
 opened,closed=op,cl
 rank=rrank
+end
 end
 local final=suffix(rem,opened,closed,rows,p,limit)
 assert(cmp(rank,ONE)>=0 and cmp(rank,final)<=0,'residual rank out of bounds')
