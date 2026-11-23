@@ -1,0 +1,82 @@
+name: Issue29 v185 GMP fail-closed invalid-input boundaries; NO original Calendar F
+on:
+  push:
+    branches:
+      - qa/issue29-ada-gmp-negative-contracts-v185
+    paths:
+      - '.github/workflows/issue29-v185-gmp-negative-contracts.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v185-fail-closed-one-shot
+  cancel-in-progress: false
+jobs:
+  source-locked-negative-contracts:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-ada-gmp-negative-contracts-v185'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact corrected GMP source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Validate source pins and all legacy date-dispatch blocks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile tests/issue29_v185_contract_runner.py
+          python3 -B tests/issue29_v185_contract_runner.py prepare | tee evidence/preflight-verdict.txt
+          grep -Fx V185_NEGATIVE_INPUT_CONTRACTS_SOURCE_LOCKED_ZERO_F evidence/preflight-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install isolated GNAT 13 and GNATCOLL GMP
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build GMP Count/Rank/Unrank contract fixture without original F
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v185_negative_contracts.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v185/issue29_v185_negative_contract_tests
+          if nm bin_v185/issue29_v185_negative_contract_tests | grep -iq normative_oracle; then
+            echo V185_CALENDAR_F_SYMBOL_FORBIDDEN >&2
+            exit 1
+          fi
+          echo V185_ONLY_GMP_COMPONENT_CONTRACTS_LINKED > evidence/build-verdict.txt
+      - name: Execute one bounded native error-path test, zero calendar F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v185_contract_runner.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V185_GMP_INVALID_INPUT_CONTRACTS_NATIVE_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Hash every evidence member, even on failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence')
+          entries={p.name:{'bytes':p.stat().st_size,
+                     'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+            for p in sorted(root.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (root/'members.sha256.json').write_text(json.dumps(entries,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload full reproducible GMP-only error-contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v185-gmp-invalid-input-fail-closed-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
