@@ -36,12 +36,14 @@ def source_copies(root):
         index = line - b["start_line"]
         if index < 1 or index >= len(original_definition):
             raise ValueError("SOURCE_COPY_LINE_OUTSIDE_FUNCTION:" + name)
-        expected_line = "   " + original
-        replacement_line = "   " + replacement
-        if original_definition[index] != expected_line:
+        expected_line = original_definition[index]
+        if not expected_line.startswith("   " + original):
             raise ValueError("SOURCE_COPY_ANCHOR_CHANGED:" + name)
         if sum(original in s for s in original_definition) != 1:
             raise ValueError("SOURCE_COPY_ANCHOR_NOT_UNIQUE:" + name)
+        replacement_line = expected_line.replace(original, replacement, 1)
+        if replacement_line == expected_line:
+            raise ValueError("SOURCE_COPY_REPLACEMENT_UNCHANGED:" + name)
         definition = list(original_definition)
         definition[index] = replacement_line
         if sum(a != b for a, b in zip(original_definition, definition)) != 1:
