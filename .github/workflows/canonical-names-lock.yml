@@ -1672,7 +1672,8 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          (ulimit -v 1048576; /usr/bin/time -f 'SECONDS=%e RSS_KIB=%M EXIT=%x' -o build/first-divergence-python.resources timeout --signal=TERM --kill-after=5s 240s python3 -u - <<'PY'
+          ulimit -v 1048576
+          /usr/bin/time -f 'SECONDS=%e RSS_KIB=%M EXIT=%x' -o build/first-divergence-python.resources timeout --signal=TERM --kill-after=5s 240s python3 -u - <<'PY'
           import hashlib,importlib.util,json,os,pathlib,sys,time
           out=pathlib.Path('build/first-divergence-result.json')
           report={'project_id':'PC-BRANCH-FORTRAN-ENGLISH','source_sha':os.environ['GITHUB_SHA'],
