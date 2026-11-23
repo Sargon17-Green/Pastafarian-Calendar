@@ -179,6 +179,93 @@ proc checkpoint(phaseName: string) {
   try! stdout.flush();
 }
 
+// Research-only non-mutating attribution for one candidate-block snapshot.
+// Reconstructs the current candidate partition from the same Chapel primitives
+// and compares every exact bigint block with production. This is deliberately
+// NOT an independent mathematical oracle, speedup claim, or Stage 6 gate.
+proc profileSparseCandidateSubphases(const ref lens: [?D] int,
+                                     const ref states: [?S] SparseWeavingVec,
+                                     const ref sizes: [?Z] int,
+                                     const ref specs: [?Q] SparseWeavingGapSpec,
+                                     const ref used: [?U] int,
+                                     opened: int, closed: int,
+                                     const ref total: bigint,
+                                     step: int) {
+  const m = D.high;
+  const expected = sparseWeavingCandidateBlocks(lens, states, sizes, specs,
+                                                 used, opened, closed, total);
+  var observed: [D] bigint;
+  var identity: [0..sizes[m]] bigint;
+  for i in 0..sizes[m] do identity[i] = new bigint(1);
+  var adjoint = sparseWeavingPack(identity);
+  var transposeSeconds = 0.0;
+  var trialSeconds = 0.0;
+  var dotSeconds = 0.0;
+  var transposeCalls = 0;
+  var trialCalls = 0;
+  var dotCalls = 0;
+  if m >= 2 {
+    for j in 2..m by -1 {
+      if sparseWeavingEligible(j, lens, used, opened, closed) {
+        const own = sparseWeavingExtendSpec(specs[j], j, j);
+        var trialTimer: stopwatch;
+        trialTimer.start();
+        const trial = sparseWeavingTransfer(states[j-1], sizes[j-1],
+                                             lens[j], own);
+        trialTimer.stop();
+        trialSeconds += trialTimer.elapsed();
+        trialCalls += 1;
+        var dotTimer: stopwatch;
+        dotTimer.start();
+        observed[j] = sparseWeavingDot(adjoint, trial);
+        dotTimer.stop();
+        dotSeconds += dotTimer.elapsed();
+        dotCalls += 1;
+      }
+      const older = sparseWeavingExtendSpec(specs[j], j, 1);
+      var transposeTimer: stopwatch;
+      transposeTimer.start();
+      adjoint = sparseWeavingTranspose(adjoint, sizes[j-1], lens[j], older);
+      transposeTimer.stop();
+      transposeSeconds += transposeTimer.elapsed();
+      transposeCalls += 1;
+    }
+  }
+  if sparseWeavingEligible(1, lens, used, opened, closed) {
+    var dotTimer: stopwatch;
+    dotTimer.start();
+    observed[1] = sparseWeavingDot(adjoint, states[1]);
+    dotTimer.stop();
+    dotSeconds += dotTimer.elapsed();
+    dotCalls += 1;
+  }
+  var partition = new bigint(0);
+  for j in D {
+    if observed[j] != expected[j] then
+      halt("Candidate subphase diagnostic exact block mismatch at step ",
+           step, " month ", j);
+    partition += observed[j];
+  }
+  if partition != total then
+    halt("Candidate subphase diagnostic exact partition mismatch at step ",
+         step);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_TRANSPOSE_SECONDS=", transposeSeconds);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_TRIAL_SECONDS=", trialSeconds);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_DOT_SECONDS=", dotSeconds);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_TRANSPOSE_CALLS=", transposeCalls);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_TRIAL_CALLS=", trialCalls);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_DOT_CALLS=", dotCalls);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_RESULT=EXACT_BLOCK_MATCH_RESEARCH_ONLY");
+  try! stdout.flush();
+}
+
 // Source-fresh, bounded attribution of production sparse unrank steps.
 // Calls the unchanged production sparse primitives; it is not an oracle or
 // a substitute for full chooseMonthWeaving / calendarDate acceptance.
@@ -252,6 +339,14 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
       writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_OPENED=", opened);
       writeln("YEAR_BOUNDARY_PREFIX_STEP_", step, "_CLOSED=", closed);
       try! stdout.flush();
+    }
+    // Stop the prefix stopwatch while sampling, so the prior 32-step
+    // baseline excludes diagnostic measurement overhead.
+    if step == 1 || step == 8 || step == 16 || step == 32 {
+      prefixTimer.stop();
+      profileSparseCandidateSubphases(lens, states, sizes, specs, used,
+                                      opened, closed, total, step);
+      prefixTimer.start();
     }
     if prefixTimer.elapsed() >= 30.0 then break;
   }
