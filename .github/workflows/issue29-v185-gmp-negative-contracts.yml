@@ -1,5 +1,5 @@
 name: Issue29 v185 GMP fail-closed invalid-input boundaries; NO original Calendar F
-# PATCH03: expected exceptions cannot be satisfied by test Require; preserved-state assertion
+# PATCH04: visibility of Natural_Array equality per exact GNAT compiler diagnostics
 on:
   push:
     branches:

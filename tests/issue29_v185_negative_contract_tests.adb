@@ -14,6 +14,7 @@ procedure Issue29_V185_Negative_Contract_Tests is
    package Wide renames Canonical_Wide_Rank_GMP_V164;
    use Ada.Text_IO;
    use type G.Big_Integer;
+   use type Full.Natural_Array;
    use type Std.Big_Integer;
 
    M : constant Std.Big_Integer :=
