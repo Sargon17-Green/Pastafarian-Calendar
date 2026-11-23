@@ -18,7 +18,7 @@ jobs:
       ACCEPTED_SOURCE_SHA: '25973c99d92c688e7cd4c30db71e2df58cdfb1fd'
       ACCEPTED_ARTIFACT_ID: '14772808348'
       ACCEPTED_ARTIFACT_SHA256: '17559d9ecaadae66a522571c6a188edd74fe893963713e35545ec9dc6108388c'
-      POST55_ARTIFACT_ZIP: ${{ runner.temp }}/three-jvm.zip
+      POST55_ARTIFACT_ZIP: /tmp/post55-three-jvm-14772808348.zip
     steps:
       - name: Checkout exact QA source
         uses: actions/checkout@v4
