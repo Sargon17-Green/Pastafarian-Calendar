@@ -64,7 +64,7 @@ pub fn dispatch_discovery_35(
 
 1. Voku **precize unufoje** `discovery_34_dice_bands.dispatch_discovery_34(context, ids, A, B)`, ankaŭ por `ids=[]` kaj `A=B=[]`. Repropagu `Error(e)` senŝanĝe; neniam ŝanĝu la erar-prioritaton.
 2. Sur `Ok(previous)`, kontrolu ĉiujn ses nombro-invariantojn. Krome validigu la heredajn reduktitajn Jaccard- kaj Dice-frakciojn: pozitiva denominatoro, intervalo [0,1], gcd=1, ĉe `U=0` J=1/1 alie `j_p*U=I*j_q`; ĉe `L+R=0` D=1/1 alie `d_p*(L+R)=2I*d_q`. Malkongruo redonas `Error(discovery_19_interval_value.InvalidStream)`. Ne kreu falsajn erarojn per ŝanĝo de antaŭaj moduloj.
-3. Metu la tri rezultajn kazojn `(1,1)`, `(0,1)`, aŭ `(I/h, min(L,R)/h)` kie `h=gcd(I,min(L,R))`; neniam kalkulu gcd kun nula denominatoro. Poste kontroli `q>0`, `0<=p<=q`, `gcd(p,q)=1`, kaj en la tria kazo `p*min(L,R)=I*q`. Kontrolu ankaŭ `O>=D>=J` per krucomultipliko. Propagu ĉiujn 12 heredajn kampojn kaj la tri kanonajn listojn sen ordŝanĝo aŭ rekanonigo.
+3. Metu la tri rezultajn kazojn `(1,1)`, `(0,1)`, aŭ `(I/h, min(L,R)/h)` kie `h=gcd(I,min(L,R))`; neniam kalkulu gcd kun nula denominatoro. Poste kontroli `q>0`, `0<=p<=q`, `gcd(p,q)=1`, kaj en la tria kazo `p*min(L,R)=I*q`. Kontrolu ankaŭ `O>=D>=J` per krucomultipliko. Propagu la dek heredajn nombr-/frakci-kampojn kaj la tri kanonajn listojn sen ordŝanĝo aŭ rekanonigo.
 4. La nova produktmodulo NE voku Stage21, Stage32, Stage33, test/reference, alilingvan fonton, fenestro-enumeradon aŭ plen-datan kalkulon. Kosto super unu Stage38-voko: `O(log(max(1,min(L,R))))` aritmetikaj Eŭklidaj paŝoj kaj `O(1)` plia entjer-vorta stokado, sen aserto pri konstanta bitkosto ĉe grandaj BEAM-Int.
 5. Neniu nova dependaĵo, glitkomo, bandomerge aŭ fenestra materialigo.
 
