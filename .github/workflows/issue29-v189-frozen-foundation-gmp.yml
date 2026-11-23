@@ -1,0 +1,94 @@
+name: Issue29 v189 frozen ORIGINAL foundation GMP component replay; NO original F
+on:
+  push:
+    branches:
+      - qa/issue29-foundation-witness-gmp-replay-v189
+    paths:
+      - '.github/workflows/issue29-v189-frozen-foundation-gmp.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v189-frozen-witness-gmp-one-shot
+  cancel-in-progress: false
+jobs:
+  source-locked-frozen-witness-gmp:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-foundation-witness-gmp-replay-v189'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Checkout corrected GNAT GMP component only, no calendar F
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Independently regenerate full original 4244-label frozen reference, zero converter calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile tests/issue29_v189_frozen_oracle.py
+          timeout -k 5s 100s python3 -B tests/issue29_v189_frozen_oracle.py prepare | tee evidence/reference-verdict.txt
+          grep -Fx V189_FROZEN_ORIGINAL_SOURCE_REFERENCE_READY_4244_ZERO_F evidence/reference-verdict.txt
+          test ! -e evidence/RUN_STARTED_ONCE
+      - name: Install bounded original GMP development dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 45s sudo apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 update -qq > evidence/apt-update.log 2>&1
+          if timeout -k 5s 130s sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 install -y --no-install-recommends gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1; then
+            echo V189_APT_PRIMARY_OK > evidence/apt-verdict.txt
+          else
+            echo V189_APT_PRIMARY_FAILED_FALLBACK_STARTED > evidence/apt-verdict.txt
+            if test -f /etc/apt/apt-mirrors.txt; then
+              sudo sed -i 's#us-east-2.ec2.archive.ubuntu.com#archive.ubuntu.com#g' /etc/apt/apt-mirrors.txt
+            fi
+            if test -f /etc/apt/sources.list.d/ubuntu.sources; then
+              sudo sed -i 's#us-east-2.ec2.archive.ubuntu.com#archive.ubuntu.com#g' /etc/apt/sources.list.d/ubuntu.sources
+            fi
+            timeout -k 5s 45s sudo apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 update -qq > evidence/apt-update-fallback.log 2>&1
+            timeout -k 5s 210s sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 install -y --no-install-recommends gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install-fallback.log 2>&1
+            echo V189_APT_FALLBACK_OK > evidence/apt-verdict.txt
+          fi
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build isolated actual GMP source components, forbid original Calendar F linkage
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v189_foundation_gmp.gpr > evidence/build.stdout 2> evidence/build.stderr
+          test -x bin_v189/issue29_v189_foundation_gmp_tests
+          if nm bin_v189/issue29_v189_foundation_gmp_tests | grep -iq normative_oracle; then
+            echo V189_FORBIDDEN_ORIGINAL_CALENDAR_SYMBOL >&2
+            exit 1
+          fi
+          echo V189_COMPONENT_ONLY_GMP_LINKED_NO_CALENDAR_F > evidence/build-verdict.txt
+      - name: One bounded 4244-token native GMP Count-Rank-Unrank original witness replay; never F
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_v189_frozen_oracle.py run-once | tee evidence/native-verdict.txt
+          grep -Fx V189_NATIVE_FROZEN_ORIGINAL_FOUNDATION_4244_TOKEN_GMP_PASS_ZERO_F evidence/native-verdict.txt
+      - name: Hash all real evidence including failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence')
+          data={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+                for p in sorted(root.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (root/'members.sha256.json').write_text(json.dumps(data,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload all original-witness GMP-only QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v189-frozen-real-foundation-4244-gmp-only-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
