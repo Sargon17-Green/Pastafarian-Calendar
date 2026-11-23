@@ -32,7 +32,10 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,28))
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
-        self.assertGreater(r["probe_count"],90)
+        self.assertGreaterEqual(r["probe_count"],15)
+        self.assertLessEqual(r["probe_count"],32)
+        self.assertEqual(r["instrumentation_mode"],"bounded_source_spans_8")
+        self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
         self.assertTrue(r["source_statements_preserved"])
@@ -55,7 +58,7 @@ class ResidualTests(unittest.TestCase):
         r=self.receipt
         starts=set()
         for p in r["probes"]:
-            self.assertIn(p["kind"],("statement","bounded_for_block"))
+            self.assertIn(p["kind"],("statement_span","bounded_for_block"))
             self.assertGreaterEqual(p["last_line"],p["first_line"])
             self.assertIn("PHASE=START",p["start_token"])
             self.assertIn("PHASE=END",p["end_token"])

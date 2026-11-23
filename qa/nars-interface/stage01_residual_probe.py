@@ -37,6 +37,11 @@ def decode_paired(raw: bytes):
     return lines, pos, match, programs
 
 def instrument(root: pathlib.Path, marker: str):
+    """Instrument bounded original-source spans to avoid 266 native filesystem writes.
+
+    All original statements remain byte-for-byte identical in the FX source copy.
+    Control-flow blocks are indivisible; the evidence is diagnostic only.
+    """
     locked = load_locked_sources(root)
     blocks = [b for b in locked["blocks"] if b["name"] == "RunStage01Tests"]
     if len(blocks) != 1 or blocks[0]["path"] != "test/stage01_tests.apl":
@@ -47,69 +52,81 @@ def instrument(root: pathlib.Path, marker: str):
         raise ValueError("SUITE_HEADER_CHANGED")
     out = [ALIAS + source[0][len("RunStage01Tests"):]]
     wp = pathlib.PureWindowsPath(marker)
-    probes = []
-    loop = None
-    skipped = []
-    for offset, line in enumerate(source[1:], 1):
-        original_line = block["start_line"] + offset
+    units = []
+    i = 1
+    while i < len(source):
+        line = source[i]
         t = line.strip()
         if not t or t.startswith("⍝"):
-            out.append(line)
+            i += 1
             continue
         if t.startswith(":For "):
-            if loop is not None:
-                raise ValueError("NESTED_LOOPS_UNSUPPORTED")
-            loop = dict(first_line=original_line, source_lines=[line])
-            indent = line[:len(line)-len(line.lstrip())]
-            idx = len(probes) + 1
-            loop["index"] = idx
-            spath = str(wp.with_name(f"{wp.stem}_statement_{idx:03d}_start.txt"))
-            stoken = f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|IDX={idx:03d}|LINE={original_line}|PHASE=START"
-            loop.update(start_path=spath, start_token=stoken)
-            out.append(indent + marker_write(stoken, spath))
-            out.append(line)
-            continue
-        if loop is not None:
-            loop["source_lines"].append(line)
-            out.append(line)
-            if t == ":EndFor":
-                idx = loop["index"]
-                epath = str(wp.with_name(f"{wp.stem}_statement_{idx:03d}_end.txt"))
-                etoken = f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|IDX={idx:03d}|LINE={original_line}|PHASE=END"
-                out.append(line[:len(line)-len(line.lstrip())] + marker_write(etoken, epath))
-                probes.append(dict(index=idx,kind="bounded_for_block",
-                                   first_line=loop["first_line"],last_line=original_line,
-                                   source_sha256=hashlib.sha256("\n".join(loop["source_lines"]).encode()).hexdigest(),
-                                   start_path=loop["start_path"],start_token=loop["start_token"],
-                                   end_path=epath,end_token=etoken))
-                loop = None
+            first = i
+            i += 1
+            while i < len(source) and source[i].strip() != ":EndFor":
+                if source[i].strip().startswith(":For "):
+                    raise ValueError("NESTED_LOOPS_UNSUPPORTED")
+                i += 1
+            if i >= len(source):
+                raise ValueError("UNTERMINATED_FOR_BLOCK")
+            units.append((first, i+1, "bounded_for_block"))
+            i += 1
             continue
         if t.startswith(":") or "⋄" in line:
-            raise ValueError("UNSUPPORTED_SUITE_STATEMENT:" + str(original_line))
-        idx = len(probes) + 1
-        indent = line[:len(line)-len(line.lstrip())]
+            raise ValueError("UNSUPPORTED_SUITE_STATEMENT:" + str(block["start_line"] + i))
+        units.append((i, i+1, "statement"))
+        i += 1
+    spans = []
+    pending = []
+    def flush():
+        if pending:
+            spans.append((pending[0][0], pending[-1][1], "statement_span"))
+            pending.clear()
+    for start, end, kind in units:
+        if kind == "bounded_for_block":
+            flush()
+            spans.append((start, end, kind))
+        else:
+            pending.append((start, end))
+            if len(pending) == 8:
+                flush()
+    flush()
+    if not (15 <= len(spans) <= 32) or sum(k == "bounded_for_block" for _,_,k in spans) != 2:
+        raise ValueError("BOUNDED_SPAN_COUNT_UNEXPECTED")
+    before, after, probes = {}, {}, []
+    for idx, (start, end, kind) in enumerate(spans, 1):
+        first_line = block["start_line"] + start
+        last_line = block["start_line"] + end-1
         spath = str(wp.with_name(f"{wp.stem}_statement_{idx:03d}_start.txt"))
         epath = str(wp.with_name(f"{wp.stem}_statement_{idx:03d}_end.txt"))
-        stoken = f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|IDX={idx:03d}|LINE={original_line}|PHASE=START"
-        etoken = f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|IDX={idx:03d}|LINE={original_line}|PHASE=END"
-        out.extend([indent + marker_write(stoken, spath),line,indent + marker_write(etoken, epath)])
-        probes.append(dict(index=idx,kind="statement",first_line=original_line,last_line=original_line,
-                           source_sha256=hashlib.sha256(line.encode()).hexdigest(),
-                           start_path=spath,start_token=stoken,end_path=epath,end_token=etoken))
-    if loop is not None:
-        raise ValueError("UNTERMINATED_FOR_BLOCK")
-    if len(probes) < 90 or len(probes) > 160:
-        raise ValueError("SOURCE_PROBE_COUNT_UNEXPECTED")
-    if any(probes[i]["index"] != i+1 for i in range(len(probes))):
-        raise ValueError("PROBE_INDEX_NOT_MONOTONIC")
-    # Strip only our own exact instrument lines to prove every original statement is preserved.
-    marker_lines = {indent + marker_write(p[phase+"_token"],p[phase+"_path"])
-                    for p in probes for phase in ("start","end")
-                    for indent in ("  ","    ","      ")}
+        stoken = (f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|"
+                  f"IDX={idx:03d}|LINE={first_line}|PHASE=START")
+        etoken = (f"APL_GERMAN_RESIDUAL_V1|SOURCE={SOURCE_COMMIT}|"
+                  f"IDX={idx:03d}|LINE={last_line}|PHASE=END")
+        indent_s = source[start][:len(source[start])-len(source[start].lstrip())]
+        indent_e = source[end-1][:len(source[end-1])-len(source[end-1].lstrip())]
+        before[start] = indent_s + marker_write(stoken, spath)
+        after[end-1] = indent_e + marker_write(etoken, epath)
+        probes.append(dict(index=idx, kind=kind,
+                           first_line=first_line, last_line=last_line,
+                           source_sha256=hashlib.sha256(
+                               "\n".join(source[start:end]).encode()).hexdigest(),
+                           start_path=spath, start_token=stoken,
+                           end_path=epath, end_token=etoken))
+    for i, line in enumerate(source[1:], 1):
+        if i in before:
+            out.append(before[i])
+        out.append(line)
+        if i in after:
+            out.append(after[i])
+    marker_lines = set(before.values()) | set(after.values())
     recovered = [source[0]] + [v for v in out[1:] if v not in marker_lines]
-    if recovered != source:
+    if recovered != source or len(marker_lines) != 2*len(probes):
         raise ValueError("ORIGINAL_STATEMENTS_CHANGED")
+    if not all(probes[i]["index"] == i+1 for i in range(len(probes))):
+        raise ValueError("PROBE_INDEX_NOT_MONOTONIC")
     return out, probes, locked["manifest"]["manifest_sha256"]
+
 
 def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     root = pathlib.Path(repo_root).resolve()
@@ -160,7 +177,9 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
-                   source_statements_preserved=True,production_source_modified=False,
+                   source_statements_preserved=True,instrumentation_mode="bounded_source_spans_8",
+                    outer_lx_chars=len(outer),candidate_bytes=len(candidate),
+                    max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
                    marker_token=FINAL,marker_path=marker,program_count=28,
