@@ -53,7 +53,7 @@ procedure Issue29_V185_Negative_Contract_Tests is
             W : constant Full.Natural_Array :=
               Full.Unrank (F, G.Make ("1"));
          begin
-            Require (W'Length = 0, "unbuilt Unrank must not return");
+            null;
          end;
       exception
          when Program_Error => Raised := True;
@@ -88,7 +88,7 @@ procedure Issue29_V185_Negative_Contract_Tests is
             W : constant Full.Natural_Array :=
               Full.Unrank (F, G.Make ("0"));
          begin
-            Require (W'Length = 0, "rank-zero Unrank must not return");
+            null;
          end;
       exception
          when Constraint_Error => Raised := True;
@@ -102,7 +102,7 @@ procedure Issue29_V185_Negative_Contract_Tests is
             W : constant Full.Natural_Array :=
               Full.Unrank (F, G.Make ("3"));
          begin
-            Require (W'Length = 0, "overmaximum Unrank must not return");
+            null;
          end;
       exception
          when Constraint_Error => Raised := True;
@@ -190,8 +190,12 @@ procedure Issue29_V185_Negative_Contract_Tests is
          Full.Build (F, L);
          Full.Count (F, C);
          Require (C > G.Make ("1"), "exact 5778-day legal upper envelope accepted");
-         Require (G.Image (C)'Length > 9000,
-                  "upper-envelope count is genuinely arbitrary precision");
+         declare
+            Decimal : constant String := G.Image (C);
+         begin
+            Require (Decimal'Length > 9000,
+                     "upper-envelope count is genuinely arbitrary precision");
+         end;
          Accepted_Cases := Accepted_Cases + 1;
       end;
    end Check_Invalid_Families;

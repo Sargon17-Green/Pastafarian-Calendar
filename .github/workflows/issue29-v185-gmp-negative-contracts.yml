@@ -1,4 +1,5 @@
 name: Issue29 v185 GMP fail-closed invalid-input boundaries; NO original Calendar F
+# PATCH02: expected exceptions cannot be satisfied by a local Require failure
 on:
   push:
     branches:
