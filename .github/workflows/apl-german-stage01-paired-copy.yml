@@ -28,15 +28,48 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           $ProgressPreference='SilentlyContinue'
-          New-Item -ItemType Directory -Force 'pinned_release/verified_release' | Out-Null
+          $sourceLock='7161824b9fcbfaca91f20d1ea492417e77003ff4'
+          $uri='https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
           $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
-          Invoke-WebRequest -Uri 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe' -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
-          if ((Get-Item -LiteralPath $installer).Length -ne 9430788 -or
-              (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -cne
-              '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b') {
-            throw 'PINNED_INSTALLER_LOCK_FAILED'
+          $expectedBytes=9430788
+          $expectedSHA='28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release','paired_copy_evidence' | Out-Null
+          $failures=@()
+          try {
+            $downloaded=$false
+            for($attempt=1;$attempt -le 4;$attempt++){
+              try {
+                Invoke-WebRequest -Uri $uri -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+              } catch {
+                $message=$_.Exception.Message
+                $failures+= [ordered]@{attempt=$attempt;class='DOWNLOAD_ERROR';message=$message}
+                Write-Warning ("OFFICIAL_NARS_DOWNLOAD_ATTEMPT_"+$attempt+"_FAILED: "+$message)
+                Remove-Item -LiteralPath $installer -Force -ErrorAction SilentlyContinue
+                if($attempt -lt 4){Start-Sleep -Seconds (3*$attempt)}
+                continue
+              }
+              $bytes=(Get-Item -LiteralPath $installer).Length
+              $sha=(Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+              if($bytes -ne $expectedBytes -or $sha -cne $expectedSHA){
+                throw ("PINNED_INSTALLER_LOCK_FAILED|bytes="+$bytes+"|sha256="+$sha)
+              }
+              $downloaded=$true
+              break
+            }
+            if(-not $downloaded){throw 'OFFICIAL_NARS_DOWNLOAD_EXHAUSTED_4_ATTEMPTS'}
+            Write-Output 'PINNED_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
+          } catch {
+            [ordered]@{
+              schema='APL_GERMAN_PAIRED_COPY_BOOTSTRAP_FAILURE_V1'
+              stage01='NOT_ACCEPTED'
+              native_executed=$false
+              source_commit=$sourceLock
+              status='PRE_NATIVE_BOOTSTRAP_FAILURE'
+              message=$_.Exception.Message
+              failures=$failures
+            } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath 'paired_copy_evidence/bootstrap_failure.json' -Encoding utf8
+            throw
           }
-          Write-Output 'PINNED_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
       - name: Provision verified runtime and ephemeral font
         shell: pwsh
         run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence paired_copy_font_evidence -Runtime verified_runtime
