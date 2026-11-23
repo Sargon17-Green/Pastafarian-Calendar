@@ -143,7 +143,13 @@ def verify_repo(repo:Path,sha:str):
                         and "CURRENT_KIND=DISCOVERY03" in s
                         and "CURRENT_PATCH=PATCH02" in s
                         and "EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE" in s)
-    require(stage04_accepted or stage05_started or stage05_accepted or stage06_started,
+    stage06_accepted = ("CURRENT_STAGE=6" in s
+                        and "LAST_COMPLETED_STAGE=6" in s
+                        and "CURRENT_KIND=DISCOVERY03" in s
+                        and "CURRENT_PATCH=PATCH02" in s
+                        and "EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_ACCEPTED_HOLD_NO_STAGE07" in s)
+    require(stage04_accepted or stage05_started or stage05_accepted
+            or stage06_started or stage06_accepted,
             "Stage04 provenance or enumerated successor state invalid")
     record=(repo/"audit/STAGE_04_RUST_FINAL_ACCEPTANCE_2026-11-22.md").read_text(encoding="utf-8")
     for pin in ("STAGE04_FINAL_DISPOSITION=ACCEPTED", "SOURCE_CI_SHA=fd0d125a2621c99fb9b356a845d40ebb91aa3e53",
