@@ -109,6 +109,8 @@ procedure Issue29_V185_Negative_Contract_Tests is
       end;
       Require (Raised, "Unrank rejects rank Count+1");
       Fail_Closed_Cases := Fail_Closed_Cases + 1;
+      Full.Count (F, C);
+      Require (C = N_Two, "invalid Unrank attempts preserve the built family state");
    end Check_Unbuilt_And_Rank;
 
    procedure Check_Invalid_Families is
