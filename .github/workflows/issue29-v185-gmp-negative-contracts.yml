@@ -1,5 +1,5 @@
 name: Issue29 v185 GMP fail-closed invalid-input boundaries; NO original Calendar F
-# PATCH04: visibility of Natural_Array equality per exact GNAT compiler diagnostics
+# PATCH05: bounded APT download and official archive mirror fallback; preserves QA source locks
 on:
   push:
     branches:
@@ -37,8 +37,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update -qq > evidence/apt-update.log 2>&1
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          timeout -k 5s 45s sudo apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 update -qq > evidence/apt-update.log 2>&1
+          if timeout -k 5s 130s sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 install -y --no-install-recommends gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1; then
+            echo V185_APT_PRIMARY_OK > evidence/apt-verdict.txt
+          else
+            echo V185_APT_PRIMARY_FAILED_FALLBACK_IN_PROGRESS > evidence/apt-verdict.txt
+            if test -f /etc/apt/apt-mirrors.txt; then
+              sudo sed -i 's#us-east-2.ec2.archive.ubuntu.com#archive.ubuntu.com#g' /etc/apt/apt-mirrors.txt
+            fi
+            if test -f /etc/apt/sources.list.d/ubuntu.sources; then
+              sudo sed -i 's#us-east-2.ec2.archive.ubuntu.com#archive.ubuntu.com#g' /etc/apt/sources.list.d/ubuntu.sources
+            fi
+            timeout -k 5s 45s sudo apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 update -qq > evidence/apt-update-fallback.log 2>&1
+            timeout -k 5s 210s sudo env DEBIAN_FRONTEND=noninteractive apt-get -o Acquire::Retries=0 -o Acquire::http::Timeout=20 install -y --no-install-recommends gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install-fallback.log 2>&1
+            echo V185_APT_OFFICIAL_MIRROR_FALLBACK_OK > evidence/apt-verdict.txt
+          fi
           gprbuild --version > evidence/gprbuild-version.txt
           dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
       - name: Build GMP Count/Rank/Unrank contract fixture without original F
