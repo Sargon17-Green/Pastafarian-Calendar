@@ -3025,3 +3025,9 @@ jobs:
     permissions:
       contents: read
     uses: ./.github/workflows/lua-haitian-real-polynomial-count.yml
+  lua_haitian_real96_prefix_differential:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/lua-haitian-real96-prefix-differential.yml
+
