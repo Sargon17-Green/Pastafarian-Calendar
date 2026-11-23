@@ -181,7 +181,7 @@ def main() -> None:
                 try:
                     if label == "RESTORED_A":
                         (wd / PLANNER).write_text(restored, encoding="utf-8")
-                        assert (wd / PLANNER).read_text(encoding="utf-8") == a
+                        assert (wd / PLANNER).read_text(encoding="utf-8") == restored
                     source_before_format = (wd / PLANNER).read_text(encoding="utf-8")
                     (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
                     (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
