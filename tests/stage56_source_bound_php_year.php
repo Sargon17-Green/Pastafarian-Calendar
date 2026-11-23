@@ -289,10 +289,10 @@ function s56Main(array $args): int {
     };
     $tCount=hrtime(true);
     $count=$measureRoundtrip('roundtrip_count',
-        static fn():BigInt=>$ranker->count($structure['monthLengths']));
+        static fn():\Pastafari\Stage01\BigInt=>$ranker->count($structure['monthLengths']));
     $tRank=hrtime(true);
     $rank=$measureRoundtrip('roundtrip_rank',
-        static fn():BigInt=>$ranker->rank($structure['monthLengths'],$structure['monthWeaving']));
+        static fn():\Pastafari\Stage01\BigInt=>$ranker->rank($structure['monthLengths'],$structure['monthWeaving']));
     $tUnrank=hrtime(true);
     $roundtrip=$measureRoundtrip('roundtrip_unrank',
         static fn():array=>$ranker->unrank($structure['monthLengths'],$rank));
