@@ -60,3 +60,13 @@ Pin the *original* FALSE interpreter to `eb3135565a8670cced3f6bbca4dbf7b014c4563
 ## NEXT
 
 Build and execute the standalone mathematical oracle for this contract, persist its exact source and result report, and only then implement independent production op38 and Native fixtures. Stage20 remains `ACCEPTED_BOUNDED`; Stage21 remains `DESIGN_ONLY_NOT_ACCEPTED`.
+
+## Mathematical oracle QA execution — 2026-11-23
+
+Two independently arranged evaluations were executed in a standalone JavaScript V8 environment: bowl-ID/factoradic/BigInt remainder vs. order-position/recursive enumeration/Mersenne folding. Exact executable source: `tools/stage21_bounded_independent_math_oracle.mjs`; result JSON: `evidence/stage21_bounded_math_qa_2026-11-23.json`.
+
+The 13 deterministic anchors and 384 seeded full 46-drop cases agreed: 397 inputs, 18,262 transitions, 109,572 bowl comparisons and positive-range checks, 109,572 canonical Base512 encode/decode roundtrips, 397 input-immutability and final-order checks, three full replays and all 720 factoradic/permutation cross-checks. First-drop hand witness confirmed `[19,22,25,19,20,21]`. Twelve malformed semantic inputs, eight malformed canonical BigInt representations, five actual numeric mutants, one corrupted numeric expected result and one corrupted output marker were rejected. The reproducibility checksum is a **noncryptographic** rolling digest modulo `2^64`, `0x56ee1bf9c94c2ead`; it is not SHA-256, FNV-1a, or artifact-integrity proof.
+
+QA source and result were read back from their Git blobs. This is **mathematical/design QA only**, not a Node.js or original-interpreter Native execution, CI result, new FALSE op38, differential runtime acceptance, or Stage21 acceptance. Stage20 is still the last `ACCEPTED_BOUNDED` stage. Physical invalid pointers/truncated allocations stay unassessed.
+
+**NEXT:** Independently implement append-only FALSE production op38 based on the bounded contract; add source-pinned positive/negative Native fixtures and CI; only then perform an independent ZIP/source/math audit and decide Stage21 acceptance. No main/merge.
