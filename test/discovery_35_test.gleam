@@ -112,10 +112,11 @@ fn overlap(expected: Counts) -> #(Int, Int) {
     False -> expected.right
   }
   case minimum == 0 {
-    True -> case expected.left == 0 && expected.right == 0 {
-      True -> #(1, 1)
-      False -> #(0, 1)
-    }
+    True ->
+      case expected.left == 0 && expected.right == 0 {
+        True -> #(1, 1)
+        False -> #(0, 1)
+      }
     False -> fraction(expected.intersection, minimum)
   }
 }
@@ -225,9 +226,10 @@ pub fn discovery_35_single_gap_one_side_and_both_absent_test() {
   a.overlap_denominator |> should.equal(1)
   b.overlap_numerator |> should.equal(0)
   b.overlap_denominator |> should.equal(1)
-  let neither = verify(context, [1], [band(gap + 1, gap + 1)], [
-    band(gap + 2, gap + 2),
-  ])
+  let neither =
+    verify(context, [1], [band(gap + 1, gap + 1)], [
+      band(gap + 2, gap + 2),
+    ])
   neither.overlap_numerator |> should.equal(1)
   neither.overlap_denominator |> should.equal(1)
 }
@@ -236,8 +238,7 @@ pub fn discovery_35_two_and_three_gap_independent_counts_test() {
   let context = bootstrap.new_context(11, 21)
   let two = verify(context, [1, 2], [band(42, 1200)], [band(500, 2000)])
   two.total_windows |> should.equal(3)
-  let three =
-    verify(context, [1, 2, 3], [band(42, 963)], [band(500, 3000)])
+  let three = verify(context, [1, 2, 3], [band(42, 963)], [band(500, 3000)])
   three.total_windows |> should.equal(6)
   { three.intersection_windows <= three.left_windows }
   |> should.equal(True)
@@ -247,20 +248,28 @@ pub fn discovery_35_three_distinct_reduced_fractions_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let assert [gap, _, _, _] = gaps(context, ids)
-  let half = verify(context, ids, [band(gap, 2 * gap)], [
-    band(2 * gap, 4 * gap),
-  ])
+  let half =
+    verify(context, ids, [band(gap, 2 * gap)], [
+      band(2 * gap, 4 * gap),
+    ])
   half.overlap_numerator |> should.equal(1)
   half.overlap_denominator |> should.equal(2)
-  let two_thirds = verify(context, ids, [band(2 * gap, 3 * gap)], [
-    band(3 * gap, 4 * gap),
-  ])
+  let two_thirds =
+    verify(context, ids, [band(2 * gap, 3 * gap)], [
+      band(3 * gap, 4 * gap),
+    ])
   two_thirds.overlap_numerator |> should.equal(2)
   two_thirds.overlap_denominator |> should.equal(3)
-  let three_quarters = verify(context, ids, [
-    band(2 * gap, 2 * gap),
-    band(4 * gap, 4 * gap),
-  ], [band(gap, 2 * gap)])
+  let three_quarters =
+    verify(
+      context,
+      ids,
+      [
+        band(2 * gap, 2 * gap),
+        band(4 * gap, 4 * gap),
+      ],
+      [band(gap, 2 * gap)],
+    )
   three_quarters.overlap_numerator |> should.equal(3)
   three_quarters.overlap_denominator |> should.equal(4)
 }
@@ -269,9 +278,10 @@ pub fn discovery_35_proper_subset_has_overlap_one_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let assert [gap, _, _, _] = gaps(context, ids)
-  let result = verify(context, ids, [band(gap, gap)], [
-    band(gap, 2 * gap),
-  ])
+  let result =
+    verify(context, ids, [band(gap, gap)], [
+      band(gap, 2 * gap),
+    ])
   result.left_windows |> should.equal(4)
   result.right_windows |> should.equal(7)
   result.overlap_numerator |> should.equal(1)
@@ -325,9 +335,10 @@ pub fn discovery_35_repeated_ids_preserve_index_multiplicity_test() {
   let context = bootstrap.new_context(11, 21)
   let ids = [1, 1, 1, 1]
   let assert [gap, _, _, _] = gaps(context, ids)
-  let result = verify(context, ids, [band(gap, gap)], [
-    band(2 * gap, 2 * gap),
-  ])
+  let result =
+    verify(context, ids, [band(gap, gap)], [
+      band(2 * gap, 2 * gap),
+    ])
   result.total_windows |> should.equal(10)
   result.left_windows |> should.equal(4)
   result.right_windows |> should.equal(3)
@@ -376,13 +387,18 @@ pub fn discovery_35_twelve_gaps_symmetry_identity_and_exact_order_test() {
   let reversed = verify(context, ids, outside, all)
   forward.overlap_numerator |> should.equal(reversed.overlap_numerator)
   forward.overlap_denominator |> should.equal(reversed.overlap_denominator)
-  let partial = verify(context, ids, [band(42, 963)], [
-    band(500, 3000),
-  ])
-  { partial.overlap_numerator * partial.dice_denominator
-    >= partial.dice_numerator * partial.overlap_denominator }
+  let partial =
+    verify(context, ids, [band(42, 963)], [
+      band(500, 3000),
+    ])
+  {
+    partial.overlap_numerator * partial.dice_denominator
+    >= partial.dice_numerator * partial.overlap_denominator
+  }
   |> should.equal(True)
-  { partial.dice_numerator * partial.jaccard_denominator
-    >= partial.jaccard_numerator * partial.dice_denominator }
+  {
+    partial.dice_numerator * partial.jaccard_denominator
+    >= partial.jaccard_numerator * partial.dice_denominator
+  }
   |> should.equal(True)
 }

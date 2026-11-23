@@ -107,10 +107,11 @@ pub fn dispatch_discovery_35(
         True -> Error(discovery_19_interval_value.InvalidStream)
         False -> {
           let #(o_p, o_q) = case minimum == 0 {
-            True -> case left == 0 && right == 0 {
-              True -> #(1, 1)
-              False -> #(0, 1)
-            }
+            True ->
+              case left == 0 && right == 0 {
+                True -> #(1, 1)
+                False -> #(0, 1)
+              }
             False -> {
               let divisor = greatest_common_divisor(intersection, minimum)
               #(intersection / divisor, minimum / divisor)
@@ -118,10 +119,11 @@ pub fn dispatch_discovery_35(
           }
 
           let invalid_overlap_value = case minimum == 0 {
-            True -> case left == 0 && right == 0 {
-              True -> o_p != 1 || o_q != 1
-              False -> o_p != 0 || o_q != 1
-            }
+            True ->
+              case left == 0 && right == 0 {
+                True -> o_p != 1 || o_q != 1
+                False -> o_p != 0 || o_q != 1
+              }
             False -> o_p * minimum != intersection * o_q
           }
           let invalid_overlap =
