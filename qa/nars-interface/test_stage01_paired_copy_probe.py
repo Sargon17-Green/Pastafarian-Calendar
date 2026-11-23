@@ -27,6 +27,7 @@ class PairedCopyTests(unittest.TestCase):
     def test_locked_95_fx_and_exact_two_copies(self):
         r=self.receipt
         self.assertEqual(r["source_commit"],SOURCE_COMMIT)
+        self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
         self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,27))
         self.assertEqual(len(r["chunk_records"]),23)
         self.assertEqual(len(r["import_program_sha256"]),23)
