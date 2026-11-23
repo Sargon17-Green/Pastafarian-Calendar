@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""QA31CF independent audit: one new original Native traces and strict causal witness."""
+"""QA31CF independent audit: one new original Native trace and strict causal witness."""
 import argparse
 import copy
 import gzip
