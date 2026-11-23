@@ -158,7 +158,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    probes=probes,compiled=dict(path=compile_path,token=compile_token,
                       name_code_path=compare_path,alias=ALIAS,
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
-                   suite=dict(**base["suite"],program_sha256=hashlib.sha256(suite_program.encode()).hexdigest()),
+                   suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=True,production_source_modified=False,
                    original_unmodified_suite_proven=False,
