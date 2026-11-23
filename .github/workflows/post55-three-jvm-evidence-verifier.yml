@@ -5,6 +5,7 @@ on:
     paths:
       - 'soak/verify_three_jvm_evidence_artifact.py'
       - 'soak/test_verify_three_jvm_evidence_artifact.py'
+      - 'soak/test_three_jvm_provenance_boundary.py'
       - '.github/workflows/post55-three-jvm-evidence-verifier.yml'
   workflow_dispatch:
 permissions:
@@ -53,17 +54,18 @@ jobs:
           printf '%s\n' "$ACCEPTED_SOURCE_SHA" > evidence/accepted-source-sha.txt
           printf '%s\n' "$ACCEPTED_ARTIFACT_SHA256" > evidence/accepted-artifact-sha256.txt
           echo 'THREE_JVM_PINNED_ARCHIVE_DIGEST_GREEN'
-      - name: Run ten verifier tests against synthetic mutations and authentic archive
+      - name: Run twelve verifier and provenance-boundary tests with authentic regression
         shell: bash
         run: |
           set -euo pipefail
           python3 -B -m py_compile \
             soak/verify_three_jvm_evidence_artifact.py \
-            soak/test_verify_three_jvm_evidence_artifact.py
+            soak/test_verify_three_jvm_evidence_artifact.py \
+            soak/test_three_jvm_provenance_boundary.py
           python3 -B -m unittest discover -s soak \
-            -p 'test_verify_three_jvm_evidence_artifact.py' -v \
+            -p 'test_*three_jvm*.py' -v \
             2>&1 | tee evidence/verifier-tests.log
-          grep -Eq '^Ran 10 tests in ' evidence/verifier-tests.log
+          grep -Eq '^Ran 12 tests in ' evidence/verifier-tests.log
           grep -Eq '^OK$' evidence/verifier-tests.log
           if grep -Eq '^OK \(skipped=' evidence/verifier-tests.log; then
             echo 'Authentic artifact regression was skipped' >&2
