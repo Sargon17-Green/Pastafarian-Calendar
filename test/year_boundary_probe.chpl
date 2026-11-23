@@ -198,7 +198,7 @@ proc researchSparseTransposeWindowed(const ref after: SparseWeavingVec,
   var coefficient = new bigint(0);
   if useRecurrence then
     coefficient = sparseWeavingChooseBig(k-2+n-highActive,n-highActive);
-  for i in hi..lo by -1 {
+  for i in lo..hi by -1 {
     const a = after.at(i+1);
     if a != 0 {
       if useRecurrence && i >= lowActive && i <= highActive {
