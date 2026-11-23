@@ -1,0 +1,88 @@
+name: Rust Azerbaijani Stage06 DISCOVERY03 Native
+
+on:
+  push:
+    branches:
+      - 'Rust\+Azərbaycan-dili'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'DEVELOPMENT_STAGE.md'
+      - 'audit/STAGE_06_DISCOVERY03_STONES_CONTRACT_2026-11-23.md'
+      - '.github/workflows/rust-az-stage06-discovery03.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-stage06-discovery03:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Verify scope and formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fxq 'CURRENT_STAGE=6' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_KIND=DISCOVERY03' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_PATCH=PATCH02' DEVELOPMENT_STAGE.md
+          grep -Fxq 'LAST_COMPLETED_STAGE=5' DEVELOPMENT_STAGE.md
+          grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          grep -Fq 'pub mod discovery03_stone_probe;' src/lib.rs
+          test -f audit/STAGE_06_DISCOVERY03_STONES_CONTRACT_2026-11-23.md
+          cargo fmt --all -- --check
+      - name: Native Stage01 to Stage06 and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s \
+            cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          if [ "$code" -ne 0 ]; then
+            cat evidence/stderr.txt >&2
+            exit "$code"
+          fi
+          for marker in \
+            'STAGE06_DISCOVERY03_ROWS=46 CELLS=230' \
+            'STAGE06_DISCOVERY03_BOUNDS=230 DETERMINISM=PASS' \
+            'STAGE06_DISCOVERY03_BOOTSTRAP_ONLY=PASS' \
+            'STAGE05_PATCH02_LOCAL_PAIRS=49' \
+            'STAGE05_PATCH02_LARGE_PAIRS=8' \
+            'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' \
+            'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' \
+            'STAGE03_PATCH01_BOUNDARY_OK=8'; do
+            grep -Fq "$marker" evidence/stdout.txt
+          done
+          if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
+            exit 1
+          fi
+          printf 'STAGE06_DISCOVERY03_NATIVE=PASS\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-stage06-discovery03-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
