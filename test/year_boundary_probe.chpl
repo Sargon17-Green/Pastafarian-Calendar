@@ -267,6 +267,37 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
   writeln("YEAR_BOUNDARY_PREFIX_MAX_STEPS=32");
   writeln("YEAR_BOUNDARY_PREFIX_SOFT_BUDGET_SECONDS=30");
   writeln("YEAR_BOUNDARY_PREFIX_RESULT=RESEARCH_ONLY");
+  // Research-only isolated transfer spectrum at the frozen bounded prefix
+  // checkpoint. Replaying transitions does not update any production state,
+  // and is timed only AFTER prefixTimer stops, preserving its baseline.
+  // Exact vectors are compared outside timing; this is not an independent
+  // algorithm oracle or Stage 6 acceptance evidence.
+  var replaySeconds = 0.0;
+  var replayCount = 0;
+  writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_PREFIX_STEPS=", completed);
+  for j in 2..m {
+    var replayTimer: stopwatch;
+    replayTimer.start();
+    const replayState = sparseWeavingTransfer(states[j-1], sizes[j-1],
+                                               lens[j], specs[j]);
+    replayTimer.stop();
+    const elapsed = replayTimer.elapsed();
+    if replayState.first != states[j].first ||
+       replayState.values.size != states[j].values.size then
+      halt("Year boundary transfer replay shape mismatch at month ", j);
+    for t in 0..<replayState.values.size {
+      if replayState.values[t] != states[j].values[t] then
+        halt("Year boundary transfer replay value mismatch at month ", j,
+             " index ", t);
+    }
+    replaySeconds += elapsed;
+    replayCount += 1;
+    writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_MONTH_", j, "_SECONDS=", elapsed);
+    writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_MONTH_", j, "_SUPPORT=", replayState.values.size);
+  }
+  writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_CALLS=", replayCount);
+  writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_TOTAL_SECONDS=", replaySeconds);
+  writeln("YEAR_BOUNDARY_TRANSFER_REPLAY_RESULT=EXACT_STATE_MATCH_RESEARCH_ONLY");
   try! stdout.flush();
 }
 
