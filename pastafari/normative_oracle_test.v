@@ -2105,3 +2105,55 @@ fn test_stage37_catalan_first_prefix_fork_at_17_and_47_months() {
 	stage37_check_first_prefix_fork(47)
 	println('V_AMHARIC_STAGE37_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
 }
+
+// Stage38: the second Dyck-prefix fork, within the [1,2] block.
+// All [1,1] words precede [1,2]. Within [1,2], the [1,2,1] block
+// has B(n;2,1) completions, a reflection-principle binomial difference.
+// Its last rank and the next rank must straddle [1,2,1] / [1,2,3].
+fn stage38_check_second_prefix_fork(month_count int) {
+	assert month_count >= 3
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	previous := month_count - 1
+	previous_choose := oracle_weave_choose_exact(2 * previous, previous)
+	catalan_previous := oracle_weave_div_small(previous_choose, month_count)
+	suffix_slots := 2 * month_count - 3
+	choose_left := oracle_weave_choose_exact(suffix_slots, month_count - 2)
+	choose_right := oracle_weave_choose_exact(suffix_slots, month_count - 3)
+	ballot_block := big_sub(choose_left, choose_right)
+	assert big_eq(ballot_block, stage35_ballot_suffix_count(month_count, 2, 1))
+	total_choose := oracle_weave_choose_exact(2 * month_count, month_count)
+	total := oracle_weave_div_small(total_choose, month_count + 1)
+	assert big_eq(candidate.count_all(), total)
+	left_rank := big_add(catalan_previous, ballot_block)
+	right_rank := big_add(left_rank, big_one())
+	assert big_cmp(left_rank, big_one()) >= 0
+	assert big_cmp(right_rank, total) <= 0
+
+	mut expected_left := [1, 2, 1]
+	for label in 3 .. month_count + 1 {
+		expected_left << label
+	}
+	for label in 2 .. month_count + 1 {
+		expected_left << label
+	}
+	mut expected_right := [1, 2, 3, 1, 2, 3]
+	for label in 4 .. month_count + 1 {
+		expected_right << label
+		expected_right << label
+	}
+	left := candidate.unrank1(left_rank)
+	right := candidate.unrank1(right_rank)
+	assert left == expected_left
+	assert right == expected_right
+	assert left[0] == 1 && left[1] == 2 && left[2] == 1
+	assert right[0] == 1 && right[1] == 2 && right[2] == 3
+	assert big_eq(stage35_independent_lexical_rank(month_count, left), left_rank)
+	assert big_eq(stage35_independent_lexical_rank(month_count, right), right_rank)
+}
+
+fn test_stage38_catalan_second_prefix_fork_at_17_and_47_months() {
+	stage38_check_second_prefix_fork(17)
+	stage38_check_second_prefix_fork(47)
+	println('V_AMHARIC_STAGE38_SECOND_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
+}
