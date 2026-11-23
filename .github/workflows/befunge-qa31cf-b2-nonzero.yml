@@ -1,4 +1,4 @@
-name: Befunge QA31CF new natural-input owner witness (two cases)
+name: Befunge QA31CF single b=2 nonzero discriminator (one case)
 on:
   push:
     branches:
@@ -28,7 +28,7 @@ jobs:
           python3 - <<'PY'
           import sys
           sys.path.insert(0, 'qa')
-          import qa31cf_independent_audit as auditor
+          import qa31cf_independent_native_audit as auditor
           auditor.archive_self_test()
           PY
           python3 - <<'PY'
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa             -v "$GITHUB_WORKSPACE:/work:ro"             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro"             -v "$RUNNER_TEMP/qa31cf-traces:/qa31cf-traces:rw"             -v "$GITHUB_WORKSPACE/qa31cf-out:/qa31cf-out:rw" -w /work             python:2.7-slim sh -ceu "
-              cp /work/qa/qa31cf_nonzero_discriminator_native.py /tmp/qa31cf_natural_input_sweep.py
+              cp /work/qa/qa31cf_nonzero_discriminator_native.py /tmp/qa31cf_nonzero_discriminator_native.py
               python -m py_compile /tmp/qa31cf_natural_input_sweep.py
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=10s 3000s python -u /work/qa/qa31cf_nonzero_discriminator_native.py /qa31cf-traces /qa31cf-out
