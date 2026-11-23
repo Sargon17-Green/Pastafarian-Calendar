@@ -36,8 +36,8 @@ def source_copies(root):
         index = line - b["start_line"]
         if index < 1 or index >= len(original_definition):
             raise ValueError("SOURCE_COPY_LINE_OUTSIDE_FUNCTION:" + name)
-        expected_line = "  " + original
-        replacement_line = "  " + replacement
+        expected_line = "   " + original
+        replacement_line = "   " + replacement
         if original_definition[index] != expected_line:
             raise ValueError("SOURCE_COPY_ANCHOR_CHANGED:" + name)
         if sum(original in s for s in original_definition) != 1:
