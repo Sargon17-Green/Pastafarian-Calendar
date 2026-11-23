@@ -1,0 +1,78 @@
+name: MATLAB Stage55 Full-Year Edge Projection Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_full_year_projection_oracle.py'
+      - 'tools/run_stage55_year5000_full_edge_projection_native.m'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - '.github/workflows/matlab-stage55-full-edge-projection-differential.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: stage55-full-edge-projection-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  full-year-edge-projection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+      - name: Pin source and independent fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          mkdir -p logs/stage55_python_1 logs/stage55_python_2
+      - name: Independent complete-year projection and repeatability
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/stage55_full_year_projection_oracle.py
+          python3 tools/stage55_full_year_projection_oracle.py tests/fixtures/stage55_year5000_appendix_a_metadata.json logs/stage55_python_1 | tee logs/STAGE55_FULL_EDGE_PYTHON.log
+          python3 tools/stage55_full_year_projection_oracle.py tests/fixtures/stage55_year5000_appendix_a_metadata.json logs/stage55_python_2
+          for word in FIRST LAST; do
+            cmp logs/stage55_python_1/STAGE55_YEAR5000_${word}.csv logs/stage55_python_2/STAGE55_YEAR5000_${word}.csv
+            test "$(wc -l < logs/stage55_python_1/STAGE55_YEAR5000_${word}.csv)" -eq 4245
+          done
+          cmp logs/stage55_python_1/STAGE55_YEAR5000_PROJECTION_MANIFEST.json logs/stage55_python_2/STAGE55_YEAR5000_PROJECTION_MANIFEST.json
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native PATCH25 full-year projection twice
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_full_edge_projection_native
+      - name: Strict 4244-row byte-wise cross-engine differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          for word in FIRST LAST; do
+            for trial in 1 2; do
+              cmp logs/stage55_python_1/STAGE55_YEAR5000_${word}.csv logs/STAGE55_YEAR5000_${word}_RUN${trial}.csv
+            done
+          done
+          grep -Fqx 'STAGE55_FULL_EDGE_NATIVE_PROJECTION_PASS CASES=2 RUNS=2 ROWS=4244 NEGATIVE=4' logs/STAGE55_FULL_EDGE_PROJECTION_NATIVE.log
+          sha256sum logs/stage55_python_1/*.csv logs/STAGE55_YEAR5000_*_RUN*.csv | tee logs/STAGE55_FULL_EDGE_SHA256.txt
+          echo 'STAGE55_FULL_EDGE_DIFFERENTIAL_PASS WORDS=2 DAYS=4244 RUNS=2 FIELDS=5 BYTEWISE=YES'
+          echo 'STAGE55_CANONICAL_MIDDLE_RANK_NOT_VERIFIED'
+          echo 'STAGE55_FINAL_STAGE_PASS_NOT_VERIFIED'
+      - name: Preserve evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-full-year-edge-projection-evidence
+          path: |
+            logs/STAGE55_FULL_EDGE_PROJECTION_NATIVE.log
+            logs/STAGE55_FULL_EDGE_PYTHON.log
+            logs/STAGE55_FULL_EDGE_SHA256.txt
+            logs/stage55_python_1/
+            logs/stage55_python_2/
+            logs/STAGE55_YEAR5000_*_RUN*.csv
+          if-no-files-found: warn
+          retention-days: 30
