@@ -177,16 +177,18 @@ def source_mutation_tests(data):
     # also reject changes when exercised without the blob gate.
     source = data.decode('utf-8', 'strict')
     mutants = [
-        ("(+' 1N (*' (- (count restvector) geopend)", "(+' 2N (*' (- (count restvector) geopend)"),
-        ('(pos? aantal)', '(>= aantal 0)'),
-        ('(or (> aantal 1) (= maand (inc gesloten)))', '(or (>= aantal 1) (= maand (inc gesloten)))'),
-        ('(when (> nieuw begroting)', '(when (>= nieuw begroting)'),
-        ('(when (> nieuw-kosten begroting)', '(when (>= nieuw-kosten begroting)'),
+        ('prefix-gedeelde-raming', "(+' 1N (*' (- (count restvector) geopend)", "(+' 2N (*' (- (count restvector) geopend)"),
+        ('prefix-legale-kandidaten', '(pos? aantal)', '(>= aantal 0)'),
+        ('prefix-legale-kandidaten', '(or (> aantal 1) (= maand (inc gesloten)))', '(or (>= aantal 1) (= maand (inc gesloten)))'),
+        ('prefix-volgende-keuze', '(when (> nieuw begroting)', '(when (>= nieuw begroting)'),
+        ('prefix-volgende-keuze', '(when (> nieuw-kosten begroting)', '(when (>= nieuw-kosten begroting)'),
     ]
-    for before, after in mutants:
-        if before not in source:
-            raise AssertionError(f'mutation anchor not found: {before}')
-        changed = source.replace(before, after, 1).encode()
+    for name, before, after in mutants:
+        original_form = definition(source, name)
+        if before not in original_form:
+            raise AssertionError(f'mutation anchor not found in {name}: {before}')
+        changed_form = original_form.replace(before, after, 1)
+        changed = source.replace(original_form, changed_form, 1).encode()
         for pin in (True, False):
             try:
                 source_guard(changed, require_blob=pin)
