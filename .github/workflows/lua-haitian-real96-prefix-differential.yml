@@ -1,0 +1,97 @@
+name: Lua Haitian real96 independent prefix differential
+
+'on':
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lua53_real96_prefix_differential:
+    if: github.ref == 'refs/heads/Lua+Kreyòl-ayisyen'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install stock Lua 5.3 and evidence tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.3 zip unzip time
+          lua5.3 -v
+      - name: Source-locked bounded Lua 5.3 differential
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          umask 077
+          E=lua-haitian-real96-evidence
+          SRC=test/lua_haitian_real96_prefix_differential_qa.lua
+          VERIFY=test/lua_haitian_real96_differential_verify.py
+          FIXTURE=test/fixtures/lua_haitian_real96_frozen_oracle.json
+          COUNT_SRC=test/lua_haitian_real_polynomial_count_qa.lua
+          mkdir -p "$E"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object "$SRC")" = 3de016cedd67bfacd5c1bcb1678f2c694e575e2a
+          test "$(git hash-object "$VERIFY")" = 54efb6ee61f1fe0b2987b8255fad17134db98aba
+          test "$(git hash-object "$FIXTURE")" = 96cdc8a766220b05bea2f34b5977aedd821b1985
+          test "$(git hash-object "$COUNT_SRC")" = df7a6d31714d111a93aced5ccb74a55c09fd78b1
+          git hash-object "$SRC" "$VERIFY" "$FIXTURE" "$COUNT_SRC" > "$E/source_blobs.txt"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nBRANCH=Lua+Kreyòl-ayisyen\nSHA=%s\nSCOPE=QA_ONLY_REAL96\nFROZEN_ORACLE_SHA=7bac3d896c332976cde5e97f6527b84084ce95b2\n' "$GITHUB_SHA" > "$E/manifest.txt"
+          luac5.3 -p "$SRC"
+          python3 -m py_compile "$VERIFY"
+          set +e
+          (
+            ulimit -v 786432
+            ulimit -t 570
+            timeout --signal=TERM --kill-after=5s 600s \
+              /usr/bin/time -f 'wall_s=%e\nuser_s=%U\nsys_s=%S\npeak_rss_kib=%M' -o "$E/resource.txt" \
+              lua5.3 "$SRC" real "$E/real96.tsv" > "$E/stdout.txt" 2> "$E/stderr.txt"
+          )
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > "$E/exit_code.txt"
+          test "$rc" -eq 0
+          test ! -s "$E/stderr.txt"
+          python3 "$VERIFY" "$FIXTURE" "$E/real96.tsv" "$SRC" > "$E/verify.txt"
+          python3 - "$E" <<'PY'
+          import pathlib, sys
+          e=pathlib.Path(sys.argv[1])
+          lines=(e/'stdout.txt').read_text(encoding='utf-8').splitlines()
+          assert len(lines)==6, lines
+          assert lines[0]=='SMALL_EXHAUSTIVE=PASS domains=6 ranks=41 invalid_vectors=4 rank_rejects=18'
+          for line,tag in zip(lines[1:4],('FIRST','MIDDLE','LAST')):
+              assert line.startswith('REAL96='+tag+' labels=96 '),line
+          assert lines[4].startswith('REAL96_LUA53=COMPUTED witnesses=3 cpu_seconds='),lines[4]
+          assert lines[5]=='QA_ONLY=PASS FULL_DATE_NOT_RUN=1 NORMATIVE_WEAVING_NOT_RUN=1'
+          v=(e/'verify.txt').read_text()
+          assert 'FROZEN_REAL96_LUA53_DIFFERENTIAL=PASS 3/3' in v
+          assert 'MUTATION_REJECTS=PASS 4/4' in v
+          metrics=dict(line.split('=',1) for line in (e/'resource.txt').read_text().splitlines())
+          assert float(metrics['wall_s'])<=600
+          assert float(metrics['user_s'])+float(metrics['sys_s'])<=570
+          assert float(metrics['peak_rss_kib'])<=786432
+          print('REAL96_RESOURCE_AND_CONTRACT=PASS')
+          PY
+      - name: Package raw evidence with internal hashes
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          E=lua-haitian-real96-evidence
+          mkdir -p "$E"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\n' "$GITHUB_SHA" > "$E/identity.txt"
+          ( cd "$E" && sha256sum ./*.txt ./*.tsv 2>/dev/null > SHA256SUMS.txt ) || true
+          zip -X -q -r lua-haitian-real96-evidence.zip "$E"
+          sha256sum lua-haitian-real96-evidence.zip > lua-haitian-real96-evidence.zip.sha256
+          unzip -t -qq lua-haitian-real96-evidence.zip
+      - name: Upload evidence even if a gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-real96-prefix-differential
+          path: |
+            lua-haitian-real96-evidence.zip
+            lua-haitian-real96-evidence.zip.sha256
+          retention-days: 30
+          if-no-files-found: error
