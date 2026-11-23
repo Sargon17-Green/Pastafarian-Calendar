@@ -25,6 +25,11 @@ mkdir -p evidence build
     fpc -B -Fu../src -FE../build stage02_context_integration.pas
   )
   ./build/stage02_context_integration build/stage02_workcounts_vectors.tsv
+  (
+    cd test
+    fpc -B -Fu../src -FE../build stage02_lifecycle_boundaries.pas
+  )
+  ./build/stage02_lifecycle_boundaries build/stage02_workcounts_vectors.tsv
 ) 2>&1 | tee evidence/stage02-native-fpc.log
 status=$?
 echo "STAGE02_EXIT=$status" | tee -a evidence/stage02-native-fpc.log

@@ -9,6 +9,7 @@ on:
       - 'src/PastafariCalendar.pas'
       - 'test/stage02_workcounts_regression.pas'
       - 'test/stage02_context_integration.pas'
+      - 'test/stage02_lifecycle_boundaries.pas'
       - 'test/build_and_run_stage02_workcounts.sh'
       - 'docs/stage02_workcounts_oracle.py'
   workflow_dispatch:
