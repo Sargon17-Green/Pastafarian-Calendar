@@ -1,0 +1,58 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 20,
+  "date": "2026-11-23",
+  "kind": "first_native_failure_diagnostic_and_scoped_repair",
+  "previous_run": 45083507301,
+  "previous_job": 137396787269,
+  "previous_run_sha": "a91b8013b2e7b871b296b4e26e04ef37a2fb4dae",
+  "run_status": "completed",
+  "run_conclusion": "failure",
+  "native_job_conclusion": "failure",
+  "verify_job_conclusion": "success",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "artifact_id": 14778507005,
+  "artifact_zip_sha256": "eee66f2ada47408cec372392a2bcf07b5977890bb4a230e425e4ab0d7a0974e6",
+  "artifact_zip_entry_count": 43,
+  "artifact_crc": "PASS_all_43_entries",
+  "compilation": "PASS",
+  "unicode_preflight": "PASS",
+  "positive": {
+    "exit": 1,
+    "stderr": "positive.false:822:12: error: stack type mismatch at p;i;1-+e;!",
+    "passed_markers": 0,
+    "accepted": false
+  },
+  "invalid_controls": {
+    "header4": "exit1+expected_label",
+    "header6": "exit1+expected_label",
+    "direction0": "exit1+expected_label",
+    "direction4": "exit1+expected_label"
+  },
+  "mutation_controls": {
+    "wrong_numeric": "exit1_parser_error_not_mutation_detection",
+    "wrong_sign": "exit1_parser_error_not_mutation_detection"
+  },
+  "diagnosis": "FALSE ! executes a function value; e is a numeric BigInt handle. The attempted indexed heap assignment is not supported by append-only heap primitives.",
+  "repair": "Eliminate buffer p and its indexed write. Retain six result handles in frame-local variables f,j,l,o,q,s by loop index, append all six to newly allocated direct order table after computation.",
+  "static_scope": {
+    "prefix_ops_0_36_unchanged": true,
+    "source_file": "src/monster_bootstrap.false",
+    "old_git_blob_sha": "c085ff9b326b5e77ec3f3e8439fc7e0cd83e8745",
+    "changed_op": "37",
+    "matched_edit_regions": 3,
+    "square_bracket_count_delta": 2,
+    "six_result_locals": true
+  },
+  "gates": {
+    "source_change": "COMMITTED_PENDING",
+    "static": "PASS_targeted_guards",
+    "native": "NOT_RUN_FOR_REPAIR",
+    "differential": "NOT_RUN",
+    "offline_acceptance": "NOT_RUN",
+    "stage20": "NOT_ACCEPTED",
+    "last_accepted_stage": "19_ACCEPTED_BOUNDED",
+    "physical_pointer_safety": "NOT_ASSESSED"
+  },
+  "next": "Check one marked push run at its exact SHA; require 15 valid Native cases, 90 outputs, four invalid controls, both genuine mutation rejections, exact artifact SHA/CRC and independent offline ZIP audit before considering bounded acceptance."
+}

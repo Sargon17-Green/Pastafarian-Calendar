@@ -436,7 +436,7 @@ z;37=~["E_INITIAL_BOWLS_LAYOUT"0 0/]?
  z;b:u;a;!w;a;!b;9h;!!d:
  z;b:d;a;!t;a;!b;9h;!!d:
  z;b:d;a;!n;a;!b;22h;!!d:
- z;p:0i:[i;6<][0a;!i;1+i:]#
+ { Six output handles stay in call-frame locals; the heap is append-only. }
  1i:
  [i;7<][
   0m:
@@ -446,9 +446,10 @@ z;37=~["E_INITIAL_BOWLS_LAYOUT"0 0/]?
   z;b:d;a;!e;a;!b;9h;!!e:
   z;b:e;a;!m;i;+a;!b;22h;!!e:
   z;b:e;a;!b;25h;!!e:
-  p;i;1-+e;!
+  i;1=[e;f:]?i;2=[e;j:]?i;3=[e;l:]?
+  i;4=[e;o:]?i;5=[e;q:]?i;6=[e;s:]?
   i;1+i:
  ]#
- z;r:6a;!0i:[i;6<][p;i;+g;!a;!i;1+i:]#
+ z;r:6a;!f;a;!j;a;!l;a;!o;a;!q;a;!s;a;!
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
