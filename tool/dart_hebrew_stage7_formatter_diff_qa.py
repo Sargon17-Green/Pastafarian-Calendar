@@ -46,11 +46,11 @@ def normalized_known_dart_call(data: bytes) -> tuple[str, int]:
     """
     source = data.decode("utf-8")
     call = re.compile(
-        r"(final\\s+work\\s*=\\s*const\\s+MonsterWorkCounter\\s*\\(\\s*\\)"
-        r"\\s*\\.\\s*calculate\\s*\\(\\s*calculationDay\\s*,\\s*firstDay)"
-        r"\\s*,(\\s*\\)\\s*;)"
+        r"(final\s+work\s*=\s*const\s+MonsterWorkCounter\s*\(\s*\)"
+        r"\s*\.\s*calculate\s*\(\s*calculationDay\s*,\s*firstDay)"
+        r"\s*,(\s*\)\s*;)"
     )
-    projected, removed = call.subn(r"\\1\\2", source)
+    projected, removed = call.subn(r"\1\2", source)
     assert removed <= 1, "Ambiguous trailing-comma allowlist match"
     return "".join(ch for ch in projected if not ch.isspace()), removed
 
