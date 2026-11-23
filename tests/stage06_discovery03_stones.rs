@@ -6,9 +6,7 @@ use num_bigint::BigInt;
 use num_traits::One;
 use pastafarian_calendar_rust_az::discovery03_stone_probe::candidate_stones;
 use pastafarian_calendar_rust_az::patch01_save::normative_save;
-use pastafarian_calendar_rust_az::{
-    calendar_date_spaghetti, MonsterErrorCode,
-};
+use pastafarian_calendar_rust_az::{calendar_date_spaghetti, MonsterErrorCode};
 use support::normative_oracle as oracle;
 
 #[test]
