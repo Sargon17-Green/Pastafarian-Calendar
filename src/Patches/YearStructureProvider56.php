@@ -16,8 +16,14 @@ final class YearStructureProvider56
     private ContextualYear5000Anchor56 $binder;
     private const FIELDS=['number','openGateIndex','closeGateIndex','openGateDay','closeGateDay'];
 
-    public function __construct(private readonly BootstrapKernel $kernel)
-    {
+    public function __construct(
+        private readonly BootstrapKernel $kernel,
+        private readonly ?string $sourceCommit = null
+    ) {
+        // Explicit opt-in only. Reject unpinned source identity at construction.
+        if ($sourceCommit !== null) {
+            CanonicalJdnBoundary56::toPhpJdn(0, $sourceCommit);
+        }
         $this->slices=new YearStructureSlices56();
         $this->ranker=new MonthWeavingRanker56();
         $this->chooser=new UnboundedUniformChoice56();
@@ -34,6 +40,10 @@ final class YearStructureProvider56
         array $year,callable $trustedYear,callable $gateDay,?callable $profile=null):array
     {
         $anchor=$this->binder->bind($c,$anchorCandidate,$trustedAnchor);
+        if ($this->sourceCommit !== null &&
+            $anchorCandidate['source_commit'] !== $this->sourceCommit) {
+            throw new RuntimeException('STAGE56_PROVIDER_SOURCE_CONTEXT');
+        }
         $this->validateYear($year);
         $trusted=$trustedYear($c,$year['number']);
         if (!is_array($trusted) || ($trusted['calculation_jdn']??null)!==$c ||
@@ -124,15 +134,27 @@ final class YearStructureProvider56
         ?callable $profile=null,string $stage='choice'):BigInt
     {
         if ($count->sign()<1) throw new LogicException('STAGE56_EMPTY_FAMILY');
+        // Year/gate arithmetic remains in canonical source coordinates.
+        // Only the legacy PHP bowl kernel receives translated JDNs.
+        if ($this->sourceCommit !== null) {
+            $pair = CanonicalJdnBoundary56::translatedPair($c, $t, $this->sourceCommit);
+            $kernelC = $pair['calculation'];
+            $kernelT = $pair['target'];
+        } else {
+            $kernelC = $c;
+            $kernelT = $t;
+        }
         if ($profile===null) {
-            return $this->chooser->chooseFromKernel($this->kernel,$c,$t,$bowl,$seal,$count);
+            return $this->chooser->chooseFromKernel(
+                $this->kernel,$kernelC,$kernelT,$bowl,$seal,$count
+            );
         }
         $metadata=['bowl'=>$bowl,'seal'=>$seal,'count'=>$count->toString()];
         $started=hrtime(true);
         $profile('start',$stage,$metadata);
         try {
             $trace=$this->chooser->chooseFromKernelWithTrace(
-                $this->kernel,$c,$t,$bowl,$seal,$count
+                $this->kernel,$kernelC,$kernelT,$bowl,$seal,$count
             );
             $rank=$trace['choice'];
             $stream=$trace['stream'];

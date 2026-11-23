@@ -10,7 +10,7 @@ require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/stage56_cutlet_semantic_oracle.php';
 foreach (['YearStructureSlices56', 'MonthWeavingFrontier56', 'MonthWeavingAdjoint56',
     'MonthWeavingRanker56', 'UnboundedUniformChoice56', 'ContextualYear5000Anchor56',
-    'YearStructureProvider56'] as $class) {
+    'YearStructureProvider56', 'CanonicalJdnBoundary56'] as $class) {
     require_once dirname(__DIR__) . '/src/Patches/' . $class . '.php';
 }
 
@@ -170,7 +170,7 @@ function s56Main(array $args): int {
     $start=hrtime(true);
     echo "STAGE56_PHP_REAL_YEAR_BEGIN year={$args[5]} source_commit=" . S56_SOURCE . "\n";
     flush();
-    $provider = new YearStructureProvider56(new BootstrapKernel());
+    $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE);
     $profilePath = $args[6] . '.profile.jsonl';
     @unlink($profilePath);
     $profile = static function(string $type,string $stage,array $metadata) use ($profilePath,$args):void {
