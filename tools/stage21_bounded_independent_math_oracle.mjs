@@ -245,7 +245,7 @@ const report = (function stage21Oracle() {
     invalid_base512_metadata_rejections:malformed.map(x=>x[0]),numeric_mutant_witnesses:mutantWitnesses,
     deliberately_corrupt_numeric_result_rejected:true,
     deliberately_corrupt_output_marker_rejected:true,
-    all_outputs_digest_fnv1a64_derived:"0x"+state.digest.toString(16).padStart(16,"0"),
+    rolling_digest_mod2_64:"0x"+state.digest.toString(16).padStart(16,"0"),
     witness_drop1:anchors[0].trace[0],
     anchors,native_run:false,ci_run:false,production_op38_implemented:false,stage21_accepted:false,
     physical_pointer_safety_assessed:false
