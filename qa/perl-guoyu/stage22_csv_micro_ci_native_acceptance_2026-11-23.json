@@ -1,0 +1,59 @@
+{
+  "project_id": "PC-BRANCH-PERL-GUOYU",
+  "date": "2026-11-23",
+  "source_commit_lock": "bb49201411b6397819c97e5fc2b40238251e48ce",
+  "workflow_commit": "1fce45680162643744f99d4b09dee3b1a72119b8",
+  "workflow_run": {
+    "id": 45133678832,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "event": "push",
+    "jobs_total": 171,
+    "jobs_success": 1,
+    "jobs_skipped": 170,
+    "job_id": 137554747831,
+    "job_status": "completed",
+    "job_conclusion": "success",
+    "raw_job_log_checked": true
+  },
+  "artifact": {
+    "id": 14798647702,
+    "name": "perl-stage22-csv-qa-source-locked",
+    "bytes": 4434,
+    "entries": 20,
+    "crc_pass_count": 20,
+    "sha256": "6125942033486ade3bfec40bdf7c613d395705103f9e3351c14d5c0be78c9471",
+    "provider_digest_matched": true,
+    "manifest_items": 8,
+    "manifest_sha256_matches": 8
+  },
+  "qa": {
+    "perl_version": "v5.40.5",
+    "syntax_pass": 3,
+    "syntax_total": 3,
+    "negative_tap_pass": 66,
+    "negative_tap_total": 66,
+    "positive_tap_pass": 45,
+    "positive_tap_total": 45,
+    "negative_exit": 0,
+    "positive_exit": 0,
+    "negative_stderr_bytes": 0,
+    "positive_stderr_bytes": 0,
+    "negative_tap_sha256": "c72e9d76f83696f279d9c0232e86816b36bb0bba4718f3f516235a2881f12e98",
+    "positive_tap_sha256": "a9f8b6e44d4e6b1274ca762c408d761425d1f479991192b68767197c0656bfe8"
+  },
+  "source_blobs": {
+    "qa/perl-guoyu/stage22_max_arena_forward_oracle.pl": "b6f6e055c41e31be369b11fbacc33f6d0279856e",
+    "qa/perl-guoyu/stage22_oracle_csv_negative_input.t": "b41ae40b2b04a07a6b3eb385b2f246097bb5f036",
+    "qa/perl-guoyu/stage22_perl_only_small_contract.pl": "85d055ae9dfec705105109195b8ed259c552d39c"
+  },
+  "claims": {
+    "focused_github_hosted_native_qa": "ACCEPTED",
+    "full_year": "NOT_ASSESSED",
+    "stage23": "NOT_AUTHORIZED",
+    "producer_modified": false,
+    "heavy_rerun": false,
+    "merge_main": false
+  }
+}
