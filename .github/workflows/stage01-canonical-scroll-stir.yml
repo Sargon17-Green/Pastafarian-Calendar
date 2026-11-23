@@ -76,7 +76,7 @@ jobs:
             python3 -u test/stage01_scroll_gate_independent.py \
               --self-test --foundation --output build/stage01-scroll-gate-foundation.json \
               | tee build/stage01-scroll-gate-foundation.log
-          grep -Fq 'STAGE01_SCROLL_GATE_SELFTEST=15/15' build/stage01-scroll-gate-foundation.log
+          grep -Fq 'STAGE01_SCROLL_GATE_SELFTEST=20/20' build/stage01-scroll-gate-foundation.log
           grep -Fxq 'STAGE01_SCROLL_FOUNDATION_YEAR5000_DIAGNOSTIC=PASS' build/stage01-scroll-gate-foundation.log
           grep -Fxq 'STAGE01_SCROLL_GATE_COMPONENT_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-gate-foundation.log
       - name: Verify independent Hebrew Scroll cutlets seals 20/21/22 (diagnostic)

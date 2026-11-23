@@ -17,6 +17,10 @@ PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
 SCROLL_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7"
 SCROLL_NAME = "Megilat_HaItim_Yehuda_FINAL_2026-09-18.md"
 MODULUS = (1 << 127) - 1
+# Stage-1 year-pair bounds; match the normative calendar contract.
+YEAR_MIN_DAYS = 252
+YEAR_MAX_DAYS = 5778
+YEAR_MIN_GATE_INTERVALS = 6
 DROP_STIR_COEFFICIENTS = (
     (3, 5, 7, 11), (5, 7, 11, 13), (7, 11, 13, 17),
     (11, 13, 17, 19), (13, 17, 19, 23), (17, 19, 23, 29),
@@ -217,7 +221,7 @@ def one_gate_step(direction: int, count_from_center: int) -> int:
     return 42 + selected
 
 
-def gate_window(max_distance: int = 5878) -> list[tuple[int, int]]:
+def gate_window(max_distance: int = YEAR_MAX_DAYS) -> list[tuple[int, int]]:
     """(gate index, signed chronological offset); index 0 is Foundation."""
     result = [(0, 0)]
     for sign in (-1, 1):
@@ -230,6 +234,12 @@ def gate_window(max_distance: int = 5878) -> list[tuple[int, int]]:
     return sorted(result, key=lambda item: item[0])
 
 
+def eligible_year_span(day_count: int, gate_intervals: int) -> bool:
+    """Inclusive legal year-length and gate-count bounds (not a date oracle)."""
+    return (YEAR_MIN_DAYS <= day_count <= YEAR_MAX_DAYS
+            and gate_intervals >= YEAR_MIN_GATE_INTERVALS)
+
+
 def foundation_year_5000() -> dict:
     gates = gate_window()
     candidates = []
@@ -240,16 +250,16 @@ def foundation_year_5000() -> dict:
             if close_day < 0:
                 continue
             total_days = close_day - open_day
-            if total_days > 5878:
+            if total_days > YEAR_MAX_DAYS:
                 break
-            if close_index - open_index < 6 or total_days < 252:
+            if not eligible_year_span(total_days, close_index - open_index):
                 continue
             candidates.append((total_days, open_day, close_day, open_index, close_index))
     candidates.sort(key=lambda t: (t[0], t[1]))
     chosen = candidates[choose_index(0, 0, 1, 10, len(candidates))]
     days, opening, ending, open_index, close_index = chosen
-    if not (opening < 0 <= ending and 252 <= days <= 5878
-            and close_index - open_index >= 6):
+    if not (opening < 0 <= ending
+            and eligible_year_span(days, close_index - open_index)):
         raise AssertionError("Foundation-Day year selection violates Hebrew constraints")
     return {
         "project_id": PROJECT_ID,
@@ -300,6 +310,11 @@ def self_test() -> None:
     verify(set(sauce(0, 0)[1]) == set(range(6)), "last drop permutation")
     verify(42 <= one_gate_step(-1, 1) <= 963, "past gate limit")
     verify(42 <= one_gate_step(1, 1) <= 963, "future gate limit")
+    verify(eligible_year_span(252, 6), "minimum inclusive year length")
+    verify(eligible_year_span(5778, 6), "maximum inclusive year length")
+    verify(not eligible_year_span(251, 6), "below minimum year length")
+    verify(not eligible_year_span(5779, 6), "above maximum year length")
+    verify(not eligible_year_span(5778, 5), "insufficient gate intervals")
     print(f"STAGE01_SCROLL_GATE_SELFTEST={checks}/{checks}")
 
 
