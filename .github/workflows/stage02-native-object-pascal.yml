@@ -6,7 +6,9 @@ on:
     paths:
       - '.github/workflows/stage02-native-object-pascal.yml'
       - 'src/Stage02WorkCounts.pas'
+      - 'src/PastafariCalendar.pas'
       - 'test/stage02_workcounts_regression.pas'
+      - 'test/stage02_context_integration.pas'
       - 'test/build_and_run_stage02_workcounts.sh'
       - 'docs/stage02_workcounts_oracle.py'
   workflow_dispatch:

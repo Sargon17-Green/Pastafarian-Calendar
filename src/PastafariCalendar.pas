@@ -8,7 +8,7 @@ unit PastafariCalendar;
 interface
 
 uses
-  BigInt, MonsterBootstrap;
+  BigInt, MonsterBootstrap, Stage02WorkCounts;
 
 type
   TBootstrapResult = record
@@ -17,11 +17,12 @@ type
   end;
 
 function BootstrapProbe(const CalculationDay, TargetDay: TBigInt): TBootstrapResult;
+function WorkCountsForContext(Context: TMonsterContext): TWorkCounts;
 
 implementation
 
 uses
-  SourceLanguageCatalog;
+  SourceLanguageCatalog, SysUtils;
 
 function BootstrapProbe(const CalculationDay, TargetDay: TBigInt): TBootstrapResult;
 var
@@ -38,6 +39,13 @@ begin
     Manager.Free;
     Context.Free;
   end;
+end;
+
+function WorkCountsForContext(Context: TMonsterContext): TWorkCounts;
+begin
+  if Context = nil then
+    raise Exception.Create('Contexto de invocação ausente.');
+  Result := ComputeWorkCounts(Context.CalculationDay, Context.TargetDay);
 end;
 
 end.
