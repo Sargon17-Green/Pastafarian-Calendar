@@ -268,11 +268,34 @@ function s56Main(array $args): int {
         count($structure['cutlets']) === $structure['cutletCount'],
         'PHP_CUTLET_COVERAGE');
     $ranker=new MonthWeavingRanker56();
+    // Timeout-safe QA evidence: record which independent round-trip operation
+    // was still running, without altering the underlying count/rank/unrank.
+    $measureRoundtrip=static function(string $stage,callable $operation) use($profile):mixed {
+        $started=hrtime(true);
+        $profile('start',$stage,['peak_bytes'=>memory_get_peak_usage(true)]);
+        $status='ok';
+        try {
+            return $operation();
+        } catch (Throwable $e) {
+            $status='error';
+            throw $e;
+        } finally {
+            $profile('end',$stage,[
+                'seconds'=>(hrtime(true)-$started)/1e9,
+                'peak_bytes'=>memory_get_peak_usage(true),
+                'status'=>$status
+            ]);
+        }
+    };
     $tCount=hrtime(true);
-    $count=$ranker->count($structure['monthLengths']); $tRank=hrtime(true);
-    $rank=$ranker->rank($structure['monthLengths'], $structure['monthWeaving']);
+    $count=$measureRoundtrip('roundtrip_count',
+        static fn():BigInt=>$ranker->count($structure['monthLengths']));
+    $tRank=hrtime(true);
+    $rank=$measureRoundtrip('roundtrip_rank',
+        static fn():BigInt=>$ranker->rank($structure['monthLengths'],$structure['monthWeaving']));
     $tUnrank=hrtime(true);
-    $roundtrip=$ranker->unrank($structure['monthLengths'], $rank);
+    $roundtrip=$measureRoundtrip('roundtrip_unrank',
+        static fn():array=>$ranker->unrank($structure['monthLengths'],$rank));
     $end=hrtime(true);
     s56Require($roundtrip === $structure['monthWeaving'] &&
         $rank->sign() > 0 && $rank->compare($count) <= 0,
