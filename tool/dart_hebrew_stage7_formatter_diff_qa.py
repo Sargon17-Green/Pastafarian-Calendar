@@ -33,6 +33,17 @@ def hex256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def without_whitespace(data: bytes) -> str:
+    # Compare all non-whitespace Unicode characters independently of formatting.
+    return "".join(char for char in data.decode("utf-8") if not char.isspace())
+
+
+def diff_content_hunks(unified: str) -> str:
+    # Discard file labels and hunk-coordinate headers, not content or context.
+    return "".join(line for line in unified.splitlines(keepends=True)
+                   if not line.startswith(("--- ", "+++ ", "@@ ")))
+
+
 def output_json(record: dict) -> None:
     (OUTPUT / "results.json").write_text(
         json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -54,7 +65,7 @@ def main() -> None:
 
     result = {
         "project_id": PROJECT_ID,
-        "scope": "Stage7 formatter diagnostic only; NOT formatter-clean acceptance",
+        "scope": "Stage7 disposable-copy equivalence and idempotence QA; NOT formatter-clean acceptance",
         "source_head": head,
         "historical_a_commit": SOURCE_A,
         "sdk_version": sdk_version,
@@ -79,6 +90,15 @@ def main() -> None:
                                   PLANNER, cwd=isolated)
                 formatted = target.read_bytes()
                 assert formatted.endswith(b"\n"), "Unexpected formatter output"
+                # A second formatter invocation on the SAME disposable copy
+                # must not change any bytes (idempotence).
+                second = command("dart", "format", "--output=write",
+                                 PLANNER, cwd=isolated)
+                formatted_twice = target.read_bytes()
+                nonwhitespace_equal = (
+                    without_whitespace(original) == without_whitespace(formatted)
+                )
+                formatter_idempotent = formatted_twice == formatted
                 # Independently compare the exact bytes and preserve a full unified diff.
                 before = original.decode("utf-8").splitlines(keepends=True)
                 after = formatted.decode("utf-8").splitlines(keepends=True)
@@ -104,8 +124,32 @@ def main() -> None:
                     "changed": changed,
                     "diff_sha256": hex256(diff.encode("utf-8")),
                     "diff_lines": len(diff.splitlines()),
+                    "diff_hunk_count": sum(1 for line in diff.splitlines()
+                                           if line.startswith("@@ ")),
+                    "nonwhitespace_equal": nonwhitespace_equal,
+                    "original_nonwhitespace_sha256": hex256(
+                        without_whitespace(original).encode("utf-8")),
+                    "formatted_nonwhitespace_sha256": hex256(
+                        without_whitespace(formatted).encode("utf-8")),
+                    "formatter_idempotent": formatter_idempotent,
+                    "second_pass_sha256": hex256(formatted_twice),
+                    "second_pass_summary": (second.stdout + second.stderr).decode(
+                        "utf-8", "replace").strip(),
                 }
                 output_json(result)
+                assert nonwhitespace_equal, label + ": formatter changed nonwhitespace data"
+                assert formatter_idempotent, label + ": second formatter pass changed bytes"
+        # Preserve and compare every diff content/context line, ignoring only
+        # the expected A/B line-coordinate and file-label differences.
+        a_diff = (OUTPUT / "A.unified.diff").read_text(encoding="utf-8")
+        b_diff = (OUTPUT / "B.unified.diff").read_text(encoding="utf-8")
+        result["same_two_formatter_hunks"] = (
+            result["variants"]["A"]["diff_hunk_count"] == 2
+            and result["variants"]["B"]["diff_hunk_count"] == 2
+            and diff_content_hunks(a_diff) == diff_content_hunks(b_diff)
+        )
+        output_json(result)
+        assert result["same_two_formatter_hunks"], "Unexpected A/B hunk mismatch"
         # Postcondition: the authoritative branch and both locked blobs are intact.
         assert command("git", "rev-parse", "HEAD").stdout.decode().strip() == head
         assert command("git", "show", "HEAD:" + PLANNER).stdout == raw_b
@@ -116,7 +160,7 @@ def main() -> None:
             v["changed"] for v in result["variants"].values()
         ) else "FORMAT_DIFF_CAPTURED_CLEAN"
         output_json(result)
-        print("STAGE7_FORMAT_DIAGNOSTIC_CAPTURED", result["status"],
+        print("STAGE7_FORMAT_COPY_ONLY_QA_PASS", result["status"],
               "A_changed=", result["variants"]["A"]["changed"],
               "B_changed=", result["variants"]["B"]["changed"],
               "source_locks_preserved=True", "head=" + head)
