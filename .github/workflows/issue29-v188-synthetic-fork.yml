@@ -1,0 +1,67 @@
+name: Issue29 v188 synthetic same-stream source-only causal fork NO calendar F
+on:
+  push:
+    branches:
+      - qa/issue29-shared-stream-causal-fork-v188
+    paths:
+      - '.github/workflows/issue29-v188-synthetic-fork.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v188-source-only
+  cancel-in-progress: false
+jobs:
+  source-only:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-shared-stream-causal-fork-v188'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout locked original source references only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Prove bounded synthetic fork, never original converter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile qa/issue29/v188_shared_stream_fork.py
+          timeout -k 5s 75s python3 -B qa/issue29/v188_shared_stream_fork.py > evidence/v188-source-result.json
+          python3 -B - <<'PY'
+          import json
+          r=json.load(open('evidence/v188-source-result.json'))
+          assert r['finite_exhaustive_rank_controls']==1356
+          assert r['same_stream_comparisons']==r['different_days_in_month']==6
+          assert r['python_global_count_bits']==1799
+          assert r['original_calendar_F_calls']==r['native_converter_runs']==r['soak_years_certified']==0
+          assert len(r['cases'])==6 and all(x['ada_month_id_day'][1]!=x['python_month_id_day'][1] for x in r['cases'])
+          print('V188_SAME_STREAM_SOURCE_FORK_6_OF_6_PASS_ZERO_F')
+          PY
+          git diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f...HEAD > evidence/changed-paths.txt
+          git rev-parse HEAD > evidence/HEAD.txt
+          sha256sum qa/issue29/v188_shared_stream_fork.py qa/issue29/V188_SHARED_STREAM_FORK.md > evidence/source-sha256.txt
+      - name: Hash evidence (also after failed proof)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence')
+          entries={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+             for p in sorted(root.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (root/'members.sha256.json').write_text(json.dumps(entries,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Preserve source-only QA receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v188-synthetic-same-stream-source-only-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
