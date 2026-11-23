@@ -2060,6 +2060,7 @@ fn test_stage36_adjacent_ballot_lexical_ranks_at_17_and_47_months() {
 	stage36_check_adjacent_ballot_ranks(47)
 	println('V_AMHARIC_STAGE36_ADJACENT_RANK_PASS MONTHS=17,47 PAIRS=14')
 }
+
 // Stage37: the exact first Dyck-prefix fork, not an arbitrary sampled rank.
 // The [1,1] block contains Catalan(n-1) words, so ranks C(n-1)
 // and C(n-1)+1 must straddle [1,1] / [1,2] in lexical order.
