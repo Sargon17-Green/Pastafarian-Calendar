@@ -1,0 +1,104 @@
+name: SQL Tamil Slice25 fixed-year bounded gate
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/177_stage25_fixed_year_gate_scan.sql'
+      - '.github/workflows/sql-tamil-stage02-slice25-fixed-year-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source/fixture lock and independent oracle preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p qa-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nHEAD=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > qa-evidence/versions.txt
+          while read -r expected file; do
+            actual="$(git hash-object "$file")"
+            printf '%s %s\n' "$actual" "$file" >> qa-evidence/locks.txt
+            test "$expected" = "$actual"
+          done <<'LOCKS'
+          d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          21f38cd280498070b08b6c3074780f1742c36957 sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl
+          6df7a01df2e96289aeac9aa26746e25443068ece sql/test/152_stage25_selector_locked_years.jsonl
+          LOCKS
+          python3 - <<'PY' | tee qa-evidence/oracle.txt
+          import json,pathlib,re
+          p=pathlib.Path('sql/test')
+          gs=[json.loads(x) for x in (p/'151_stage25_calendar_date_locked_goldens_44701320191.jsonl').read_text().splitlines() if x]
+          ys=[json.loads(x) for x in (p/'152_stage25_selector_locked_years.jsonl').read_text().splitlines() if x]
+          assert len(gs)==29 and len(ys)==8
+          rows=[y for y in ys if y['year_data']['year_number']==4996]
+          assert len(rows)==1 and '44701320191' in rows[0]['provenance']
+          assert rows[0]['year_data']==dict(year_number=4996,open_gate_index=-38,close_gate_index=-29,open_gate_day=-15074038,close_gate_day=-15070673)
+          cases={g['purpose']:g for g in gs if g['expected']['year_number']==4996}
+          assert set(cases)=={'year_first','year_last','year_middle'}
+          assert (cases['year_first']['target_day'],cases['year_middle']['target_day'],cases['year_last']['target_day'])==(-15074037,-15072356,-15070673)
+          assert cases['year_middle']['expected']==dict(year_number=4996,cutlet_name='வெண்கலம்',day_in_cutlet=302,month_name='தவளை',day_in_month=50)
+          s=(p/'177_stage25_fixed_year_gate_scan.sql').read_text()
+          assert [tuple(map(int,x)) for x in re.findall(r'SELECT pg_temp\.qa_fixed_segment\((-?\d+),(-?\d+)\);',s)]==[(-38,-36),(-35,-33),(-32,-30)]
+          assert s.count("SET statement_timeout='60s';")==3
+          assert 'find_target_year(' not in s.split('\\set ON_ERROR_STOP on',1)[-1] and 'calendar_date(' not in s.split('\\set ON_ERROR_STOP on',1)[-1]
+          assert s.count('negative_gate_gap(-i)')==1
+          assert -15070673-(-15074038)==3365
+          print('S25_STATIC_LOCKS=4/4 PASS')
+          print('S25_LOCKED_YEAR=4996 ORIGINAL_PG17_RUN=44701320191')
+          print('S25_BOUNDED_SEGMENTS=3/3 PASS; NATIVE=NOT_YET_EXECUTED')
+          PY
+          cp sql/test/177_stage25_fixed_year_gate_scan.sql qa-evidence/diagnostic.sql
+          sha256sum sql/test/177_stage25_fixed_year_gate_scan.sql qa-evidence/diagnostic.sql > qa-evidence/sha256.txt
+      - name: Isolated native PostgreSQL 17.12
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-fixed-year --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-fixed-year pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-fixed-year pg_isready -q -U postgres
+          docker exec -u postgres tamil-fixed-year postgres --version | tee -a qa-evidence/versions.txt
+      - name: Load unchanged production 00-27
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+            printf '%s %s\n' "$(git hash-object "${found[0]}")" "${found[0]}" >> qa-evidence/production-blobs.txt
+          done
+          docker exec -u postgres tamil-fixed-year psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > qa-evidence/load.log 2>&1 || { tail -60 qa-evidence/load.log; exit 3; }
+      - name: Three bounded native segments, exact exit and boundary
+        shell: bash
+        run: |
+          set -uo pipefail
+          docker exec -u postgres tamil-fixed-year psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/sql/test/177_stage25_fixed_year_gate_scan.sql > qa-evidence/diagnostic.log 2>&1
+          code=$?
+          printf 'PSQL_EXIT=%s\n' "$code" | tee qa-evidence/exit-code.txt
+          tail -50 qa-evidence/diagnostic.log || true
+          test "$code" -eq 0 || exit 3
+          grep -q 'S25_FIXED_YEAR_GATE_BOUNDARY=PASS' qa-evidence/diagnostic.log || exit 4
+          grep -q 'S25_FULL_SLICE=NOT_ACCEPTED' qa-evidence/diagnostic.log || exit 5
+      - name: Preserve original native logs and source hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-fixed-year-gate-${{ github.run_id }}
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Clean up isolated PostgreSQL
+        if: always()
+        run: docker rm -f tamil-fixed-year 2>/dev/null || true
