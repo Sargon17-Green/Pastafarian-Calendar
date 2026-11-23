@@ -800,7 +800,7 @@ jobs:
         run: dart run bin/stage7_weave_hotpath_profile.dart
 
   dart-hebrew-stage7-ab-qa-only:
-    if: github.ref == 'refs/heads/Dart+עברית' && !contains(github.event.head_commit.message, '[stage7-target-only]') && !contains(github.event.head_commit.message, '[stage7-restoration-only]') && !contains(github.event.head_commit.message, '[stage7-format-only]')
+    if: github.ref == 'refs/heads/Dart+עברית' && !contains(github.event.head_commit.message, '[stage7-target-only]') && !contains(github.event.head_commit.message, '[stage7-restoration-only]') && !contains(github.event.head_commit.message, '[stage7-format-only]') && !contains(github.event.head_commit.message, '[stage7-r2-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -851,7 +851,7 @@ jobs:
           if-no-files-found: error
 
   dart-hebrew-stage7-isolated-restoration-qa-only:
-    if: github.ref == 'refs/heads/Dart+עברית' && (contains(github.event.head_commit.message, '[stage7-restoration-only]') || contains(github.event.head_commit.message, '[stage7-qa-only]'))
+    if: github.ref == 'refs/heads/Dart+עברית' && (contains(github.event.head_commit.message, '[stage7-restoration-only]') || contains(github.event.head_commit.message, '[stage7-qa-only]') || contains(github.event.head_commit.message, '[stage7-r2-only]'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

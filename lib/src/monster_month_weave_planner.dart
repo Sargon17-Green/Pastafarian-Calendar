@@ -71,7 +71,8 @@ final class MonsterMonthWeavePlanner {
       if (j == 0) {
         result[j] = (base * suffixNumerator[j]) ~/ suffixDenominator[j];
       } else {
-        result[j] = (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
+        result[j] =
+            (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
             (BigInt.from(sums[j] - 1) * suffixDenominator[j]);
       }
     }
@@ -196,10 +197,7 @@ final class MonsterMonthWeavePlanner {
       throw ArgumentError('§V requires the accepted §U year-length vector.');
     }
     final firstDay = year.candidate.openGate + BigInt.one;
-    final work = const MonsterWorkCounter().calculate(
-      calculationDay,
-      firstDay,
-    );
+    final work = const MonsterWorkCounter().calculate(calculationDay, firstDay);
     final feeder = const MonsterSeedFeeder();
     final stones = feeder.buildStones();
     final feeds = feeder.buildHiddenFeeds(work, stones);
