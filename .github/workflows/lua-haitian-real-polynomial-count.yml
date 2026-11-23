@@ -54,7 +54,7 @@ jobs:
                 'ATTESTED_VECTOR=47/5294','DP_RECURSION_CELLS=123326',
                 'TOTAL_DIGITS=8654',
                 'QA_ONLY=PASS NORMATIVE_WEAVING_NOT_RUN=1 FULL_DATE_NOT_RUN=1']
-          assert len(lines)==7 and all(x in lines for x in must), lines
+          assert len(lines)==8 and all(x in lines for x in must), lines
           decimals=[x.split('=',1)[1] for x in lines if x.startswith('TOTAL_DECIMAL=')]
           assert len(decimals)==1 and len(decimals[0])==8654 and decimals[0].isdigit()
           digest=hashlib.sha256(decimals[0].encode('ascii')).hexdigest()
