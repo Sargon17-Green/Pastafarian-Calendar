@@ -15,3 +15,9 @@ Cases: foundation calculationDay=targetDay=-15055671; future targetDay=-15049671
 Required provenance: GitHub run, attempt, exact checkout SHA, original Git blob, sha256 for original/test/copy/wasm, tool versions, Native log, JSON trace, exit code, artifact ID/hash. The workflow uploads partial evidence also on failure. Only a completed run, successful job, checked log and inspected artifact can justify a Native PASS claim.
 
 Existing Names47 acceptance is not rerun. This does not verify historical Stage02 ZIP/manifest provenance; Stage02 overall NOT ACCEPTED. NEXT after observed completed run: isolate any failure or gather actual coverage; independently derive complete five-field tuple from canonical calendar rules before overall acceptance. No main/merge/release.
+
+## CI routing and actual-navigation coverage (2026-11-23)
+
+The trace workflow is reusable only (`workflow_call`) and called once by existing canonical-names-lock workflow on a `WAT+Español` push containing `[calendar-trace-run]` in the commit message. No separate `push` trigger or workflow dispatch is used for the trace. Canonical WAT source and main are untouched.
+
+Runtime JSON is now written **before** aggregate seal coverage is evaluated. The actual trace, not descriptive probe names, must contain both `next_year_wide` (11) and `previous_year_wide` (12) plus seals 1,10,20,21,22,30,31,32,33. Missing coverage returns nonzero and leaves JSON for diagnosis; this is not expected-red. Rank remains independently calculated; the five-field calendar tuple is still regression-only and must not be called an independent oracle. Overall Stage02 remains NOT ACCEPTED.

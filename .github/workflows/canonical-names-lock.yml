@@ -31,6 +31,12 @@ jobs:
     permissions:
       contents: read
 
+  wat-stage02-calendar-runtime-trace:
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español' && contains(github.event.head_commit.message, '[calendar-trace-run]')"
+    uses: ./.github/workflows/wat-stage02-calendar-runtime-trace.yml
+    permissions:
+      contents: read
+
   wat-stage02-semantic:
     if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español'"
     runs-on: ubuntu-24.04

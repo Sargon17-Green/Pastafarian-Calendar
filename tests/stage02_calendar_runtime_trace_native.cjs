@@ -164,24 +164,29 @@ async function native() {
       instance.exports.wide_calendar_result_day_in_month()
     ];
     if(tc.expected) assert.deepEqual(fields,tc.expected,'foundation regression');
-    if(!events.some(e=>e.seal===1)) fail('missing gate-gap trace');
-    if(!events.some(e=>e.seal===10 || e.seal===11 || e.seal===12)) fail('missing year selection');
-    for(const seal of [20,21,22,30,31,32,33])if(!events.some(e=>e.seal===seal)) fail('missing family '+seal);
     records.push({case:tc.name,calculation_day:tc.c.toString(),target_day:tc.t.toString(),
       five_fields:fields,oracle_scope:'rank independent; five fields foundation regression only',
       trace_count:events.length,observed_seals:[...new Set(events.map(e=>e.seal))].sort((a,b)=>a-b),
       events});
   }
+  // Navigation coverage comes from executed source callsites, never test-case labels.
+  const requiredSeals=[...expectedSeals].sort((a,b)=>a-b);
+  const observedSeals=[...new Set(records.flatMap(r=>r.observed_seals))].sort((a,b)=>a-b);
+  const missingSeals=requiredSeals.filter(seal=>!observedSeals.includes(seal));
   const result={
     project_id:'PC-BRANCH-WAT-SPANISH',source_blob:WAT_BLOB,
     qa_sha:process.env.GITHUB_SHA||'LOCAL_UNCOMMITTED',
     run_id:process.env.GITHUB_RUN_ID||null,run_attempt:process.env.GITHUB_RUN_ATTEMPT||null,
     node:process.version,wasm_sha256:hash(wasm),type:'NATIVE_INSTRUMENTED_COPY',
     independent_rank_oracle:true,independent_five_field_oracle:false,
+    trace_coverage:{required_seals:requiredSeals,observed_seals:observedSeals,missing_seals:missingSeals,
+      next_year_observed:observedSeals.includes(11),previous_year_observed:observedSeals.includes(12),
+      complete:missingSeals.length===0},
     original_stage02_zip_manifest_verified:false,overall_stage02_accepted:false,
     cases:records
   };
   fs.writeFileSync(path.join(outdir,'native-results.json'),JSON.stringify(result,null,2)+'\n');
+  if(missingSeals.length) fail('incomplete executed callsite coverage; missing seals='+missingSeals.join(',')+'; trace retained in native-results.json');
   console.log('TRACE_NATIVE_PASS cases='+records.length+' event_counts='+records.map(r=>r.trace_count).join(','));
 }
 async function main() {
