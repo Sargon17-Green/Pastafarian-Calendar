@@ -1,0 +1,140 @@
+name: Issue29 v187 authorized one-day frozen-source internal trace (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-original-one-day-internal-trace-v187
+    paths:
+      - '.github/workflows/issue29-one-day-internal-trace-v187.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exactly-one-day-originals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated QA branch
+        uses: actions/checkout@v4
+        with:
+          path: coordinator
+          persist-credentials: false
+      - name: Checkout locked historical original Ada
+        uses: actions/checkout@v4
+        with:
+          path: original-ada
+          ref: a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          persist-credentials: false
+      - name: Checkout locked historical original Python
+        uses: actions/checkout@v4
+        with:
+          path: original-python
+          ref: 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          persist-credentials: false
+      - name: Verify source identities, exact scope and preserved branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$GITHUB_ACTIONS" = true
+          test "$RUNNER_OS" = Linux
+          test "$(git -C original-ada rev-parse HEAD)" = a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72
+          test "$(git -C original-python rev-parse HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git -C original-ada rev-parse HEAD:src/normative_oracle.adb)" = 923733d4f8face03586aee304640bf7540c28b4c
+          test "$(git -C original-ada rev-parse HEAD:src/month_weaving.adb)" = 9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef
+          test "$(git -C original-ada rev-parse HEAD:src/exact_math.adb)" = 4b014d2e6a467ec606493c6c977e8cc184fea40a
+          test "$(git -C original-python rev-parse HEAD:tests/normative_reference.py)" = d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53
+          test -z "$(git -C original-ada status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+          test "$(git -C coordinator ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          python3 - <<'PY' | tee evidence/identity.json
+          import json,subprocess
+          print(json.dumps({
+            'schema':'ISSUE29_V187_SOURCE_LOCKS/1',
+            'qa_head':subprocess.check_output(['git','-C','coordinator','rev-parse','HEAD'],text=True).strip(),
+            'original_ada_commit':'a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72',
+            'original_python_commit':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4',
+            'main_mutation':False,'original_ada_branch_mutation':False,
+            'input':[-15055671,-15055671],'max_original_date_calls_per_engine':1,
+            'original_years_certified':0,
+          },sort_keys=True))
+          PY
+          python3 -m py_compile coordinator/qa/issue29/v187/python_trace.py coordinator/qa/issue29/v187/adjudicate.py
+      - name: Create isolated instrumented copy and compile original Ada with GNAT13
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p instrumented-ada evidence/ada-build
+          cp -a original-ada/src instrumented-ada/src
+          cp coordinator/qa/issue29/v187/normative_oracle.adb instrumented-ada/src/normative_oracle.adb
+          diff -u original-ada/src/normative_oracle.adb instrumented-ada/src/normative_oracle.adb > evidence/ada-instrumentation.patch || test "$?" -eq 1
+          test -s evidence/ada-instrumentation.patch
+          test -z "$(git -C original-ada status --porcelain)"
+          sha256sum original-ada/src/normative_oracle.adb instrumented-ada/src/normative_oracle.adb original-python/tests/normative_reference.py > evidence/source-sha256.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gnat-13
+          gnatmake --version > evidence/compiler-version.txt
+          gnatmake -gnat2022 -gnatW8 -gnata -gnatwa -Iinstrumented-ada/src -D evidence/ada-build -o evidence/issue29_v187_ada             coordinator/qa/issue29/v187/issue29_v187_one_day.adb             2>&1 | tee evidence/ada-build.log
+          sha256sum evidence/issue29_v187_ada >> evidence/source-sha256.txt
+      - name: Original Ada exactly one date, 180 second and 1GiB bound
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -v -o evidence/ada-time.log              timeout -s TERM -k 5s 180s evidence/issue29_v187_ada              > evidence/ada.stdout 2> evidence/ada.stderr)
+          code=$?
+          set -e
+          echo "$code" > evidence/ada.exitcode
+          sha256sum evidence/ada.stdout evidence/ada.stderr >> evidence/source-sha256.txt
+          test "$code" -eq 0
+          test "$(grep -c '^ISSUE29_FINAL ' evidence/ada.stdout)" -eq 1
+          test -z "$(git -C original-ada status --porcelain)"
+      - name: Original Python exactly one date, 180 second and 1GiB bound
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -v -o evidence/python-time.log              timeout -s TERM -k 5s 180s python3 -B              coordinator/qa/issue29/v187/python_trace.py              original-python/tests/normative_reference.py evidence/python.json              > evidence/python.stdout 2> evidence/python.stderr)
+          code=$?
+          set -e
+          echo "$code" > evidence/python.exitcode
+          test "$code" -eq 0
+          test -s evidence/python.json
+          test -z "$(git -C original-python status --porcelain)"
+          sha256sum evidence/python.json evidence/python.stdout evidence/python.stderr >> evidence/source-sha256.txt
+      - name: Validate independent numeric receipts, compute first observed divergence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B coordinator/qa/issue29/v187/adjudicate.py             evidence/ada.stdout evidence/python.json evidence/issue29-verdict.json             2>&1 | tee evidence/adjudication.log
+          sha256sum evidence/issue29-verdict.json >> evidence/source-sha256.txt
+          test "$(git -C coordinator ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          test -z "$(git -C original-ada status --porcelain)"
+          test -z "$(git -C original-python status --porcelain)"
+      - name: Freeze source, exit codes, evidence hashes and artifacts even on failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('evidence');entries=[]
+          for p in sorted(root.iterdir()):
+              if p.is_file() and p.name!='manifest.json':
+                  b=p.read_bytes()
+                  if len(b) > 2*1024*1024 and p.suffix in ('.json','.stdout','.stderr'):
+                      raise RuntimeError('evidence size cap '+p.name)
+                  entries.append({'name':p.name,'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          (root/'manifest.json').write_text(json.dumps({
+              'schema':'ISSUE29_V187_ARCHIVE_MANIFEST/1',
+              'original_full_years_certified':0,'records':entries,
+          },sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload permanent witness for separate independent replay
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v187-authorized-one-day-internal-trace-not-year
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 90
