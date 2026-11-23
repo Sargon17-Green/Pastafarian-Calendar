@@ -53,8 +53,7 @@ def source_copies(root):
                             replacement_sha256=hashlib.sha256(replacement_line.encode()).hexdigest(),
                             original_text=expected_line,replacement_text=replacement_line))
         amended.append((name, definition))
-    pretty_manifest = json.dumps(loaded["manifest"], ensure_ascii=False, indent=2).encode("utf-8") + b"\n"
-    return amended, anchors, hashlib.sha256(pretty_manifest).hexdigest()
+    return amended, anchors, loaded["manifest"]["manifest_sha256"]
 
 def build_paired_copy(raw: bytes, repo_root: pathlib.Path, marker: str):
     root = pathlib.Path(repo_root).resolve()
