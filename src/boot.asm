@@ -215,6 +215,17 @@ wCalendarPostStirSum:: ds 16
 wCalendarPostStirSumsScratch:: ds 192
 wCalendarPostStirSums:: ds 192
 wCalendarPostStirSavedBowls:: ds 96
+; Native392 public answer and private scratch (WRAM0).
+wCalendarAnswerInputBowl:: ds 1
+wCalendarAnswerInputSeal:: ds 1
+wCalendarAnswerNextBowl:: ds 1
+wCalendarAnswerSeen:: ds 1
+wCalendarAnswerRepeat:: ds 1
+wCalendarAnswerA0Scratch:: ds 16
+wCalendarAnswerDirectionScratch:: ds 1
+wCalendarAnswerA0:: ds 16
+wCalendarAnswerDirection:: ds 1
+wCalendarAnswerSavedByte:: ds 1
 ; Native389 initializer shares the 96-byte bowl scratch.
 
 SECTION "Bootstrap", ROM0[$0150]
@@ -311,6 +322,10 @@ ELIF DEF(STAGE1_POSTSTIRS_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarBowlPostStirsBench
+ELIF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarBowlAnswerBench
 ELSE
     call RunSelfTests
     ld a, [wTestResult]
@@ -445,6 +460,7 @@ INCLUDE "src/runtime/calendar_bowl_step.asm"
 INCLUDE "src/runtime/calendar_bowl_init.asm"
 INCLUDE "src/runtime/calendar_bowl_trace46.asm"
 INCLUDE "src/runtime/calendar_bowl_poststirs.asm"
+INCLUDE "src/runtime/calendar_bowl_answer.asm"
 INCLUDE "src/tests/selftest.asm"
 INCLUDE "src/tests/wide_test.asm"
 INCLUDE "src/tests/mul_test.asm"
@@ -549,4 +565,8 @@ ENDC
 
 IF DEF(STAGE1_POSTSTIRS_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_bowl_poststirs_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
+INCLUDE "src/tests/calendar_bowl_answer_native_test.asm"
 ENDC

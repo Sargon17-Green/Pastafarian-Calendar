@@ -191,3 +191,10 @@ build/calendar_bowl_poststirs.o: build/calendar.o src/runtime/calendar_bowl_post
 build/calendar_bowl_poststirs.gb: build/calendar_bowl_poststirs.o
 	$(RGBLINK) -n build/calendar_bowl_poststirs.sym -m build/calendar_bowl_poststirs.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated Stage1 Native392. Default Native370 dispatcher unchanged.
+build/calendar_bowl_answer.o: build/calendar.o src/runtime/calendar_bowl_answer.asm src/tests/calendar_bowl_answer_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_ANSWER_FLOW_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_bowl_answer.gb: build/calendar_bowl_answer.o
+	$(RGBLINK) -n build/calendar_bowl_answer.sym -m build/calendar_bowl_answer.map -o $@ $<
