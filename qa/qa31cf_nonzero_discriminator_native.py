@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-"""QA31CF: one unmodified original-source PyFunge Native candidate runs."""
+"""QA31CF: one unmodified original-source PyFunge Native candidate run."""
 from __future__ import print_function
 import binascii
 import gzip
@@ -49,6 +49,7 @@ def target_events_match(metadata):
 
 def run_case(source, token, traces_dir, output_dir):
     raw = '1 2 0 %03d' % token
+    need(raw == '1 2 0 100' and sha(raw) == '1699e3d66b01f2d43c0658c479d43e15006255927be082816ed7610a38c70f83', 'new no-LF discriminator input drift')
     label = 'candidate_%03d' % token
     stdin = observed.Observed(raw)
     stdout = StringIO.StringIO()
@@ -259,5 +260,5 @@ def main(traces_dir, output_dir):
 
 if __name__ == '__main__':
     need(len(sys.argv) == 3,
-         'usage: qa31cf_natural_input_sweep.py TRACE_DIR OUTPUT_DIR')
+         'usage: qa31cf_nonzero_discriminator_native.py TRACE_DIR OUTPUT_DIR')
     main(sys.argv[1], sys.argv[2])
