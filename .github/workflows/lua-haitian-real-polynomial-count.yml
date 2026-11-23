@@ -1,0 +1,90 @@
+name: Lua Haitian real polynomial exact count QA
+
+'on':
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lua53_real_polynomial_count:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install native Lua 5.3 and tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lua5.3 zip unzip time
+          lua5.3 -v
+      - name: Run independent recurrence under explicit budgets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          E=lua-haitian-real-count-evidence
+          SRC=test/lua_haitian_real_polynomial_count_qa.lua
+          mkdir -p "$E"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object "$SRC")" = "$(git rev-parse "HEAD:$SRC")"
+          git hash-object "$SRC" > "$E/source_blob.txt"
+          sha256sum "$SRC" > "$E/source_sha256.txt"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\nSOURCE_BLOB=%s\nSCOPE=QA_ONLY_REAL_COUNT\n' "$GITHUB_SHA" "$(cat "$E/source_blob.txt")" > "$E/manifest.txt"
+          luac5.3 -p "$SRC"
+          set +e
+          (
+            ulimit -v 262144
+            ulimit -t 420
+            timeout --signal=TERM --kill-after=5s 450s \
+              /usr/bin/time -f 'wall_s=%e\nuser_s=%U\nsys_s=%S\npeak_rss_kib=%M' -o "$E/resource.txt" \
+              lua5.3 "$SRC" real > "$E/stdout.txt" 2> "$E/stderr.txt"
+          )
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > "$E/exit_code.txt"
+          test "$rc" -eq 0
+          test ! -s "$E/stderr.txt"
+          python3 - "$E" <<'PY'
+          import hashlib, pathlib, re, sys
+          e=pathlib.Path(sys.argv[1])
+          s=(e/'stdout.txt').read_text(encoding='utf-8')
+          lines=s.splitlines()
+          must=['SMALL_RECURRENCE_WITNESSES=3/3','VECTOR_GUARDS=4/4',
+                'ATTESTED_VECTOR=47/5294','DP_RECURSION_CELLS=123326',
+                'TOTAL_DIGITS=8654',
+                'QA_ONLY=PASS NORMATIVE_WEAVING_NOT_RUN=1 FULL_DATE_NOT_RUN=1']
+          assert len(lines)==7 and all(x in lines for x in must), lines
+          decimals=[x.split('=',1)[1] for x in lines if x.startswith('TOTAL_DECIMAL=')]
+          assert len(decimals)==1 and len(decimals[0])==8654 and decimals[0].isdigit()
+          digest=hashlib.sha256(decimals[0].encode('ascii')).hexdigest()
+          assert digest=='e3d498d39d6b4dfc401a85b8d9135ff1089a81ace85565ac5dcb123870c09f34',digest
+          metrics=dict(line.strip().split('=',1) for line in (e/'resource.txt').read_text().splitlines())
+          assert float(metrics['wall_s'])<=450
+          assert float(metrics['user_s'])+float(metrics['sys_s'])<=420
+          assert float(metrics['peak_rss_kib'])<=262144
+          (e/'count_sha256.txt').write_text(digest+'\n')
+          print('REAL_COUNT_SHA256=PASS',digest)
+          PY
+      - name: Package immutable raw evidence
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          E=lua-haitian-real-count-evidence
+          mkdir -p "$E"
+          printf 'PROJECT_ID=PC-BRANCH-LUA-HAITIAN\nSHA=%s\n' "$GITHUB_SHA" > "$E/identity.txt"
+          (cd "$E" && sha256sum ./*.txt > SHA256SUMS.txt)
+          zip -X -q -r lua-haitian-real-count-evidence.zip "$E"
+          sha256sum lua-haitian-real-count-evidence.zip > lua-haitian-real-count-evidence.zip.sha256
+          unzip -t lua-haitian-real-count-evidence.zip
+      - name: Upload QA evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lua-haitian-real-polynomial-count-qa
+          path: |
+            lua-haitian-real-count-evidence.zip
+            lua-haitian-real-count-evidence.zip.sha256
+          retention-days: 30
+          if-no-files-found: error
