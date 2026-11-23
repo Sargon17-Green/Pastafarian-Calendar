@@ -1,0 +1,91 @@
+name: APL German Stage1 paired source-copy regression (QA ONLY)
+on:
+  push:
+    branches: [qa/apl-german-nars-interface-20261116]
+    paths:
+      - '.github/workflows/apl-german-stage01-paired-copy.yml'
+      - 'qa/nars-interface/stage01_paired_copy_probe.py'
+      - 'qa/nars-interface/test_stage01_paired_copy_probe.py'
+      - 'qa/nars-interface/bounded_stage01_paired_copy_probe.ps1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  paired-source-copy-native:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned official NARS installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $ProgressPreference='SilentlyContinue'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release' | Out-Null
+          $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          Invoke-WebRequest -Uri 'https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe' -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+          if ((Get-Item -LiteralPath $installer).Length -ne 9430788 -or
+              (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant() -cne
+              '28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b') {
+            throw 'PINNED_INSTALLER_LOCK_FAILED'
+          }
+          Write-Output 'PINNED_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
+      - name: Provision verified runtime and ephemeral font
+        shell: pwsh
+        run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence paired_copy_font_evidence -Runtime verified_runtime
+      - name: Unit test exact paired source copies before NARS
+        shell: pwsh
+        run: |
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_paired_copy_probe.py' -v
+          if($LASTEXITCODE -ne 0){throw 'PAIRED_GENERATOR_UNIT_FAILED'}
+      - name: Execute original Stage1 entrypoint under two QA-only source copies
+        shell: pwsh
+        run: ./qa/nars-interface/bounded_stage01_paired_copy_probe.ps1 -Runtime verified_runtime -Evidence paired_copy_evidence
+      - name: Independent diagnostic receipt gate (never acceptance)
+        shell: pwsh
+        run: |
+          $a=Get-Content paired_copy_evidence/native_paired_copy.json -Raw | ConvertFrom-Json
+          $b=Get-Content paired_copy_evidence/paired_candidate.json -Raw | ConvertFrom-Json
+          if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or
+             $b.source_commit -cne $a.source_commit -or
+             $a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED' -or
+             $b.original_stage01_acceptance_token_present -ne $false -or
+             $b.original_unmodified_suite_proven -ne $false -or
+             $b.production_source_modified -ne $false){throw 'FALSE_ACCEPTANCE_OR_SOURCE_LOCK'}
+          if($a.status -cnotin @('PAIRED_OVERRIDES_SUITE_NO_ERROR_DIAGNOSTIC_ONLY',
+                                'PAIRED_OVERRIDES_SUITE_ERROR_DIAGNOSTIC_ONLY') -or
+             $a.native_executed -ne $true -or $a.runtime_verified -ne $true -or
+             $a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or
+             $a.copies.Count -ne 2 -or $a.suite_start_exact -ne $true -or
+             $a.suite_captured_exact -ne $true -or $a.suite_ec_valid -ne $true -or
+             $a.final_marker_exact -ne $true){throw 'PAIRED_DIAGNOSTIC_EVIDENCE_MISSING'}
+          if(@($a.copies | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -ne 0){
+            throw 'QA_COPY_NATIVE_NOT_VERIFIED'
+          }
+          Write-Output ('PAIRED_SOURCE_COPY_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
+          Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
+      - name: Hash all diagnostic evidence
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force paired_copy_evidence,paired_copy_font_evidence | Out-Null
+          Get-ChildItem paired_copy_evidence,paired_copy_font_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $hash=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.FullName)"
+          } | Set-Content -Encoding utf8 paired_copy_receipts.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-paired-source-copy-diagnostic-v1
+          path: |
+            paired_copy_evidence/
+            paired_copy_font_evidence/
+            paired_copy_receipts.sha256
+          retention-days: 21
