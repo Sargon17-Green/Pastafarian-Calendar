@@ -46,6 +46,23 @@ to monster.stage02.choose.wide.general.seek :digit :step :m :remaining
   output monster.stage02.choose.wide.general.seek (monster.stage02.choose.wide.general.next :digit :step :m) :step :m (:remaining - 1)
 end
 
+; Positive BI remainder without constructing the quotient.
+; Invariant r<den; next digit in [0,9999] implies next r<10000*den.
+to monster.stage02.choose.wide.general.fastmod :num :den
+  if bi.lt :num :den [output :num]
+  output bi.make 1 (monster.stage02.choose.wide.general.fastmod.walk (reverse (bi.digits :num)) (bi.digits :den) (list 0))
+end
+
+to monster.stage02.choose.wide.general.fastmod.walk :msd :den :rem
+  if emptyp :msd [output bi.strip.high :rem]
+  localmake "newrem bi.strip.high fput first :msd :rem
+  if (bi.mag.compare :newrem :den) < 0 [
+    output monster.stage02.choose.wide.general.fastmod.walk butfirst :msd :den :newrem
+  ]
+  localmake "qr bi.mag.qdigit :newrem :den
+  output monster.stage02.choose.wide.general.fastmod.walk butfirst :msd :den last :qr
+end
+
 ; Horner over high-to-low stream digits: accumulator <- accumulator*M+(digit-1).
 to monster.stage02.choose.wide.general.horner :digit :reverseStep :m :remaining :acc
   if :remaining = 0 [output :acc]
@@ -69,10 +86,10 @@ to monster.stage02.choose.wide.general.build :step :N :m :space :width :digit :i
   ]
 
   ; Preserve generic exact BI behavior for all other N.
-  localmake "remainder bi.regmod :space :N
+  localmake "remainder monster.stage02.choose.wide.general.fastmod :space :N
   localmake "limit bi.sub :space :remainder
   if bi.le :rankSample :limit [
-    output bi.add (bi.small 1) (bi.regmod (bi.sub :rankSample (bi.small 1)) :N)
+    output bi.add (bi.small 1) (monster.stage02.choose.wide.general.fastmod (bi.sub :rankSample (bi.small 1)) :N)
   ]
   if :step = 1 [output bi.small 1]
   output :N

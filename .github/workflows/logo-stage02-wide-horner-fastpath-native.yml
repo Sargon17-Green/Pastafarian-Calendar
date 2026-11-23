@@ -24,7 +24,7 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/qa/logo-ido-wide-horner-fastpath-20261123
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git hash-object src/stage02_choose_wide_general.logo)" = f72d3c9480338b28de60366fa492da4bf3f5f12a
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = bda23ddc1d0f8a534b20d8391ecc7519fccd57c3
           test "$(git hash-object qa/logo_stage2_wide_horner_fastpath_native_vectors.py)" = 400cfad3f1c64e527492745dbe7b1ae8a95ca425
           test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
           test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
