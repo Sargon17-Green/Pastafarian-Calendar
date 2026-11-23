@@ -81,7 +81,7 @@ CalendarBowlsInitialize::
     inc [hl]
     ld a, [hl]
     cp 7
-    jr nz, .nextBowl
+    jp nz, .nextBowl
 
     ; Atomic publication after six successful calculations.
     ld hl, wCalendarBowlNewScratch
