@@ -1498,3 +1498,98 @@ jobs:
             build/stage01-actual-45-full-year-selftest.log
           if-no-files-found: warn
           retention-days: 30
+
+  independent-seal32-full-unrank:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile unchanged same-commit Fortran Foundation candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/big_integer.f90 -o build/big_integer.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build test/stage01_foundation_candidate_probe.f90 build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o build/normative_oracle_core.o build/normative_oracle_calendar.o -o build/stage01_foundation_candidate_probe
+      - name: Capture corrected 44-month real Fortran Foundation candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 180s python3 -u test/stage01_foundation_candidate_capture.py --fortran-exe build/stage01_foundation_candidate_probe --output build/stage01-foundation-candidate.json | tee build/stage01-foundation-candidate.log
+          grep -Fxq 'STAGE01_FOUNDATION_CANDIDATE_CAPTURE=PASS' build/stage01-foundation-candidate.log
+      - name: Independent small-shape exhaustive brute oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_weaving_reverse_endpoint.py
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 60s python3 -B test/stage01_scroll_weaving_reverse_endpoint.py --self-test) | tee build/stage01-reverse-endpoint-small.log
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_SHAPES=115' build/stage01-reverse-endpoint-small.log
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_RANKS=1408' build/stage01-reverse-endpoint-small.log
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_BRUTE=PASS' build/stage01-reverse-endpoint-small.log
+      - name: Full real 4399-ID and five-field independent differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-reverse-endpoint-resource.log timeout --signal=TERM --kill-after=5s 240s python3 -u -B test/stage01_scroll_weaving_reverse_endpoint.py --foundation --candidate-json build/stage01-foundation-candidate.json --output build/stage01-reverse-endpoint-full.json --max-seconds 180 --max-states 150000) > build/stage01-reverse-endpoint-full.log 2>&1
+          rc=$?
+          set -e
+          printf 'EXIT_CODE=%s\n' "$rc" | tee build/stage01-reverse-endpoint-exit.log
+          cat build/stage01-reverse-endpoint-full.log
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          target=pathlib.Path('build/stage01-reverse-endpoint-full.json')
+          if target.exists():
+              j=json.loads(target.read_text(encoding='utf8'))
+              j['source_commit']=os.environ['GITHUB_SHA']
+              j['source_file_sha256']=hashlib.sha256(pathlib.Path('test/stage01_scroll_weaving_reverse_endpoint.py').read_bytes()).hexdigest()
+              target.write_text(json.dumps(j,sort_keys=True,indent=2)+'\n',encoding='utf8')
+          PY
+          if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_MONTH_IDS=4399/4399' build/stage01-reverse-endpoint-full.log
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_FOUNDATION_FIELDS=5/5' build/stage01-reverse-endpoint-full.log
+          grep -Fxq 'STAGE01_REVERSE_ENDPOINT_COUNT_SHA256=c6d66ea1cf3aa809393bcee7b3232a2f5ff8705897f1016f6d8532d7800d5ab3' build/stage01-reverse-endpoint-full.log
+          python3 - <<'PY'
+          import json,os
+          j=json.load(open('build/stage01-reverse-endpoint-full.json'))
+          assert j['project_id']=='PC-BRANCH-FORTRAN-ENGLISH'
+          assert j['source_commit']==os.environ['GITHUB_SHA']
+          assert j['days']==4399 and j['months']==44
+          assert len(j['weaving'])==4399
+          assert j['matched_month_ids']==4399 and j['matched_foundation_fields']==5
+          assert j['comparison_pass'] is True and j['full_stage1_accepted'] is False
+          PY
+      - name: Record SHA source, stdout, exit code, resource use and artifacts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build
+          printf 'PROJECT_ID=PC-BRANCH-FORTRAN-ENGLISH\nGITHUB_SHA=%s\n' "$GITHUB_SHA" > build/stage01-reverse-endpoint-source.txt
+          sha256sum test/stage01_scroll_weaving_reverse_endpoint.py test/stage01_foundation_candidate_probe.f90 .github/workflows/stage01-scroll-endpoint-dp.yml > build/stage01-reverse-endpoint-source-hashes.txt
+          find build -maxdepth 1 -type f -name 'stage01-*' -print | sort | xargs -r sha256sum > build/stage01-reverse-endpoint-artifact-hashes.txt
+      - name: Preserve successful or failed full differential evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-seal32-reverse-endpoint-full-diff
+          path: |
+            build/stage01-foundation-candidate.json
+            build/stage01-foundation-candidate.log
+            build/stage01-reverse-endpoint-small.log
+            build/stage01-reverse-endpoint-full.json
+            build/stage01-reverse-endpoint-full.log
+            build/stage01-reverse-endpoint-resource.log
+            build/stage01-reverse-endpoint-exit.log
+            build/stage01-reverse-endpoint-source.txt
+            build/stage01-reverse-endpoint-source-hashes.txt
+            build/stage01-reverse-endpoint-artifact-hashes.txt
+          if-no-files-found: warn
+          retention-days: 30
