@@ -1,0 +1,67 @@
+name: Issue29 v187 corrected source-only witness-bound suffix proof NO original F
+on:
+  push:
+    branches:
+      - qa/issue29-original-witness-bound-v187
+    paths:
+      - '.github/workflows/issue29-v187-source-only-proof.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v187-source-only
+  cancel-in-progress: false
+jobs:
+  source-only-mathematical-proof:
+    if: >-
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/qa/issue29-original-witness-bound-v187'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout exact source-pinned QA for analysis only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Original sources and all 42 native-dispatch gates verified; zero converter execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B -m py_compile qa/issue29/v187_witness_bound_suffix.py
+          timeout -k 5s 60s python3 -B qa/issue29/v187_witness_bound_suffix.py > evidence/v187-source-result.json
+          python3 -B - <<'PY'
+          import json
+          r=json.load(open('evidence/v187-source-result.json'))
+          assert r['result']=='PROVEN_720_DAY_LEGAL_FIXED_RAIL_WEAVE_NOT_REACHABLE_BY_ADA_TICKET_STREAM'
+          assert r['witness_minimum_year_days']==713
+          assert r['boundary_streams_checked']==5664
+          assert r['small_modulus_independent_literal_walk_checks']==3084
+          assert r['original_calendar_F_calls']==r['native_converter_runs']==r['soak_years_certified']==0
+          print('V187_CORRECTED_SOURCE_MATH_720_DAY_UNREACHABLE_PASS_ZERO_F')
+          PY
+          git diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f...HEAD > evidence/changed-paths.txt
+          git rev-parse HEAD > evidence/HEAD.txt
+          sha256sum qa/issue29/v187_witness_bound_suffix.py qa/issue29/V187_WITNESS_BOUND_SUFFIX_PROOF.md > evidence/source-sha256.txt
+      - name: Archive every source-only proof receipt, even on failure
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('evidence')
+          m={x.name:{'bytes':x.stat().st_size,'sha256':hashlib.sha256(x.read_bytes()).hexdigest()}
+              for x in sorted(p.iterdir()) if x.is_file() and x.name!='members.sha256.json'}
+          (p/'members.sha256.json').write_text(json.dumps(m,sort_keys=True,indent=2)+'\n')
+          PY
+      - name: Upload source-only immutable QA evidence (not original F)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v187-corrected-source-only-witness-proof-no-F
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: warn
