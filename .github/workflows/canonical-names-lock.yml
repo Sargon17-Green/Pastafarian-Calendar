@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   verify:
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: (github.event_name != 'push' || (!contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
 
   perl-stage01:
     timeout-minutes: 15
-    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     steps:
       - name: 取得來源
@@ -2781,7 +2781,7 @@ jobs:
   # Stage2 gate is included in the established push workflow because the
   # standalone Stage2 workflow has no observed run on this feature branch.
   stage02-weaving-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -2850,7 +2850,7 @@ jobs:
   # Stage3 gate is integrated with the existing push workflow; feature-branch
   # standalone workflow registration is not accepted as CI evidence alone.
   stage03-weaving-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
@@ -2918,7 +2918,7 @@ jobs:
   # Stage4 Native also runs on the established feature-branch push workflow.
   # Registration of the separate Stage4 workflow alone is not acceptance evidence.
   stage04-month-occurrence-native:
-    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: (github.event_name != 'push' || (!contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -2960,7 +2960,7 @@ jobs:
 
   # Stage5 native gate is part of the established feature-branch push workflow.
   stage05-cutlet-occurrence-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3010,7 +3010,7 @@ jobs:
 
   # Stage6 Native gate validates the first calendarDate field only.
   stage06-year-occurrence-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3060,7 +3060,7 @@ jobs:
 
   # Stage7: five components from an externally materialized year, NOT full generator.
   stage07-five-field-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3111,7 +3111,7 @@ jobs:
 
   # Stage8: bounded generation of monthLengths, not the complete calendar.
   stage08-month-length-generation-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3162,7 +3162,7 @@ jobs:
 
   # Stage9 must run in this established push workflow; feature-branch standalone registration is not sufficient.
   stage09-cutlet-partition-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3218,7 +3218,7 @@ jobs:
 
   # Stage10: isolated distinct-name-index assignment (not complete calendar semantics).
   stage10-distinct-name-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3276,7 +3276,7 @@ jobs:
 
   # Stage11: exact stream rank selection with bounded rejection-skip.
   stage11-stream-rank-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3334,7 +3334,7 @@ jobs:
 
   # Stage12: bounded stream-ranked distinct-name index integration (not calendar acceptance).
   stage12-stream-distinct-name-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3393,7 +3393,7 @@ jobs:
 
   # Stage13: bounded text name materialization from a caller-provided catalog (not calendar acceptance).
   stage13-stream-name-materialization-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3452,7 +3452,7 @@ jobs:
           retention-days: 30
 
   stage14-canonical-name-selection-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3510,7 +3510,7 @@ jobs:
           retention-days: 30
 
   stage15-canonical-five-field-projection-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3568,7 +3568,7 @@ jobs:
           retention-days: 30
 
   stage16-weaving-seven-months-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3629,7 +3629,7 @@ jobs:
           retention-days: 30
 
   stage17-weaving-eight-months-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3691,7 +3691,7 @@ jobs:
           retention-days: 30
 
   stage18-weaving-nine-months-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3753,7 +3753,7 @@ jobs:
           retention-days: 30
 
   stage19-weaving-ten-months-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -3825,7 +3825,7 @@ jobs:
 
 
   stage20-weaving-eleven-months-native:
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -3898,7 +3898,7 @@ jobs:
 
   stage21-weaving-twelve-months-native:
     name: Perl Stage21 twelve-month / forty-eight-day native QA
-    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: github.ref_name == 'Perl+國語' && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -3978,7 +3978,7 @@ jobs:
 
   stage22-weaving-thirteen-months-native:
     timeout-minutes: 60
-    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]')
+    if: (github.ref_name == 'Perl+國語' || github.head_ref == 'Perl+國語') && !contains(github.event.head_commit.message, '[stage22-maxarena-only]') && !contains(github.event.head_commit.message, '[stage22-csv-only]')
     runs-on: ubuntu-latest
     env:
       LC_ALL: C.UTF-8
@@ -4090,4 +4090,109 @@ jobs:
           name: perl-stage22-max-arena-source-locked-native
           path: logs/stage22-maxarena
           if-no-files-found: error
+          retention-days: 30
+
+  stage22-csv-qa-source-locked-native:
+    name: Stage22 CSV parser and small independent oracle (111 TAP)
+    if: github.event_name == 'push' && github.ref_name == 'Perl+國語' && contains(github.event.head_commit.message, '[stage22-csv-only]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+      - name: Verify exact parent and all three QA-only source blobs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p logs/stage22-csv-qa
+          log=logs/stage22-csv-qa
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = '72034f71d106a4427621af4afb114318e60fc051'
+          printf 'PROJECT_ID=PC-BRANCH-PERL-GUOYU\nCOMMIT_SHA=%s\nSOURCE_LOCK=bb49201411b6397819c97e5fc2b40238251e48ce\n' "$GITHUB_SHA" > "$log/source.txt"
+          perl -e 'die "Perl 5.40 required\n" if $] < 5.040; print "$^V\n"' >> "$log/source.txt"
+          while read -r expected path; do
+            actual="$(git hash-object "$path")"
+            printf '%s %s\n' "$actual" "$path" >> "$log/source.txt"
+            test "$actual" = "$expected"
+          done <<'BLOBS'
+          b6f6e055c41e31be369b11fbacc33f6d0279856e qa/perl-guoyu/stage22_max_arena_forward_oracle.pl
+          b41ae40b2b04a07a6b3eb385b2f246097bb5f036 qa/perl-guoyu/stage22_oracle_csv_negative_input.t
+          85d055ae9dfec705105109195b8ed259c552d39c qa/perl-guoyu/stage22_perl_only_small_contract.pl
+          BLOBS
+          echo SOURCE_LOCK_PASS=1 >> "$log/source.txt"
+      - name: Run bounded syntax and isolated 66+45 TAP QA only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          log=logs/stage22-csv-qa
+          i=0
+          for file in qa/perl-guoyu/stage22_max_arena_forward_oracle.pl qa/perl-guoyu/stage22_oracle_csv_negative_input.t qa/perl-guoyu/stage22_perl_only_small_contract.pl; do
+            i=$((i+1))
+            set +e
+            perl -c "$file" > "$log/syntax-$i.stdout" 2> "$log/syntax-$i.stderr"
+            rc=$?
+            set -e
+            printf '%s\n' "$rc" > "$log/syntax-$i.exit"
+            test "$rc" = 0
+            grep -q 'syntax OK' "$log/syntax-$i.stderr"
+          done
+          set +e
+          ( ulimit -v 393216; timeout --signal=TERM --kill-after=5s 90s perl qa/perl-guoyu/stage22_oracle_csv_negative_input.t ) > "$log/negative.tap" 2> "$log/negative.stderr"
+          negative_rc=$?
+          ( ulimit -v 393216; timeout --signal=TERM --kill-after=5s 90s perl qa/perl-guoyu/stage22_perl_only_small_contract.pl ) > "$log/positive.tap" 2> "$log/positive.stderr"
+          positive_rc=$?
+          set -e
+          printf '%s\n' "$negative_rc" > "$log/negative.exit"
+          printf '%s\n' "$positive_rc" > "$log/positive.exit"
+          test "$negative_rc" -eq 0 && test "$positive_rc" -eq 0
+          test ! -s "$log/negative.stderr" && test ! -s "$log/positive.stderr"
+          for spec in "negative 66 STAGE22_ORACLE_CSV_NEGATIVE_CONTRACT=PASS" "positive 45 STAGE22_PERL_ORACLE_BRUTE_FORCE_CONTRACT=PASS"; do
+            read -r label expected marker <<< "$spec"
+            perl -e '
+              use strict; use warnings;
+              my ($file,$expected,$marker)=@ARGV;
+              open my $fh, "<", $file or die "open $file: $!";
+              my ($plan,$count,$marker_count)=(undef,0,0);
+              while(my $line=<$fh>) {
+                chomp $line; $line =~ s/\r\z//;
+                if($line =~ /^1\.\.([0-9]+)\z/) { die "duplicate plan\n" if defined $plan; $plan=$1; next; }
+                if($line =~ /^ok[ \t]+([0-9]+)(?:[ \t]|\z)/) { ++$count; die "noncontiguous TAP\n" if $count != $1; next; }
+                die "test failure\n" if $line =~ /^not ok\b/;
+                if($line eq $marker) { ++$marker_count; next; }
+                next if $line eq "" || $line =~ /^#/;
+                die "unexpected TAP text: $line\n";
+              }
+              die "TAP count/plan/marker mismatch\n" unless defined($plan) && $plan == $expected && $count == $expected && $marker_count == 1;
+              print "TAP_VERIFIED=$count/$expected\n";
+            ' "$log/$label.tap" "$expected" "$marker" | tee "$log/$label.verify"
+          done
+          {
+            echo PROJECT_ID=PC-BRANCH-PERL-GUOYU
+            echo SYNTAX_PASS=3/3
+            echo NEGATIVE_TAP_PASS=66/66
+            echo POSITIVE_TAP_PASS=45/45
+            echo TOTAL_TAP_PASS=111/111
+            echo STAGE22_CSV_MICRO_CI_PASS=1
+            echo NO_12X52_13X4_REPLAY=1
+            echo FULL_YEAR_NOT_ASSESSED=1
+          } > "$log/summary.txt"
+          sha256sum "$log"/*.tap "$log"/*.stderr "$log/source.txt" > "$log/log-sha256.txt"
+          cat "$log/summary.txt" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        name: Store source, TAP, exit, stderr and hashes even on failure
+        if: always()
+        with:
+          name: perl-stage22-csv-qa-source-locked
+          path: logs/stage22-csv-qa
+          if-no-files-found: warn
           retention-days: 30
