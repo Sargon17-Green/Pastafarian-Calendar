@@ -1,0 +1,170 @@
+{
+  "archive_crc_and_manifest_sha": "PASS",
+  "archive_sha256": {
+    "CB": "ea247b7c907d9cd0e1fb8e211619ff538b99b435dd43bcdaef70f084f6e499be",
+    "CD": "a8a48737663cdcfcae6df4c93bc62dde81f02c5159803a7d3484aee7363c9db1"
+  },
+  "cases": {
+    "b0_n100": {
+      "b_stored_at_5_1691": 0,
+      "dynamic_stored_and_fetched": 62,
+      "fetch_next_delta": [
+        1,
+        0
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        0
+      ],
+      "input": "1 0 0 100",
+      "n_stored_at_11_1693": 100,
+      "owner_value": 0,
+      "reads": 2,
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout_length": 21,
+      "stdout_sha256": "5abdb9b68376f375671dbf51591f3d23a0843b4cdab2a9007addeec8a5dc89e9",
+      "steps": 24853
+    },
+    "b0_n999": {
+      "b_stored_at_5_1691": 0,
+      "dynamic_stored_and_fetched": 62,
+      "fetch_next_delta": [
+        1,
+        0
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        0
+      ],
+      "input": "1 0 0 999",
+      "n_stored_at_11_1693": 999,
+      "owner_value": 0,
+      "reads": 2,
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout_length": 21,
+      "stdout_sha256": "5abdb9b68376f375671dbf51591f3d23a0843b4cdab2a9007addeec8a5dc89e9",
+      "steps": 24853
+    },
+    "b1_n100": {
+      "b_stored_at_5_1691": 1,
+      "dynamic_stored_and_fetched": 118,
+      "fetch_next_delta": [
+        0,
+        1
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        1
+      ],
+      "input": "1 1 0 100",
+      "n_stored_at_11_1693": 100,
+      "owner_value": 1,
+      "reads": 2,
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout_length": 77,
+      "stdout_sha256": "dd8ca101f718fa8b3bb0c7989885e6e277267f2c8839c11c043b9cd0360884b7",
+      "steps": 24977
+    },
+    "b1_n999": {
+      "b_stored_at_5_1691": 1,
+      "dynamic_stored_and_fetched": 118,
+      "fetch_next_delta": [
+        0,
+        1
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        1
+      ],
+      "input": "1 1 0 999",
+      "n_stored_at_11_1693": 999,
+      "owner_value": 1,
+      "reads": 2,
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout_length": 78,
+      "stdout_sha256": "5d434b9a9bc96d270dd1adcb88a2a9843caa6d6931673e449870fa74ed7ce37f",
+      "steps": 24977
+    }
+  },
+  "ci_runs_new": 0,
+  "conclusion": "For fixed n, changing second token b=0 -> 1 changes owner 0 -> 1 and code 62 -> 118 on a common 24822 opcode/IP prefix; changing n=100 -> 999 at fixed b leaves route, owner, and code unchanged for four finite traces only.",
+  "hostile_detached_mutations_rejected": 8,
+  "hostile_names": [
+    "forge_last_n_write",
+    "forge_second_b_write",
+    "forge_second_b_read",
+    "forge_gate_op",
+    "forge_owner_write",
+    "forge_owner_read",
+    "forge_code_write",
+    "forge_dynamic_fetch"
+  ],
+  "inputs_covered": [
+    "b0_n100",
+    "b0_n999",
+    "b1_n100",
+    "b1_n999"
+  ],
+  "native_executions_new": 0,
+  "paired_checks": {
+    "fixed_b0_n100_to_n999": {
+      "different_input_position": "last integer token only",
+      "first_physical_stack_difference_tick": 7079,
+      "owner_and_code_unchanged": true,
+      "shared_opcode_ip_route_count": 24853
+    },
+    "fixed_b1_n100_to_n999": {
+      "different_input_position": "last integer token only",
+      "first_physical_stack_difference_tick": 7079,
+      "owner_and_code_unchanged": true,
+      "shared_opcode_ip_route_count": 24977
+    },
+    "fixed_n100_b0_to_b1": {
+      "different_input_position": "second integer token only",
+      "first_opcode_or_ip_divergence_tick": 24823,
+      "first_physical_stack_difference_tick": 2555,
+      "new_owner_code_steps": [
+        1,
+        118,
+        24977
+      ],
+      "old_owner_code_steps": [
+        0,
+        62,
+        24853
+      ],
+      "proof_scope": "two original executed traces; not hypothetical instruction simulation",
+      "shared_opcode_ip_prefix_count": 24822
+    },
+    "fixed_n999_b0_to_b1": {
+      "different_input_position": "second integer token only",
+      "first_opcode_or_ip_divergence_tick": 24823,
+      "first_physical_stack_difference_tick": 2555,
+      "new_owner_code_steps": [
+        1,
+        118,
+        24977
+      ],
+      "old_owner_code_steps": [
+        0,
+        62,
+        24853
+      ],
+      "proof_scope": "two original executed traces; not hypothetical instruction simulation",
+      "shared_opcode_ip_prefix_count": 24822
+    }
+  },
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "schema": "qa31ce-original-native-four-trace-causal-comparison-v1",
+  "source_blob_sha1": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_accepted": false,
+  "steps_physically_inspected": 99660
+}
