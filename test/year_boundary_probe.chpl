@@ -179,6 +179,94 @@ proc checkpoint(phaseName: string) {
   try! stdout.flush();
 }
 
+// Bounded research-only transpose window: after(i+1) is exactly zero
+// outside its packed support. The skipped high cells have zero suffix;
+// below the first supported predecessor index the suffix is constant.
+// No production algorithm or normative acceptance is altered.
+proc researchSparseTransposeWindowed(const ref after: SparseWeavingVec,
+                                      n: int, k: int,
+                                      spec: SparseWeavingGapSpec): SparseWeavingVec {
+  var dense: [0..n] bigint;
+  const lo = max(0, after.first - 1);
+  const hi = min(n, after.first + after.values.size - 2);
+  if hi < lo then return sparseWeavingPack(dense);
+  var suffix = new bigint(0);
+  const lowActive = max(spec.q, after.first-1);
+  const highActive = hi;
+  const useRecurrence = spec.fixedSum == 0 && spec.tail == 0 &&
+                        k >= 8 && highActive-lowActive >= 8;
+  var coefficient = new bigint(0);
+  if useRecurrence then
+    coefficient = sparseWeavingChooseBig(k-2+n-highActive,n-highActive);
+  for i in hi..lo by -1 {
+    const a = after.at(i+1);
+    if a != 0 {
+      if useRecurrence && i >= lowActive && i <= highActive {
+        if coefficient != 0 then suffix += a*coefficient;
+      } else {
+        const factor = sparseWeavingWeight(i,n,k,spec);
+        if factor != 0 then suffix += a*factor;
+      }
+    }
+    dense[i] = suffix;
+    if useRecurrence && i <= highActive && i > lowActive then
+      coefficient = (coefficient * new bigint(k-1+n-i)) /
+                    new bigint(n-i+1);
+  }
+  for i in 0..<lo do dense[i] = suffix;
+  return sparseWeavingPack(dense);
+}
+
+proc checkResearchSparseTransposeWindowedFinite() {
+  var cases = 0;
+  // Small exhaustive dimensions with deterministic sparse, dense and empty
+  // adjoints; include zero/tail/fixed specifications. Differential only:
+  // this compares against the existing Chapel primitive, not an
+  // independent mathematical oracle or a whole-year performance gate.
+  for n in 0..9 {
+    for k in 1..6 {
+      for shape in 0..4 {
+        var dense: [0..n+k] bigint;
+        if shape != 4 {
+          for t in 0..n+k {
+            if (t+shape)%4 != 0 then
+              dense[t] = new bigint((t+1)*(shape+2));
+          }
+        }
+        const after = sparseWeavingPack(dense);
+        for q in 0..min(3,n) {
+          var spec: SparseWeavingGapSpec;
+          spec.q = q;
+          if shape == 1 then spec.tail = 2;
+          if shape == 2 {
+            spec.fixedSum = 1;
+            if q > 0 then spec.firstFixed = q-1;
+          }
+          if shape == 3 {
+            spec.tail = 1;
+            if q > 0 then spec.firstFixed = q-1;
+          }
+          const baseline = sparseWeavingTranspose(after,n,k,spec);
+          const optimized = researchSparseTransposeWindowed(after,n,k,spec);
+          if baseline.first != optimized.first ||
+             baseline.values.size != optimized.values.size then
+            halt("Windowed transpose finite shape mismatch n=",n,
+                 " k=",k," shape=",shape," q=",q);
+          for t in 0..<baseline.values.size {
+            if baseline.values[t] != optimized.values[t] then
+              halt("Windowed transpose finite mismatch n=",n,
+                   " k=",k," shape=",shape," q=",q," t=",t);
+          }
+          cases += 1;
+        }
+      }
+    }
+  }
+  writeln("RESEARCH_WINDOWED_TRANSPOSE_FINITE_CASES=",cases);
+  writeln("RESEARCH_WINDOWED_TRANSPOSE_FINITE_RESULT=EXACT_DIFFERENTIAL_PASS");
+  try! stdout.flush();
+}
+
 // Research-only non-mutating attribution for one candidate-block snapshot.
 // Reconstructs the current candidate partition from the same Chapel primitives
 // and compares every exact bigint block with production. This is deliberately
@@ -199,6 +287,8 @@ proc profileSparseCandidateSubphases(const ref lens: [?D] int,
   for i in 0..sizes[m] do identity[i] = new bigint(1);
   var adjoint = sparseWeavingPack(identity);
   var transposeSeconds = 0.0;
+  var windowedSeconds = 0.0;
+  var windowedCalls = 0;
   var trialSeconds = 0.0;
   var dotSeconds = 0.0;
   var transposeCalls = 0;
@@ -225,9 +315,27 @@ proc profileSparseCandidateSubphases(const ref lens: [?D] int,
       const older = sparseWeavingExtendSpec(specs[j], j, 1);
       var transposeTimer: stopwatch;
       transposeTimer.start();
-      adjoint = sparseWeavingTranspose(adjoint, sizes[j-1], lens[j], older);
+      const baselineAdjoint = sparseWeavingTranspose(adjoint, sizes[j-1],
+                                                     lens[j], older);
       transposeTimer.stop();
       transposeSeconds += transposeTimer.elapsed();
+      var windowedTimer: stopwatch;
+      windowedTimer.start();
+      const windowedAdjoint = researchSparseTransposeWindowed(adjoint,
+                                                    sizes[j-1], lens[j], older);
+      windowedTimer.stop();
+      windowedSeconds += windowedTimer.elapsed();
+      windowedCalls += 1;
+      if baselineAdjoint.first != windowedAdjoint.first ||
+         baselineAdjoint.values.size != windowedAdjoint.values.size then
+        halt("Windowed transpose snapshot shape mismatch step=",step,
+             " month=",j);
+      for t in 0..<baselineAdjoint.values.size {
+        if baselineAdjoint.values[t] != windowedAdjoint.values[t] then
+          halt("Windowed transpose snapshot value mismatch step=",step,
+               " month=",j," index=",t);
+      }
+      adjoint = baselineAdjoint;
       transposeCalls += 1;
     }
   }
@@ -251,6 +359,12 @@ proc profileSparseCandidateSubphases(const ref lens: [?D] int,
          step);
   writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
           "_TRANSPOSE_SECONDS=", transposeSeconds);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_WINDOWED_SECONDS=", windowedSeconds);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_WINDOWED_CALLS=", windowedCalls);
+  writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
+          "_WINDOWED_RESULT=EXACT_TRANSPOSE_MATCH_RESEARCH_ONLY");
   writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
           "_TRIAL_SECONDS=", trialSeconds);
   writeln("YEAR_BOUNDARY_CANDIDATE_SAMPLE_STEP_", step,
@@ -397,6 +511,7 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
 }
 
 proc main() {
+  checkResearchSparseTransposeWindowedFinite();
   checkSparseWeavingDifferential();
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
