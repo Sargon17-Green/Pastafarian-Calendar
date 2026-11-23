@@ -163,16 +163,24 @@ local extreme_first=cmp(rank,ONE)==0
 local extreme_last=cmp(rank,rows[0][0])==0
 for step=0,limit-1 do
 if extreme_first or extreme_last then
+-- Every structurally legal transition has a completion: close all currently
+-- opened labels in label order, then open/close the rest in that order.
+-- Therefore extreme lexicographic ranks need only one suffix cardinality.
+local lo,hi=closed+1,math.min(opened+1,#months)
+local direction=extreme_first and 1 or -1
+local j=extreme_first and lo or hi
 local picked
-for j=closed+1,math.min(opened+1,#months) do
+while j>=lo and j<=hi do
 local op,cl=candidate(rem,months,opened,closed,j)
 if op then
 rem[j]=rem[j]-1
 local card=suffix(rem,op,cl,rows,p,step+1)
 rem[j]=rem[j]+1
-if cmp(card,ZERO)>0 then picked={j,op,cl,card} end
-if picked and extreme_first then break end
+assert(cmp(card,ZERO)>0,'structural branch lacks a completion')
+picked={j,op,cl,card}
+break
 end
+j=j+direction
 end
 assert(picked,'extreme rank has no legal branch')
 local j,op,cl=picked[1],picked[2],picked[3]
