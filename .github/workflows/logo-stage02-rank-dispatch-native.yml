@@ -1,0 +1,98 @@
+name: Logo Stage2 QA Native Dispatcher
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-fastmod-evidence-20261123'
+permissions:
+  contents: read
+jobs:
+  source-locked-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [small, deep31, deep64]
+    env:
+      SHARD: "\${{ matrix.shard }}"
+    steps:
+      - name: Checkout exact QA source
+        uses: actions/checkout@v4
+      - name: Assert source locks and generate independent fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-fastmod-evidence-20261123"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object src/stage02_answer_at.logo)" = f0951ba68a191667208b2a2b99b386c5336e49c2
+          test "$(git hash-object src/stage02_choose_short.logo)" = a556145f52a6c59018b0ef216d7a4fc6813e0f23
+          test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
+          test "$(git hash-object src/stage02_choose_wide_general.logo)" = bda23ddc1d0f8a534b20d8391ecc7519fccd57c3
+          test "$(git hash-object src/stage02_choose_rank.logo)" = 116cab31f3afd03b3a03a8981cef740c193c727b
+          test "$(git hash-object qa/logo_stage2_dispatch_native_oracle.py)" = 0e4730bf74d51ba098201daea67221f2e0dffe97
+          case "$SHARD" in
+            small) cases=22; checks=46; seconds=360 ;;
+            deep31) cases=8; checks=24; seconds=900 ;;
+            deep64) cases=5; checks=15; seconds=900 ;;
+            *) exit 2 ;;
+          esac
+          echo "$cases $checks $seconds" > "$RUNNER_TEMP/counts.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
+          git hash-object .github/workflows/logo-stage02-rank-dispatch-native.yml > "$RUNNER_TEMP/workflow-blob.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_short.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo src/stage02_choose_rank.logo qa/logo_stage2_dispatch_native_oracle.py .github/workflows/logo-stage02-rank-dispatch-native.yml > "$RUNNER_TEMP/source-hashes.txt"
+          python3 -m py_compile qa/logo_stage2_dispatch_native_oracle.py
+          python3 qa/logo_stage2_dispatch_native_oracle.py --shard "$SHARD" --output "$RUNNER_TEMP/native.logo" | tee "$RUNNER_TEMP/host.log"
+          grep -Fxq "HOST_CASES=$cases" "$RUNNER_TEMP/host.log"
+          grep -Fxq "HOST_CHECKS=$checks" "$RUNNER_TEMP/host.log"
+          grep -Fxq "INDEPENDENT_HOST_ORACLE=PASS" "$RUNNER_TEMP/host.log"
+      - name: Build UCBLogo at pinned upstream SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
+          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$RUNNER_TEMP/ucblogo-source"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Native exact source bounded execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          read -r cases checks seconds < "$RUNNER_TEMP/counts.txt"
+          log="$RUNNER_TEMP/native.log"
+          echo "DISPATCH_NATIVE_SHARD=$SHARD MAX_SECONDS=$seconds"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s "$seconds" stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::Native failure or timeout exit=$code"
+            exit 1
+          fi
+          grep -Fxq "DISPATCH_NATIVE_CASES_PASIS $cases" "$log"
+          grep -Fxq "DISPATCH_NATIVE_CHECKS_PASIS $checks" "$log"
+          grep -Fxq "DISPATCH_NATIVE_PASIS" "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then exit 1; fi
+          echo "NATIVE_LOGO_STAGE2_DISPATCH=PASS SHARD=$SHARD"
+      - name: Preserve inputs, exit evidence and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-dispatch-\${{ matrix.shard }}-evidence
+          path: |
+            \${{ runner.temp }}/commit.txt
+            \${{ runner.temp }}/workflow-blob.txt
+            \${{ runner.temp }}/source-hashes.txt
+            \${{ runner.temp }}/counts.txt
+            \${{ runner.temp }}/host.log
+            \${{ runner.temp }}/native.logo
+            \${{ runner.temp }}/native.log
+          if-no-files-found: warn
+          retention-days: 30
