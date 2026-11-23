@@ -183,3 +183,11 @@ build/calendar_bowl_trace46.o: build/calendar.o src/runtime/calendar_bowl_trace4
 build/calendar_bowl_trace46.gb: build/calendar_bowl_trace46.o
 	$(RGBLINK) -n build/calendar_bowl_trace46.sym -m build/calendar_bowl_trace46.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated Stage1 Native391 12 retained post-stirs after Native390; no default gate change.
+build/calendar_bowl_poststirs.o: build/calendar.o src/runtime/calendar_bowl_poststirs.asm src/tests/calendar_bowl_poststirs_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_POSTSTIRS_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_bowl_poststirs.gb: build/calendar_bowl_poststirs.o
+	$(RGBLINK) -n build/calendar_bowl_poststirs.sym -m build/calendar_bowl_poststirs.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
