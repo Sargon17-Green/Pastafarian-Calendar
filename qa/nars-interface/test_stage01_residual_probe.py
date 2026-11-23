@@ -32,15 +32,15 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,28))
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
-        self.assertGreaterEqual(r["probe_count"],15)
-        self.assertLessEqual(r["probe_count"],32)
-        self.assertEqual(r["instrumentation_mode"],"bounded_source_spans_8")
+        self.assertEqual(r["probe_count"],8)
+        self.assertEqual([p["first_line"] for p in r["probes"]],[172,173,174,175,177,178,179,180])
+        self.assertEqual(r["instrumentation_mode"],"first_residual_span_individual_172_180")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
         self.assertTrue(r["source_statements_preserved"])
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
-        self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),2)
+        self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
 
     def test_no_acceptance_possible(self):
         r=self.receipt
@@ -58,7 +58,7 @@ class ResidualTests(unittest.TestCase):
         r=self.receipt
         starts=set()
         for p in r["probes"]:
-            self.assertIn(p["kind"],("statement_span","bounded_for_block"))
+            self.assertIn(p["kind"],("statement",))
             self.assertGreaterEqual(p["last_line"],p["first_line"])
             self.assertIn("PHASE=START",p["start_token"])
             self.assertIn("PHASE=END",p["end_token"])

@@ -100,12 +100,13 @@ jobs:
              $a.suite_captured_exact -ne $true -or $a.suite_ec_valid -ne $true -or
              $a.final_marker_exact -ne $true -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
-             $a.statement_started -lt 1 -or $a.statement_receipts.Count -lt 15){
+             $a.statement_started -lt 1 -or $a.statement_receipts.Count -ne 8){
              throw 'RESIDUAL_DIAGNOSTIC_EVIDENCE_MISSING'}
           if(@($a.copies | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -ne 0){
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
+             $b.instrumentation_mode -cne 'first_residual_span_individual_172_180' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $true){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)

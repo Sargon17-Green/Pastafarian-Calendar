@@ -60,7 +60,8 @@ try {
     $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
-    $m.program_count -ne 28 -or ($m.probe_count -lt 15 -or $m.probe_count -gt 32) -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
+    $m.instrumentation_mode -cne 'first_residual_span_individual_172_180' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.original_unmodified_suite_proven -ne $false -or
     $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
  if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}

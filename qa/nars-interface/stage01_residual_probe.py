@@ -91,8 +91,16 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    if not (15 <= len(spans) <= 32) or sum(k == "bounded_for_block" for _,_,k in spans) != 2:
-        raise ValueError("BOUNDED_SPAN_COUNT_UNEXPECTED")
+    # Follow up V13's independently verified first incomplete source span only.
+    # Uninstrumented statements elsewhere are retained exactly, not skipped.
+    focus = [172, 173, 174, 175, 177, 178, 179, 180]
+    focused = [(start, end, kind) for start, end, kind in units
+               if block["start_line"] + start in focus]
+    if ([block["start_line"] + start for start, _, _ in focused] != focus
+            or len(focused) != 8
+            or any(kind != "statement" or end != start+1 for start, end, kind in focused)):
+        raise ValueError("FOCUSED_SOURCE_LINES_CHANGED")
+    spans = focused
     before, after, probes = {}, {}, []
     for idx, (start, end, kind) in enumerate(spans, 1):
         first_line = block["start_line"] + start
@@ -177,7 +185,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
-                   source_statements_preserved=True,instrumentation_mode="bounded_source_spans_8",
+                   source_statements_preserved=True,instrumentation_mode="first_residual_span_individual_172_180",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
