@@ -52,7 +52,7 @@ jobs:
           set -euo pipefail
           docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa             -v "$GITHUB_WORKSPACE:/work:ro"             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro"             -v "$RUNNER_TEMP/qa31cf-traces:/qa31cf-traces:rw"             -v "$GITHUB_WORKSPACE/qa31cf-out:/qa31cf-out:rw" -w /work             python:2.7-slim sh -ceu "
               cp /work/qa/qa31cf_nonzero_discriminator_native.py /tmp/qa31cf_nonzero_discriminator_native.py
-              python -m py_compile /tmp/qa31cf_natural_input_sweep.py
+              python -m py_compile /tmp/qa31cf_nonzero_discriminator_native.py
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               timeout --kill-after=10s 3000s python -u /work/qa/qa31cf_nonzero_discriminator_native.py /qa31cf-traces /qa31cf-out
             " | tee qa31cf-out/native-sweep.log
