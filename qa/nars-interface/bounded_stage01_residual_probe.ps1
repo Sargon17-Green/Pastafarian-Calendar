@@ -48,7 +48,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v1'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v15'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -60,7 +60,7 @@ try {
     $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
-    $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
+    $m.program_count -ne 29 -or $m.probe_count -ne 8 -or
     $m.instrumentation_mode -cne 'first_residual_span_individual_172_180' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.original_unmodified_suite_proven -ne $false -or
     $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
@@ -76,6 +76,11 @@ try {
  foreach($field in @('path','name_code_path')){if(Test-Path -LiteralPath $m.compiled.$field){throw 'PREEXISTING_COMPILE_RECEIPT'}}
  foreach($s in $m.probes){
    foreach($phase in @('start','end')){if(Test-Path -LiteralPath $s.($phase+'_path')){throw 'PREEXISTING_STATEMENT_RECEIPT'}}
+ }
+ $w=$m.line180_witness
+ if($w.source_line -ne 180){throw 'LINE180_WITNESS_CONTRACT'}
+ foreach($prop in $w.paths.PSObject.Properties){
+   if(Test-Path -LiteralPath $prop.Value){throw 'PREEXISTING_LINE180_RECEIPT'}
  }
  $startTime=[DateTime]::UtcNow
  $p=Start-Process -FilePath $exe -ArgumentList ('"'+$prefix+'"') -WorkingDirectory $rt -PassThru
@@ -152,7 +157,32 @@ try {
  }
  $final=ReadExact $marker $m.marker_token (Join-Path $Evidence 'residual_final_diagnostic_marker.txt')
  $r['final_marker_exact']=[bool]$final.exact
- $all=($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
+ $wstart=ReadExact $w.paths.start $w.start_token (Join-Path $Evidence 'line180_start.txt')
+ $wcaptured=ReadExact $w.paths.captured $w.captured_token (Join-Path $Evidence 'line180_captured.txt')
+ $metrics=ReadNumbers $w.paths.metrics (Join-Path $Evidence 'line180_metrics.txt')
+ $original=ReadNumbers $w.paths.original_ec (Join-Path $Evidence 'line180_original_ec.txt')
+ $corrected=ReadNumbers $w.paths.corrected_ec (Join-Path $Evidence 'line180_corrected_ec.txt')
+ $omsg=ReadNumbers $w.paths.original_message (Join-Path $Evidence 'line180_original_message_codepoints.txt')
+ $cmsg=ReadNumbers $w.paths.corrected_message (Join-Path $Evidence 'line180_corrected_message_codepoints.txt')
+ $ecValid=$original.valid -and $corrected.valid -and $original.values.Count -eq 1 -and $corrected.values.Count -eq 1 -and (@(0,1,2,3) -contains $original.values[0]) -and (@(0,1,2,3) -contains $corrected.values[0])
+ $witnessValid=$wstart.exact -and $wcaptured.exact -and $metrics.valid -and $metrics.values.Count -ge 4 -and $ecValid
+ if($ecValid){
+   if($original.values[0] -eq 0 -and -not $omsg.valid){$witnessValid=$false}
+   if($corrected.values[0] -eq 0 -and -not $cmsg.valid){$witnessValid=$false}
+ }
+ $classification='INCOMPLETE'
+ if($witnessValid){
+   $classification='OTHER_OR_UNRESOLVED'
+   if(($metrics.values -join ',') -ceq '0,17,1,1,17,17' -and $original.values[0] -eq 0 -and $corrected.values[0] -eq 1){
+     $classification='SCALAR_VECTOR_SHAPE_MISMATCH_CONFIRMED_DIAGNOSTIC_ONLY'
+   }
+ }
+ $r['line180_witness']=@{valid=[bool]$witnessValid;classification=$classification;metrics=$metrics.values;
+   original_ec=$original.values;counterfactual_ec=$corrected.values;
+   original_message_codepoints=$omsg.values;counterfactual_message_codepoints=$cmsg.values;
+   start_exact=$wstart.exact;captured_exact=$wcaptured.exact}
+ Write-Output ('LINE180_WITNESS='+($r['line180_witness']|ConvertTo-Json -Compress -Depth 8))
+ $all=$witnessValid -and ($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
    (@($r['fx_checkpoints'] | Where-Object {$_.exact -ne $true}).Count -eq 0) -and
    ($r['copies'].Count -eq 2) -and
    (@($r['copies'] | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -eq 0) -and

@@ -29,7 +29,7 @@ class ResidualTests(unittest.TestCase):
     def test_locked_prerequisites_and_source(self):
         r=self.receipt
         self.assertEqual(r["source_commit"],SOURCE_COMMIT)
-        self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,28))
+        self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,29))
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
@@ -41,6 +41,16 @@ class ResidualTests(unittest.TestCase):
         self.assertTrue(r["source_statements_preserved"])
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
+
+    def test_line180_exact_counterfactual(self):
+        w=self.receipt["line180_witness"]
+        self.assertEqual(w["source_line"],180)
+        self.assertTrue(w["original"].startswith("AssertEqual (⊂17) (⊂⍴CUTLET_NAMES) "))
+        self.assertEqual(w["counterfactual"],w["original"].replace("(⊂17)","(⊂,17)",1))
+        self.assertEqual(len(set(w["paths"].values())),7)
+        self.assertIn("⍴⍴⍴CUTLET_NAMES",w["metrics_expression"])
+        self.assertIn("≢CUTLET_NAMES",w["metrics_expression"])
+        self.assertIn("NOT_PASS",w["captured_token"])
 
     def test_no_acceptance_possible(self):
         r=self.receipt

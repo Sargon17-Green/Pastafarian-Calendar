@@ -107,8 +107,13 @@ jobs:
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
              $b.instrumentation_mode -cne 'first_residual_span_individual_172_180' -or
-             $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
+             $b.program_count -ne 29 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $true){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+          if($a.line180_witness.valid -ne $true -or
+             $a.line180_witness.start_exact -ne $true -or
+             $a.line180_witness.captured_exact -ne $true -or
+             $b.line180_witness.source_line -ne 180){throw 'LINE180_WITNESS_MISSING'}
+          Write-Output ('LINE180_INDEPENDENT_GATE='+($a.line180_witness|ConvertTo-Json -Compress -Depth 8))
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
@@ -124,7 +129,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-statement-diagnostic-v1
+          name: apl-german-stage01-line180-witness-v15
           path: |
             residual_evidence/
             residual_font_evidence/

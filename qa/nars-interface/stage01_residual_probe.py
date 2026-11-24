@@ -136,6 +136,43 @@ def instrument(root: pathlib.Path, marker: str):
     return out, probes, locked["manifest"]["manifest_sha256"]
 
 
+def line180_witness(root, marker):
+    """Exact original assertion and independent shape-only counterfactual."""
+    locked = load_locked_sources(root)
+    block = next(b for b in locked["blocks"] if b["name"] == "RunStage01Tests")
+    if block["path"] != "test/stage01_tests.apl":
+        raise ValueError("LINE180_PATH_MISMATCH")
+    original = fx_definition_lines(block)[180-block["start_line"]].strip()
+    anchor = "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES)"
+    if not original.startswith(anchor + " "):
+        raise ValueError("LINE180_ANCHOR_MISMATCH")
+    corrected = original.replace("(⊂17)", "(⊂,17)", 1)
+    wp = pathlib.PureWindowsPath(marker)
+    paths = {k:str(wp.with_name(wp.stem+"_line180_"+k+".txt"))
+             for k in ("start","metrics","original_ec","original_message","corrected_ec","corrected_message","captured")}
+    start = f"APL_GERMAN_LINE180_V15|SOURCE={SOURCE_COMMIT}|PHASE=START"
+    captured = f"APL_GERMAN_LINE180_V15|SOURCE={SOURCE_COMMIT}|PHASE=CAPTURED_NOT_PASS"
+    # Layout: expected rank, expected scalar value, actual rank,
+    # actual shape dimensions, actual shape values, catalog tally.
+    metrics = "(⍴⍴17),17,(⍴⍴⍴CUTLET_NAMES),(⍴⍴CUTLET_NAMES),(,⍴CUTLET_NAMES),(≢CUTLET_NAMES)"
+    def write(expression, key):
+        return f"(⍕({expression})) ⎕NAPPEND ((⎕UCS {_codes(paths[key])}) ⎕NCREATE 0)"
+    parts = ["95 Stage01ChunkAssert 0", marker_write(start,paths["start"]),
+             write(metrics,"metrics")]
+    for key, expression in (("original",original),("corrected",corrected)):
+        var = "QALine180"+key.capitalize()+"EC"
+        parts += [f"{var}←⎕EC ⎕UCS {_codes(expression)}",
+                  write(f"{var}[1]",key+"_ec")]
+        msg = write(f"⎕UCS ⊃{var}[3]",key+"_message")
+        parts.append(f"⎕EC ⎕UCS {_codes(msg)}")
+    parts.append(marker_write(captured,paths["captured"]))
+    program = " ⋄ ".join(parts)
+    return program, dict(paths=paths,start_token=start,captured_token=captured,
+                         source_line=180,original=original,counterfactual=corrected,
+                         metrics_expression=metrics,
+                         program_sha256=hashlib.sha256(program.encode()).hexdigest())
+
+
 def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     root = pathlib.Path(repo_root).resolve()
     paired, base = build_paired_copy(raw,root,marker)
@@ -164,9 +201,10 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     if programs[25].count(target) != 1:
         raise ValueError("PAIRED_ENTRYPOINT_NOT_UNIQUE")
     suite_program = programs[25].replace(target,replacement)
-    programs = programs[:25] + [compile_program,suite_program,
+    witness_program, witness = line180_witness(root, marker)
+    programs = programs[:25] + [compile_program,suite_program,witness_program,
                 "95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL,marker)]
-    if len(programs) != 28:
+    if len(programs) != 29:
         raise ValueError("RESIDUAL_PROGRAM_COUNT_INVALID")
     outer = " ⋄ ".join("⎕EC ⎕UCS "+_codes(x) for x in programs)
     serial = outer.replace("⎕","{quad}").replace("⋄","{diamond}")
@@ -190,7 +228,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
-                   marker_token=FINAL,marker_path=marker,program_count=28,
+                   marker_token=FINAL,marker_path=marker,program_count=29,line180_witness=witness,
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 
