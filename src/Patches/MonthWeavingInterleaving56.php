@@ -71,6 +71,9 @@ final class MonthWeavingInterleaving56
                 ? $this->suffixCount($high, $activeTotal)
                 : BigInt::one();
 
+            // All already-open sibling blocks share the same suffix factor.
+            // Sum their bases before multiplying: exact distributivity preserves rank.
+            $skippedBase = BigInt::zero();
             $selected = false;
             $previousMonth = null;
             $previousBaseCount = null;
@@ -80,9 +83,8 @@ final class MonthWeavingInterleaving56
                 $nextBaseCount = $previousMonth === null
                     ? self::firstBranchBaseCount($baseCount, $remainingForMonth, $prefix, $low, $month, $activeTotal)
                     : self::nextBranchBaseCount($previousBaseCount, $remaining, $prefix, $low, $previousMonth, $month);
-                $block = $nextBaseCount->mul($futureSame);
                 if ($month < $wanted) {
-                    $rank = $rank->add($block);
+                    $skippedBase = $skippedBase->add($nextBaseCount);
                     $previousMonth = $month;
                     $previousBaseCount = $nextBaseCount;
                     continue;
@@ -95,6 +97,7 @@ final class MonthWeavingInterleaving56
                 $selected = true;
                 break;
             }
+            if (!$skippedBase->isZero()) $rank = $rank->add($skippedBase->mul($futureSame));
             if ($selected) continue;
 
             $month = $high + 1;
@@ -146,31 +149,62 @@ final class MonthWeavingInterleaving56
             $futureSame = $high < $this->monthCount - 1
                 ? $this->suffixCount($high, $activeTotal)
                 : BigInt::one();
-            $selected = false;
+            // Prefix sums of sibling bases are monotone. Compare scaled
+            // prefix sums rather than multiplying each individual sibling.
+            // At most 47 candidates, and the first candidate retains a fast path.
+            $ids = [];
+            $bases = [];
+            $cumulative = [];
+            $sum = BigInt::zero();
             $previousMonth = null;
             $previousBaseCount = null;
+            $chosen = null;
             for ($month = $low; $month <= $high; ++$month) {
                 $remainingForMonth = $remaining[$month];
                 if ($remainingForMonth === 1 && $month !== $low) continue;
                 $nextBaseCount = $previousMonth === null
                     ? self::firstBranchBaseCount($baseCount, $remainingForMonth, $prefix, $low, $month, $activeTotal)
                     : self::nextBranchBaseCount($previousBaseCount, $remaining, $prefix, $low, $previousMonth, $month);
-                $block = $nextBaseCount->mul($futureSame);
-                if ($rank->compare($block) > 0) {
-                    $rank = $rank->sub($block);
-                    $previousMonth = $month;
-                    $previousBaseCount = $nextBaseCount;
-                    continue;
+                $sum = $sum->add($nextBaseCount);
+                $ids[] = $month;
+                $bases[] = $nextBaseCount;
+                $cumulative[] = $sum;
+                if (count($ids) === 1 && $rank->compare($sum->mul($futureSame)) <= 0) {
+                    $chosen = 0;
+                    break;
                 }
+                $previousMonth = $month;
+                $previousBaseCount = $nextBaseCount;
+            }
+            if ($chosen === null && $ids !== []) {
+                $scaledTotal = $sum->mul($futureSame);
+                if ($rank->compare($scaledTotal) > 0) {
+                    $rank = $rank->sub($scaledTotal);
+                } else {
+                    // The first candidate was already ruled out.
+                    $left = 1;
+                    $right = count($ids) - 1;
+                    while ($left < $right) {
+                        $mid = intdiv($left + $right, 2);
+                        if ($rank->compare($cumulative[$mid]->mul($futureSame)) <= 0) {
+                            $right = $mid;
+                        } else {
+                            $left = $mid + 1;
+                        }
+                    }
+                    $chosen = $left;
+                    $rank = $rank->sub($cumulative[$chosen - 1]->mul($futureSame));
+                }
+            }
+            if ($chosen !== null) {
+                $month = $ids[$chosen];
                 $weave[$position] = $month;
                 --$remaining[$month];
                 --$activeTotal;
-                $baseCount = $nextBaseCount;
+                $baseCount = $bases[$chosen];
                 if ($remaining[$month] === 0) ++$low;
-                $selected = true;
-                break;
+                continue;
             }
-            if ($selected) continue;
 
             $month = $high + 1;
             if ($month >= $this->monthCount) throw new LogicException('STAGE56_INTERLEAVING_EXHAUSTED');
