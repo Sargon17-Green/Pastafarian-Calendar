@@ -1,4 +1,4 @@
-name: Logo Stage2 QA Native Dispatcher
+name: Logo Stage2 QA Native Dispatcher Deep64 Isolated
 on:
   push:
     branches:
@@ -12,9 +12,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [small, deep31, deep64]
+        case_id: [1, 2, 3, 4, 5]
     env:
-      SHARD: "${{ matrix.shard }}"
+      SHARD: deep64
+      CASE_ID: "${{ matrix.case_id }}"
     steps:
       - name: Checkout exact QA source
         uses: actions/checkout@v4
@@ -32,21 +33,40 @@ jobs:
           test "$(git hash-object src/stage02_choose_wide_general.logo)" = bda23ddc1d0f8a534b20d8391ecc7519fccd57c3
           test "$(git hash-object src/stage02_choose_rank.logo)" = 116cab31f3afd03b3a03a8981cef740c193c727b
           test "$(git hash-object qa/logo_stage2_dispatch_native_oracle.py)" = 0e4730bf74d51ba098201daea67221f2e0dffe97
-          case "$SHARD" in
-            small) cases=22; checks=46; seconds=360 ;;
-            deep31) cases=8; checks=24; seconds=900 ;;
-            deep64) cases=5; checks=15; seconds=900 ;;
-            *) exit 2 ;;
-          esac
+          cases=1; checks=3; seconds=900
           echo "$cases $checks $seconds" > "$RUNNER_TEMP/counts.txt"
           git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
           git hash-object .github/workflows/logo-stage02-rank-dispatch-native.yml > "$RUNNER_TEMP/workflow-blob.txt"
           sha256sum src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_short.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo src/stage02_choose_rank.logo qa/logo_stage2_dispatch_native_oracle.py .github/workflows/logo-stage02-rank-dispatch-native.yml > "$RUNNER_TEMP/source-hashes.txt"
           python3 -m py_compile qa/logo_stage2_dispatch_native_oracle.py
-          python3 qa/logo_stage2_dispatch_native_oracle.py --shard "$SHARD" --output "$RUNNER_TEMP/native.logo" | tee "$RUNNER_TEMP/host.log"
-          grep -Fxq "HOST_CASES=$cases" "$RUNNER_TEMP/host.log"
-          grep -Fxq "HOST_CHECKS=$checks" "$RUNNER_TEMP/host.log"
+          python3 qa/logo_stage2_dispatch_native_oracle.py --shard "$SHARD" --output "$RUNNER_TEMP/full-native.logo" | tee "$RUNNER_TEMP/host.log"
+          grep -Fxq "HOST_CASES=5" "$RUNNER_TEMP/host.log"
+          grep -Fxq "HOST_CHECKS=15" "$RUNNER_TEMP/host.log"
           grep -Fxq "INDEPENDENT_HOST_ORACLE=PASS" "$RUNNER_TEMP/host.log"
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"])
+          full = (root / "full-native.logo").read_text(encoding="utf-8")
+          parts = re.split(r"(?m)^\(q\.valid\n", full)
+          assert len(parts) == 6
+          header, *vectors = parts
+          last, sep, footer = vectors[-1].partition("\nif :Q.FAILED")
+          assert sep
+          vectors[-1] = last
+          tags = ["k64_entry", "k64_minus_one", "k64_exact", "k65_entry", "k65_exact"]
+          for i, vector in enumerate(vectors, 1):
+              assert f"[v{i}_{tags[i-1]}]\n)" in vector
+          i = int(os.environ["CASE_ID"])
+          assert 1 <= i <= 5
+          footer = sep + footer
+          assert footer.count(":Q.CASES <> 5") == 1
+          assert footer.count(":Q.CHECKS <> 15") == 1
+          footer = footer.replace(":Q.CASES <> 5", ":Q.CASES <> 1").replace(":Q.CHECKS <> 15", ":Q.CHECKS <> 3")
+          (root / "native.logo").write_text(header + "(q.valid\n" + vectors[i-1] + "\n" + footer, encoding="utf-8")
+          (root / "case.txt").write_text(f"v{i}_{tags[i-1]}\n", encoding="utf-8")
+          print(f"ISOLATED_CASE=v{i}_{tags[i-1]}")
+          PY
       - name: Build UCBLogo at pinned upstream SHA
         shell: bash
         run: |
@@ -67,15 +87,21 @@ jobs:
           set -euo pipefail
           read -r cases checks seconds < "$RUNNER_TEMP/counts.txt"
           log="$RUNNER_TEMP/native.log"
-          echo "DISPATCH_NATIVE_SHARD=$SHARD MAX_SECONDS=$seconds"
+          echo "DISPATCH_NATIVE_SHARD=$SHARD CASE_ID=$CASE_ID MAX_SECONDS=$seconds"
+          started=$SECONDS
           if printf 'bye\n' | timeout --signal=TERM --kill-after=5s "$seconds" stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$log" 2>&1; then
+            echo 0 > "$RUNNER_TEMP/exit.txt"
+            echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
             cat "$log"
           else
             code=$?
+            echo "$code" > "$RUNNER_TEMP/exit.txt"
+            echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
             cat "$log"
             echo "::error::Native failure or timeout exit=$code"
             exit 1
           fi
+          grep -Fxq "DISPATCH_NATIVE_CASE_START $(cat "$RUNNER_TEMP/case.txt")" "$log"
           grep -Fxq "DISPATCH_NATIVE_CASES_PASIS $cases" "$log"
           grep -Fxq "DISPATCH_NATIVE_CHECKS_PASIS $checks" "$log"
           grep -Fxq "DISPATCH_NATIVE_PASIS" "$log"
@@ -85,13 +111,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-stage2-dispatch-${{ matrix.shard }}-evidence
+          name: logo-stage2-dispatch-deep64-case-${{ matrix.case_id }}-evidence
           path: |
             ${{ runner.temp }}/commit.txt
             ${{ runner.temp }}/workflow-blob.txt
             ${{ runner.temp }}/source-hashes.txt
             ${{ runner.temp }}/counts.txt
             ${{ runner.temp }}/host.log
+            ${{ runner.temp }}/full-native.logo
+            ${{ runner.temp }}/case.txt
+            ${{ runner.temp }}/exit.txt
+            ${{ runner.temp }}/elapsed.txt
             ${{ runner.temp }}/native.logo
             ${{ runner.temp }}/native.log
           if-no-files-found: warn
