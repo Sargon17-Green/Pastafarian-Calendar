@@ -1,0 +1,15 @@
+# Issue29 v191 — archived projection and proposed bounded panel
+
+Status: archive-only QA; panel PREPARED_NOT_AUTHORIZED_NOT_RUN. No native/date calls, no new workflow, no production edits, no stage or soak credit.
+
+Input evidence: original internal trace run 45270015597 artifact 14864488555 (SHA256 479fc8c6b45c426368d75f18e26bb3e669d6af0c8168b6cc043965f7df7c5b1f, 26 CRC, 17 manifest hashes); original Python+TS sample run 44392067310 artifact 14469537094 (SHA256 bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1, 53 CRC). Four historical sample receipts and all Python/TS stream hashes independently checked. No algorithmic independence claim.
+
+Fixed c=-15055671, year 5000, first day -15057702, last day -15053459, 4244 days. Frozen full original Ada/Python chronological weave and common canonical name map yield exact projected month name/day for every offset. Original disagreement: 4122 name indices, 4013 day-in-month values, 4218 either, 3917 both. These are projected rows from a frozen year, NOT new F executions. All four archived original reference rows match the Python projection.
+
+The observed cutlet names [15,17,10,14,8,13] and gate-gap partition [1,2,1,2,1,1], combined with year start and 4 terminal samples, identify cutlet starts 1=-15057702, 2=-15056943, 3=-15056173, 4=-15055670. Cutlets 1,2,3 lengths 759,770,503; cutlet 4 length >=1000. Under only numeric gate bounds 42..963 there are 574326 possible remaining length triples; these are not deterministic Sauce outcomes. Do not invent the last cutlet boundaries. All five projected fields determined for first 3032 days, remaining 1212 month projection only. CSV hash 165fafae1103e1367f3e26884b7b71daec7fce7b9349ed926f2533fa7e9f7bb3. Local reproducible archive-only script SHA256 bd2b5b97d36ed0391c8bd4e5b6f18c01ef4c7f33aa46f408ce859feb7a4c8c2a; result JSON SHA256 3a50046c6958cd32f20474528ba7e98b9a95bbc5bb24a79bac047117a4e93ab2.
+
+The panel contains 3 previously observed original Python/TypeScript dates and 6 derived boundary dates, all within the known 3032-day prefix. Foundation day already passed corrected native run 45271645185, is control only and MUST NOT run again under this panel. No new Python F necessary for existing archived anchors; derived expectations are conditional on fixed c and exact frozen year structure. No cross-year or changed-c coverage yet.
+
+validate_panel.py is an offline output checker, not an execution harness. Its local selftest accepted 9 synthetic matching records and rejected six malformed/missing/duplicate/wrong-field/wrong-input batches. It does not verify binary provenance or establish any native pass. Run without records for selftest; with a separately authorized evidence records file for strict comparison. A later native panel requires explicit scoped authorization, locked corrected Ada SHA, one execution per listed run_new=true case, bounded 180s and 1GiB per process, halt on first mismatch or process failure, archive full logs/source identities. No 10,000-year admission.
+
+Issue #29 remains OPEN; STOP_NEW_NATIVE_SOAK_DISPATCH=true; 0/10000 original full years. No native dispatch is defined in this QA branch.

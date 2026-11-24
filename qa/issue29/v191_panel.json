@@ -1,0 +1,149 @@
+{
+  "cases": [
+    {
+      "basis": "ARCHIVED_ORIGINAL_PYTHON_TS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        10,
+        503,
+        20,
+        56
+      ],
+      "reason": "already accepted foundation control",
+      "run_new": false,
+      "t": -15055671
+    },
+    {
+      "basis": "ARCHIVED_ORIGINAL_PYTHON_TS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        14,
+        13,
+        3,
+        69
+      ],
+      "reason": "archived cross-engine sample +13",
+      "run_new": true,
+      "t": -15055658
+    },
+    {
+      "basis": "ARCHIVED_ORIGINAL_PYTHON_TS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        17,
+        273,
+        20,
+        29
+      ],
+      "reason": "archived cross-engine sample -1000",
+      "run_new": true,
+      "t": -15056671
+    },
+    {
+      "basis": "ARCHIVED_ORIGINAL_PYTHON_TS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        14,
+        1000,
+        23,
+        36
+      ],
+      "reason": "archived cross-engine sample +1000",
+      "run_new": true,
+      "t": -15054671
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        15,
+        1,
+        18,
+        1
+      ],
+      "reason": "year opening",
+      "run_new": true,
+      "t": -15057702
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        15,
+        7,
+        6,
+        1
+      ],
+      "reason": "before first historical weave divergence",
+      "run_new": true,
+      "t": -15057696
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        15,
+        8,
+        28,
+        2
+      ],
+      "reason": "first historical weave divergence",
+      "run_new": true,
+      "t": -15057695
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        15,
+        759,
+        16,
+        20
+      ],
+      "reason": "cutlet 1 closing",
+      "run_new": true,
+      "t": -15056944
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        17,
+        1,
+        40,
+        12
+      ],
+      "reason": "cutlet 2 opening",
+      "run_new": true,
+      "t": -15056943
+    },
+    {
+      "basis": "DERIVED_FROM_FROZEN_YEAR_AND_ARCHIVED_CUTLET_STARTS",
+      "c": -15055671,
+      "expected": [
+        5000,
+        14,
+        1,
+        29,
+        38
+      ],
+      "reason": "cutlet 4 opening",
+      "run_new": true,
+      "t": -15055670
+    }
+  ],
+  "schema": "ISSUE29_V191_BOUNDED_PANEL_NOT_AUTHORIZED/1",
+  "source_commit": "1160096aa847c54cbef27c232771ce1549d7ba8f",
+  "status": "PREPARED_NOT_AUTHORIZED_NOT_RUN",
+  "trace_sha256": "479fc8c6b45c426368d75f18e26bb3e669d6af0c8168b6cc043965f7df7c5b1f",
+  "v101_sha256": "bb256c2a8e6d599f7f78aa2264129d4ab4ff0dc0c9b8680077149de55b752ff1"
+}
