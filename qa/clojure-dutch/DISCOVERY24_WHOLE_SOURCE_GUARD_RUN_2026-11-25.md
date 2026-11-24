@@ -22,3 +22,11 @@ Additional actual CLI negative probes: appended newline to a temporary copy -> e
 Scope: STATIC_PLUS_MODEL_ONLY PASS, 10/10 rejection checks (5 distinct mutants x 2 guard modes), 15 MODEL assertions. Frozen prefix digest is emitted as a constant, not recomputed by this script; p82 witness arithmetic is tested. No new CI, Native or five-field differential; Stage2 OPEN. No production/API/128N/5000000N/main/merge/publication changes.
 
 NEXT (QA only): independently audit clause multiplicity and active/new budget-guard mutation coverage. In particular, the script uses set(clauses), so the two repeated rank-branch clauses are not enforced by multiplicity when the blob guard is bypassed. Test targeted deletion of one occurrence against the exact full source, then strengthen the QA-only guard if needed, preserving the blob gate and existing checks. No new Native or duplicate CI.
+
+## Follow-up completed in the same session
+
+Actual targeted mutation of first of two rank comparisons from > to >=: original guard with pin=True REJECTED, with pin=False ACCEPTED. This is a defect in QA clause multiplicity, not a production defect. The exact source has two occurrences. QA-only change replaces set membership with Counter minimum multiplicity and adds two distinct context-anchored rank comparison mutants, one per occurrence. No production edits.
+
+QA fix commit 1078e75a3fa42dbfce2faf951d805f81f4fcd99e; local and remote QA Git blob 410c69cbd68fccac28c16086219d648882e9cb22 match. Actual local execution against the same exact complete production blob, Python 3.13.5, exit 0, 14/14 source rejection checks (7 mutants x 2 modes) and 15 MODEL assertions. Exact stdout is the JSON above with source_mutations_rejected changed from 10 to 14; all other fields unchanged. stdout SHA256=539b0c7032716c0b45ce15f04a5954cf0e9baf6ce137456a0f2f24fb9d2f1af6.
+
+NEXT: QA-only independent audit of the full-source guard's shared active/new group charge and rank subtraction/association branches: test targeted semantic mutations for each, identify unpinned guard escapes, strengthen coverage only when observed. Keep exact source lock, 128N and 5000000N limits, Stage2 and five-field OPEN. No new Native or duplicate CI.
