@@ -8,6 +8,7 @@ from qa31ch_scanner_induction import Affine, HANDOFF, SLOTS, integer, need
 from qa31ci_native_scanner_and_valid_fork import ARCHIVE_SHA, step_groups
 from qa31cf_independent_native_audit import PIN, git_blob
 from qa31cg_compare import ARROWS, sha256
+from stage1_native_real_u_operand_audit import check as check_u_interventions
 
 JOIN = (949, 1335)
 BRACE, U, CLOSE = (954, 1330), (954, 1328), (954, 1322)
@@ -15,6 +16,7 @@ J, C, X1, X2 = (958, 1331), (958, 1325), (1027, 1334), (950, 1335)
 OWNER = ((3, 1690), (5, 1691), (7, 1692), (11, 1693))
 SCRATCH = (1490, 1600)
 U_SHA = "759af313ac10f0646cac0c54eba8fc86a48e383a5b9099b9504824ada31632b4"
+CORRECTED_U_SHA = "2a8dc48839e515fb51a755d5c32043c84266f189b187ac829dc22fd7787483d6"
 
 
 def zero(value):
@@ -244,11 +246,45 @@ def audit_legacy_u(path, upper):
     return evidence
 
 
+def audit_corrected_u(path):
+    need(sha256(path.read_bytes()) == CORRECTED_U_SHA, "corrected u archive pin")
+    with zipfile.ZipFile(path) as archive:
+        need(archive.testzip() is None and sorted(archive.namelist()) ==
+             ["u_operand_native_audit.json", "u_operand_native_witness.json"], "corrected u archive membership")
+        witness = json.loads(archive.read("u_operand_native_witness.json"))
+        archived_audit = json.loads(archive.read("u_operand_native_audit.json"))
+    measured = check_u_interventions(witness)
+    need(measured == archived_audit["measured"] and len(set(archived_audit["falsified_reports_rejected"])) == 12,
+         "corrected native audit receipts")
+    cases = []
+    for row in witness["records"]:
+        control = row["control"]
+        trials = []
+        for variant in row["mutants"]:
+            run = variant["run"]
+            motions = zip(control["post_u_128_real_motion"], run["post_u_128_real_motion"])
+            diff = next(((i, good, changed) for i, (good, changed) in enumerate(motions, 1)
+                         if good != changed), None)
+            need(diff == (100, [949, 1335, -1, 0], [948, 1335, -2, 0]), "physical first divergence")
+            need(run["steps"] == 200001 and run["status"] == "step-limit" and run["ips"] == 1
+                 and run["output"] == [], "bounded Native outcome")
+            trials.append({"u_count": run["u_event"]["operand_executed"], "first_motion_divergence": diff,
+                           "steps_executed": run["steps"] - 1, "live_ips": run["ips"],
+                           "output_fields": len(run["output"])})
+        cases.append({"case": row["case"], "control_steps": control["steps"], "u_tick": control["u_event"]["tick"],
+                      "control_reference_fields": len(row["reference_7"]), "trials": trials})
+    return {"run": 45432407974, "job": 138581009012, "artifact": 14939886020,
+            "executed_commit": "e2da1629b0c931013e45f919759b6d3bca57eb7f", "zip_sha256": CORRECTED_U_SHA,
+            "measured": measured, "cases": cases}
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("source", type=Path)
     ap.add_argument("geometry_zip", type=Path)
     ap.add_argument("u_zip", type=Path)
+    ap.add_argument("--corrected-u-zip", type=Path,
+                    default=Path(__file__).parent/"evidence/qa31cj/u_operand_native_v2.zip")
     ap.add_argument("--output", required=True, type=Path)
     args = ap.parse_args()
     src = args.source.read_bytes()
@@ -257,6 +293,7 @@ def main():
     walks, classes = prove(lines)
     cases = compare_geometry(args.geometry_zip, walks)
     legacy = audit_legacy_u(args.u_zip, classes["a=0"])
+    corrected = audit_corrected_u(args.corrected_u_zip)
     tested = []
     for point, old, new, reason in ((U, "u", "$", "wrap or source escape"),
                                     ((954, 1329), "3", "2", "source u count"),
@@ -275,7 +312,8 @@ def main():
     out = {"source_git_blob": PIN, "range": "first fresh handoff through first common join inclusive",
            "classes": classes, "native_calibration": cases, "native_steps": sum(n for _, n in cases),
            "geometry_zip_sha256": ARCHIVE_SHA, "historical_u_zip_sha256": U_SHA,
-           "historical_u_payload_trials": legacy, "hostile_source_controls": tested, "stage1_accepted": False}
+           "historical_u_payload_trials": legacy, "corrected_u_native": corrected,
+           "hostile_source_controls": tested, "stage1_accepted": False}
     args.output.write_text(json.dumps(out, indent=2, sort_keys=True)+"\n", encoding="utf-8")
     print("QA31CJ PASS", len(walks), "exhaustive handoff classes;", out["native_steps"], "archived STEPs")
 

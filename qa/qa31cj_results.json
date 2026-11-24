@@ -334,6 +334,171 @@
       }
     }
   },
+  "corrected_u_native": {
+    "artifact": 14939886020,
+    "cases": [
+      {
+        "case": "zero_equal",
+        "control_reference_fields": 7,
+        "control_steps": 17387,
+        "trials": [
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 4
+          },
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 2
+          }
+        ],
+        "u_tick": 10117
+      },
+      {
+        "case": "forward_short",
+        "control_reference_fields": 7,
+        "control_steps": 19713,
+        "trials": [
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 4
+          },
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 2
+          }
+        ],
+        "u_tick": 10117
+      },
+      {
+        "case": "recent_anchor_next",
+        "control_reference_fields": 7,
+        "control_steps": 43749,
+        "trials": [
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 4
+          },
+          {
+            "first_motion_divergence": [
+              100,
+              [
+                949,
+                1335,
+                -1,
+                0
+              ],
+              [
+                948,
+                1335,
+                -2,
+                0
+              ]
+            ],
+            "live_ips": 1,
+            "output_fields": 0,
+            "steps_executed": 200000,
+            "u_count": 2
+          }
+        ],
+        "u_tick": 20197
+      }
+    ],
+    "executed_commit": "e2da1629b0c931013e45f919759b6d3bca57eb7f",
+    "job": 138581009012,
+    "measured": {
+      "immediate_post_state_changed": 6,
+      "negative_output_effect": 3,
+      "positive_output_effect": 3,
+      "post128_route_changed": 6
+    },
+    "run": 45432407974,
+    "zip_sha256": "2a8dc48839e515fb51a755d5c32043c84266f189b187ac829dc22fd7787483d6"
+  },
   "geometry_zip_sha256": "938f4643876db0758e9d068726dbb84bb171c246109f0b52281e08422f52f236",
   "historical_u_payload_trials": [
     [
