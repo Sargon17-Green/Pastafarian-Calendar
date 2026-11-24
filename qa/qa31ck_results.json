@@ -1,0 +1,958 @@
+{
+  "canonical_ranges": [
+    "0,1,>=2",
+    "0,>=1",
+    "0,1,>=2",
+    "0,>=1"
+  ],
+  "classes": [
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        0,
+        0,
+        1,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        0,
+        0,
+        2,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        0,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        0,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        1,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        2,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        0,
+        1,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        0,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        1,
+        0,
+        1,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        1,
+        0,
+        2,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        0,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        0,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 1
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        2,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        1,
+        1,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        2,
+        0,
+        0,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        0,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        2,
+        0,
+        1,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        0,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": ">",
+      "minimum_fields": [
+        2,
+        0,
+        2,
+        0
+      ],
+      "successor": [
+        1501,
+        1750
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        0,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        0,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        0,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        1,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        1,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        2,
+        0
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    },
+    {
+      "fetched": "v",
+      "minimum_fields": [
+        2,
+        1,
+        2,
+        1
+      ],
+      "successor": [
+        1500,
+        1751
+      ],
+      "validity_owner": 0
+    }
+  ],
+  "control_rejections": [
+    [
+      199,
+      1335,
+      "!",
+      "1",
+      "first live gate opcode"
+    ],
+    [
+      1234,
+      670,
+      "!",
+      "1",
+      "canonical validity owner"
+    ]
+  ],
+  "corridor_steps_including_successor": 1039,
+  "fetch_step_from_join_zero_based": 1037,
+  "first_gate": [
+    1500,
+    1750
+  ],
+  "first_writer": [
+    1335,
+    1354
+  ],
+  "fresh_scanner": {
+    "all_write_targets": [
+      [
+        0,
+        49
+      ],
+      [
+        1,
+        49
+      ],
+      [
+        2,
+        49
+      ],
+      [
+        3,
+        49
+      ],
+      [
+        10,
+        49
+      ],
+      [
+        11,
+        49
+      ],
+      [
+        12,
+        49
+      ],
+      [
+        13,
+        49
+      ]
+    ],
+    "distinct_executed_cells": 3573,
+    "excluded_scanner_sites": [
+      [
+        235,
+        23
+      ],
+      [
+        235,
+        32
+      ],
+      [
+        286,
+        5
+      ]
+    ],
+    "exits": {
+      "handoff": 2,
+      "read": 116,
+      "reject": 2195
+    },
+    "max_segment_instructions": 1422,
+    "states": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        4,
+        0
+      ]
+    ],
+    "transitions": 2313
+  },
+  "geometry_sha256": "938f4643876db0758e9d068726dbb84bb171c246109f0b52281e08422f52f236",
+  "native_calibration": [
+    [
+      "zero_equal",
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      10217,
+      11255
+    ],
+    [
+      "foundation_cross",
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      21901,
+      22939
+    ],
+    [
+      "forward_short",
+      [
+        0,
+        1,
+        0,
+        1
+      ],
+      10217,
+      11255
+    ],
+    [
+      "reverse_short",
+      [
+        0,
+        1,
+        0,
+        1
+      ],
+      10217,
+      11255
+    ],
+    [
+      "mixed_small",
+      [
+        1,
+        1,
+        0,
+        1
+      ],
+      10141,
+      11179
+    ],
+    [
+      "positive_negative",
+      [
+        0,
+        1,
+        1,
+        1
+      ],
+      23657,
+      24695
+    ],
+    [
+      "negative_positive",
+      [
+        1,
+        1,
+        0,
+        1
+      ],
+      23581,
+      24619
+    ],
+    [
+      "large_values",
+      [
+        0,
+        1,
+        1,
+        1
+      ],
+      74057,
+      75095
+    ],
+    [
+      "invalid_zero_sign",
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      10141,
+      11179
+    ],
+    [
+      "invalid_big_sign",
+      [
+        2,
+        1,
+        0,
+        1
+      ],
+      11885,
+      12923
+    ],
+    [
+      "epoch_forward_one",
+      [
+        0,
+        0,
+        0,
+        1
+      ],
+      10217,
+      11255
+    ],
+    [
+      "epoch_reverse_one",
+      [
+        0,
+        1,
+        0,
+        0
+      ],
+      10217,
+      11255
+    ],
+    [
+      "recent_anchor_equal",
+      [
+        0,
+        1,
+        0,
+        1
+      ],
+      20297,
+      21335
+    ],
+    [
+      "recent_anchor_next",
+      [
+        0,
+        1,
+        0,
+        1
+      ],
+      20297,
+      21335
+    ],
+    [
+      "foundation_neighbor_forward",
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      21901,
+      22939
+    ],
+    [
+      "foundation_neighbor_reverse",
+      [
+        1,
+        1,
+        1,
+        1
+      ],
+      21901,
+      22939
+    ],
+    [
+      "invalid_target_zero_sign",
+      [
+        0,
+        0,
+        1,
+        0
+      ],
+      10217,
+      11255
+    ]
+  ],
+  "native_steps_including_successors": 17663,
+  "scope": "source proof plus archived Native calibration",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_accepted": false,
+  "validity_owner": [
+    19,
+    1696
+  ],
+  "write_step_from_join_zero_based": 1017,
+  "writes_at_zero_based_ticks": [
+    [
+      [
+        19,
+        1696
+      ],
+      [
+        1332,
+        480
+      ],
+      306
+    ],
+    [
+      [
+        13,
+        1694
+      ],
+      [
+        670,
+        1246
+      ],
+      382
+    ],
+    [
+      [
+        17,
+        1695
+      ],
+      [
+        1145,
+        946
+      ],
+      464
+    ],
+    [
+      [
+        23,
+        1697
+      ],
+      [
+        1059,
+        1430
+      ],
+      546
+    ],
+    [
+      [
+        29,
+        1698
+      ],
+      [
+        280,
+        860
+      ],
+      620
+    ],
+    [
+      [
+        31,
+        1699
+      ],
+      [
+        876,
+        1240
+      ],
+      660
+    ],
+    [
+      [
+        53,
+        1704
+      ],
+      [
+        480,
+        1070
+      ],
+      704
+    ],
+    [
+      [
+        59,
+        1705
+      ],
+      [
+        1030,
+        385
+      ],
+      746
+    ],
+    [
+      [
+        61,
+        1706
+      ],
+      [
+        195,
+        958
+      ],
+      806
+    ],
+    [
+      [
+        67,
+        1707
+      ],
+      [
+        487,
+        670
+      ],
+      848
+    ],
+    [
+      [
+        1500,
+        1750
+      ],
+      [
+        1335,
+        1354
+      ],
+      1017
+    ]
+  ]
+}
