@@ -380,6 +380,154 @@ proc checkResearchSparseTransposeWindowedFinite() {
 // Reconstructs the current candidate partition from the same Chapel primitives
 // and compares every exact bigint block with production. This is deliberately
 // NOT an independent mathematical oracle, speedup claim, or Stage 6 gate.
+// Research-only singleton specialization. A fixed positive prefix permits
+// only firstFixed; a positive tail without a fixed prefix permits only q.
+// Other specs use the unchanged production transfer. No production promotion.
+proc researchForwardSingletonEligible(spec: SparseWeavingGapSpec): bool {
+  return spec.fixedSum > 0 || (spec.tail > 0 && spec.firstFixed < 0);
+}
+
+proc researchSparseForwardSingleton(const ref previous: SparseWeavingVec,
+                                    n: int, k: int,
+                                    spec: SparseWeavingGapSpec): SparseWeavingVec {
+  if !researchForwardSingletonEligible(spec) then
+    return sparseWeavingTransfer(previous,n,k,spec);
+  var result: SparseWeavingVec;
+  var i = spec.q;
+  if spec.fixedSum > 0 then i = spec.firstFixed;
+  if i < 0 || i > n || (spec.fixedSum > 0 && i >= spec.q) then return result;
+  var cumulative = new bigint(0);
+  const count = max(0,min(previous.values.size,i-previous.first+1));
+  for t in 0..<count do cumulative += previous.values[t];
+  if cumulative == 0 then return result;
+  const value = cumulative*sparseWeavingWeight(i,n,k,spec);
+  if value != 0 {
+    result.first = i+1;
+    result.values.pushBack(value);
+  }
+  return result;
+}
+
+proc checkResearchForwardSingletonMatrix() {
+  var cases = 0, entries = 0, singletonCases = 0;
+  for n in 0..12 {
+    for k in 1..10 {
+      for q in 0..n {
+        for shape in 0..5 {
+          var spec: SparseWeavingGapSpec;
+          spec.q = q;
+          if shape == 1 then spec.tail = 2;
+          if shape == 2 && q > 0 {
+            spec.fixedSum = 1;
+            spec.firstFixed = q-1;
+          }
+          if shape == 5 && q > 0 {
+            spec.fixedSum = 2;
+            spec.firstFixed = q/2;
+            spec.tail = 1;
+          }
+          var input: [0..n] bigint;
+          if shape == 3 then input[n] = new bigint(-7);
+          else if shape != 4 {
+            for i in 0..n {
+              if i%3 != 0 {
+                if i%2 == 0 then input[i] = new bigint(i+2);
+                else input[i] = new bigint(-(i+2));
+              }
+            }
+          }
+          const packed = sparseWeavingPack(input);
+          const actual = researchSparseForwardSingleton(packed,n,k,spec);
+          const baseline = sparseWeavingTransfer(packed,n,k,spec);
+          if researchForwardSingletonEligible(spec) then singletonCases += 1;
+          var expected: [0..n+k] bigint;
+          for i in 0..n {
+            const w = researchGapAllocationCount(i,n,k,spec);
+            for p in 0..i do expected[i+1] += input[p]*w;
+          }
+          for t in 0..n+k {
+            if actual.at(t) != expected[t] || baseline.at(t) != expected[t] then
+              halt("Forward singleton matrix mismatch n=",n," k=",k,
+                   " q=",q," shape=",shape," t=",t);
+            entries += 1;
+          }
+          if actual.first != baseline.first ||
+             actual.values.size != baseline.values.size then
+            halt("Forward singleton packing mismatch");
+          cases += 1;
+        }
+      }
+    }
+  }
+  if cases != 5460 || entries != 79170 || singletonCases != 2470 then
+    halt("Forward singleton oracle cardinality mismatch");
+  writeln("RESEARCH_FORWARD_MATRIX_CASES=",cases);
+  writeln("RESEARCH_FORWARD_MATRIX_ENTRIES=",entries);
+  writeln("RESEARCH_FORWARD_SINGLETON_CASES=",singletonCases);
+  writeln("RESEARCH_FORWARD_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
+  try! stdout.flush();
+}
+
+// Frozen post-take states contain the actual updated selected suffix inputs
+// and specs. Compare the two kernels on the same input; never mutate states.
+// Time only the kernel calls, alternate order to reduce systematic bias.
+proc profileResearchSelectedForward(const ref lens: [?D] int,
+                                    const ref states: [?S] SparseWeavingVec,
+                                    const ref sizes: [?Z] int,
+                                    const ref specs: [?Q] SparseWeavingGapSpec,
+                                    chosen: int, step: int) {
+  var baselineSeconds = 0.0, candidateSeconds = 0.0;
+  var baselineSingletonSeconds = 0.0, candidateSingletonSeconds = 0.0;
+  var calls = 0, singletonCalls = 0;
+  for j in max(2,chosen)..D.high {
+    var baseline: SparseWeavingVec;
+    var candidate: SparseWeavingVec;
+    var bt: stopwatch;
+    var ct: stopwatch;
+    if j%2 == 0 {
+      bt.start();
+      baseline = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
+      bt.stop();
+      ct.start();
+      candidate = researchSparseForwardSingleton(states[j-1],sizes[j-1],lens[j],specs[j]);
+      ct.stop();
+    } else {
+      ct.start();
+      candidate = researchSparseForwardSingleton(states[j-1],sizes[j-1],lens[j],specs[j]);
+      ct.stop();
+      bt.start();
+      baseline = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
+      bt.stop();
+    }
+    if baseline.first != states[j].first ||
+       baseline.values.size != states[j].values.size ||
+       candidate.first != baseline.first ||
+       candidate.values.size != baseline.values.size then
+      halt("Selected forward snapshot packing mismatch step=",step," month=",j);
+    for t in 0..<baseline.values.size {
+      if baseline.values[t] != states[j].values[t] ||
+         candidate.values[t] != baseline.values[t] then
+        halt("Selected forward snapshot value mismatch step=",step," month=",j," index=",t);
+    }
+    baselineSeconds += bt.elapsed();
+    candidateSeconds += ct.elapsed();
+    calls += 1;
+    if researchForwardSingletonEligible(specs[j]) {
+      singletonCalls += 1;
+      baselineSingletonSeconds += bt.elapsed();
+      candidateSingletonSeconds += ct.elapsed();
+    }
+  }
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CALLS=",calls);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_SINGLETON_CALLS=",singletonCalls);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_BASELINE_SECONDS=",baselineSeconds);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CANDIDATE_SECONDS=",candidateSeconds);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_BASELINE_SINGLETON_SECONDS=",baselineSingletonSeconds);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CANDIDATE_SINGLETON_SECONDS=",candidateSingletonSeconds);
+  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_RESULT=EXACT_SELECTED_SUFFIX_MATCH_RESEARCH_ONLY");
+  try! stdout.flush();
+}
+
 proc profileSparseCandidateSubphases(const ref lens: [?D] int,
                                      const ref states: [?S] SparseWeavingVec,
                                      const ref sizes: [?Z] int,
@@ -569,6 +717,7 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
       prefixTimer.stop();
       profileSparseCandidateSubphases(lens, states, sizes, specs, used,
                                       opened, closed, total, step);
+      profileResearchSelectedForward(lens, states, sizes, specs, chosen, step);
       prefixTimer.start();
     }
     if prefixTimer.elapsed() >= 30.0 then break;
@@ -622,6 +771,7 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
 proc main() {
   checkResearchSparseTransposeWindowedFinite();
   checkResearchSparseTransposeMatrixOracle();
+  checkResearchForwardSingletonMatrix();
   checkSparseWeavingDifferential();
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
