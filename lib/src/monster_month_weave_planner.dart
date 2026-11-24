@@ -71,8 +71,7 @@ final class MonsterMonthWeavePlanner {
       if (j == 0) {
         result[j] = (base * suffixNumerator[j]) ~/ suffixDenominator[j];
       } else {
-        result[j] =
-            (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
+        result[j] = (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/
             (BigInt.from(sums[j] - 1) * suffixDenominator[j]);
       }
     }

@@ -17,8 +17,8 @@ PROJECT = "PC-BRANCH-DART-HEBREW"
 PLANNER = "lib/src/monster_month_weave_planner.dart"
 SOURCE_A = "1d98a83db7446ceb4548c39e0eaf9b4441b72b9a"
 A_BLOB = "3553a7f2e3899c958d56620c5449daa35b0731e2"
-B_BLOB = "749b874d2fc736a02bfd3985ac7897ea4fb8c407"
-A_REBASED_BLOB = "a29fe8d80f3d1c2dbe6efb18075eea6a01af1853"
+B_BLOB = "cd3e0ad955938db6f5a554fe030168ad3efd3436"
+A_REBASED_BLOB = "1824e96d82e6b0ceb12da01ba33fa75a83204d2a"
 B_HISTORICAL_BLOB = "d736ca8afe3409a10474b8514284aceb154a46a9"
 B_HISTORICAL_HEAD = "12289c4ae379bde41b62df8c6d8611e4b4bffe8c"
 CASES = [(3, 3, 2), (4, 4, 3), (4, 4, 4)]
@@ -112,16 +112,7 @@ def words_for(lengths: tuple[int, ...]) -> list[list[int]]:
     return output
 
 def rebaseline_a(b: str, a: str, historical_b: str) -> str:
-    """Only two known formatter hunks; never modify the historical A blob."""
-    old_arithmetic = (
-        "        result[j] = (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/\n"
-        "            (BigInt.from(sums[j] - 1) * suffixDenominator[j]);"
-    )
-    new_arithmetic = (
-        "        result[j] =\n"
-        "            (base * BigInt.from(counts[j] - 1) * suffixNumerator[j]) ~/\n"
-        "            (BigInt.from(sums[j] - 1) * suffixDenominator[j]);"
-    )
+    """Post-pub-get formatter baseline: only the approved optional call comma hunk."""
     old_call = (
         "    final work = const MonsterWorkCounter().calculate(\n"
         "      calculationDay,\n"
@@ -132,13 +123,12 @@ def rebaseline_a(b: str, a: str, historical_b: str) -> str:
         "    final work = const MonsterWorkCounter().calculate(calculationDay, firstDay);"
     )
     def apply(source: str) -> str:
-        assert source.count(old_arithmetic) == 1
         assert source.count(old_call) == 1
-        return source.replace(old_arithmetic, new_arithmetic).replace(old_call, new_call)
+        return source.replace(old_call, new_call)
 
     assert git_blob(a) == A_BLOB, "Historical A source modified"
     assert git_blob(historical_b) == B_HISTORICAL_BLOB, "Historical B source modified"
-    assert apply(historical_b) == b, "Tracked B exceeds the two allowed formatter hunks"
+    assert apply(historical_b) == b, "Tracked B differs from captured post-pub-get formatter baseline"
     new_a = apply(a)
     assert git_blob(new_a) == A_REBASED_BLOB, "Rebased A source lock mismatch"
     # Unlike R1, the revised baseline is a new physical source snapshot.
@@ -170,7 +160,7 @@ def main() -> None:
                "planner_b_blob": B_BLOB, "historical_planner_a_blob": A_BLOB,
                "rebased_a_blob": A_REBASED_BLOB,
                "historical_planner_b_blob": B_HISTORICAL_BLOB,
-               "source_rebaseline": "two exact Dart 3.13.2 formatter hunks, no R1 exception",
+               "source_rebaseline": "Dart 3.13.2 post-pub-get baseline, exact call hunk, no R1 exception",
                "oracle_sha256": hashlib.sha256(oracle_json.encode("utf-8")).hexdigest(),
                "domains": EXPECTED_COUNTS, "variants": {}}
     try:
@@ -185,14 +175,18 @@ def main() -> None:
                     source_before_format = (wd / PLANNER).read_text(encoding="utf-8")
                     (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
                     (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
+                    # Match the ordinary CI format gate: package language version
+                    # must be resolved BEFORE invoking the formatter.
+                    pub_get = run("dart", "pub", "get", cwd=wd, timeout=360)
+                    assert (wd / ".dart_tool" / "package_config.json").is_file()
                     # Both B and restored A are source-locked. Diagnose formatting
                     # without modifying either variant; retain the historical bytes.
                     fmt_proc = subprocess.run(
-                        ("dart", "format", "--output=none", PLANNER),
+                        ("dart", "format", "--output=none", "--set-exit-if-changed", PLANNER),
                         cwd=wd, capture_output=True, text=True, timeout=240,
                     )
                     fmt_output = (fmt_proc.stdout or "") + (fmt_proc.stderr or "")
-                    if fmt_proc.returncode != 0:
+                    if fmt_proc.returncode not in (0, 1):
                         raise RuntimeError(
                             f"dart format diagnostic failed for locked {label} (exit={fmt_proc.returncode})\n{fmt_output[-4000:]}"
                         )
@@ -202,7 +196,9 @@ def main() -> None:
                             f"Could not parse Dart formatter summary for locked {label}: " + fmt_output[-2000:]
                         )
                     changed_files = int(changed_match.group(1))
-                    fmt = {"output": fmt_output.strip(), "changed_files": changed_files}
+                    assert fmt_proc.returncode == int(changed_files != 0), "Formatter exit/count mismatch"
+                    fmt = {"output": fmt_output.strip(), "changed_files": changed_files,
+                           "exit_code": fmt_proc.returncode, "after_pub_get": True}
                     format_status = "CLEAN" if changed_files == 0 else "BASELINE_FORMAT_DRIFT"
                     source_after_format = (wd / PLANNER).read_text(encoding="utf-8")
                     expected_blob = B_BLOB if label == "B" else A_REBASED_BLOB
@@ -210,9 +206,6 @@ def main() -> None:
                     assert git_blob(source_after_format) == expected_blob, (
                         f"Source blob changed after format diagnostic: {label}"
                     )
-                    # Worktree does not inherit the root package configuration.
-                    # Resolve its package URI before full-package static analysis.
-                    pub_get = run("dart", "pub", "get", cwd=wd, timeout=360)
                     analyze = run("dart", "analyze", cwd=wd, timeout=360)
                     log = run("dart", "run", "tool/stage7_qa_probe.dart", "tool/stage7_qa_expected.json", label,
                               cwd=wd, timeout=600)
