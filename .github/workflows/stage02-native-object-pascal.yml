@@ -5,6 +5,11 @@ on:
       - 'Object-Pascal\+Português'
     paths:
       - '.github/workflows/stage02-native-object-pascal.yml'
+      # Stage02 compiles these transitive dependencies as well (FPC -B).
+      # A change to any of them invalidates exact-source Stage02 evidence.
+      - 'src/BigInt.pas'
+      - 'src/MonsterBootstrap.pas'
+      - 'src/SourceLanguageCatalog.pas'
       - 'src/Stage02WorkCounts.pas'
       - 'src/PastafariCalendar.pas'
       - 'test/stage02_workcounts_regression.pas'
