@@ -34,6 +34,11 @@ FUNCTIONS = {
         '(when (> nieuw-kosten begroting)',
         '(if (> r (:blok blok))',
         '(if (> r (:blok blok))',
+        "(+' kosten (prefix-gedeelde-raming restvector geopend))",
+        "(+' actieve-kosten\n                    (prefix-gedeelde-raming restvector nieuw-geopend))",
+        "(recur (rest over) (-' r (:blok blok)))",
+        "(assoc blok :rang r :kosten actieve-kosten)",
+        "(assoc blok :rang r :kosten nieuw-kosten)",
         ':bounded-prefix-budget-unproven',
         ':bounded-prefix-invalid-count',
     ),
@@ -185,6 +190,15 @@ def source_mutation_tests(data):
         ('prefix-volgende-keuze', '(when (> nieuw-kosten begroting)', '(when (>= nieuw-kosten begroting)'),
         ('prefix-volgende-keuze', '(if (> r (:blok blok))\n            (recur', '(if (>= r (:blok blok))\n            (recur'),
         ('prefix-volgende-keuze', '(if (> r (:blok blok))\n                (fout', '(if (>= r (:blok blok))\n                (fout'),
+        ("prefix-volgende-keuze", "(+' kosten (prefix-gedeelde-raming restvector geopend))", "(-' kosten (prefix-gedeelde-raming restvector geopend))"),
+        ("prefix-volgende-keuze", "(+' kosten (prefix-gedeelde-raming restvector geopend))", "(+' kosten (*' 2N (prefix-gedeelde-raming restvector geopend)))"),
+        ("prefix-volgende-keuze", "(+' actieve-kosten\n                    (prefix-gedeelde-raming restvector nieuw-geopend))", "(+' kosten\n                    (prefix-gedeelde-raming restvector nieuw-geopend))"),
+        ("prefix-volgende-keuze", "(+' actieve-kosten\n                    (prefix-gedeelde-raming restvector nieuw-geopend))", "(-' actieve-kosten\n                    (prefix-gedeelde-raming restvector nieuw-geopend))"),
+        ("prefix-volgende-keuze", "(recur (rest over) (-' r (:blok blok)))", "(recur (rest over) (+' r (:blok blok)))"),
+        ("prefix-volgende-keuze", "(assoc blok :rang r :kosten actieve-kosten)", "(assoc blok :rang huidige-rang :kosten actieve-kosten)"),
+        ("prefix-volgende-keuze", "(assoc blok :rang r :kosten actieve-kosten)", "(assoc blok :rang r :kosten kosten)"),
+        ("prefix-volgende-keuze", "(assoc blok :rang r :kosten nieuw-kosten)", "(assoc blok :rang huidige-rang :kosten nieuw-kosten)"),
+        ("prefix-volgende-keuze", "(assoc blok :rang r :kosten nieuw-kosten)", "(assoc blok :rang r :kosten actieve-kosten)"),
     ]
     for name, before, after in mutants:
         original_form = definition(source, name)
