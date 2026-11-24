@@ -13,7 +13,10 @@ the same Befunge code. Dedicated native reference/fixture suites test math.
 """
 from __future__ import print_function
 import StringIO
+import hashlib
+import json
 import subprocess
+import sys
 
 from funge.program import Program
 from funge.languages.funge98 import Befunge98
@@ -23,8 +26,14 @@ SOURCES = [
     "src/interleaved_work_counts.b98",
     "qa/interleaved_work_counts_pre_lexical_baseline.b98",
 ]
+OUTPUT_WIDTH = {
+    "src/base_context.b98": 4, "src/base_validator.b98": 1, "src/bootstrap.b98": 1,
+    "src/day_count.b98": 1, "src/error_wrapper.b98": 1, "src/interleaved_day_save.b98": 2,
+    "src/interleaved_work_counts.b98": 7, "src/logging_shell.b98": 2,
+    "src/metrics_shell.b98": 2, "src/runtime_contract.b98": 1, "src/save.b98": 1,
+}
 CODES = {}
-for path in SOURCES:
+for path in set(SOURCES) | set(OUTPUT_WIDTH):
     with open(path,"rb") as stream:
         CODES[path] = stream.read()
 
@@ -40,8 +49,8 @@ def run_cli(path,input_text):
         raise AssertionError("native baseline process error %s rc=%d stderr=%r" %
                              (path,proc.returncode,err[-500:]))
     result=out.split()
-    if len(result)!=7:
-        raise AssertionError("native CLI non-seven-value output %r" % result)
+    if len(result)!=OUTPUT_WIDTH.get(path,7):
+        raise AssertionError("native CLI unexpected output width for %s: %r" % (path,result))
     return result
 
 def fresh_platform(raw):
@@ -49,11 +58,12 @@ def fresh_platform(raw):
     platform=BufferedPlatform([],{},stdin=StringIO.StringIO(raw),stdout=stdout)
     return platform,stdout
 
-def sample(space,vector_cls):
-    positions=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
+BASE_POSITIONS=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
+
+def sample(space,vector_cls,positions):
     return tuple(space.get(vector_cls(p)) for p in positions)
 
-def replay(program,source_path,raw,iteration,previous):
+def replay(program,source_path,raw,iteration,previous,receipts=None):
     if program.ips:
         raise AssertionError("prior native IP was not fully terminated")
 
@@ -61,8 +71,8 @@ def replay(program,source_path,raw,iteration,previous):
     old_semantics=program.semantics
     object_id=id(program)
     if previous:
-        old_snapshot,old_vector_type=previous
-        if sample(old_space,old_vector_type)!=old_snapshot:
+        old_snapshot,old_vector_type,old_positions=previous
+        if sample(old_space,old_vector_type,old_positions)!=old_snapshot:
             raise AssertionError("prior completed Funge-space changed before reset")
     platform,stdout=fresh_platform(raw)
 
@@ -98,7 +108,27 @@ def replay(program,source_path,raw,iteration,previous):
 
     if len(stdout.getvalue())!=0:
         raise AssertionError("unexpected output before execute")
-    result=program.execute()
+    written=set()
+    if receipts is None:
+        program.execute()
+    else:
+        space=program.space
+        cls=type(space)
+        original_put=cls.put
+        def observed_put(receiver,*args,**kwargs):
+            if receiver is not space or len(args)<2:
+                raise AssertionError("foreign or unrecognized native memory write")
+            address=tuple(int(v) for v in args[0])
+            result=original_put(receiver,*args,**kwargs)
+            if len(address)!=2 or int(receiver.get(args[0]))!=int(args[1]):
+                raise AssertionError("native write value or dimension mismatch")
+            written.add(address)
+            return result
+        cls.put=observed_put
+        try:
+            program.execute()
+        finally:
+            cls.put=original_put
     if program.ips:
         raise AssertionError("native Program.execute left unclean IP list")
     got=stdout.getvalue().split()
@@ -108,10 +138,18 @@ def replay(program,source_path,raw,iteration,previous):
                              (iteration,raw,got,expected))
     # Previous Funge-space object must remain untouched by the new run.
     if previous:
-        old_snapshot,old_vector_type=previous
-        if sample(old_space,old_vector_type)!=old_snapshot:
+        if sample(old_space,old_vector_type,old_positions)!=old_snapshot:
             raise AssertionError("new Program run contaminated old Funge-space")
-    return sample(program.space,vector_cls),vector_cls
+    positions=tuple(sorted(set(BASE_POSITIONS) | written))
+    snapshot=sample(program.space,vector_cls,positions)
+    if receipts is not None:
+        code=CODES[source_path]
+        receipts.append({"path":source_path,"input":raw,"output":got,"native_fresh_cli":expected,
+                         "source_blob":hashlib.sha1("blob %d\0"%len(code)+code).hexdigest(),
+                         "written_addresses":[list(p) for p in sorted(written)],
+                         "previous_addresses_checked":len(old_positions) if previous else 0,
+                         "retained_addresses":len(positions)})
+    return snapshot,vector_cls,positions
 
 qa=SOURCES[0]
 original=SOURCES[1]
@@ -152,3 +190,32 @@ for iteration,(source_path,raw) in enumerate(CASES):
 print("NATIVE_SAME_PROGRAM_OBJECT_RESET_PASS",len(CASES),
       "runs in exact same object with clean spaces/IPs/streams")
 print("SCOPE: explicit reset contract. In-place no-reset execution is NOT safe.")
+
+# Switch between all eleven Stage-1 production entry points on the same Program.
+# The final stateless invocation also checks the last stateful snapshot.
+extra_cases=[
+    ("base_context",""), ("bootstrap","10"), ("base_validator","1 0"),
+    ("interleaved_day_save","1 15055672"), ("metrics_shell","42 7"),
+    ("day_count","0 0"), ("error_wrapper","1 42"), ("save","1 1"),
+    ("runtime_contract",""), ("logging_shell","42 7"),
+    ("interleaved_work_counts","0 0 0 1"), ("day_count","1 0"),
+    ("interleaved_day_save","0 0"), ("save","0 0"), ("base_context",""),
+]
+receipts=[]
+for index,(name,raw) in enumerate(extra_cases):
+    name="src/"+name+".b98"
+    previous=replay(program,name,raw+"\n",index,previous,receipts)
+    if id(program)!=identity:
+        raise AssertionError("lost the original Program identity")
+    if index and receipts[-1]["previous_addresses_checked"]!=receipts[-2]["retained_addresses"]:
+        raise AssertionError("missed addresses written by the previous execution")
+stateful={"src/"+n+".b98" for n in ("bootstrap","day_count","save","interleaved_day_save","interleaved_work_counts")}
+if {r["path"] for r in receipts}!=set(OUTPUT_WIDTH):
+    raise AssertionError("incomplete Stage-1 entry-point coverage")
+if {r["path"] for r in receipts if r["written_addresses"]}!=stateful:
+    raise AssertionError("unexpected production state owner")
+if len(sys.argv)>1:
+    with open(sys.argv[1],"wb") as stream:
+        stream.write(json.dumps(receipts,indent=2,sort_keys=True)+"\n")
+print("NATIVE_STAGE1_ALL_ENTRYPOINTS_EXPLICIT_RESET_PASS",len(OUTPUT_WIDTH),"sources",
+      len(receipts),"executions",len(stateful),"physical writers")

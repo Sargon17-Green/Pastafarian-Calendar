@@ -38,6 +38,14 @@ jobs:
           python3 qa/stage1_full_execution_geometry_sim.py
           python3 qa/stage1_native_trace_auditor_selftest.py
           python3 qa/stage1_native_route_graph.py --selftest
+      - name: Check the fresh Befunge kernel through all seven outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/stage1-kernel-and-shells"
+          timeout 90s python3 qa/qa31cm_kernel_equations.py src/interleaved_work_counts.b98 \
+            reference/work_counts.b98 reference/save.b98 \
+            --output "$RUNNER_TEMP/stage1-kernel-and-shells/fresh_kernel.json"
       - name: Verify pinned PyFunge-98 package
         shell: bash
         run: |
@@ -50,6 +58,7 @@ jobs:
           set -euo pipefail
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/stage1-kernel-and-shells:/stage1-evidence" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
@@ -132,9 +141,38 @@ jobs:
                 "0 100 0 0 7 0 0 0 42 0 84 0 126 0 168 0 210 0 252 1",
                 "0 5000 0 6 0 252".split())
           print("STAGE1_TARGETED_NATIVE_REGRESSION_PASS total_invocations="+str(n))
+          import hashlib, json
+          shell_cases = [
+              ("base_context", "", "1 0 0 0"),
+              ("base_validator", "0 0", "1"), ("base_validator", "1 1", "1"),
+              ("base_validator", "1 0", "0"), ("base_validator", "2 1", "0"),
+              ("error_wrapper", "0 42", "42"), ("error_wrapper", "1 42", "-1"),
+              ("metrics_shell", "42 7", "42 8"), ("logging_shell", "42 7", "42 8"),
+          ]
+          receipts = []
+          for name, raw, expected in shell_cases:
+              path = "src/"+name+".b98"
+              with open(path, "rb") as stream:
+                  code = stream.read()
+              digest = hashlib.sha1("blob %d\0"%len(code)+code).hexdigest()
+              got = invoke(path, raw)
+              if got != expected.split():
+                  raise ValueError("bootstrap shell %s %r: expected %s, got %r"%(name,raw,expected,got))
+              receipts.append(dict(path=path, source_blob=digest, input=raw,
+                                   output=got, expected=expected.split()))
+          with open("/stage1-evidence/bootstrap_shells.json", "wb") as stream:
+              stream.write(json.dumps(receipts, indent=2, sort_keys=True)+"\n")
+          print("STAGE1_BOOTSTRAP_SHELLS_NATIVE_PASS cases="+str(len(receipts))+" sources=5")
           PY
               python qa/stage1_native_process_isolation.py
             '
+      - name: Retain source proof and native bootstrap results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-stage1-fresh-kernel-and-bootstrap-shells
+          path: ${{ runner.temp }}/stage1-kernel-and-shells/
+          retention-days: 30
 
   native-write-audit:
     runs-on: ubuntu-latest
@@ -337,13 +375,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/stage1-reset-receipts"
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
             -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/stage1-reset-receipts:/reset-evidence" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
-              timeout --kill-after=5s 240s python -u qa/stage1_native_same_program_reset.py
+              timeout --kill-after=5s 240s python -u qa/stage1_native_same_program_reset.py /reset-evidence/entrypoints.json
             '
+          test -s "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
+      - name: Retain per-source reset and native memory evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-stage1-all-entrypoint-reset
+          path: ${{ runner.temp }}/stage1-reset-receipts/
+          retention-days: 30
 
   native-structural-reference-properties:
     runs-on: ubuntu-latest
