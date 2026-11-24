@@ -6,6 +6,7 @@ The program will not accept a different production Git blob, even if equivalent.
 No Clojure interpreter, CI, Native or five-field test is invoked.
 """
 import argparse
+from collections import Counter
 import hashlib
 import json
 from pathlib import Path
@@ -89,9 +90,9 @@ def source_guard(data, require_blob=True):
     forms = {}
     for name, clauses in FUNCTIONS.items():
         form = definition(source, name)
-        for clause in set(clauses):
-            if clause not in form:
-                raise AssertionError(f'{name}: missing/altered source clause {clause!r}')
+        for clause, minimum in Counter(clauses).items():
+            if form.count(clause) < minimum:
+                raise AssertionError(f'{name}: missing/altered source clause {clause!r}; expected at least {minimum}')
         # Boundary guard: both the active and new group have their own strict > test.
         if name == 'prefix-volgende-keuze' and form.count('(when (> ') != 2:
             raise AssertionError('Expected exactly two strict over-budget guards')
@@ -182,6 +183,8 @@ def source_mutation_tests(data):
         ('prefix-legale-kandidaten', '(or (> aantal 1) (= maand (inc gesloten)))', '(or (>= aantal 1) (= maand (inc gesloten)))'),
         ('prefix-volgende-keuze', '(when (> nieuw begroting)', '(when (>= nieuw begroting)'),
         ('prefix-volgende-keuze', '(when (> nieuw-kosten begroting)', '(when (>= nieuw-kosten begroting)'),
+        ('prefix-volgende-keuze', '(if (> r (:blok blok))\n            (recur', '(if (>= r (:blok blok))\n            (recur'),
+        ('prefix-volgende-keuze', '(if (> r (:blok blok))\n                (fout', '(if (>= r (:blok blok))\n                (fout'),
     ]
     for name, before, after in mutants:
         original_form = definition(source, name)
