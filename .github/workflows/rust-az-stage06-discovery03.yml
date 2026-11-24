@@ -80,11 +80,7 @@ jobs:
           if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
             exit 1
           fi
-          if grep -Fxq 'LAST_COMPLETED_STAGE=6' DEVELOPMENT_STAGE.md; then
-            printf 'STAGE06_DISCOVERY03_NATIVE=PASS\nSTAGE06_CLOSURE=ACCEPTED\n' > evidence/result.txt
-          else
-            printf 'STAGE06_DISCOVERY03_NATIVE=PASS\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
-          fi
+          printf 'STAGE06_STONE_AUXILIARY_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE=NOT_CLAIMED\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence regardless of result
         if: always()

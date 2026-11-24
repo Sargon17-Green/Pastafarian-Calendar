@@ -1,5 +1,5 @@
 //! Mərhələ 5 — PATCH02: iki gün üçün normativ iş sayları.
-//! Tarixi Stage04 zonduna və test oracle-ına istinad etmir.
+//! Təsdiqlənmiş 2026 Rust rekonstruksiyasının izini saxlayır; test oracle-ı yoxdur.
 //! Beş sahəli yekun təqvim marşrutu hələ qəsdən bağlıdır.
 
 use std::cmp::Ordering;
@@ -29,20 +29,39 @@ pub struct Patch02Observation {
 
 pub struct WorkCountsPatch02;
 
-/// F=-15055671. F-dən əvvəl cüt, F və sonra tək müsbət göstərici.
-pub fn normative_day_tag(day: &BigInt) -> BigInt {
+/// 2026-cı ildə təsdiqlənmiş Rust rekonstruksiyasının dəyişməz riyazi izi.
+/// Bu, orijinal tarixi mənbə deyil; F-dən əvvəl +1 qəsdən yanlışdır.
+pub fn reconstructed_legacy_day_tag(day: &BigInt) -> BigInt {
     let foundation = BigInt::from(-15_055_671i64);
-    match day.cmp(&foundation) {
-        Ordering::Less => (&foundation - day) << 1usize,
-        Ordering::Equal | Ordering::Greater => ((day - &foundation) << 1usize) + BigInt::one(),
-    }
+    (day - foundation).abs() * BigInt::from(2u8) + BigInt::one()
 }
 
-/// Məsafəyə hər iki sərhəd daxildir; eyni günün məsafəsi 1-dir.
-/// İstiqamət: əvvəl=1, eyni=2, sonra=3.
+/// Legacy nəticəsini bir dəfə al, yalnız F-dən əvvəl ofseti geri götür.
+fn patch02_day_tag_observed(day: &BigInt) -> (BigInt, BigInt) {
+    let legacy = reconstructed_legacy_day_tag(day);
+    let corrected = if day < &BigInt::from(-15_055_671i64) {
+        &legacy - BigInt::one()
+    } else {
+        legacy.clone()
+    };
+    (legacy, corrected)
+}
+
+pub fn normative_day_tag(day: &BigInt) -> BigInt {
+    patch02_day_tag_observed(day).1
+}
+
+/// Məsafə bu əvvəlki normativ QA marşrutunda dəyişmir.
 pub fn normative_work_counts(calculation_day: &BigInt, target_day: &BigInt) -> WorkCounts {
-    let action = normative_day_tag(calculation_day);
-    let target = normative_day_tag(target_day);
+    observed_work_counts(calculation_day, target_day).0
+}
+
+fn observed_work_counts(
+    calculation_day: &BigInt,
+    target_day: &BigInt,
+) -> (WorkCounts, BigInt, BigInt) {
+    let (legacy_action, action) = patch02_day_tag_observed(calculation_day);
+    let (legacy_target, target) = patch02_day_tag_observed(target_day);
     let distance = (target_day - calculation_day).abs() + BigInt::one();
     let connection = &action + &target;
     let direction = match target_day.cmp(calculation_day) {
@@ -50,13 +69,17 @@ pub fn normative_work_counts(calculation_day: &BigInt, target_day: &BigInt) -> W
         Ordering::Equal => 2,
         Ordering::Greater => 3,
     };
-    WorkCounts {
-        action,
-        target,
-        distance,
-        connection,
-        direction,
-    }
+    (
+        WorkCounts {
+            action,
+            target,
+            distance,
+            connection,
+            direction,
+        },
+        legacy_action,
+        legacy_target,
+    )
 }
 
 impl PhaseHandler for WorkCountsPatch02 {
@@ -65,10 +88,25 @@ impl PhaseHandler for WorkCountsPatch02 {
     }
 
     fn handle(&self, context: &mut MonsterContext) -> Result<(), MonsterError> {
-        context.work_counts_observation = Some(normative_work_counts(
-            &context.calculation_day,
-            &context.target_day,
+        if context.work_counts_observation.is_some() {
+            return Err(MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "PATCH02: təkrar müşahidə qadağandır.".to_owned(),
+            });
+        }
+        let (counts, legacy_action, legacy_target) =
+            observed_work_counts(&context.calculation_day, &context.target_day);
+        context.logs.push(format!(
+            "PATCH02:legacy-action={} corrected-action={}",
+            legacy_action, counts.action
         ));
+        context.logs.push(format!(
+            "PATCH02:legacy-target={} corrected-target={}",
+            legacy_target, counts.target
+        ));
+        context.metrics.bump("patch02.legacy.action.calls");
+        context.metrics.bump("patch02.legacy.target.calls");
+        context.work_counts_observation = Some(counts);
         context.metrics.bump("patch02.work_counts.calls");
         context
             .logs
@@ -98,4 +136,55 @@ pub fn calculate_work_counts(
         counts,
         context,
     })
+}
+
+#[cfg(test)]
+mod wrapper_reconciliation_tests {
+    use super::*;
+
+    #[test]
+    fn reconstructed_wrapper_uses_legacy_and_preserves_call_ownership() {
+        let foundation = BigInt::from(-15_055_671i64);
+        let mut offsets: Vec<BigInt> = (-31i64..=31).map(BigInt::from).collect();
+        for bits in [129usize, 1031, 4097] {
+            let wide = BigInt::one() << bits;
+            offsets.push(-&wide);
+            offsets.push(wide);
+        }
+        let mut before = 0;
+        let mut controls = 0;
+        for offset in &offsets {
+            let day = &foundation + offset;
+            let expected = if offset < &BigInt::from(0u8) {
+                -offset - offset
+            } else {
+                offset + offset + BigInt::one()
+            };
+            let other = &foundation - offset;
+            let obs = calculate_work_counts(day.clone(), other).unwrap();
+            let raw = reconstructed_legacy_day_tag(&day);
+            if offset < &BigInt::from(0u8) {
+                assert_eq!(raw, &expected + BigInt::one());
+                before += 1;
+            } else {
+                assert_eq!(raw, expected);
+                controls += 1;
+            }
+            assert_eq!(obs.counts.action, expected);
+            assert_eq!(obs.context.metrics.get("patch02.legacy.action.calls"), 1);
+            assert_eq!(obs.context.metrics.get("patch02.legacy.target.calls"), 1);
+            assert!(obs.context.logs.entries().contains(&format!(
+                "PATCH02:legacy-action={} corrected-action={}",
+                raw, expected
+            )));
+            let mut duplicate = obs.context.clone();
+            let snapshot = duplicate.clone();
+            let error = WorkCountsPatch02.handle(&mut duplicate).unwrap_err();
+            assert_eq!(error.code, MonsterErrorCode::InvalidState);
+            assert_eq!(duplicate, snapshot);
+            println!("PATCH02_WRAPPER_ROW day={day} raw={raw} corrected={expected}");
+        }
+        assert_eq!((before, controls), (34, 35));
+        println!("STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69");
+    }
 }

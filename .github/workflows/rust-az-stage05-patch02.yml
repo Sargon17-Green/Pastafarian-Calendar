@@ -78,6 +78,7 @@ jobs:
             exit "$code"
           fi
           for marker in \
+            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \
             'STAGE05_PATCH02_FOUNDATION_CASES=7' \
             'STAGE05_PATCH02_LOCAL_PAIRS=49' \
             'STAGE05_PATCH02_LARGE_PAIRS=8' \
