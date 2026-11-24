@@ -198,3 +198,4 @@ build/calendar_bowl_answer.o: build/calendar.o src/runtime/calendar_bowl_answer.
 
 build/calendar_bowl_answer.gb: build/calendar_bowl_answer.o
 	$(RGBLINK) -n build/calendar_bowl_answer.sym -m build/calendar_bowl_answer.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
