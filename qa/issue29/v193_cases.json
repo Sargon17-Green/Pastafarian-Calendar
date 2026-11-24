@@ -1,0 +1,39 @@
+{
+  "schema": "ISSUE29_V193_SIX_CASES/1",
+  "cases": [
+    {
+      "c": -15055671,
+      "t": -15057703,
+      "reason": "last day of year 4999",
+      "year": 4999
+    },
+    {
+      "c": -15055671,
+      "t": -15053459,
+      "reason": "last day of year 5000",
+      "year": 5000
+    },
+    {
+      "c": -15055671,
+      "t": -15053458,
+      "reason": "first day of year 5001",
+      "year": 5001
+    },
+    {
+      "c": -15055672,
+      "t": -15055671,
+      "reason": "calculation day before foundation"
+    },
+    {
+      "c": -15055670,
+      "t": -15055671,
+      "reason": "calculation day after foundation"
+    },
+    {
+      "c": -15055629,
+      "t": -15055629,
+      "reason": "changed calculation day equals target",
+      "year": 5000
+    }
+  ]
+}
