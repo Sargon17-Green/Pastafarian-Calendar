@@ -1,8 +1,6 @@
 name: FALSE Arabic Stage 21 source-locked measurement diagnostic
 on:
-  push:
-    branches:
-      - 'FALSE+العربية'
+  workflow_call:
 permissions:
   contents: read
 jobs:

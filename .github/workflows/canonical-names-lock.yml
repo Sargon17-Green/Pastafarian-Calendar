@@ -213,3 +213,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage20-native-initial-bowls.yml
     permissions:
       contents: read
+
+  false-arabic-stage21-diagnostic:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-stage21-diagnostic]')
+    uses: ./.github/workflows/false-arabic-stage21-diagnostic.yml
+    permissions:
+      contents: read
