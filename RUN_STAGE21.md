@@ -2,7 +2,7 @@
 
 PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · BRANCH: `FALSE+العربية` · 2026-11-23
 
-**Status: DESIGN_CONTRACT_ONLY.** Stage20 remains the last accepted stage (`ACCEPTED_BOUNDED`). Stage21 production, Native, CI and acceptance have NOT occurred.
+**Current status (2026-11-25): CORRECTED_OP38_CANDIDATE; NOT_ACCEPTED.** Stage20 remains the last accepted stage (`ACCEPTED_BOUNDED`). Original-runtime Stage21 measurement is prepared; no Native result or acceptance is claimed. Historical design and QA entries below are preserved as history; the neighbor correction supersedes the original formula.
 
 ## Normative evidence and adaptation
 
@@ -31,11 +31,11 @@ Using only the *old* six bowl values, compute six auxiliary quantities indexed b
 
 `A[p]=SAVE(t*t + B[O[p]]*S(u,p) + u*(2p+1))` for `p=1,2,3`, and `A[p]=2` for `p=4,5,6`.
 
-Then, for each bowl ID `b=1..6`, let `p=P[b]`, `L=B[1+((p+4) mod 6)]`, `R=B[1+(p mod 6)]` and compute
+Then, for each bowl ID `b=1..6`, let `p=P[b]`, `L=B[O[1+((p+4) mod 6)]]`, `R=B[O[1+(p mod 6)]]` and compute
 
 `N[b]=SAVE(B[b]^2 + 2L + 3R + A[p] + t + S(u,K[p]) + 5LR + u*p)`.
 
-All six `N[b]` must be computed from the **same old snapshot**; only then replace `B=N`. No per-bowl in-place mutation is equivalent to the normative operation. At the end return `B` and the `O` calculated for `u=46`. The distinction between bowl ID `b` and its position `p` is essential: neighbors and the stone-type lookup use position `p`, whereas `B[b]` uses bowl ID.
+All six `N[b]` must be computed from the **same old snapshot**; only then replace `B=N`. No per-bowl in-place mutation is equivalent to the normative operation. At the end return `B` and the `O` calculated for `u=46`. The distinction between bowl ID `b` and its position `p` is essential: neighbor positions must be mapped through the permutation `O` to bowl IDs before reading `B`; the stone-type lookup uses position `p` directly, whereas `B[b]` uses bowl ID.
 
 ### Independently hand-computable witness
 
@@ -70,3 +70,16 @@ The 13 deterministic anchors and 384 seeded full 46-drop cases agreed: 397 input
 QA source and result were read back from their Git blobs. This is **mathematical/design QA only**, not a Node.js or original-interpreter Native execution, CI result, new FALSE op38, differential runtime acceptance, or Stage21 acceptance. Stage20 is still the last `ACCEPTED_BOUNDED` stage. Physical invalid pointers/truncated allocations stay unassessed.
 
 **NEXT:** Independently implement append-only FALSE production op38 based on the bounded contract; add source-pinned positive/negative Native fixtures and CI; only then perform an independent ZIP/source/math audit and decide Stage21 acceptance. No main/merge.
+
+
+## 2026-11-25 — source-level correction and diagnostic preparation
+
+Normative op55 (blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`, lines 383–423) explicitly maps both neighboring positions through the current order using seqAt before reading the old bowl values. The earlier design and both old oracle paths omitted this mapping. Agreement between those paths did not establish normative correctness. The original 2026-11-23 math QA report remains historical and is superseded for neighbor semantics; do not reuse its numerical expectations.
+
+Counterexample: initial bowls [2,3,5,7,11,13], first visible drop 720, stones [2,3,5,7,11], order [6,5,4,3,2,1]. Correct first transition is [974,813,886,519531,519786,519468]; the previous erroneous formula gave [872,1255,1076,519351,519353,519551]. The identity-order all-ones witness remains [19,22,25,19,20,21].
+
+Append-only op38 candidate commit `b7a909b4ac323c5f7e46fba1b6be81d2ba54c4ff` was corrected at `c260b2058c1240e91df8df49fd0483bf7e939b9c` (production blob `e9cf5c3d6933aabf23176ea208baf2a1291a7dfd`); accepted op0–37 unchanged. Corrected executable QA `tools/stage21_corrected_neighbor_oracle.mjs` and report `evidence/stage21_corrected_neighbor_math_qa_2026-11-25.json` were read back from commit `c3909c68723a8a78783d8cce36962fc65f572e5b`. Executed in V8: 397 full cases, 18,262 drops, 109,572 numeric comparisons and Base512 roundtrips, 720 order cross-checks, one full replay, six genuine numeric mutation witnesses (including the actual old-contract defect), noncryptographic digest 0x945a235052e22203. This does not establish original-runtime correctness; the earlier invalid-domain QA is not represented as newly rerun.
+
+The diagnostic harness `tools/stage21_native_diagnostic.py` (commit `4dd600de607e8c858d23dd6189789ba69c69377e`) generates complete allocated Python-integer fixtures for identity, reverse and boundary inputs, exact output and input-cell assertions, and prepares invalid-record fixture construction. The first measurement uses an explicitly instrumented one-drop prefix and then an unmodified full 46-drop identity-input program, each in a separate bounded original-interpreter process. Caps: 2 GiB address space, 180 s per short case, 600 s for the full case; these are conservative diagnostic limits, not measured acceptance thresholds. If any diagnostic fails, preserve its logs and stop the sequence. Run short and full measurement in a separate source-pinned CI diagnostic because local original-interpreter execution was not available in this session. No stage acceptance, no full Native gate, no claims of physical invalid-pointer safety, no merge/main.
+
+NEXT: inspect the diagnostic run only after completion (job/log/exit/artifact/source SHA), diagnose any actual failure or resource pressure, and use observed measurements to establish full Native limits and run at least three independent full paths, intermediate probes, replay, semantic invalids and genuine numeric mutations. Independent offline source/artifact/math audit remains mandatory.
