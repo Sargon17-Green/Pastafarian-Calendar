@@ -2157,6 +2157,7 @@ fn test_stage38_catalan_second_prefix_fork_at_17_and_47_months() {
 	stage38_check_second_prefix_fork(47)
 	println('V_AMHARIC_STAGE38_SECOND_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
 }
+
 // Stage39: the third Dyck-prefix fork, within the [1,2,3] block.
 // Prefix blocks [1,1], [1,2,1] and [1,2,3,1] precede [1,2,3,4].
 // Independent Catalan and reflection-principle Ballot counts fix the rank.
