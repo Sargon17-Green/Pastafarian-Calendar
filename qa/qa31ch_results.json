@@ -1,0 +1,115 @@
+{
+  "all_write_targets": [
+    [
+      0,
+      49
+    ],
+    [
+      1,
+      49
+    ],
+    [
+      2,
+      49
+    ],
+    [
+      3,
+      49
+    ],
+    [
+      10,
+      49
+    ],
+    [
+      11,
+      49
+    ],
+    [
+      12,
+      49
+    ],
+    [
+      13,
+      49
+    ]
+  ],
+  "detached_source_mutations_rejected": [
+    "EOF reflect path",
+    "reject fourth token",
+    "decimal multiply",
+    "drop separator reset",
+    "allow bad pending count",
+    "duplicate second output token",
+    "change rejection value"
+  ],
+  "distinct_executed_cells": 3573,
+  "excluded_scanner_sites": [
+    [
+      235,
+      23
+    ],
+    [
+      235,
+      32
+    ],
+    [
+      286,
+      5
+    ]
+  ],
+  "exits": {
+    "handoff": 2,
+    "read": 116,
+    "reject": 2195
+  },
+  "max_segment_instructions": 1422,
+  "native_prefix_steps": {
+    "14745206712": 10578,
+    "14775400606": 10578,
+    "14865377417": 10578
+  },
+  "new_native_runs": 0,
+  "schema": "qa31ch-inductive-fresh-scanner-v1",
+  "scope": "original fresh entry through rejection or first arithmetic handoff",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_accepted": false,
+  "states": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      1
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      3,
+      0
+    ],
+    [
+      3,
+      1
+    ],
+    [
+      4,
+      0
+    ]
+  ],
+  "transitions": 2313
+}
