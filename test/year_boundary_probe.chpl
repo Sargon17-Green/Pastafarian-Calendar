@@ -217,6 +217,115 @@ proc researchSparseTransposeWindowed(const ref after: SparseWeavingVec,
   return sparseWeavingPack(dense);
 }
 
+// Independent small transfer-matrix oracle: count gap allocations by
+// finite DP over individual gaps, not by binomial coefficients or suffix
+// recurrence. Fixed prefix is already consumed; the first occupied gap and
+// final gap must be positive, with the observed tail as an extra lower bound.
+proc researchGapAllocationCount(i: int, n: int, k: int,
+                                spec: SparseWeavingGapSpec): bigint {
+  if i < spec.q {
+    if spec.firstFixed != i || spec.fixedSum == 0 then return new bigint(0);
+  } else {
+    if spec.fixedSum != 0 || (i > spec.q && spec.tail > 0) then
+      return new bigint(0);
+  }
+  if spec.fixedSum > k then return new bigint(0);
+  var ways: [0..k] int;
+  ways[spec.fixedSum] = 1;
+  for j in spec.q..n {
+    var nextWays: [0..k] int;
+    var lower = 0;
+    if j == spec.q then lower = spec.tail;
+    if j == i || j == n then lower = max(lower,1);
+    for used in 0..k {
+      if ways[used] == 0 then continue;
+      for count in lower..(k-used) {
+        if j < i && count != 0 then continue;
+        nextWays[used+count] += ways[used];
+      }
+    }
+    ways = nextWays;
+  }
+  return new bigint(ways[k]);
+}
+
+proc checkResearchSparseTransposeMatrixOracle() {
+  var cases = 0, entries = 0, recurrenceCases = 0;
+  for n in 0..12 {
+    for k in 1..10 {
+      for q in 0..n {
+        for shape in 0..5 {
+          var spec: SparseWeavingGapSpec;
+          spec.q = q;
+          if shape == 1 then spec.tail = 2;
+          if shape == 2 && q > 0 {
+            spec.fixedSum = 1;
+            spec.firstFixed = q-1;
+          }
+          if shape == 5 && q > 0 {
+            spec.fixedSum = 2;
+            spec.firstFixed = q/2;
+            spec.tail = 1;
+          }
+          var adjoint: [0..n+k] bigint;
+          if shape == 3 {
+            adjoint[n+1] = new bigint(-7);
+          } else if shape != 4 {
+            for j in 0..n+k {
+              if j%3 != 0 {
+                if j%2 == 0 then adjoint[j] = new bigint(j+2);
+                else adjoint[j] = new bigint(-(j+2));
+              }
+            }
+          }
+          const packed = sparseWeavingPack(adjoint);
+          const actual = researchSparseTransposeWindowed(packed,n,k,spec);
+          const lowActive = max(q,packed.first-1);
+          const highActive = min(n,packed.first+packed.values.size-2);
+          if spec.fixedSum == 0 && spec.tail == 0 && k >= 8 &&
+             highActive-lowActive >= 8 then recurrenceCases += 1;
+          // Explicit column-by-column matrix multiplication against the
+          // original dense adjoint; no call to either transpose or weight
+          // implementation to construct the oracle.
+          var columnWeights: [0..n] bigint;
+          for i in 0..n do
+            columnWeights[i] = researchGapAllocationCount(i,n,k,spec);
+          var expected: [0..n] bigint;
+          for p in 0..n {
+            for i in 0..n {
+              if p <= i then expected[p] += adjoint[i+1]*columnWeights[i];
+            }
+            if actual.at(p) != expected[p] then
+              halt("Independent transpose matrix mismatch n=",n,
+                   " k=",k," q=",q," shape=",shape," p=",p);
+            entries += 1;
+          }
+          var first = -1, last = -1;
+          for p in 0..n {
+            if expected[p] != 0 {
+              if first < 0 then first = p;
+              last = p;
+            }
+          }
+          if first < 0 {
+            if actual.values.size != 0 then halt("Nonempty zero transpose");
+          } else if actual.first != first ||
+                    actual.values.size != last-first+1 then
+            halt("Independent transpose packing mismatch");
+          cases += 1;
+        }
+      }
+    }
+  }
+  if cases != 5460 || entries != 49140 || recurrenceCases != 75 then
+    halt("Independent transpose matrix oracle cardinality mismatch");
+  writeln("RESEARCH_TRANSPOSE_MATRIX_CASES=",cases);
+  writeln("RESEARCH_TRANSPOSE_MATRIX_ENTRIES=",entries);
+  writeln("RESEARCH_TRANSPOSE_MATRIX_RECURRENCE_CASES=",recurrenceCases);
+  writeln("RESEARCH_TRANSPOSE_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
+  try! stdout.flush();
+}
+
 proc checkResearchSparseTransposeWindowedFinite() {
   var cases = 0;
   // Small exhaustive dimensions with deterministic sparse, dense and empty
@@ -512,6 +621,7 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
 
 proc main() {
   checkResearchSparseTransposeWindowedFinite();
+  checkResearchSparseTransposeMatrixOracle();
   checkSparseWeavingDifferential();
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
