@@ -2,7 +2,7 @@ name: Stage55 exact root count and middle rank (bounded)
 on:
   push:
     branches:
-      - 'MATLAB+Polski'
+      - 'MATLAB\+Polski'
     paths:
       - 'tools/stage55_root_middle_rank_dual_counter.py'
       - 'docs/stage55-root-middle-rank-contract.md'

@@ -1,0 +1,81 @@
+name: MATLAB Stage55 Middle-Word Projection Differential
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/fixtures/stage55_year5000_middle_word.json'
+      - 'tools/run_stage55_year5000_middle_projection_native.m'
+      - '.github/workflows/matlab-stage55-middle-projection-differential.yml'
+permissions:
+  contents: read
+concurrency:
+  group: stage55-middle-projection-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  middle-projection:
+    if: github.ref == 'refs/heads/MATLAB+Polski'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pin production source, canonical fixture, oracle and archived word
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD:src)" = "d04d76694bb1246be5943f1dadd6e9d285e5ce97"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          test "$(git rev-parse HEAD:tools/stage55_full_year_projection_oracle.py)" = "e4f8d1b043467af8cc7baadbbe6e465cc2a27adb"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          mkdir -p logs/stage55_middle_python_1 logs/stage55_middle_python_2
+          echo '82042fef5a65cc8b08120d069fa9d8f31c05e6761040f82c3341328ded9b44e5  tests/fixtures/stage55_year5000_middle_word.json' | sha256sum -c
+          git rev-parse HEAD HEAD:src HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json HEAD:tools/stage55_full_year_projection_oracle.py HEAD:tests/fixtures/stage55_year5000_middle_word.json > logs/STAGE55_MIDDLE_SOURCE_LOCK.txt
+      - name: Independent Python full-year projection twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/stage55_full_year_projection_oracle.py
+          for trial in 1 2; do
+            python3 tools/stage55_full_year_projection_oracle.py tests/fixtures/stage55_year5000_appendix_a_metadata.json logs/stage55_middle_python_$trial --word-json tests/fixtures/stage55_year5000_middle_word.json | tee logs/STAGE55_MIDDLE_PYTHON_$trial.log
+            test "$(wc -l < logs/stage55_middle_python_$trial/STAGE55_YEAR5000_CANDIDATE.csv)" -eq 4245
+            echo "bb4a350ecd465f6db5eda00ac7a546958e3ec26db7740d830442424591352ca6  logs/stage55_middle_python_$trial/STAGE55_YEAR5000_CANDIDATE.csv" | sha256sum -c
+          done
+          cmp logs/stage55_middle_python_1/STAGE55_YEAR5000_CANDIDATE.csv logs/stage55_middle_python_2/STAGE55_YEAR5000_CANDIDATE.csv
+          cmp logs/stage55_middle_python_1/STAGE55_YEAR5000_PROJECTION_MANIFEST.json logs/stage55_middle_python_2/STAGE55_YEAR5000_PROJECTION_MANIFEST.json
+          python3 -c 'import json; d=json.load(open("logs/stage55_middle_python_1/STAGE55_YEAR5000_PROJECTION_MANIFEST.json")); assert d["cases"]["CANDIDATE"]["weave_sha256"]=="17604f757a52e960dcc7a50b7096bfacb8800f3424b50bce8ca781eb4bbab0e0"'
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native production PATCH25 full-year projection twice
+        uses: matlab-actions/run-command@v3
+        with:
+          command: addpath('tools'); run_stage55_year5000_middle_projection_native
+      - name: Strict bytewise full-year differential and certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          for trial in 1 2; do
+            cmp "logs/stage55_middle_python_1/STAGE55_YEAR5000_CANDIDATE.csv" "logs/STAGE55_YEAR5000_CANDIDATE_RUN$trial.csv"
+          done
+          grep -Fqx 'STAGE55_MIDDLE_NATIVE_PROJECTION_PASS CASES=1 RUNS=2 ROWS=4244 NEGATIVE=2' logs/STAGE55_MIDDLE_PROJECTION_NATIVE.log
+          sha256sum logs/stage55_middle_python_1/*.csv logs/stage55_middle_python_2/*.csv logs/STAGE55_YEAR5000_CANDIDATE_RUN*.csv | tee logs/STAGE55_MIDDLE_SHA256.txt
+          python3 -c 'import json,os; d={"project_id":"PC-BRANCH-MATLAB-POLSKI","source_commit":os.environ["GITHUB_SHA"],"run_id":os.environ["GITHUB_RUN_ID"],"rows_per_trial":4244,"trials":2,"negative_positions":[0,4245],"bytewise":True,"csv_sha256":"bb4a350ecd465f6db5eda00ac7a546958e3ec26db7740d830442424591352ca6","scope":"PROJECTION_ONLY","native_rank_verified":False,"final_stage_accepted":False}; open("logs/STAGE55_MIDDLE_DIFFERENTIAL.json","w").write(json.dumps(d,indent=2)+"\n")'
+          echo 'STAGE55_MIDDLE_DIFFERENTIAL_PASS WORDS=1 DAYS=4244 RUNS=2 FIELDS=5 BYTEWISE=YES'
+      - name: Preserve evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-middle-word-projection-evidence
+          path: |
+            logs/STAGE55_MIDDLE_*
+            logs/stage55_middle_python_1/
+            logs/stage55_middle_python_2/
+            logs/STAGE55_YEAR5000_CANDIDATE_RUN*.csv
+            tests/fixtures/stage55_year5000_middle_word.json
+          if-no-files-found: warn
+          retention-days: 30
