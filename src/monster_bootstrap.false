@@ -453,3 +453,90 @@ z;37=~["E_INITIAL_BOWLS_LAYOUT"0 0/]?
  z;r:6a;!f;a;!j;a;!l;a;!o;a;!q;a;!s;a;!
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+{ المرحلة 21: العملية 38؛ تحديث متزامن لست كرات عبر 46 قطرة مرئية. }
+{ [bowls,visible,stones] -> [2,newBowls,lastOrder]، ضمن عقد السجلات المخصصة. }
+{ القيم المدخلة موجبة معيارية بأساس 512، حتى 2^127-1. }
+{ قائمة نتائج عكسية مؤقتة، ثم جدول جديد؛ لا يكتب فوق المدخلات. }
+z;38=~["E_BOWL_UPDATE_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!y:x;1+g;!w:x;2+g;!v:
+ y;g;!6=~["E_BOWL_UPDATE_BOWLS_LENGTH"0 0/]?
+ w;g;!46=~["E_BOWL_UPDATE_VISIBLE_LENGTH"0 0/]?
+ v;g;!46=~["E_BOWL_UPDATE_STONES_LENGTH"0 0/]?
+ { تحقق من الإشارة، طول التمثيل، والخانات قبل الحساب. }
+ [
+  d:
+  d;g;!1=~["E_BOWL_UPDATE_BIG_SIGN"0 0/]?
+  d;1+g;!e:
+  e;1<["E_BOWL_UPDATE_BIG_LENGTH"0 0/]?
+  e;15>["E_BOWL_UPDATE_BIG_LENGTH"0 0/]?
+  0f:
+  [f;e;<][
+   d;2+f;+g;!m:
+   m;0<["E_BOWL_UPDATE_BIG_DIGIT"0 0/]?
+   m;511>["E_BOWL_UPDATE_BIG_DIGIT"0 0/]?
+   f;1+f:
+  ]#
+  m;0=["E_BOWL_UPDATE_BIG_TOP"0 0/]?
+  e;15=[m;1>["E_BOWL_UPDATE_BIG_RANGE"0 0/]?]?
+ ]q:
+ 1j:[j;7<][y;j;+g;!q;!j;1+j:]#
+ 1i:[i;47<][
+  w;i;+g;!q;!
+  v;i;+g;!n:
+  n;g;!5=~["E_BOWL_UPDATE_ROW_LENGTH"0 0/]?
+  1j:[j;6<][n;j;+g;!q;!j;1+j:]#
+  i;1+i:
+ ]#
+ 1i:
+ [i;47<][
+  w;i;+g;!t:v;i;+g;!n:
+  z;b:t;a;!b;35h;!!o:
+  0q:1u:
+  [u;7<][
+   z;b:o;a;!u;a;!b;36h;!!p:
+   y;u;+g;!m:
+   { حساب A حسب الموضع، مع استعمال قيمة الكرة القديمة. }
+   p;4<[
+    z;b:t;a;!t;a;!b;14h;!!d:
+    n;p;+g;!e:
+    z;b:m;a;!e;a;!b;14h;!!e:
+    z;b:d;a;!e;a;!b;9h;!!d:
+    z;b:d;a;!i;p;2*1+*a;!b;22h;!!d:
+    z;b:d;a;!b;25h;!!f:
+   ]?
+   p;3>[z;b:2a;!b;0h;!!f:]?
+   { الجاران حسب الموضع لا حسب معرف الكرة. }
+   p;1-j:j;0=[6j:]?y;j;+g;!s:
+   p;1+j:j;7=[1j:]?y;j;+g;!l:
+   z;b:m;a;!m;a;!b;14h;!!d:
+   z;b:s;a;!2a;!b;23h;!!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:l;a;!3a;!b;23h;!!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:d;a;!f;a;!b;9h;!!d:
+   z;b:d;a;!t;a;!b;9h;!!d:
+   p;j:p;6=[1j:]?n;j;+g;!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:s;a;!l;a;!b;14h;!!e:
+   z;b:e;a;!5a;!b;23h;!!e:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:d;a;!i;p;*a;!b;22h;!!d:
+   z;b:d;a;!b;25h;!!d:
+   z;r:d;a;!q;a;!r;q:
+   u;1+u:
+  ]#
+  { تسطيح ست نتائج بترتيب المعرف، بعد انتهاء الحسابات الست. }
+  z;x:6a;!1u:
+  [u;7<][
+   q;r:6u;-j:
+   [j;0>][r;1+g;!r:j;1-j:]#
+   r;g;!a;!u;1+u:
+  ]#
+  x;y:i;1+i:
+ ]#
+ z;r:2a;!y;a;!o;a;!
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!
