@@ -5,6 +5,11 @@ Run: python3 tests/stage02_calendar_weave_boundary_qa.py
       python3 tests/stage02_calendar_weave_boundary_qa.py --enumerator-only
 Independent DFS supplies expected words, not the existing WAT or weave oracle.
 Large-family tests are structural only, not independent differential or Native.
+2026-11-25 correction: the original contract's whole-word lexical ranking is
+not the canonical closure ranking. The locked WAT s_wf_unrank3 switches to
+s_ct_finish_closure after the last first appearance. Compare independent
+DFS words sorted by the canonical prefix / descending-ID bitword key.
+No production WAT or prior unrank oracle is changed. See rank_order_witness.
 """
 import argparse
 import hashlib
@@ -49,6 +54,32 @@ def enumerate_words(lengths):
     return output
 
 
+def canonical_rank_key(word):
+    """Chronological prefix through last introduction; descending-ID bitwords thereafter."""
+    largest = max(word)
+    split = word.index(largest) + 1
+    suffix = word[split:]
+    masks = []
+    for ident in range(largest, 0, -1):
+        masks.append(tuple(int(x == ident) for x in suffix))
+        suffix = tuple(x for x in suffix if x != ident)
+    return word[:split], tuple(masks)
+
+
+def rank_order_witness():
+    """Protect against confusing whole-word lexicographic and canonical ranks."""
+    lex = enumerate_words((3,3,3))
+    canonical = sorted(lex, key=canonical_rank_key)
+    require(len(lex) == 71, 'rank discriminator cardinality')
+    require(len(set(map(canonical_rank_key, lex))) == len(lex), 'nonunique rank key')
+    require(lex[19] == (1,1,2,3,1,2,3,2,3), 'lexical rank-20 witness')
+    require(canonical[19] == (1,1,2,3,2,1,2,3,3), 'canonical rank-20 witness')
+    differences = sum(a != b for a,b in zip(lex,canonical))
+    require(differences == 17, 'rank convention discriminator')
+    return {'lengths':[3,3,3], 'rank':20, 'lexical_word':lex[19],
+            'canonical_word':canonical[19], 'different_ranks':differences}
+
+
 def rejects(fn, label):
     try:
         fn()
@@ -75,7 +106,10 @@ def run_small(unrank, completion_table):
     word_count = offset_count = mutation_count = 0
     results = []
     for lengths in SMALL:
-        valid = enumerate_words(lengths)
+        enumerated = enumerate_words(lengths)
+        require(len(set(map(canonical_rank_key, enumerated))) == len(enumerated),
+                'nonunique canonical rank key')
+        valid = sorted(enumerated, key=canonical_rank_key)
         size = len(valid)
         require(size == completion_table(list(lengths))[0][0], 'family cardinality')
         for rank, expected in enumerate(valid, 1):
@@ -138,8 +172,9 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--enumerator-only',action='store_true')
     args = p.parse_args()
+    witness = rank_order_witness()
     if args.enumerator_only:
-        print(json.dumps({'project':PROJECT,'enumerator_only':True,
+        print(json.dumps({'project':PROJECT,'enumerator_only':True,'rank_order_witness':witness,
                           'families':[{'lengths':list(x),'count':len(enumerate_words(x))}
                                       for x in SMALL]},sort_keys=True))
         return
@@ -150,6 +185,7 @@ def main():
     print(json.dumps({'project':PROJECT,'gate':'FOCUSED_QA_PASS',
                       'oracle_source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),
                       'small_independent':small,'large_structural':large,
+                      'rank_order_witness':witness,
                       'native_pass':False,'stage02_accepted':False},sort_keys=True))
 
 
