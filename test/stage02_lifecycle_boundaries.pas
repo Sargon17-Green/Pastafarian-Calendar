@@ -6,6 +6,7 @@ program stage02_lifecycle_boundaries;
 uses SysUtils, Classes, BigInt, MonsterBootstrap, Stage02WorkCounts, PastafariCalendar;
 
 const
+  ExpectedNilMessage: RawByteString = 'Contexto de invoca'#$C3#$A7#$C3#$A3'o ausente.';
   ExpectedVectors = 96;
   ExpectedContexts = ExpectedVectors * 2;
   ChecksPerContext = 19;
@@ -202,7 +203,7 @@ begin
     on E: Exception do
     begin
       Rejected := True;
-      CorrectMessage := E.Message = 'Contexto de invocação ausente.';
+      CorrectMessage := RawByteString(E.Message) = ExpectedNilMessage;
     end;
   end;
   Check('nil.workcounts.rejected', Rejected, True);
@@ -218,7 +219,7 @@ begin
       on E: Exception do
       begin
         Rejected := True;
-        CorrectMessage := E.Message = 'Contexto de invocação ausente.';
+        CorrectMessage := RawByteString(E.Message) = ExpectedNilMessage;
       end;
     end;
   finally
