@@ -47,11 +47,12 @@ def execute(source,raw,delta):
         if pos==TARGET and event[0] is None:
             need(int(self.space.get(ip.position))==ord("u") and
                  not ip.stringmode and len(ip.stack)==2 and
-                 len(ip.stack[0])>=1,
+                 frames(ip)==[["1","0","0"],["3"]],
                  "real BF98 stack-stack transfer site invalid")
             before=context(ip)
-            operand=int(ip.stack[0][-1])
-            if delta:ip.stack[0][-1]=operand+delta
+            # PyFunge stores frames bottom first. The last frame is the TOSS.
+            operand=int(ip.stack[-1][-1])
+            if delta:ip.stack[-1][-1]=operand+delta
             execution_before=context(ip)
             result=old()
             need(len(self.ips)==1 and self.ips[0] is ip,
@@ -72,8 +73,8 @@ def execute(source,raw,delta):
     try:p.execute()
     except StepLimit:status="step-limit"
     finally:del p.execute_step
-    need(event[0] is not None and len(tail)==128,
-         "Native u witness or 128 subsequent real IP steps missing")
+    need(event[0] is not None and len(tail)==min(128,step[0]-event[0]["tick"]),
+         "Native u witness or subsequent real IP steps missing")
     return {"status":status,"steps":step[0],"ips":len(p.ips),
             "output":output.getvalue().split(),
             "u_event":event[0],"post_u_128_real_motion":tail}
@@ -122,7 +123,7 @@ def main():
             sys.stdout.flush()
         rows.append({"case":name,"reference_7":expected,
                      "control":control,"mutants":others})
-    report={"schema":"befunge-stage1-native-real-u-operand-transfer-v1",
+    report={"schema":"befunge-stage1-native-real-u-operand-transfer-v2",
             "scope":"THREE_VALID_NATIVE_INPUTS_ONE_ACTUAL_U_SITE_PLUS_MINUS_ONE",
             "source_git_blob":PIN,"actual_native_programs":9,
             "independent_native_references":3,"last_completed_stage":0,

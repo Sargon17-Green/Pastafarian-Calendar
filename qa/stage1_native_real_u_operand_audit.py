@@ -12,7 +12,7 @@ def need(x,m):
     if not x:raise AssertionError(m)
 def check(d):
     need(type(d) is dict and
-         d.get("schema")=="befunge-stage1-native-real-u-operand-transfer-v1"
+         d.get("schema")=="befunge-stage1-native-real-u-operand-transfer-v2"
          and d.get("scope")=="THREE_VALID_NATIVE_INPUTS_ONE_ACTUAL_U_SITE_PLUS_MINUS_ONE"
          and d.get("source_git_blob")==PIN
          and d.get("actual_native_programs")==9
@@ -45,20 +45,29 @@ def check(d):
         need(type(e) is dict and e.get("tick")==tick and
              e.get("coordinate")==[954,1328] and
              e.get("executed_opcode")=="u" and
-             type(e.get("operand_original")) is int and
+             e.get("operand_original")==3 and
              e.get("operand_delta")==0 and
              e.get("operand_executed")==e["operand_original"] and
              e.get("pre_original")==e.get("pre_executed"),
              "real Native baseline executed-u evidence forged")
         p=e["pre_original"]
         need(type(p) is dict and
-             type(p.get("frames")) is list and len(p["frames"])==2
-             and type(p["frames"][0]) is list and len(p["frames"][0])>=1
-             and int(p["frames"][0][-1])==e["operand_original"] and
+             p.get("frames")==[["1","0","0"],["3"]]
+             and p.get("offset")==[954,1329] and p.get("direction")==[0,-1]
+             and p.get("string_mode") is False and
              p.get("position")==[954,1328] and
              type(control.get("post_u_128_real_motion")) is list and
              len(control["post_u_128_real_motion"])==128,
              "Native u stack-of-stacks baseline missing")
+        def after_transfer(count):
+            state=copy.deepcopy(p)
+            lower,toss=state["frames"]
+            toss.pop()
+            for _ in range(count):
+                toss.append(lower.pop() if lower else "0")
+            state["position"]=[954,1327]
+            return state
+        need(e.get("post")==after_transfer(3),"baseline full native u transfer mismatch")
         for item,delta in zip(mutants,(1,-1)):
             t=item.get("run");f=t.get("u_event") if type(t) is dict else None
             need(item.get("delta")==delta and type(f) is dict and
@@ -71,16 +80,18 @@ def check(d):
                  and type(f.get("pre_executed")) is dict and
                  type(f["pre_executed"].get("frames")) is list
                  and type(t.get("post_u_128_real_motion")) is list
-                 and len(t["post_u_128_real_motion"])==128
-                 and type(t.get("steps")) is int and t["steps"]>=tick+128
+                 and type(t.get("steps")) is int and t["steps"]>=tick
+                 and len(t["post_u_128_real_motion"])==min(128,t["steps"]-tick)
                  and t.get("status") in ("normal","step-limit")
                  and type(t.get("ips")) is int
                  and type(t.get("output")) is list,
                  "real Native executed-u perturbation evidence malformed")
             changed=copy.deepcopy(p)
-            changed["frames"][0][-1]=str(e["operand_original"]+delta)
+            changed["frames"][-1][-1]=str(e["operand_original"]+delta)
             need(f["pre_executed"]==changed,
                  "not exactly one real Native u operand modified")
+            need(f.get("post")==after_transfer(e["operand_original"]+delta),
+                 "mutated full native u transfer mismatch")
             immediate=f.get("post")!=e.get("post")
             downstream=t["post_u_128_real_motion"]!=control["post_u_128_real_motion"]
             effect=(t["status"]!="normal" or t["ips"]!=0 or
@@ -110,6 +121,7 @@ def main(folder):
        ("opcode",lambda x:x["records"][0]["mutants"][0]["run"]["u_event"].__setitem__("executed_opcode",":")),
        ("operand",lambda x:x["records"][0]["mutants"][0]["run"]["u_event"].__setitem__("operand_executed",999)),
        ("stack",lambda x:x["records"][0]["mutants"][0]["run"]["u_event"]["pre_executed"]["frames"][0].__setitem__(-1,"888")),
+       ("post_transfer",lambda x:x["records"][0]["mutants"][0]["run"]["u_event"]["post"]["frames"][-1].append("99")),
        ("step",lambda x:x["records"][0]["mutants"][0]["run"]["u_event"].__setitem__("tick",1)),
        ("flags",lambda x:x["records"][0]["mutants"][0].__setitem__("immediate_post_state_differs",
               not x["records"][0]["mutants"][0]["immediate_post_state_differs"])),
@@ -121,8 +133,8 @@ def main(folder):
         try:check(test)
         except (AssertionError,KeyError,TypeError,IndexError):denied.append(name)
         else:raise AssertionError("accepted forged Native u operand evidence "+name)
-    need(len(denied)==11,"Native u anti-tamper coverage incomplete")
-    result={"schema":"befunge-stage1-native-real-u-operand-independent-audit-v1",
+    need(len(denied)==12,"Native u anti-tamper coverage incomplete")
+    result={"schema":"befunge-stage1-native-real-u-operand-independent-audit-v2",
             "native_programs":9,"measured":stats,
             "falsified_reports_rejected":denied,
             "last_completed_stage":0,"geometric_spaghetti_qa_pass":False}
@@ -130,7 +142,7 @@ def main(folder):
         json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print("NATIVE_REAL_BF98_U_TRANSFER_INDEPENDENT_AUDIT_PASS",
           json.dumps(stats,sort_keys=True))
-    print("NATIVE_REAL_BF98_U_TRANSFER_ELEVEN_FALSIFICATIONS_REJECT_PASS")
+    print("NATIVE_REAL_BF98_U_TRANSFER_TWELVE_FALSIFICATIONS_REJECT_PASS")
 if __name__=="__main__":
     need(len(sys.argv)==2,"Native u evidence directory required")
     main(sys.argv[1])
