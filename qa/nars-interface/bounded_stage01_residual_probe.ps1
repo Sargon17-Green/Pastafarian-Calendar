@@ -78,7 +78,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v24'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v24_1'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -91,7 +91,7 @@ try {
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
     $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
-    $m.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_246_after_v23' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_244_after_v23' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
     $m.line237_witness.source_line -ne 237 -or $m.line237_witness.applied_to_suite_copy -ne $true -or
     $m.prior_line181_witness_run -ne 45551684196 -or
@@ -236,7 +236,7 @@ try {
    $r['compile_exact'] -and $r['compile_name_exact'] -and
    $r['statement_receipts'].Count -eq $m.probe_count -and $r['statement_started'] -ge 1 -and
    $r['statement_receipts'][0].first_line -eq 234 -and $r['statement_receipts'][0].start_exact -and
-   $r['statement_receipts'][11].first_line -eq 246 -and
+   $r['statement_receipts'][10].first_line -eq 244 -and
    $r['line234_witness'].start_exact -and $r['line234_witness'].captured_exact -and
    $r['line234_witness'].rank_valid -and $r['line234_witness'].rank.Count -eq 1 -and [long]$r['line234_witness'].rank[0] -eq 1 -and
    $r['line234_witness'].shape_valid -and $r['line234_witness'].shape.Count -eq 1 -and [long]$r['line234_witness'].shape[0] -eq 7 -and

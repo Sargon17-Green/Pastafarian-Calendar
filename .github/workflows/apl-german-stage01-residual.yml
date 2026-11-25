@@ -78,7 +78,7 @@ jobs:
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
           if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: Execute QA alias with four QA-only shape substitutions and two local-value witnesses
+      - name: V24.1: four QA-only shape substitutions and two local-value witnesses
         shell: pwsh
         run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
       - name: Independent diagnostic receipt gate (never acceptance)
@@ -106,7 +106,7 @@ jobs:
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_246_after_v23' -or
+             $b.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_244_after_v23' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $b.prior_line181_witness_run -ne 45551684196 -or
              $b.prior_v17_run -ne 45658001179 -or
@@ -129,7 +129,7 @@ jobs:
              $b.line237_witness.source_line -ne 237 -or $b.line237_witness.applied_to_suite_copy -ne $true){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
           if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
           if($a.statement_receipts[0].first_line -ne 234 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[11].first_line -ne 246){throw 'V24_RESIDUAL_FOCUS_NOT_PROVEN'}
+             $a.statement_receipts[10].first_line -ne 244){throw 'V24_RESIDUAL_FOCUS_NOT_PROVEN'}
           if(-not $a.line234_witness.start_exact -or -not $a.line234_witness.captured_exact -or
              -not $a.line234_witness.rank_valid -or $a.line234_witness.rank.Count -ne 1 -or [long]$a.line234_witness.rank[0] -ne 1 -or
              -not $a.line234_witness.shape_valid -or $a.line234_witness.shape.Count -ne 1 -or [long]$a.line234_witness.shape[0] -ne 7 -or
@@ -161,7 +161,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v24
+          name: apl-german-stage01-residual-v24-1
           path: |
             residual_evidence/
             residual_font_evidence/
