@@ -1,0 +1,105 @@
+name: Rust Azerbaijani Stage08 DISCOVERY04 Native Expected RED
+
+on:
+  push:
+    branches:
+      - 'Rust\+Azərbaycan-dili'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/stage08_discovery04_stone_oracle.py'
+      - 'Cargo.toml'
+      - 'audit/STAGE_08_DISCOVERY04_CONTRACT_2026-11-25.md'
+      - '.github/workflows/rust-az-stage08-discovery04.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-stage08-discovery04:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Verify Stage08 scope and formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fxq 'CURRENT_STAGE=8' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_KIND=DISCOVERY04' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_PATCH=PATCH03' DEVELOPMENT_STAGE.md
+          grep -Fxq 'LAST_COMPLETED_STAGE=7' DEVELOPMENT_STAGE.md
+          grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY04_STAGE08_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          grep -Fxq 'STAGE08_SCOPE=SEQUENTIAL_STONE_UPDATE_DISCOVERY' audit/STAGE_08_DISCOVERY04_CONTRACT_2026-11-25.md
+          grep -Fxq 'STAGE07_CLOSURE=ACCEPTED' audit/STAGE_07_PATCH03_ACCEPTANCE_2026-11-25.md
+          grep -Fq 'pub mod discovery04_stone_probe;' src/lib.rs
+          grep -Fq 'pub fn calendar_stones_spaghetti(' src/discovery04_stone_probe.rs
+          grep -Fq 'pub fn mutate_stones_wrong(' src/discovery04_stone_probe.rs
+          cargo fmt --all -- --check
+      - name: Self-test independent Stage08 oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 tools/stage08_discovery04_stone_oracle.py --self-test | tee evidence/stage08_oracle_self_test.txt
+          grep -Fxq 'STAGE08_DISCOVERY04_ORACLE_SELF_TEST=PASS' evidence/stage08_oracle_self_test.txt
+      - name: Native Stage01 to Stage08 and independent oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          if [ "$code" -ne 0 ]; then
+            cat evidence/stderr.txt >&2
+            exit "$code"
+          fi
+          for marker in \
+            'STAGE08_DISCOVERY04_ROWS=46 CELLS=230' \
+            'STAGE08_DISCOVERY04_EXPECTED_RED=224 MATCH=1 UNEXPECTED=0 GUARDS=4' \
+            'STAGE08_DISCOVERY04_BOOTSTRAP_ONLY=PASS' \
+            'STAGE07_PATCH03_ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226' \
+            'STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170' \
+            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \
+            'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' \
+            'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' \
+            'STAGE03_PATCH01_BOUNDARY_OK=8'; do
+            grep -Fq "$marker" evidence/stdout.txt
+          done
+          if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
+            exit 1
+          fi
+          python3 tools/stage06_discovery03_distance_oracle.py evidence/stdout.txt | tee evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS ROWS=169 RED=153 CONTROL=16 GUARDS=170' evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE05_PATCH02_WRAPPER_ORACLE=PASS ROWS=69 RED_SCAR=34 CONTROL=35 GUARDS=69' evidence/stage06_distance_oracle.txt
+          python3 tools/stage07_patch03_distance_oracle.py evidence/stdout.txt | tee evidence/stage07_distance_oracle.txt
+          grep -Fxq 'STAGE07_PATCH03_ORACLE=PASS ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226' evidence/stage07_distance_oracle.txt
+          python3 tools/stage08_discovery04_stone_oracle.py evidence/stdout.txt | tee evidence/stage08_distance_oracle.txt
+          grep -Fxq 'STAGE08_DISCOVERY04_ORACLE=PASS ROWS=225 RED=224 MATCH=1 GUARDS=4' evidence/stage08_distance_oracle.txt
+          printf 'STAGE08_DISCOVERY04_NATIVE=PASS EXPECTED_RED=224 MATCH=1 UNEXPECTED=0\nSTAGE08_DISCOVERY04_ORACLE=PASS\nSTAGE08_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-stage08-discovery04-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30

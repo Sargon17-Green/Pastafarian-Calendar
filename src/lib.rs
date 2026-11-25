@@ -5,6 +5,7 @@ pub mod discovery01_legacy_save;
 pub mod discovery02_day_tag_probe;
 pub mod discovery02_work_counts_probe;
 pub mod discovery03_stone_probe;
+pub mod discovery04_stone_probe;
 pub mod patch01_save;
 pub mod patch02_work_counts;
 pub mod patch03_distance;
@@ -84,6 +85,7 @@ pub struct MonsterContext {
     pub work_counts_observation: Option<patch02_work_counts::WorkCounts>,
     // Stage07: PATCH03 nəticəsi ayrıca saxlanır; Stage06 legacy məsafəsi dəyişdirilmir.
     pub patch03_distance_observation: Option<patch03_distance::Patch03DistanceObservation>,
+    pub discovery04_stone_observation: Option<discovery04_stone_probe::Discovery04StoneObservation>,
 }
 
 impl MonsterContext {
@@ -107,6 +109,7 @@ impl MonsterContext {
             save_observation: None,
             work_counts_observation: None,
             patch03_distance_observation: None,
+            discovery04_stone_observation: None,
         }
     }
 }
