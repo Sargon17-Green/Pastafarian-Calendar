@@ -45,15 +45,14 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
     for k in 1..=7 {
         assert_eq!(observed.backward_storage[8 - k], expected[k]);
         let actual = calendar_hidden_by_nearness(&observed.backward_storage, k).unwrap();
-        let class = if actual == expected[k] {
+        if actual == expected[k] {
             matched += 1;
-            "MATCH"
         } else {
             red += 1;
-            "RED"
-        };
+        }
     }
     assert_eq!((red, matched), (6, 1));
+    assert_ne!(observed.actual, expected[1]);
 
     let pairs = [
         (0i64, 0i64),

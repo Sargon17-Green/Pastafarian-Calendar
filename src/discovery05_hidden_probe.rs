@@ -222,10 +222,14 @@ impl PhaseHandler for LegacyHiddenDropDiscovery05 {
         context.discovery05_hidden_count = HIDDEN_COUNT;
         context.discovery05_requested_k = Some(self.requested_k);
         context.discovery05_actual = Some(actual);
+        let actual_text = context
+            .discovery05_actual
+            .as_ref()
+            .expect("just committed")
+            .to_string();
         context.logs.push(format!(
             "DISCOVERY05: hidden_count=7 requested_k={} actual={} physical_order=7..1",
-            self.requested_k,
-            context.discovery05_actual.as_ref().expect("just committed")
+            self.requested_k, actual_text
         ));
         context.diagnostics.push("DISCOVERY05_BACKWARD_HIDDEN_DIRECT_ACCESS".to_owned());
         context.metrics.bump("discovery05.builds");
