@@ -277,3 +277,70 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+
+
+  scroll-cache-sequence-diff:
+    name: Independent Hebrew Scroll same-process cache sequence differential (48 calls)
+    needs: scroll-full-date-context-diff
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile sequence probe against normative oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "${flags[@]}" test/stage01_scroll_cache_sequence_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_scroll_cache_sequence_probe
+          test -x build/stage01_scroll_cache_sequence_probe
+      - name: Self-test cache sequence definitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_cache_sequence_diff.py
+          python3 -u test/stage01_scroll_cache_sequence_diff.py --self-test | tee build/stage01-scroll-cache-sequence-selftest.log
+          grep -Fxq 'STAGE01_SCROLL_CACHE_SEQUENCE_SELFTEST=6/6' build/stage01-scroll-cache-sequence-selftest.log
+      - name: Compare warm-cache and reset-before-each sequences
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-cache-sequence-resource.log \
+            timeout --signal=TERM --kill-after=5s 1000s python3 -u test/stage01_scroll_cache_sequence_diff.py \
+              --sequence-exe build/stage01_scroll_cache_sequence_probe \
+              --output build/stage01-scroll-cache-sequences.json \
+              --max-seconds 180 --max-states 150000 --fortran-timeout 800) \
+            > build/stage01-scroll-cache-sequence.log 2>&1
+          rc=$?
+          set -e
+          cat build/stage01-scroll-cache-sequence.log
+          echo "STAGE01_SCROLL_CACHE_SEQUENCE_EXIT=$rc TIME_LIMIT=1000 MEMORY_KIB=1048576"
+          if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+          grep -Fxq 'STAGE01_SCROLL_CACHE_SEQUENCE_DIFFERENTIAL=2/2 MODES; 48/48 CALLS; 240/240 EXACT FIELDS' build/stage01-scroll-cache-sequence.log
+          grep -Fxq 'STAGE01_SCROLL_CACHE_SEQUENCE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-cache-sequence.log
+      - name: Preserve same-process cache sequence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-scroll-cache-sequence-diff
+          path: |
+            build/stage01-scroll-cache-sequence-selftest.log
+            build/stage01-scroll-cache-sequence-resource.log
+            build/stage01-scroll-cache-sequence.log
+            build/stage01-scroll-cache-sequences.json
+          if-no-files-found: warn
+          retention-days: 30
+

@@ -107,3 +107,15 @@ The next acceptance-quality step is a complete independent implementation derive
 - The first commit introducing `--suite wide` did not route the comparison loop to `WIDE_CONTEXT_CASES`; the parser accepted the option, but the loop still used `BOUNDARY_CASES`.
 - The automatic run `45675469692` on commit `cd6f6e4a734c713fc2decfb35074d2e07c231b00` is therefore not evidence for the wide suite. Do not count its output as a wide-context result.
 - Corrected the dispatch to select the case tuple by `args.suite`, and changed all result totals/acceptance comparisons to use the selected `cases` sequence. The next run is the first valid wide-suite execution.
+
+ 
+## 2026-11-25 — Independent wide calculation-context differential
+
+- Tested commit: `f90fd83afba7df755f8f8289905c8aa5875987a4`.
+- GitHub Actions run: `45675704650`; job: `139422977304`; run and job completed SUCCESS.
+- Source SHA pins: 8/8; independent Scroll oracle self-test: 14/14.
+- Wide-context differential: 9/9 cases and 45/45 exact fields. Cases explicitly included calculation offsets -8192, +8192, +137, -2048, +2048 and the four ±2032/±2213 year-crossing contexts.
+- Artifact ID `15051049683`, 3,585 bytes; ZIP SHA-256 `5a05d9d9a5776d9a08ca7b36443bac6788bc95045a7dcaf78c56d8d26071be0a`.
+- Artifact URL: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45675704650/artifacts/15051049683
+- Combined with the prior boundary suite: 18/18 independent full-date cases and 90/90 exact fields, including all 14 original calculation contexts and four extra year-boundary neighbors.
+- This remains bounded QA, not full Stage 1 acceptance. Next: same-process cache sequence testing, with warm-cache and reset-before-each modes, against the same independent Scroll oracle.
