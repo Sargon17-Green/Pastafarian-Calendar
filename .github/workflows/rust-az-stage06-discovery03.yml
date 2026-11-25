@@ -3,13 +3,12 @@ name: Rust Azerbaijani Stage06 DISCOVERY03 Native
 on:
   push:
     branches:
-      - 'Rust\+Azərbaycan-dili'
+      - 'Rust\\+Azərbaycan-dili'
     paths:
       - 'src/**'
       - 'tests/**'
       - 'tools/stage06_discovery03_distance_oracle.py'
       - 'Cargo.toml'
-      - 'DEVELOPMENT_STAGE.md'
       - 'audit/STAGE_06_DISCOVERY03_DISTANCE_CONTRACT_2026-11-25.md'
       - 'audit/STAGE_06_DISCOVERY03_STONES_CONTRACT_2026-11-23.md'
       - '.github/workflows/rust-az-stage06-discovery03.yml'
@@ -37,14 +36,27 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          grep -Fxq 'CURRENT_STAGE=6' DEVELOPMENT_STAGE.md
-          grep -Fxq 'CURRENT_KIND=DISCOVERY03' DEVELOPMENT_STAGE.md
-          grep -Fxq 'CURRENT_PATCH=PATCH02' DEVELOPMENT_STAGE.md
-          if grep -Fxq 'LAST_COMPLETED_STAGE=5' DEVELOPMENT_STAGE.md; then
-            grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          if grep -Fxq 'CURRENT_STAGE=6' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=DISCOVERY03' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH02' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=5' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=6' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_ACCEPTED_HOLD_NO_STAGE07' DEVELOPMENT_STAGE.md
+            fi
+          elif grep -Fxq 'CURRENT_STAGE=7' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=PATCH03' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH03' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=6' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=7' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_ACCEPTED_HOLD_NO_STAGE08' DEVELOPMENT_STAGE.md
+            fi
           else
-            grep -Fxq 'LAST_COMPLETED_STAGE=6' DEVELOPMENT_STAGE.md
-            grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_ACCEPTED_HOLD_NO_STAGE07' DEVELOPMENT_STAGE.md
+            echo 'Unexpected current stage' >&2
+            exit 1
           fi
           grep -Fq 'pub mod patch02_work_counts;' src/lib.rs
           grep -Fq 'pub struct LegacyTagDistanceDiscovery03;' src/patch02_work_counts.rs
@@ -64,29 +76,29 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p evidence
-          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\\nSHA=%s\\n' "$GITHUB_SHA" > evidence/sha.txt
           rustc --version > evidence/toolchain.txt
           cargo --version >> evidence/toolchain.txt
           set +e
           timeout --signal=TERM --kill-after=5s 900s cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
           code=$?
           set -e
-          printf '%s\n' "$code" > evidence/exit.txt
+          printf '%s\\n' "$code" > evidence/exit.txt
           cat evidence/stdout.txt
           if [ "$code" -ne 0 ]; then
             cat evidence/stderr.txt >&2
             exit "$code"
           fi
-          for marker in \
-            'STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170' \
-            'STAGE06_DISCOVERY03_ROWS=46 CELLS=230' \
-            'STAGE06_DISCOVERY03_BOUNDS=230 DETERMINISM=PASS' \
-            'STAGE06_DISCOVERY03_BOOTSTRAP_ONLY=PASS' \
-            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \
-            'STAGE05_PATCH02_LOCAL_PAIRS=49' \
-            'STAGE05_PATCH02_LARGE_PAIRS=8' \
-            'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' \
-            'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' \
+          for marker in \\
+            'STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170' \\
+            'STAGE06_DISCOVERY03_ROWS=46 CELLS=230' \\
+            'STAGE06_DISCOVERY03_BOUNDS=230 DETERMINISM=PASS' \\
+            'STAGE06_DISCOVERY03_BOOTSTRAP_ONLY=PASS' \\
+            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \\
+            'STAGE05_PATCH02_LOCAL_PAIRS=49' \\
+            'STAGE05_PATCH02_LARGE_PAIRS=8' \\
+            'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' \\
+            'STAGE02_DISCOVERY01_EXPECTED_RED=3 CONTROL=1 UNEXPECTED=0' \\
             'STAGE03_PATCH01_BOUNDARY_OK=8'; do
             grep -Fq "$marker" evidence/stdout.txt
           done
@@ -96,7 +108,7 @@ jobs:
           python3 tools/stage06_discovery03_distance_oracle.py evidence/stdout.txt | tee evidence/stage06_distance_oracle.txt
           grep -Fxq 'STAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS ROWS=169 RED=153 CONTROL=16 GUARDS=170' evidence/stage06_distance_oracle.txt
           grep -Fxq 'STAGE05_PATCH02_WRAPPER_ORACLE=PASS ROWS=69 RED_SCAR=34 CONTROL=35 GUARDS=69' evidence/stage06_distance_oracle.txt
-          printf 'STAGE06_STONE_AUXILIARY_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+          printf 'STAGE06_STONE_AUXILIARY_NATIVE=PASS\\nSTAGE06_DISCOVERY03_DISTANCE_NATIVE=PASS\\nSTAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS\\nSTAGE06_CLOSURE=NOT_CLAIMED\\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence regardless of result
         if: always()

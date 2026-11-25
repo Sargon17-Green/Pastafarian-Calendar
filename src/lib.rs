@@ -7,6 +7,7 @@ pub mod discovery02_work_counts_probe;
 pub mod discovery03_stone_probe;
 pub mod patch01_save;
 pub mod patch02_work_counts;
+pub mod patch03_distance;
 #[rustfmt::skip]
 pub mod source_language_catalog;
 
@@ -81,6 +82,8 @@ pub struct MonsterContext {
     pub save_observation: Option<BigInt>,
     // Stage05: yalnız bu çağırışa aid normativ iki-gün iş sayları.
     pub work_counts_observation: Option<patch02_work_counts::WorkCounts>,
+    // Stage07: PATCH03 nəticəsi ayrıca saxlanır; Stage06 legacy məsafəsi dəyişdirilmir.
+    pub patch03_distance_observation: Option<patch03_distance::Patch03DistanceObservation>,
 }
 
 impl MonsterContext {
@@ -103,6 +106,7 @@ impl MonsterContext {
             legacy_save_observation: None,
             save_observation: None,
             work_counts_observation: None,
+            patch03_distance_observation: None,
         }
     }
 }
