@@ -24,6 +24,8 @@ function run() {
   function walk(a,d,n,m){let x=a,steps=0n; const limit=(m/n)*n;while(x>limit){x+=d;if(x===0n)x=m;if(x===m+1n)x=1n;steps++;check(steps<n,"rejected tail bound");}return [1n+(x-1n)%n,steps,x];}
   function closed(a,d,n,m){const limit=m-m%n;let accepted=a, steps=0n;if(a>limit){if(d===1n){accepted=1n;steps=m-a+1n;}else{accepted=limit;steps=a-limit;}}return [1n+(accepted-1n)%n,steps,accepted];}
   function compare(a,d,n,m){let x=walk(a,d,n,m),y=closed(a,d,n,m);check(x.every((v,i)=>v===y[i]),"rank mismatch");check(at(a,d,y[1],m)===y[2],"Ak mismatch");}
+  const validCount=n=>n>=1n&&n<=max;
+  check(!validCount(0n)&&!validCount(max+1n)&&validCount(1n)&&validCount(max),"count bounds");
   let small=0, full=0, walked=0, wrap=0, mutant=0;
   for(let m=2n;m<=31n;m++)for(let n=1n;n<=m;n++)for(let a=1n;a<=m;a++)for(const d of [-1n,1n]){compare(a,d,n,m);small++;}
   for(let n=1n;n<=max;n++){const L=M-M%n;for(const a of new Set([1n,M,L,L>1n?L-1n:L,L<M?L+1n:L]))for(const d of [-1n,1n]){const [rank,k,accepted]=closed(a,d,n,M);check(k<n&&rank>=1n&&rank<=n&&at(a,d,k,M)===accepted&&accepted<=L,"127-bit boundary");if(a>L){check(rank===(d===1n?1n:n),"tail rank");if(n<=64n||[922n,19044n].includes(n)){compare(a,d,n,M);walked++;}if(n>1n&&d===-1n&&rank!==1n)mutant++;}full++;}}
@@ -32,6 +34,6 @@ function run() {
   const adapter=x=>x===1?1:x===255?2:null;
   for(let x=0;x<256;x++)check(adapter(x)===(x===1?1:x===255?2:null),"direction ABI");
   check(mutant>0,"direction mutant unexercised");
-  return {small_ring_literal_walk:small,full_width_boundary_checks:full,full_width_literal_walk:walked,wrap_period_reverse:wrap,direction_bytes:256,backwards_as_forward_mutant_rejected:mutant};
+  return {small_ring_literal_walk:small,full_width_boundary_checks:full,full_width_literal_walk:walked,wrap_period_reverse:wrap,direction_bytes:256,count_bounds:"0/19045 reject; 1/19044 accept",backwards_as_forward_mutant_rejected:mutant};
 }
 console.log("HOST_STAGE1_ANSWER_RANK_PREFLIGHT=PASS", JSON.stringify(run()));

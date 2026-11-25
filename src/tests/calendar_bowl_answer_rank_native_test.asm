@@ -102,6 +102,33 @@ RunCalendarBowlAnswerRankBench::
     call .checkAnswer
     jp nz, .fail
 
+    ; Four Foundation cases above; all remaining bowl/seal pairs are source-derived.
+    ld a, 14
+    ld [wCalendarAnswerSavedByte], a
+    ld hl, .sourceCases
+.sourceCaseLoop:
+    ld a, [hli]
+    ld [wCalendarAnswerInputBowl], a
+    ld a, [hli]
+    ld [wCalendarAnswerInputSeal], a
+    ld a, [hli]
+    ld [wCalendarSelectCount], a
+    ld a, [hli]
+    ld [wCalendarSelectCount+1], a
+    ld a, [hli]
+    ld c, a
+    ld a, [hli]
+    ld e, a
+    ld a, [hli]
+    ld d, a
+    push hl
+    call .checkAnswer
+    pop hl
+    jp nz, .fail
+    ld hl, wCalendarAnswerSavedByte
+    dec [hl]
+    jr nz, .sourceCaseLoop
+
     ld de, .s0
     call .synthetic
     jp nz, .fail
@@ -743,3 +770,103 @@ RunCalendarBowlAnswerRankBench::
     db 2
     dw 19044
     db $44,$bd,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$7f
+; Fourteen source-derived nonfoundation vectors from the real Native393 Q/orderAt46.
+.sourceCases:
+    db 1, 12, 3, 0, $ff
+    dw .a1z12
+    db 2, 10, 7, 0, $01
+    dw .a2z10
+    db 2, 11, 138, 0, $01
+    dw .a2z11
+    db 2, 12, 154, 3, $ff
+    dw .a2z12
+    db 3, 10, 146, 22, $ff
+    dw .a3z10
+    db 3, 11, 100, 74, $ff
+    dw .a3z11
+    db 3, 12, 3, 0, $01
+    dw .a3z12
+    db 4, 10, 7, 0, $01
+    dw .a4z10
+    db 4, 11, 138, 0, $01
+    dw .a4z11
+    db 5, 10, 154, 3, $ff
+    dw .a5z10
+    db 5, 11, 146, 22, $ff
+    dw .a5z11
+    db 5, 12, 100, 74, $01
+    dw .a5z12
+    db 6, 10, 3, 0, $ff
+    dw .a6z10
+    db 6, 11, 7, 0, $01
+    dw .a6z11
+
+.a1z12:
+    db $4b,$2f,$ea,$93,$22,$92,$c1,$0d,$ed,$36,$c9,$54,$94,$50,$93,$7c
+    dw 2
+    db $4b,$2f,$ea,$93,$22,$92,$c1,$0d,$ed,$36,$c9,$54,$94,$50,$93,$7c
+
+.a2z10:
+    db $e2,$21,$aa,$ce,$70,$80,$8f,$82,$57,$64,$6f,$a5,$26,$48,$85,$2f
+    dw 3
+    db $e2,$21,$aa,$ce,$70,$80,$8f,$82,$57,$64,$6f,$a5,$26,$48,$85,$2f
+
+.a2z11:
+    db $a9,$96,$2f,$20,$6e,$ab,$ee,$8e,$2b,$52,$a7,$1e,$72,$58,$b1,$6f
+    dw 83
+    db $a9,$96,$2f,$20,$6e,$ab,$ee,$8e,$2b,$52,$a7,$1e,$72,$58,$b1,$6f
+
+.a2z12:
+    db $73,$0b,$b5,$71,$6b,$d6,$4d,$9b,$ff,$3f,$df,$97,$bd,$68,$dd,$2f
+    dw 329
+    db $73,$0b,$b5,$71,$6b,$d6,$4d,$9b,$ff,$3f,$df,$97,$bd,$68,$dd,$2f
+
+.a3z10:
+    db $7d,$36,$80,$9f,$9a,$d6,$94,$46,$4d,$65,$60,$34,$b4,$91,$dd,$1c
+    dw 2639
+    db $7d,$36,$80,$9f,$9a,$d6,$94,$46,$4d,$65,$60,$34,$b4,$91,$dd,$1c
+
+.a3z11:
+    db $91,$31,$d1,$1b,$bc,$c3,$44,$12,$1d,$c5,$b1,$94,$d6,$d8,$a9,$6e
+    dw 1709
+    db $91,$31,$d1,$1b,$bc,$c3,$44,$12,$1d,$c5,$b1,$94,$d6,$d8,$a9,$6e
+
+.a3z12:
+    db $a8,$2c,$22,$98,$dd,$b0,$f4,$dd,$ec,$24,$03,$f5,$f8,$1f,$76,$40
+    dw 3
+    db $a8,$2c,$22,$98,$dd,$b0,$f4,$dd,$ec,$24,$03,$f5,$f8,$1f,$76,$40
+
+.a4z10:
+    db $01,$ff,$3b,$c8,$af,$4c,$6a,$50,$db,$74,$8f,$e6,$ac,$29,$7e,$21
+    dw 1
+    db $01,$ff,$3b,$c8,$af,$4c,$6a,$50,$db,$74,$8f,$e6,$ac,$29,$7e,$21
+
+.a4z11:
+    db $d8,$0c,$11,$9a,$98,$9d,$f5,$5e,$01,$a7,$fa,$1b,$e4,$51,$88,$2d
+    dw 62
+    db $d8,$0c,$11,$9a,$98,$9d,$f5,$5e,$01,$a7,$fa,$1b,$e4,$51,$88,$2d
+
+.a5z10:
+    db $f7,$16,$06,$cc,$e7,$a0,$b5,$7c,$04,$d1,$8e,$3d,$d2,$11,$2e,$09
+    dw 447
+    db $f7,$16,$06,$cc,$e7,$a0,$b5,$7c,$04,$d1,$8e,$3d,$d2,$11,$2e,$09
+
+.a5z11:
+    db $63,$c9,$e9,$5d,$06,$f6,$8c,$de,$a6,$1f,$de,$49,$da,$64,$bc,$5b
+    dw 937
+    db $63,$c9,$e9,$5d,$06,$f6,$8c,$de,$a6,$1f,$de,$49,$da,$64,$bc,$5b
+
+.a5z12:
+    db $d2,$7b,$cd,$ef,$24,$4b,$64,$40,$49,$6e,$2d,$56,$e2,$b7,$4a,$2e
+    dw 3122
+    db $d2,$7b,$cd,$ef,$24,$4b,$64,$40,$49,$6e,$2d,$56,$e2,$b7,$4a,$2e
+
+.a6z10:
+    db $30,$dc,$ee,$9d,$02,$c6,$51,$69,$d4,$e0,$7c,$6c,$56,$8e,$70,$1d
+    dw 1
+    db $30,$dc,$ee,$9d,$02,$c6,$51,$69,$d4,$e0,$7c,$6c,$56,$8e,$70,$1d
+
+.a6z11:
+    db $ff,$df,$45,$7d,$f4,$34,$b1,$56,$ca,$b7,$e4,$88,$97,$07,$c4,$44
+    dw 3
+    db $ff,$df,$45,$7d,$f4,$34,$b1,$56,$ca,$b7,$e4,$88,$97,$07,$c4,$44
