@@ -1,0 +1,47 @@
+name: Stage 3 Native Object Pascal
+
+on:
+  push:
+    branches:
+      - 'Object-Pascal\+Português'
+    paths:
+      - '.github/workflows/stage03-native-object-pascal.yml'
+      - 'DEVELOPMENT_STAGE.md'
+      - 'src/BigInt.pas'
+      - 'test/stage03_save_regression.pas'
+      - 'test/build_and_run_stage03_save.sh'
+      - 'docs/stage03_save_oracle.py'
+      - 'docs/STAGE03_PATCH01_SAVE_20261125.md'
+
+permissions:
+  contents: read
+
+jobs:
+  stage03-native-fpc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+
+      - name: Install Free Pascal 3.2.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+
+      - name: Independent Python-int oracle and Native SAVE regression
+        shell: bash
+        run: bash test/build_and_run_stage03_save.sh
+
+      - name: Upload Stage03 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage03-native-fpc-evidence
+          path: |
+            evidence/stage03-native-fpc.log
+            build/stage03_save_vectors.tsv
+          if-no-files-found: warn
+          retention-days: 30

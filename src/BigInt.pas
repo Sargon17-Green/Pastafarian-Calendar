@@ -42,6 +42,17 @@ function BigSquare(const A: TBigInt): TBigInt;
 procedure BigDivModPositive(const A, B: TBigInt; out Q, R: TBigInt);
 function BigFloorDivPositive(const A, B: TBigInt): TBigInt;
 function BigRegularModPositive(const A, D: TBigInt): TBigInt;
+function BigSave(const A: TBigInt): TBigInt;
+function BigSave(const A: TBigInt): TBigInt;
+var
+  M, Previous: TBigInt;
+begin
+  { Normative SAVE(x)=1+((x-1) mod (2^127-1)); keep ordinary remainder separate. }
+  M := BigFromDecimal(BIG_SAVE_MODULUS_DECIMAL);
+  Previous := BigSubtractInt64(A, 1);
+  Result := BigAddInt64(BigRegularModPositive(Previous, M), 1);
+end;
+
 function BigAddInt64(const A: TBigInt; B: Int64): TBigInt;
 function BigSubtractInt64(const A: TBigInt; B: Int64): TBigInt;
 function BigToUInt32Exact(const A: TBigInt): UInt32;
@@ -50,6 +61,9 @@ function BigMin(const A, B: TBigInt): TBigInt;
 function BigMax(const A, B: TBigInt): TBigInt;
 
 implementation
+
+const
+  BIG_SAVE_MODULUS_DECIMAL = '170141183460469231731687303715884105727';
 
 procedure Normalize(var A: TBigInt);
 var
