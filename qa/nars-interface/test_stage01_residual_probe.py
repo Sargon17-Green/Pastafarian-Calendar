@@ -33,23 +33,25 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
-        self.assertEqual([p["first_line"] for p in r["probes"]],[172,173,174,175,177,178,179,180])
-        self.assertEqual(r["instrumentation_mode"],"first_residual_span_individual_172_180")
+        self.assertEqual([p["first_line"] for p in r["probes"]],[180,181,182,183,184,185,186,187])
+        self.assertEqual(r["instrumentation_mode"],"line180_counterfactual_focus_180_187")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
-        self.assertTrue(r["source_statements_preserved"])
+        self.assertFalse(r["source_statements_preserved"])
+        self.assertEqual(r["qa_only_patch"]["source_line"],180)
+        self.assertEqual(r["qa_only_patch"]["counterfactual"],r["qa_only_patch"]["original"].replace("(⊂17)","(⊂,17)",1))
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
 
-    def test_line180_exact_counterfactual(self):
-        w=self.receipt["line180_witness"]
-        self.assertEqual(w["source_line"],180)
-        self.assertTrue(w["original"].startswith("AssertEqual (⊂17) (⊂⍴CUTLET_NAMES) "))
-        self.assertEqual(w["counterfactual"],w["original"].replace("(⊂17)","(⊂,17)",1))
+    def test_line181_exact_counterfactual(self):
+        w=self.receipt["line181_witness"]
+        self.assertEqual(w["source_line"],181)
+        self.assertTrue(w["original"].startswith("AssertEqual (⊂47) (⊂⍴MONTH_NAMES) "))
+        self.assertEqual(w["counterfactual"],w["original"].replace("(⊂47)","(⊂,47)",1))
         self.assertEqual(len(set(w["paths"].values())),7)
-        self.assertIn("⍴⍴⍴CUTLET_NAMES",w["metrics_expression"])
-        self.assertIn("≢CUTLET_NAMES",w["metrics_expression"])
+        self.assertIn("⍴⍴⍴MONTH_NAMES",w["metrics_expression"])
+        self.assertIn("≢MONTH_NAMES",w["metrics_expression"])
         self.assertIn("NOT_PASS",w["captured_token"])
 
     def test_no_acceptance_possible(self):

@@ -39,7 +39,7 @@ def decode_paired(raw: bytes):
 def instrument(root: pathlib.Path, marker: str):
     """Instrument bounded original-source spans to avoid 266 native filesystem writes.
 
-    All original statements remain byte-for-byte identical in the FX source copy.
+    All original statements except the exact line180 QA-only substitution remain unchanged.
     Control-flow blocks are indivisible; the evidence is diagnostic only.
     """
     locked = load_locked_sources(root)
@@ -50,6 +50,15 @@ def instrument(root: pathlib.Path, marker: str):
     source = fx_definition_lines(block)
     if not source[0].startswith("RunStage01Tests;"):
         raise ValueError("SUITE_HEADER_CHANGED")
+    original_source = source.copy()
+    patch_index = 180 - block["start_line"]
+    anchor = "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES) "
+    if not source[patch_index].strip().startswith(anchor):
+        raise ValueError("LINE180_PATCH_ANCHOR_MISMATCH")
+    source[patch_index] = source[patch_index].replace("(⊂17)", "(⊂,17)", 1)
+    patch = dict(source_line=180, original=original_source[patch_index], counterfactual=source[patch_index])
+    if [i for i,(a,b) in enumerate(zip(original_source,source)) if a != b] != [patch_index]:
+        raise ValueError("UNEXPECTED_SOURCE_COPY_CHANGE")
     out = [ALIAS + source[0][len("RunStage01Tests"):]]
     wp = pathlib.PureWindowsPath(marker)
     units = []
@@ -91,9 +100,9 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # Follow up V13's independently verified first incomplete source span only.
+    # V16: advance past the independently proven V15 line180 mismatch.
     # Uninstrumented statements elsewhere are retained exactly, not skipped.
-    focus = [172, 173, 174, 175, 177, 178, 179, 180]
+    focus = [180, 181, 182, 183, 184, 185, 186, 187]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
@@ -133,42 +142,42 @@ def instrument(root: pathlib.Path, marker: str):
         raise ValueError("ORIGINAL_STATEMENTS_CHANGED")
     if not all(probes[i]["index"] == i+1 for i in range(len(probes))):
         raise ValueError("PROBE_INDEX_NOT_MONOTONIC")
-    return out, probes, locked["manifest"]["manifest_sha256"]
+    return out, probes, locked["manifest"]["manifest_sha256"], patch
 
 
-def line180_witness(root, marker):
+def line181_witness(root, marker):
     """Exact original assertion and independent shape-only counterfactual."""
     locked = load_locked_sources(root)
     block = next(b for b in locked["blocks"] if b["name"] == "RunStage01Tests")
     if block["path"] != "test/stage01_tests.apl":
         raise ValueError("LINE180_PATH_MISMATCH")
-    original = fx_definition_lines(block)[180-block["start_line"]].strip()
-    anchor = "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES)"
+    original = fx_definition_lines(block)[181-block["start_line"]].strip()
+    anchor = "AssertEqual (⊂47) (⊂⍴MONTH_NAMES)"
     if not original.startswith(anchor + " "):
-        raise ValueError("LINE180_ANCHOR_MISMATCH")
-    corrected = original.replace("(⊂17)", "(⊂,17)", 1)
+        raise ValueError("LINE181_ANCHOR_MISMATCH")
+    corrected = original.replace("(⊂47)", "(⊂,47)", 1)
     wp = pathlib.PureWindowsPath(marker)
-    paths = {k:str(wp.with_name(wp.stem+"_line180_"+k+".txt"))
+    paths = {k:str(wp.with_name(wp.stem+"_line181_"+k+".txt"))
              for k in ("start","metrics","original_ec","original_message","corrected_ec","corrected_message","captured")}
-    start = f"APL_GERMAN_LINE180_V15|SOURCE={SOURCE_COMMIT}|PHASE=START"
-    captured = f"APL_GERMAN_LINE180_V15|SOURCE={SOURCE_COMMIT}|PHASE=CAPTURED_NOT_PASS"
+    start = f"APL_GERMAN_LINE181_V16|SOURCE={SOURCE_COMMIT}|PHASE=START"
+    captured = f"APL_GERMAN_LINE181_V16|SOURCE={SOURCE_COMMIT}|PHASE=CAPTURED_NOT_PASS"
     # Layout: expected rank, expected scalar value, actual rank,
     # actual shape dimensions, actual shape values, catalog tally.
-    metrics = "(⍴⍴17),17,(⍴⍴⍴CUTLET_NAMES),(⍴⍴CUTLET_NAMES),(,⍴CUTLET_NAMES),(≢CUTLET_NAMES)"
+    metrics = "(⍴⍴47),47,(⍴⍴⍴MONTH_NAMES),(⍴⍴MONTH_NAMES),(,⍴MONTH_NAMES),(≢MONTH_NAMES)"
     def write(expression, key):
         return f"(⍕({expression})) ⎕NAPPEND ((⎕UCS {_codes(paths[key])}) ⎕NCREATE 0)"
     parts = ["95 Stage01ChunkAssert 0", marker_write(start,paths["start"]),
              write(metrics,"metrics")]
     for key, expression in (("original",original),("corrected",corrected)):
-        var = "QALine180"+key.capitalize()+"EC"
+        var = "QALine181"+key.capitalize()+"EC"
         parts += [f"{var}←⎕EC ⎕UCS {_codes(expression)}",
                   write(f"{var}[1]",key+"_ec")]
-        msg = write(f"⎕UCS ⊃{var}[3]",key+"_message")
+        msg = write(f"≢,⊃{var}[3]" if key == "corrected" else f"⎕UCS ⊃{var}[3]",key+"_message")
         parts.append(f"⎕EC ⎕UCS {_codes(msg)}")
     parts.append(marker_write(captured,paths["captured"]))
     program = " ⋄ ".join(parts)
     return program, dict(paths=paths,start_token=start,captured_token=captured,
-                         source_line=180,original=original,counterfactual=corrected,
+                         source_line=181,original=original,counterfactual=corrected,
                          metrics_expression=metrics,
                          program_sha256=hashlib.sha256(program.encode()).hexdigest())
 
@@ -184,7 +193,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     before = [hashlib.sha256(x.encode()).hexdigest() for x in programs[:25]]
     if before[:23] != base["import_program_sha256"]:
         raise ValueError("LOCKED_95_FX_PREFIX_CHANGED")
-    definition, probes, manifest_sha = instrument(root, marker)
+    definition, probes, manifest_sha, patch = instrument(root, marker)
     if manifest_sha != base["source_manifest_sha256"]:
         raise ValueError("SOURCE_MANIFEST_CHANGED")
     wp = pathlib.PureWindowsPath(marker)
@@ -201,7 +210,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     if programs[25].count(target) != 1:
         raise ValueError("PAIRED_ENTRYPOINT_NOT_UNIQUE")
     suite_program = programs[25].replace(target,replacement)
-    witness_program, witness = line180_witness(root, marker)
+    witness_program, witness = line181_witness(root, marker)
     programs = programs[:25] + [compile_program,suite_program,witness_program,
                 "95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL,marker)]
     if len(programs) != 29:
@@ -223,12 +232,13 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
-                   source_statements_preserved=True,instrumentation_mode="first_residual_span_individual_172_180",
+                   source_statements_preserved=False,qa_only_patch=patch,
+                   instrumentation_mode="line180_counterfactual_focus_180_187",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
-                   marker_token=FINAL,marker_path=marker,program_count=29,line180_witness=witness,
+                   marker_token=FINAL,marker_path=marker,program_count=29,line181_witness=witness,
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 
