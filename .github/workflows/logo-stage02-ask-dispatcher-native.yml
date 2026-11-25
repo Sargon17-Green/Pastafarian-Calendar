@@ -1,0 +1,132 @@
+name: Logo Stage2 QA D19 ASK to dispatcher integration
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-ask-dispatcher-20261125'
+permissions:
+  contents: read
+jobs:
+  ask-dispatcher:
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - direction: forward
+            group: gate
+          - direction: forward
+            group: year5000
+          - direction: forward
+            group: next
+          - direction: forward
+            group: previous
+          - direction: forward
+            group: structure
+          - direction: reverse
+            group: gate
+          - direction: reverse
+            group: year5000
+          - direction: reverse
+            group: next
+          - direction: reverse
+            group: previous
+          - direction: reverse
+            group: structure
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify exact source and generate the fixed runner
+        shell: bash
+        env:
+          DIRECTION: ${{ matrix.direction }}
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = "c21646e1b06f25b3f75fb672dd432ead8e664875"
+          test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = "ad001c6aeeb6c758f5004b206a656fec5d6fc403"
+          git diff --exit-code HEAD^ HEAD -- src test
+          mkdir -p "$RUNNER_TEMP/qa-bundle"
+          unzip -q qa/logo_ido_ask_dispatcher_code_bundle.zip -d "$RUNNER_TEMP/qa-bundle"
+          (cd "$RUNNER_TEMP/qa-bundle" && sha256sum -c qa/bundle.sha256)
+          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_common.logo" qa/
+          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_oracle.py" qa/
+          cp "$RUNNER_TEMP/qa-bundle/QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md" .
+          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
+          git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
+          sha256sum qa/logo_ido_ask_dispatcher_code_bundle.zip qa/logo_stage2_ask_dispatcher_common.logo qa/logo_stage2_ask_dispatcher_oracle.py QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md .github/workflows/logo-stage02-ask-dispatcher-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
+          cat > "$RUNNER_TEMP/native.logo" <<EOF
+make "AD.DIRECTION "$DIRECTION
+make "AD.GROUP "$GROUP
+load "qa/logo_stage2_ask_dispatcher_common.logo
+ad.run
+EOF
+      - name: Build pinned UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
+          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = "a0215433f07384e4c42fe247525867f11e6f32f7"
+          cd "$RUNNER_TEMP/ucblogo-source"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Run bounded Native selector group
+        shell: bash
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          echo bye | timeout --signal=TERM --kill-after=5s 1200 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
+          code=$?
+          set -e
+          echo "$code" > "$RUNNER_TEMP/exit.txt"
+          echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
+          cat "$RUNNER_TEMP/native.log"
+          test "$code" = 0
+          expected_cases=1
+          expected_checks=14
+          if [ "$GROUP" = structure ]; then
+            expected_cases=5
+            expected_checks=70
+          fi
+          grep -Fxq "ASK_DISPATCH_CASES_PASIS $expected_cases" "$RUNNER_TEMP/native.log"
+          grep -Fxq "ASK_DISPATCH_CHECKS_PASIS $expected_checks" "$RUNNER_TEMP/native.log"
+          grep -Fxq 'ASK_DISPATCH_NATIVE_PASIS' "$RUNNER_TEMP/native.log"
+          test "$(grep -c '^ASK_DISPATCH_ROW ' "$RUNNER_TEMP/native.log")" = "$expected_cases"
+          if grep -Eq 'ASK_DISPATCH_FAILURE|ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
+      - name: Independent Python integer oracle
+        shell: bash
+        env:
+          DIRECTION: ${{ matrix.direction }}
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -euo pipefail
+          python3 qa/logo_stage2_ask_dispatcher_oracle.py --log "$RUNNER_TEMP/native.log" --direction "$DIRECTION" --group "$GROUP" > "$RUNNER_TEMP/host.log" 2>&1
+          cat "$RUNNER_TEMP/host.log"
+          grep -Fxq 'ASK_DISPATCH_HOST_ORACLE=PASS' "$RUNNER_TEMP/host.log"
+      - name: Preserve exact-SHA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-ask-dispatch-${{ matrix.direction }}-${{ matrix.group }}
+          path: |
+            ${{ runner.temp }}/commit.txt
+            ${{ runner.temp }}/source-blobs.txt
+            ${{ runner.temp }}/qa-hashes.txt
+            ${{ runner.temp }}/native.logo
+            ${{ runner.temp }}/native.log
+            ${{ runner.temp }}/host.log
+            ${{ runner.temp }}/exit.txt
+            ${{ runner.temp }}/elapsed.txt
+          if-no-files-found: warn
+          retention-days: 30
