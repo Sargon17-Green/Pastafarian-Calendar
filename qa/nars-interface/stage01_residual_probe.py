@@ -102,15 +102,20 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V18: isolate the next eight source-anchored assertions after V17's completed span.
-    # The already-proven line180/181 QA-only counterfactuals remain; their standalone witnesses are not rerun.
-    focus = [188, 189, 190, 191, 192, 193, 194, 195]
+    # V19: isolate the two catalog loops and the six following source statements.
+    # V18 proved lines188-195 complete; reuse the two QA-only counterfactuals at lines180/181.
+    focus = [196, 199, 202, 203, 204, 205, 206, 207]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
+    expected_kinds = ["bounded_for_block", "bounded_for_block"] + ["statement"] * 6
     if ([block["start_line"] + start for start, _, _ in focused] != focus
             or len(focused) != 8
-            or any(kind != "statement" or end != start+1 for start, end, kind in focused)):
+            or [kind for _, _, kind in focused] != expected_kinds
+            or any(kind == "statement" and end != start+1 for start, end, kind in focused)):
         raise ValueError("FOCUSED_SOURCE_LINES_CHANGED")
+    for (start, end, kind), header in zip(focused[:2], (":For i :In ⍳17", ":For i :In ⍳47")):
+        if kind != "bounded_for_block" or source[start].strip() != header or source[end-1].strip() != ":EndFor":
+            raise ValueError("CATALOG_LOOP_SOURCE_ANCHOR_CHANGED")
     spans = focused
     before, after, probes = {}, {}, []
     for idx, (start, end, kind) in enumerate(spans, 1):
@@ -234,14 +239,16 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=False,qa_only_patches=patches,
-                   instrumentation_mode="line188_195_residual_focus_after_v17_180_187",
+                   instrumentation_mode="loops196_201_plus_statements202_207_after_v18_188_195",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
                    marker_token=FINAL,marker_path=marker,program_count=28,prior_line181_witness_run=45551684196,
-                   prior_residual_run=45658001179,
-                   prior_residual_artifact_sha256="ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e",
+                   prior_v17_run=45658001179,
+                   prior_v17_artifact_sha256="ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e",
+                   prior_residual_run=45671179161,
+                   prior_residual_artifact_sha256="26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89",
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 

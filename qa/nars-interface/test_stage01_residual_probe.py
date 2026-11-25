@@ -33,8 +33,8 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
-        self.assertEqual([p["first_line"] for p in r["probes"]],[188,189,190,191,192,193,194,195])
-        self.assertEqual(r["instrumentation_mode"],"line188_195_residual_focus_after_v17_180_187")
+        self.assertEqual([p["first_line"] for p in r["probes"]],[196,199,202,203,204,205,206,207])
+        self.assertEqual(r["instrumentation_mode"],"loops196_201_plus_statements202_207_after_v18_188_195")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
@@ -43,10 +43,14 @@ class ResidualTests(unittest.TestCase):
         for p,value in zip(r["qa_only_patches"],(17,47)):
             self.assertEqual(p["counterfactual"],p["original"].replace(f"(⊂{value})",f"(⊂,{value})",1))
         self.assertEqual(r["prior_line181_witness_run"],45551684196)
-        self.assertEqual(r["prior_residual_run"],45658001179)
-        self.assertEqual(r["prior_residual_artifact_sha256"],"ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e")
+        self.assertEqual(r["prior_v17_run"],45658001179)
+        self.assertEqual(r["prior_v17_artifact_sha256"],"ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e")
+        self.assertEqual(r["prior_residual_run"],45671179161)
+        self.assertEqual(r["prior_residual_artifact_sha256"],"26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89")
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
-        self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
+        self.assertEqual([p["kind"] for p in r["probes"]],["bounded_for_block","bounded_for_block"]+["statement"]*6)
+        self.assertEqual([(p["first_line"],p["last_line"]) for p in r["probes"][:2]],[(196,198),(199,201)])
+        self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),2)
 
     def test_line181_exact_counterfactual(self):
         _,w=probe.line181_witness(ROOT,MARKER)
@@ -74,7 +78,7 @@ class ResidualTests(unittest.TestCase):
         r=self.receipt
         starts=set()
         for p in r["probes"]:
-            self.assertIn(p["kind"],("statement",))
+            self.assertIn(p["kind"],("statement","bounded_for_block"))
             self.assertGreaterEqual(p["last_line"],p["first_line"])
             self.assertIn("PHASE=START",p["start_token"])
             self.assertIn("PHASE=END",p["end_token"])
