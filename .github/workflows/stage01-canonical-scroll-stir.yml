@@ -187,7 +187,7 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll full-date context differential (5 cases)
+    name: Independent Hebrew Scroll full-date context differential (9 cases)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -245,7 +245,7 @@ jobs:
           python3 -m py_compile test/stage01_scroll_full_date_diff.py
           python3 -u test/stage01_scroll_full_date_diff.py --self-test | tee build/stage01-scroll-full-date-selftest.log
           grep -Eq '^STAGE01_SCROLL_FULL_DATE_ORACLE_SELFTEST=[0-9]+/[0-9]+$' build/stage01-scroll-full-date-selftest.log
-      - name: Differential adjacent targets and calculation contexts
+      - name: Differential adjacent targets, calculation contexts, and year boundaries
         shell: bash
         run: |
           set -euo pipefail
@@ -261,7 +261,7 @@ jobs:
           cat build/stage01-scroll-full-date.log
           echo "STAGE01_SCROLL_FULL_DATE_EXIT=$rc TIME_LIMIT=700 MEMORY_KIB=1048576"
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
-          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=5/5 CASES; 25/25 EXACT FIELDS' build/stage01-scroll-full-date.log
+          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=9/9 CASES; 45/45 EXACT FIELDS' build/stage01-scroll-full-date.log
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-full-date.log
       - name: Preserve independent full-date evidence
         if: always()

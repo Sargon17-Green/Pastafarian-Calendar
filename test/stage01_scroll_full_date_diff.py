@@ -43,12 +43,16 @@ from stage01_scroll_weaving_reverse_endpoint import (
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
 SOURCE_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b"
 FOUNDATION_DAY = -15055671
-ADJACENT_CASES = (
+DIFFERENTIAL_CASES = (
     ("target-minus-one", 0, -1),
     ("foundation-target", 0, 0),
     ("target-plus-one", 0, 1),
     ("same-target-calc-minus-one", -1, 0),
     ("same-target-calc-plus-one", 1, 0),
+    ("previous-year-boundary-left", -1, -2033),
+    ("previous-year-boundary-right", 1, -2031),
+    ("next-year-boundary-left", -1, 2212),
+    ("next-year-boundary-right", 1, 2214),
 )
 _STRUCTURE_CACHE: dict[tuple[int, int, int, int], dict] = {}
 
@@ -349,11 +353,11 @@ def compare(args):
         "project_id": PROJECT_ID, "source_snapshot": SCROLL_NAME,
         "source_sha256": SOURCE_SHA256, "source_bytes_verified": False,
         "oracle": "independent Hebrew Scroll component composition; no pinned Python imports",
-        "scope": "five bounded adjacent-target/calculation-context differentials",
+        "scope": "nine adjacent-target, calculation-context, and year-boundary differentials",
         "full_stage1_accepted": False, "cases": [],
     }
     matched_cases = matched_fields = 0
-    for index, (label, calculation_offset, target_offset) in enumerate(ADJACENT_CASES, start=1):
+    for index, (label, calculation_offset, target_offset) in enumerate(DIFFERENTIAL_CASES, start=1):
         expected = full_date(calculation_offset, target_offset, args.max_seconds, args.max_states)
         actual = run_fortran(args.fortran_exe, calculation_offset, target_offset, args.fortran_timeout)
         expected_fields = tuple(expected["fields"])
@@ -374,19 +378,19 @@ def compare(args):
             print("STAGE01_SCROLL_FULL_DATE_EXPECTED=" + ",".join(map(str, expected_fields)))
             print("STAGE01_SCROLL_FULL_DATE_FORTRAN=" + ",".join(map(str, actual)))
     report["matched_cases"] = matched_cases
-    report["total_cases"] = len(ADJACENT_CASES)
+    report["total_cases"] = len(DIFFERENTIAL_CASES)
     report["matched_fields"] = matched_fields
-    report["total_fields"] = 5 * len(ADJACENT_CASES)
-    report["status"] = "PASS_BOUNDED_INDEPENDENT_SCROLL_DIFFERENTIAL" if matched_cases == len(ADJACENT_CASES) and matched_fields == 5 * len(ADJACENT_CASES) else "MISMATCH"
+    report["total_fields"] = 5 * len(DIFFERENTIAL_CASES)
+    report["status"] = "PASS_BOUNDED_INDEPENDENT_SCROLL_DIFFERENTIAL" if matched_cases == len(DIFFERENTIAL_CASES) and matched_fields == 5 * len(DIFFERENTIAL_CASES) else "MISMATCH"
     report["full_stage1_accepted"] = False
     output = args.output or Path("build/stage01-scroll-full-date.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    if matched_cases == len(ADJACENT_CASES) and matched_fields == 5 * len(ADJACENT_CASES):
-        print(f"STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL={matched_cases}/{len(ADJACENT_CASES)} CASES; {matched_fields}/{5 * len(ADJACENT_CASES)} EXACT FIELDS")
+    if matched_cases == len(DIFFERENTIAL_CASES) and matched_fields == 5 * len(DIFFERENTIAL_CASES):
+        print(f"STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL={matched_cases}/{len(DIFFERENTIAL_CASES)} CASES; {matched_fields}/{5 * len(DIFFERENTIAL_CASES)} EXACT FIELDS")
         print("STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
         return 0
-    print(f"STAGE01_SCROLL_FULL_DATE_NOT_ACCEPTED={matched_cases}/{len(ADJACENT_CASES)} CASES; {matched_fields}/{5 * len(ADJACENT_CASES)} EXACT FIELDS")
+    print(f"STAGE01_SCROLL_FULL_DATE_NOT_ACCEPTED={matched_cases}/{len(DIFFERENTIAL_CASES)} CASES; {matched_fields}/{5 * len(DIFFERENTIAL_CASES)} EXACT FIELDS")
     return 1
 
 

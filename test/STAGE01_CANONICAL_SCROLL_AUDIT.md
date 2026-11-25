@@ -75,3 +75,16 @@ The pinned Python reference is not suitable as a canonical full-date oracle unti
 The next acceptance-quality step is a complete independent implementation derived from the Hebrew Scroll, with separately verified intermediate results for the sauce, gates, year selection, cutlets, month count and lengths, weaving, and names. No full-date tuple or full-year differential is promoted to canonical acceptance before that work is complete.
 
 **Acceptance flag:** `full_stage1_accepted = false`.
+
+ 
+## 2026-11-25 — Independent full-date differential, bounded adjacent contexts
+
+- Source SHA-256 corrected and verified: `7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b` (64 hex characters).
+- Branch commit tested: `d6613037b43163a7d866f28af92fa9ffeaef9d8b`.
+- GitHub Actions run: `45673365685`; job: `139414918492`; both completed SUCCESS.
+- Source-pin check: 8/8; independent oracle self-test: 14/14.
+- Full-date differential: 5/5 cases and 25/25 exact fields:
+  - calculation offset 0, target offsets -1, 0, +1;
+  - calculation offsets -1 and +1, target offset 0.
+- Artifact: [fortran-stage01-scroll-full-date-context-diff](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45673365685/artifacts/15049779556), artifact ID `15049779556`, 2,405 bytes.
+- This is bounded QA evidence only; it does not accept Stage 1. Next: add the four existing boundary-neighbor cases (years 4999/5001), then broaden the calculation-context set.
