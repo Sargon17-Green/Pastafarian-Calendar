@@ -104,22 +104,30 @@ jobs:
              $a.fx_checkpoints.Count -ne 23 -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
              $a.witness_start_exact -ne $true -or $a.witness_captured_exact -ne $true -or
+             $a.init_all_exact -ne $true -or $a.init_checkpoints.Count -ne 4 -or
+             $a.phase_all_exact -ne $true -or $a.phase_checkpoints.Count -ne 4 -or
+             $a.run_ec_valid -ne $true -or $a.run_ec -eq 0 -or
+             $a.output_ec_valid -ne $true -or $a.output_ec -eq 0 -or
              $a.original_ec_valid -ne $true -or $a.trace_ec_valid -ne $true -or
              $a.trace_log_valid -ne $true -or $a.trace_log.Count -lt 2 -or
              $a.final_marker_exact -ne $true){
             throw 'BOUNDED_UNRANK_NATIVE_RECEIPT_INCOMPLETE'
           }
-          $core=@('expected_values','expected_shape','expected_rank','expected_type',
-            'count_values','count_rank','count_type','trace_args','trace_dp_shape',
-            'trace_dp_values','trace_dp_type','trace_loop_state','trace_candidate_state',
-            'trace_out','trace_rem','trace_rank','trace_result')
+          $core=@('run_ec_code','run_ec_message_codes','output_ec_code','output_ec_message_codes',
+            'expected_values','expected_shape','expected_rank','expected_type',
+            'count_values','count_rank','count_type','original_ec','original_message_codes',
+            'trace_ec','trace_message_codes','trace_args','trace_dp_shape',
+            'trace_dp_values','trace_dp_type','trace_log','trace_loop_state',
+            'trace_candidate_state','trace_out','trace_rem','trace_rank','trace_result')
           foreach($key in $core){
             if($a.witness_files.PSObject.Properties[$key].Value.valid -ne $true){
               throw ('BOUNDED_UNRANK_WITNESS_FILE_INVALID_'+$key)
             }
           }
           if($b.program_count -ne 26 -or $b.function_count -ne 95 -or
-             $b.chunk_count -ne 23 -or $b.final_expression -cne 'BOUNDED_UNRANK_WITNESS_ONLY' -or
+             $b.chunk_count -ne 23 -or $b.witness.init_markers.Count -ne 4 -or
+             $b.witness.phase_markers.Count -ne 4 -or
+             $b.final_expression -cne 'BOUNDED_UNRANK_WITNESS_ONLY' -or
              $b.trace.source_function -cne 'BoundedUnrank' -or
              $b.trace.alias -cne 'QABoundedUnrankTrace' -or
              $b.trace.source_statements_preserved -ne $true -or
@@ -131,7 +139,8 @@ jobs:
              $b.prior_v26_artifact_sha256 -cne 'ef9a79666eb91c09a56518576e41bf191456a0ba870d0b73bf2c5a0a5e08e331'){
             throw 'BOUNDED_UNRANK_SOURCE_WITNESS_CONTRACT_MISMATCH'
           }
-          Write-Output ('ORIGINAL_BOUNDEDUNRANK_EC='+$a.original_ec+
+          Write-Output ('RUN_EC='+$a.run_ec+'|OUTPUT_EC='+$a.output_ec+
+            '|ORIGINAL_BOUNDEDUNRANK_EC='+$a.original_ec+
             '|TRACE_COPY_EC='+$a.trace_ec+'|LAST_TRACE_STAGE='+$a.trace_last_stage)
           Write-Output 'NATIVE_95_OF_95_AND_23_OF_23_PREREQUISITES_VERIFIED'
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_RUNSTAGE01TESTS_NOT_EXECUTED'

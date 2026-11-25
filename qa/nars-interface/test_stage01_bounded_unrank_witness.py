@@ -80,6 +80,16 @@ class BoundedUnrankWitnessTests(unittest.TestCase):
         self.assertIn("PHASE=COMPILED_DIAGNOSTIC", w["compile_token"])
         self.assertIn("PHASE=START", w["start_token"])
         self.assertIn("CAPTURED_NOT_PASS", w["captured_token"])
+        self.assertEqual(
+            [x["name"] for x in w["init_markers"]],
+            ["SourceLanguageCatalogInit", "MonsterBootstrapInit", "OracleInit", "Stage01FixturesInit"],
+        )
+        self.assertEqual(
+            [x["name"] for x in w["phase_markers"]],
+            ["EXPECTED_FIXTURE_CAPTURED", "BOUNDED_COUNT_CAPTURED", "ORIGINAL_CALL_CAPTURED", "TRACE_CALL_CAPTURED"],
+        )
+        self.assertIn("run_ec_code", w["paths"])
+        self.assertIn("output_ec_code", w["paths"])
         self.assertEqual(self.receipt["trace"]["source_lines"], [388, 412])
         self.assertTrue(self.receipt["trace"]["source_statements_preserved"])
 

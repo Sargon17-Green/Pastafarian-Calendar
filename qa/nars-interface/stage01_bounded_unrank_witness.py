@@ -265,6 +265,10 @@ def build_bounded_unrank_witness(
             "compile_name_code": "compile_name_code",
             "start_marker": "start",
             "captured_marker": "captured",
+            "run_ec_code": "run_ec_code",
+            "run_ec_message_codes": "run_ec_message_codes",
+            "output_ec_code": "output_ec_code",
+            "output_ec_message_codes": "output_ec_message_codes",
             "original_ec": "original_ec",
             "original_message_codes": "original_message_codes",
             "trace_ec": "trace_ec",
@@ -302,6 +306,35 @@ def build_bounded_unrank_witness(
         f"APL_GERMAN_BOUNDED_UNRANK_V1|SOURCE={SOURCE_COMMIT}"
         "|PHASE=CAPTURED_NOT_PASS"
     )
+    init_names = [
+        "SourceLanguageCatalogInit",
+        "MonsterBootstrapInit",
+        "OracleInit",
+        "Stage01FixturesInit",
+    ]
+    init_markers = []
+    for index, name in enumerate(init_names, 1):
+        token = (
+            f"APL_GERMAN_BOUNDED_UNRANK_V1|SOURCE={SOURCE_COMMIT}"
+            f"|INIT={index:02d}|NAME={name}|PHASE=END"
+        )
+        path = str(p.with_name(f"{p.stem}_bounded_unrank_init_{index:02d}.txt"))
+        init_markers.append({"index": index, "name": name, "token": token, "path": path})
+
+    phase_names = [
+        "EXPECTED_FIXTURE_CAPTURED",
+        "BOUNDED_COUNT_CAPTURED",
+        "ORIGINAL_CALL_CAPTURED",
+        "TRACE_CALL_CAPTURED",
+    ]
+    phase_markers = []
+    for index, name in enumerate(phase_names, 1):
+        token = (
+            f"APL_GERMAN_BOUNDED_UNRANK_V1|SOURCE={SOURCE_COMMIT}"
+            f"|PHASE={name}"
+        )
+        path = str(p.with_name(f"{p.stem}_bounded_unrank_phase_{index:02d}.txt"))
+        phase_markers.append({"index": index, "name": name, "token": token, "path": path})
 
     trace_name_var = "QABoundedTraceName"
     compile_program = (
@@ -322,42 +355,84 @@ def build_bounded_unrank_witness(
         "QABoundedTraceDPValues←0 ⋄ QABoundedTraceLoopState←0 ⋄ "
         "QABoundedTraceCandidateState←0 ⋄ QABoundedTraceOut←0 ⋄ "
         "QABoundedTraceRem←0 ⋄ QABoundedTraceRank←0 ⋄ "
-        "QABoundedTraceResult←0"
+        "QABoundedTraceResult←0 ⋄ QABoundedExpected←0 ⋄ "
+        "QABoundedExpectedShape←0 ⋄ QABoundedExpectedRank←0 ⋄ "
+        "QABoundedExpectedType←0 ⋄ QABoundedCountProbe←0 ⋄ "
+        "QABoundedCountRank←0 ⋄ QABoundedCountType←0 ⋄ "
+        "QABoundedOriginalCode←999 ⋄ QABoundedOriginalMessageCodes←0 ⋄ "
+        "QABoundedTraceCode←999 ⋄ QABoundedTraceMessageCodes←0 ⋄ "
+        "QABoundedRunCode←999 ⋄ QABoundedRunMessageCodes←0 ⋄ "
+        "QABoundedOutputCode←999 ⋄ QABoundedOutputMessageCodes←0"
     )
     original_call = "BoundedUnrank 12 3 4 4 1"
     trace_call = f"{ALIAS} 12 3 4 4 1"
-    run_parts = [
-        "95 Stage01ChunkAssert 0",
-        marker_write(start_token, paths["start_marker"]),
-        init,
-        "QABoundedCountProbe←BoundedCount 12 3 4 4",
-        f"QABoundedOriginalEC←⎕EC ⎕UCS {_codes(original_call)}",
-        f"QABoundedTraceEC←⎕EC ⎕UCS {_codes(trace_call)}",
-        _write_expr("FIX_BOUNDED_444", paths["expected_values"]),
-        _write_expr("⍴FIX_BOUNDED_444", paths["expected_shape"]),
-        _write_expr("⍴⍴FIX_BOUNDED_444", paths["expected_rank"]),
-        _write_expr("⎕DR FIX_BOUNDED_444", paths["expected_type"]),
-        _write_expr("QABoundedCountProbe", paths["count_values"]),
-        _write_expr("⍴⍴QABoundedCountProbe", paths["count_rank"]),
-        _write_expr("⎕DR QABoundedCountProbe", paths["count_type"]),
-        _write_expr("QABoundedOriginalEC[1]", paths["original_ec"]),
-        _write_expr("⎕UCS ⊃QABoundedOriginalEC[3]", paths["original_message_codes"]),
-        _write_expr("QABoundedTraceEC[1]", paths["trace_ec"]),
-        _write_expr("⎕UCS ⊃QABoundedTraceEC[3]", paths["trace_message_codes"]),
+
+    run_body_parts = []
+    for item in init_markers:
+        run_body_parts.append(item["name"])
+        run_body_parts.append(marker_write(item["token"], item["path"]))
+    run_body_parts.extend([
+        "QABoundedExpected←FIX_BOUNDED_444 ⋄ "
+        "QABoundedExpectedShape←⍴FIX_BOUNDED_444 ⋄ "
+        "QABoundedExpectedRank←⍴⍴FIX_BOUNDED_444 ⋄ "
+        "QABoundedExpectedType←⎕DR FIX_BOUNDED_444",
+        marker_write(phase_markers[0]["token"], phase_markers[0]["path"]),
+        "QABoundedCountProbe←BoundedCount 12 3 4 4 ⋄ "
+        "QABoundedCountRank←⍴⍴QABoundedCountProbe ⋄ "
+        "QABoundedCountType←⎕DR QABoundedCountProbe",
+        marker_write(phase_markers[1]["token"], phase_markers[1]["path"]),
+        f"QABoundedOriginalEC←⎕EC ⎕UCS {_codes(original_call)} ⋄ "
+        "QABoundedOriginalCode←QABoundedOriginalEC[1] ⋄ "
+        "QABoundedOriginalMessageCodes←⎕UCS ⊃QABoundedOriginalEC[3]",
+        marker_write(phase_markers[2]["token"], phase_markers[2]["path"]),
+        f"QABoundedTraceEC←⎕EC ⎕UCS {_codes(trace_call)} ⋄ "
+        "QABoundedTraceCode←QABoundedTraceEC[1] ⋄ "
+        "QABoundedTraceMessageCodes←⎕UCS ⊃QABoundedTraceEC[3]",
+        marker_write(phase_markers[3]["token"], phase_markers[3]["path"]),
+    ])
+    run_body = " ⋄ ".join(run_body_parts)
+
+    output_body_parts = [
+        _write_expr("QABoundedRunCode", paths["run_ec_code"]),
+        _write_expr("0,QABoundedRunMessageCodes", paths["run_ec_message_codes"]),
+        _write_expr("QABoundedOriginalCode", paths["original_ec"]),
+        _write_expr("0,QABoundedOriginalMessageCodes", paths["original_message_codes"]),
+        _write_expr("QABoundedTraceCode", paths["trace_ec"]),
+        _write_expr("0,QABoundedTraceMessageCodes", paths["trace_message_codes"]),
+        _write_expr("0,QABoundedExpected", paths["expected_values"]),
+        _write_expr("0,QABoundedExpectedShape", paths["expected_shape"]),
+        _write_expr("QABoundedExpectedRank", paths["expected_rank"]),
+        _write_expr("QABoundedExpectedType", paths["expected_type"]),
+        _write_expr("0,QABoundedCountProbe", paths["count_values"]),
+        _write_expr("QABoundedCountRank", paths["count_rank"]),
+        _write_expr("QABoundedCountType", paths["count_type"]),
         _write_expr("0,QABoundedTraceArgs", paths["trace_args"]),
         _write_expr("0,QABoundedTraceDPShape", paths["trace_dp_shape"]),
         _write_expr("0,QABoundedTraceDPValues", paths["trace_dp_values"]),
         _write_expr("QABoundedTraceDPType", paths["trace_dp_type"]),
-        _write_expr("0,QABoundedTraceLog", paths["trace_log"]),
-        _write_expr("0,QABoundedTraceLoopState", paths["trace_loop_state"]),
-        _write_expr("0,QABoundedTraceCandidateState", paths["trace_candidate_state"]),
+        _write_expr("QABoundedTraceLog", paths["trace_log"]),
+        _write_expr("QABoundedTraceLoopState", paths["trace_loop_state"]),
+        _write_expr("QABoundedTraceCandidateState", paths["trace_candidate_state"]),
         _write_expr("0,QABoundedTraceOut", paths["trace_out"]),
         _write_expr("QABoundedTraceRem", paths["trace_rem"]),
         _write_expr("QABoundedTraceRank", paths["trace_rank"]),
         _write_expr("0,QABoundedTraceResult", paths["trace_result"]),
-        marker_write(captured_token, paths["captured_marker"]),
     ]
-    run_program = " ⋄ ".join(run_parts)
+    output_body = " ⋄ ".join(output_body_parts)
+    run_program = " ⋄ ".join([
+        "95 Stage01ChunkAssert 0",
+        marker_write(start_token, paths["start_marker"]),
+        init,
+        f"QABoundedRunEC←⎕EC ⎕UCS {_codes(run_body)}",
+        "QABoundedRunCode←QABoundedRunEC[1] ⋄ "
+        "QABoundedRunMessageCodes←⎕UCS ⊃QABoundedRunEC[3]",
+        f"QABoundedOutputEC←⎕EC ⎕UCS {_codes(output_body)}",
+        "QABoundedOutputCode←QABoundedOutputEC[1] ⋄ "
+        "QABoundedOutputMessageCodes←⎕UCS ⊃QABoundedOutputEC[3]",
+        _write_expr("QABoundedOutputCode", paths["output_ec_code"]),
+        _write_expr("0,QABoundedOutputMessageCodes", paths["output_ec_message_codes"]),
+        marker_write(captured_token, paths["captured_marker"]),
+    ])
     final_program = "95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL, marker)
     programs = old_programs[:23] + [compile_program, run_program, final_program]
     if len(programs) != 26:
@@ -414,6 +489,8 @@ def build_bounded_unrank_witness(
             "start_marker_path": paths["start_marker"],
             "captured_marker_path": paths["captured_marker"],
             "compile_name_code_path": paths["compile_name_code"],
+            "init_markers": init_markers,
+            "phase_markers": phase_markers,
             "paths": {k: v for k, v in paths.items()
                       if k not in ("compile_marker", "start_marker", "captured_marker")},
         },
