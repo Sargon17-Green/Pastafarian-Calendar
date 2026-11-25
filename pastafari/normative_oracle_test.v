@@ -2650,7 +2650,8 @@ fn stage48_check_twelfth_prefix_fork(month_count int) {
 	for label in 2 .. month_count + 1 {
 		expected_left << label
 	}
-	mut expected_right := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+	mut expected_right := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+		10, 11, 12, 13]
 	for label in 14 .. month_count + 1 {
 		expected_right << label
 		expected_right << label
