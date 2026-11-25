@@ -187,10 +187,7 @@ fn verify(
     * signed_denominator
     - signed_numerator
     * mean_denominator
-  let reconstructed_denominator =
-    2
-    * mean_denominator
-    * signed_denominator
+  let reconstructed_denominator = 2 * mean_denominator * signed_denominator
   let left_reconstruction_ok =
     reconstructed_left_numerator * left_denominator
     == left_numerator * reconstructed_denominator
