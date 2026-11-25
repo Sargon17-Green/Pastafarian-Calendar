@@ -8,7 +8,7 @@ The isolated target is `make build/calendar_bowl_answer_rank.gb`; it does not ch
 
 - Runtime adapter validates active ordinal, bowl 1..6, seal 10..12 and count 1..19044 before publication; it adapts Native392 A0/direction into the short-rank kernel ABI and publishes A0, direction, rank and accepted A_k atomically.
 - 18 source-derived vectors use the real post-46+12 Q and orderAt46: four Foundation and fourteen nonfoundation combinations covering all six bowls and seals 10..12. Independent Python computes A0, direction, short rank and accepted A_k from the captured Q/order; the ROM bench checks the same values.
-- 26 synthetic full-width boundary vectors exercise A0=1/M, L and L+1, counts 1/2/922/19044, both directions and forward/backward wrap through the same adapter/kernel path. The separate host ring oracle compares closed form with literal ring traversal, checks L-1/L/L+1 and period/reverse properties.
+- 26 synthetic full-width boundary vectors exercise the selector kernel directly (the same kernel called by the adapter): A0=1/M, L and L+1, counts 1/2/922/19044, both directions and forward/backward wrap. The 18 source-derived cases exercise the adapter-to-kernel path and publication. The separate host ring oracle compares closed form with literal ring traversal, checks L-1/L/L+1 and period/reverse properties.
 - Native invalid-count tests reject 0 and 19045. Invalid bowl/seal/order/residue, illegal sign and negative zero, idle calls, and output sentinels for A0/direction/rank/A_k are checked.
 - Around every answer/rank call the bench snapshots and compares all six Q residues, orderAt46, ordinal sign/24-bit length and the live ordinal SRAM byte; owner lease and foreign SRAM sentinels are checked.
 
@@ -24,3 +24,5 @@ Artifact 15049228236:
 
 ## Acceptance gate still open
 Run the expanded test suite on the exact new SHA; inspect completed CI jobs, Native log and ROM/map/sym artifact. Require RGBDS 1.0.4, ROM_HEADER, ROM0 free >=10, Native393 A5/393/40 <=120000 frames and Native370 <=9000, plus retained Native371..392 regression. A candidate run is not Stage1 acceptance. No Stage2/main/merge/release.
+## Expanded-run diagnosis and correction
+Run 45672668795 on `171b825abfa4cbbb4dcc1697be8d892781d17fc8`: 24/25 jobs succeeded; Native returned E0. Diagnostic run 45673463027 on `f5747b1c7de8b5079af75726eff037a14bb51092` showed the first nonfoundation source vector passed and the remaining-case counter reached 13, after which the table cursor was replaced by the counter address. Root cause was the test loop loading `HL=wCalendarAnswerSavedByte` before looping; the correction decrements/stores through A and preserves HL. This is a Native test-harness defect, not evidence of an A0/rank runtime failure. Re-run the expanded suite on the corrected exact SHA.

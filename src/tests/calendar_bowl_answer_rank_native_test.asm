@@ -125,8 +125,10 @@ RunCalendarBowlAnswerRankBench::
     call .checkAnswer
     pop hl
     jp nz, .fail
-    ld hl, wCalendarAnswerSavedByte
-    dec [hl]
+    ; Keep HL on the next table row; do not replace it with the counter address.
+    ld a, [wCalendarAnswerSavedByte]
+    dec a
+    ld [wCalendarAnswerSavedByte], a
     jr nz, .sourceCaseLoop
 
     ld de, .s0
