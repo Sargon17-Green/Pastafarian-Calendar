@@ -1,0 +1,91 @@
+; QA-only real sauce -> ASK -> CHOOSE -> names, separate from accepted unit tests.
+load "src/exact_integer.logo
+load "src/source_language_catalog.logo
+load "src/monster_bootstrap.logo
+load "src/stage02_boundary.logo
+load "src/stage02_context.logo
+load "src/stage02_counts.logo
+load "src/stage02_stones.logo
+load "src/stage02_hidden.logo
+load "src/stage02_visible_prefix.logo
+load "src/stage02_visible_ten.logo
+load "src/stage02_visible_fifteen.logo
+load "src/stage02_visible_twenty.logo
+load "src/stage02_visible_twentyfive.logo
+load "src/stage02_visible_thirty.logo
+load "src/stage02_visible_thirtyfive.logo
+load "src/stage02_visible_forty.logo
+load "src/stage02_visible_fortyfive.logo
+load "src/stage02_visible_fortysix.logo
+load "src/stage02_sauce.logo
+load "src/stage02_ask.logo
+load "src/stage02_answer_at.logo
+load "src/stage02_choose_short.logo
+load "src/stage02_choose_wide.logo
+load "src/stage02_choose_wide_general.logo
+load "src/stage02_choose_rank.logo
+load "qa/logo_stage2_names_candidate.logo
+load "test/normative_reference.logo
+make "QC.CASES 0
+make "QC.CHECKS 0
+make "QC.FAIL 0
+to qc.check :ok :tag
+  make "QC.CHECKS (:QC.CHECKS + 1)
+  if not :ok [make "QC.FAIL (:QC.FAIL + 1) print sentence [NAMES_COMPOSITION_FALIIS] :tag]
+end
+to qc.prefix :calculation :target
+  output monster.stage02.visible.fortysix (monster.stage02.visible.fortyfive (monster.stage02.visible.forty (monster.stage02.visible.thirtyfive (monster.stage02.visible.thirty (monster.stage02.visible.twentyfive (monster.stage02.visible.twenty (monster.stage02.visible.fifteen (monster.stage02.visible.ten (monster.stage02.visible.prefix (monster.stage02.hidden (monster.stage02.stones (monster.stage02.workcounts :calculation :target))))))))))))
+end
+; Frozen reference constructs sample and space; jump over rejected suffix
+; to first accepted point instead of walking potentially astronomical steps.
+to qc.reference.rank :stream :N
+  localmake "space nr.M
+  localmake "sample nr.answer.at :stream 0
+  if bi.gt :N nr.M [
+    localmake "power nr.smallest.power nr.M :N
+    make "space item 2 :power
+    make "sample nr.wide.initial :stream (first :power)
+  ]
+  localmake "cutoff bi.mul (bi.floor.div :space :N) :N
+  if bi.gt :sample :cutoff [
+    ifelse (last :stream) = 1 [make "sample bi.small 1] [make "sample :cutoff]
+  ]
+  output bi.add (bi.small 1) (bi.regmod (bi.sub :sample (bi.small 1)) :N)
+end
+to qc.case :ctx :refSauce :n :k :seal
+  localmake "tag (list :n :k :seal)
+  print sentence [NAMES_COMPOSITION_CASE] :tag
+  make "QC.CASES (:QC.CASES + 1)
+  localmake "expectedStream nr.ask :refSauce 5 :seal
+  localmake "actualStream monster.stage02.ask :ctx 5 :seal
+  localmake "expectedN nr.falling :n :k
+  localmake "actualN qnames.total :n :k
+  qc.check (equalp :actualStream :expectedStream) (list :tag [ask])
+  qc.check (equalp :actualN :expectedN) (list :tag [total])
+  localmake "expectedRank qc.reference.rank :expectedStream :expectedN
+  localmake "actualRank monster.stage02.choose.rank :actualStream :actualN
+  qc.check (equalp :actualRank :expectedRank) (list :tag [rank])
+  qc.check (monster.stage02.bi.canonical :actualRank) (list :tag [canonical])
+  localmake "expectedNames nr.unrank.names :n :k :expectedRank
+  localmake "actualNames qnames.unrank :n :k :actualRank
+  qc.check (equalp :actualNames :expectedNames) (list :tag [names])
+  qc.check (equalp (qnames.rank :n :actualNames) :expectedRank) (list :tag [inverse])
+  qc.check (equalp (count :actualNames) :k) (list :tag [length])
+end
+to qc.run :calculation :target
+  print [NAMES_COMPOSITION_BUILD_PRODUCTION]
+  localmake "ctx monster.stage02.sauce (qc.prefix :calculation :target)
+  print [NAMES_COMPOSITION_BUILD_REFERENCE]
+  localmake "refSauce nr.sauce :calculation :target
+  qc.check (equalp (monster.context.get :ctx "sauceBowls) (nr.sauce.bowls :refSauce)) [bowls]
+  qc.check (equalp (monster.context.get :ctx "sauceOrder46) (nr.sauce.order46 :refSauce)) [latch]
+  foreach [[17 1 22] [17 6 22] [17 17 22] [47 1 33] [47 24 33] [47 25 33] [47 46 33] [47 47 33]] [
+    qc.case :ctx :refSauce (first ?) (item 2 ?) (last ?)
+  ]
+  if :QC.FAIL <> 0 [print [NAMES_COMPOSITION_FALIIS] stop]
+  if :QC.CASES <> 8 [print [NAMES_COMPOSITION_COUNT_FALIIS] stop]
+  if :QC.CHECKS <> 58 [print [NAMES_COMPOSITION_CHECK_COUNT_FALIIS] stop]
+  print sentence [NAMES_COMPOSITION_CASES_PASIS] :QC.CASES
+  print sentence [NAMES_COMPOSITION_CHECKS_PASIS] :QC.CHECKS
+  print [NAMES_COMPOSITION_PASIS]
+end

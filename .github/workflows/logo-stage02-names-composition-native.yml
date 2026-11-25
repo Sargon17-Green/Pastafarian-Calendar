@@ -1,0 +1,82 @@
+name: Logo Stage2 QA Real Names Composition
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-names-composition-20261125'
+permissions:
+  contents: read
+jobs:
+  composition:
+    strategy:
+      fail-fast: false
+      matrix:
+        direction: [forward, reverse]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify exact parent and unchanged source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = "43e0b54bde74df8535efaf356b5df8da183a7988"
+          git diff --exit-code HEAD^ HEAD -- src test qa/logo_stage2_names_candidate.logo
+          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
+          git ls-tree -r HEAD src test qa/logo_stage2_names_candidate.logo > "$RUNNER_TEMP/source-blobs.txt"
+          sha256sum qa/logo_stage2_names_composition.logo .github/workflows/logo-stage02-names-composition-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
+          cp qa/logo_stage2_names_composition.logo "$RUNNER_TEMP/native.logo"
+          if [ "${{ matrix.direction }}" = forward ]; then
+            echo 'qc.run (nr.foundation) (nr.tablets)' >> "$RUNNER_TEMP/native.logo"
+          else
+            echo 'qc.run (nr.tablets) (nr.foundation)' >> "$RUNNER_TEMP/native.logo"
+          fi
+      - name: Build pinned UCBLogo
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
+          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$RUNNER_TEMP/ucblogo-source"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Run bounded real composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          printf 'bye\n' | timeout --signal=TERM --kill-after=5s 2100 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
+          code=$?
+          set -e
+          echo "$code" > "$RUNNER_TEMP/exit.txt"
+          echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
+          cat "$RUNNER_TEMP/native.log"
+          test "$code" = 0
+          grep -Fxq 'NAMES_COMPOSITION_CASES_PASIS 8' "$RUNNER_TEMP/native.log"
+          grep -Fxq 'NAMES_COMPOSITION_CHECKS_PASIS 58' "$RUNNER_TEMP/native.log"
+          grep -Fxq 'NAMES_COMPOSITION_PASIS' "$RUNNER_TEMP/native.log"
+          test "$(grep -c '^NAMES_COMPOSITION_CASE ' "$RUNNER_TEMP/native.log")" = 8
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$RUNNER_TEMP/native.log"; then exit 1; fi
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-names-composition-${{ matrix.direction }}
+          path: |
+            ${{ runner.temp }}/commit.txt
+            ${{ runner.temp }}/source-blobs.txt
+            ${{ runner.temp }}/qa-hashes.txt
+            ${{ runner.temp }}/native.logo
+            ${{ runner.temp }}/native.log
+            ${{ runner.temp }}/exit.txt
+            ${{ runner.temp }}/elapsed.txt
+          if-no-files-found: warn
+          retention-days: 30
