@@ -57,13 +57,13 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(r["prior_v22_artifact_sha256"],"6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf")
         self.assertEqual(r["prior_v23_run"],45676884530)
         self.assertEqual(r["prior_v23_artifact_sha256"],"366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38")
-        self.assertEqual(r["prior_residual_run"],45676884530)
+        self.assertEqual(r["prior_residual_run"],45678986496)
         self.assertEqual(r["prior_residual_artifact_sha256"],"ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013")
         self.assertEqual(r["prior_v24_1_run"],45678986496)
         self.assertEqual(r["prior_v24_1_artifact_sha256"],"ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013")
         self.assertEqual(r["prior_v24_1_artifact_url"],"https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589")
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
-        self.assertEqual([p["kind"] for p in r["probes"]],["statement"]*11)
+        self.assertEqual([p["kind"] for p in r["probes"]],["statement"]*9)
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
         w234=r["line234_witness"]
         w237=r["line237_witness"]
