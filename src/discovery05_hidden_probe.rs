@@ -12,7 +12,6 @@ use crate::patch04_stone_probe::StonePatch04;
 use crate::{MonsterContext, MonsterError, MonsterErrorCode, MonsterManager, PhaseHandler};
 
 const HIDDEN_COUNT: usize = 7;
-const STONE_COMPONENTS: usize = 5;
 const PHYSICAL_STORAGE_LEN: usize = 8;
 const GRIND_STONE_KINDS: [usize; 7] = [0, 1, 2, 3, 4, 0, 1];
 

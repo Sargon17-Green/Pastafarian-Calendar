@@ -27,7 +27,7 @@ pub fn independent_stones() -> Vec<[BigInt; 5]> {
     let mut rows = Vec::with_capacity(46);
     rows.push([17, 29, 43, 71, 101].map(BigInt::from));
     for row in 2..=46 {
-        let old = rows.last().expect("seed row exists");
+        let old = rows.last().expect("seed row exists").clone();
         rows.push([
             independent_save(&(&old[0] * &old[0] + BigInt::from(3u8) * &old[1] + BigInt::from(row))),
             independent_save(&(&old[1] * &old[1] + BigInt::from(5u8) * &old[2] + &old[0])),
