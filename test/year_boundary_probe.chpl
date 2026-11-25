@@ -480,8 +480,9 @@ proc profileResearchSelectedForward(const ref lens: [?D] int,
   var baselineSingletonSeconds = 0.0, candidateSingletonSeconds = 0.0;
   var calls = 0, singletonCalls = 0;
   for j in max(2,chosen)..D.high {
-    var baseline: SparseWeavingVec;
-    var candidate: SparseWeavingVec;
+    // Explicit initialization prevents Chapel split-init order conflicts.
+    var baseline: SparseWeavingVec = new SparseWeavingVec();
+    var candidate: SparseWeavingVec = new SparseWeavingVec();
     var bt: stopwatch;
     var ct: stopwatch;
     if j%2 == 0 {
