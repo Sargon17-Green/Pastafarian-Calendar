@@ -322,6 +322,10 @@ ELIF DEF(STAGE1_POSTSTIRS_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarBowlPostStirsBench
+ELIF DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarBowlAnswerRankBench
 ELIF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
@@ -569,4 +573,9 @@ ENDC
 
 IF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_bowl_answer_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
+INCLUDE "src/runtime/calendar_bowl_answer_rank.asm"
+INCLUDE "src/tests/calendar_bowl_answer_rank_native_test.asm"
 ENDC

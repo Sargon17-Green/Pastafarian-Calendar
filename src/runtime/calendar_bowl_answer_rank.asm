@@ -42,6 +42,7 @@ CalendarBowlAnswerShortRank::
     inc a
 .directionReady:
     ld [wCalendarSelectDirection], a
+.select:
     call CalendarSelectShortRank
     ld a, [wCalendarStatus]
     or a

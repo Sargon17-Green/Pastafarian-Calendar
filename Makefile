@@ -199,3 +199,11 @@ build/calendar_bowl_answer.o: build/calendar.o src/runtime/calendar_bowl_answer.
 build/calendar_bowl_answer.gb: build/calendar_bowl_answer.o
 	$(RGBLINK) -n build/calendar_bowl_answer.sym -m build/calendar_bowl_answer.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Isolated Stage1 Native393; previous cartridge targets unchanged.
+build/calendar_bowl_answer_rank.o: build/calendar.o src/runtime/calendar_bowl_answer_rank.asm src/tests/calendar_bowl_answer_rank_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_ANSWER_RANK_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_bowl_answer_rank.gb: build/calendar_bowl_answer_rank.o
+	$(RGBLINK) -n build/calendar_bowl_answer_rank.sym -m build/calendar_bowl_answer_rank.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
