@@ -136,13 +136,13 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V25: V24.1 completed every statement through line244; continue at the next exact source statements.
-    # Reuse the verified V24.1 shape witnesses by immutable artifact reference; do not rerun them.
-    focus = [246, 247, 248, 249, 250, 252, 253, 254, 255]
+    # V26: V25 completed every statement through line255; continue at the next exact source statements.
+    # Reuse V24.1 shape witnesses and V25's completed native probes by immutable artifact references.
+    focus = [256, 257, 258, 259, 261, 262, 263, 264, 265, 266, 267]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
-            or len(focused) != 9
+            or len(focused) != 11
             or any(kind != "statement" or end != start+1 for start, end, kind in focused)):
         raise ValueError("FOCUSED_SOURCE_LINES_CHANGED")
     spans = focused
@@ -269,7 +269,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=False,qa_only_patches=patches,
-                   instrumentation_mode="statement_focus246_255_after_v24_1",
+                   instrumentation_mode="statement_focus256_267_after_v25",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
@@ -292,8 +292,17 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    prior_v24_1_run=45678986496,
                    prior_v24_1_artifact_sha256="ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013",
                    prior_v24_1_artifact_url="https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589",
-                   prior_residual_run=45678986496,
-                   prior_residual_artifact_sha256="ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013",
+                   prior_v25_run=45683881377,
+                   prior_v25_artifact_sha256="f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297",
+                   prior_v25_artifact_url="https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45683881377/artifacts/15055108970",
+                   prior_v25_native_summary=dict(
+                       fx_last_contiguous=95, checkpoint_count=23, statement_count=9,
+                       statement_lines=[246,247,248,249,250,252,253,254,255],
+                       first_incomplete=None, suite_ec_first=0,
+                       status="RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY",
+                       zip_crc_count=57, manifest_verified_count=56),
+                   prior_residual_run=45683881377,
+                   prior_residual_artifact_sha256="f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297",
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 

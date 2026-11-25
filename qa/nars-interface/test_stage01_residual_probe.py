@@ -32,9 +32,9 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,28))
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
-        self.assertEqual(r["probe_count"],9)
-        self.assertEqual([p["first_line"] for p in r["probes"]],[246,247,248,249,250,252,253,254,255])
-        self.assertEqual(r["instrumentation_mode"],"statement_focus246_255_after_v24_1")
+        self.assertEqual(r["probe_count"],11)
+        self.assertEqual([p["first_line"] for p in r["probes"]],[256,257,258,259,261,262,263,264,265,266,267])
+        self.assertEqual(r["instrumentation_mode"],"statement_focus256_267_after_v25")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
@@ -57,13 +57,22 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(r["prior_v22_artifact_sha256"],"6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf")
         self.assertEqual(r["prior_v23_run"],45676884530)
         self.assertEqual(r["prior_v23_artifact_sha256"],"366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38")
-        self.assertEqual(r["prior_residual_run"],45678986496)
-        self.assertEqual(r["prior_residual_artifact_sha256"],"ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013")
+        self.assertEqual(r["prior_residual_run"],45683881377)
+        self.assertEqual(r["prior_residual_artifact_sha256"],"f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297")
+        self.assertEqual(r["prior_v25_run"],45683881377)
+        self.assertEqual(r["prior_v25_artifact_sha256"],"f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297")
+        self.assertEqual(r["prior_v25_artifact_url"],"https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45683881377/artifacts/15055108970")
+        self.assertEqual(r["prior_v25_native_summary"],{
+            "fx_last_contiguous":95,"checkpoint_count":23,"statement_count":9,
+            "statement_lines":[246,247,248,249,250,252,253,254,255],
+            "first_incomplete":None,"suite_ec_first":0,
+            "status":"RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY",
+            "zip_crc_count":57,"manifest_verified_count":56})
         self.assertEqual(r["prior_v24_1_run"],45678986496)
         self.assertEqual(r["prior_v24_1_artifact_sha256"],"ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013")
         self.assertEqual(r["prior_v24_1_artifact_url"],"https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589")
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
-        self.assertEqual([p["kind"] for p in r["probes"]],["statement"]*9)
+        self.assertEqual([p["kind"] for p in r["probes"]],["statement"]*11)
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
         w234=r["line234_witness"]
         w237=r["line237_witness"]

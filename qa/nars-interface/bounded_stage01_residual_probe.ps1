@@ -6,7 +6,7 @@ $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 $source='7161824b9fcbfaca91f20d1ea492417e77003ff4'
 $r=[ordered]@{
- schema='APL_GERMAN_NATIVE_RESIDUAL_STATEMENT_V1';source_commit=$source;
+ schema='APL_GERMAN_NATIVE_RESIDUAL_STATEMENT_V1';source_commit=$source;qa_commit=$env:GITHUB_SHA;program_count=$null;
  stage01='NOT_ACCEPTED';status='STARTED';native_executed=$false;runtime_verified=$false;
  fx_last_contiguous=0;fx_checkpoints=@();copies=@();suite_start_exact=$false;
  suite_captured_exact=$false;suite_ec_valid=$false;suite_ec_first=$null;
@@ -78,7 +78,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v25'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v26'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -90,8 +90,8 @@ try {
     $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
-    $m.program_count -ne 28 -or $m.probe_count -ne 9 -or
-    $m.instrumentation_mode -cne 'statement_focus246_255_after_v24_1' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.program_count -ne 28 -or $m.probe_count -ne 11 -or
+    $m.instrumentation_mode -cne 'statement_focus256_267_after_v25' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or
     $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
     $m.line234_witness.evidence_run -ne 45678986496 -or $m.line234_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
@@ -119,11 +119,21 @@ try {
     $m.prior_v24_1_run -ne 45678986496 -or
     $m.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
     $m.prior_v24_1_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589' -or
-    $m.prior_residual_run -ne 45678986496 -or
-    $m.prior_residual_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+    $m.prior_v25_run -ne 45683881377 -or
+    $m.prior_v25_artifact_sha256 -cne 'f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297' -or
+    $m.prior_v25_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45683881377/artifacts/15055108970' -or
+    $m.prior_v25_native_summary.fx_last_contiguous -ne 95 -or $m.prior_v25_native_summary.checkpoint_count -ne 23 -or
+    $m.prior_v25_native_summary.statement_count -ne 9 -or
+    (($m.prior_v25_native_summary.statement_lines -join ',') -cne '246,247,248,249,250,252,253,254,255') -or
+    $null -ne $m.prior_v25_native_summary.first_incomplete -or $m.prior_v25_native_summary.suite_ec_first -ne 0 -or
+    $m.prior_v25_native_summary.status -cne 'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY' -or
+    $m.prior_v25_native_summary.zip_crc_count -ne 57 -or $m.prior_v25_native_summary.manifest_verified_count -ne 56 -or
+    $m.prior_residual_run -ne 45683881377 -or
+    $m.prior_residual_artifact_sha256 -cne 'f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297' -or
     $m.original_unmodified_suite_proven -ne $false -or
     $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'} if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
  $r['candidate_sha256']=$m.candidate_sha256
+ $r['program_count']=[int]$m.program_count
  foreach($path in @($m.marker_path,$m.suite.start_path,$m.suite.captured_path,$m.suite.code_path,$m.suite.message_path)){
    if(Test-Path -LiteralPath $path){throw 'PREEXISTING_RESIDUAL_SUITE_EVIDENCE'}
  }
@@ -231,8 +241,13 @@ try {
  $r['prior_v23_artifact_sha256']='366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38'
  $r['prior_v24_1_run']=45678986496
  $r['prior_v24_1_artifact_sha256']='ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
- $r['prior_residual_run']=45678986496
- $r['prior_residual_artifact_sha256']='ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
+ $r['prior_v25_run']=45683881377
+ $r['prior_v25_artifact_sha256']='f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297'
+ $r['prior_v25_artifact_url']='https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45683881377/artifacts/15055108970'
+ $r['prior_residual_run']=45683881377
+ $r['prior_residual_artifact_sha256']='f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297'
+ Write-Output ('PRIOR_V25_RESIDUAL_REFERENCE|RUN='+$r['prior_v25_run']+
+   '|ARTIFACT_SHA256='+$r['prior_v25_artifact_sha256'])
  $all= ($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
    (@($r['fx_checkpoints'] | Where-Object {$_.exact -ne $true}).Count -eq 0) -and
    ($r['copies'].Count -eq 2) -and
@@ -240,12 +255,15 @@ try {
    $r['suite_start_exact'] -and $r['suite_captured_exact'] -and
    $r['suite_ec_valid'] -and $r['final_marker_exact'] -and
    $r['compile_exact'] -and $r['compile_name_exact'] -and
-   $r['statement_receipts'].Count -eq $m.probe_count -and $m.probe_count -eq 9 -and
+   $r['qa_commit'] -ceq $env:GITHUB_SHA -and $r['program_count'] -eq 28 -and
+   $r['statement_receipts'].Count -eq $m.probe_count -and $m.probe_count -eq 11 -and
    $r['statement_started'] -ge 1 -and
-   $r['statement_receipts'][0].first_line -eq 246 -and $r['statement_receipts'][0].start_exact -and
-   $r['statement_receipts'][8].first_line -eq 255 -and
+   $r['statement_receipts'][0].first_line -eq 256 -and $r['statement_receipts'][0].start_exact -and
+   $r['statement_receipts'][10].first_line -eq 267 -and
    $r['prior_v24_1_run'] -eq 45678986496 -and
-   $r['prior_v24_1_artifact_sha256'] -ceq 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
+   $r['prior_v24_1_artifact_sha256'] -ceq 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -and
+   $r['prior_v25_run'] -eq 45683881377 -and
+   $r['prior_v25_artifact_sha256'] -ceq 'f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297'
  $r['status']=if(-not $all){'INCOMPLETE_RESIDUAL_DIAGNOSTIC_NOT_STAGE01'}elseif($r['suite_no_error']){
     'RESIDUAL_SUITE_NO_ERROR_DIAGNOSTIC_ONLY'
  }else{'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY'}
