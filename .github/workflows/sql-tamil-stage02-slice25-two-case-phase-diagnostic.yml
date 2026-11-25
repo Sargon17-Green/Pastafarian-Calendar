@@ -1,0 +1,204 @@
+name: SQL Tamil Slice25 bounded phase diagnostics and direct middle
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - 'sql/test/180_stage25_two_case_phase_diagnostic.py'
+      - '.github/workflows/sql-tamil-stage02-slice25-two-case-phase-diagnostic.yml'
+      - 'artifacts/stage-02/SLICE25_TWO_CASE_PHASE_DIAGNOSTIC_CONTRACT_20261125.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  one-case-per-fresh-pg1712:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - {mode: phase, case_id: prev_3_prev_last}
+          - {mode: phase, case_id: next_3_next_middle}
+          - {mode: direct, case_id: prev_3_middle}
+    env:
+      MODE: ${{ matrix.mode }}
+      CASE_ID: ${{ matrix.case_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact 29 source and fixture locks; generate QA-only case
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p phase-evidence
+          python3 sql/test/180_stage25_two_case_phase_diagnostic.py --self-test \
+            | tee phase-evidence/static.txt
+          python3 sql/test/180_stage25_two_case_phase_diagnostic.py \
+            --mode "$MODE" --case-id "$CASE_ID" --out-dir phase-evidence \
+            | tee phase-evidence/generator.txt
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          m=json.loads(Path("phase-evidence/manifest.json").read_text(encoding="utf-8"))
+          lines=[
+            "PROJECT_ID=PC-BRANCH-SQL-TAMIL",
+            "GITHUB_SHA="+os.environ["GITHUB_SHA"],
+            "BRANCH="+os.environ["GITHUB_REF_NAME"],
+            "MODE="+m["mode"],
+            "CASE="+m["case_id"],
+            "CALCULATION_DAY="+str(m["calculation_day"]),
+            "TARGET_DAY="+str(m["target_day"]),
+            "FIXTURE_GIT_BLOB="+m["fixture_git_blob"],
+            "FIXTURE_SOURCE_COMMIT="+m["fixture_source_commit"],
+            "PG_IMAGE=postgres:17.12",
+            "STATEMENT_TIMEOUT_SECONDS=720",
+            "WATCHDOG_SECONDS=750",
+            "JOB_TIMEOUT_MINUTES=15",
+          ]
+          Path("phase-evidence/versions.txt").write_text("\n".join(lines)+"\n",encoding="utf-8")
+          PY
+          : > phase-evidence/production-blobs.txt
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            git hash-object "${found[0]}" >> phase-evidence/production-blobs.txt
+          done
+          test "$(wc -l < phase-evidence/production-blobs.txt)" -eq 28
+          sha256sum \
+            sql/test/180_stage25_two_case_phase_diagnostic.py \
+            .github/workflows/sql-tamil-stage02-slice25-two-case-phase-diagnostic.yml \
+            sql/00_schema.sql sql/01_source_language_catalog.sql \
+            sql/02_monster_bootstrap.sql sql/03_stage02_production_core.sql \
+            sql/04_stage02_stone_states.sql sql/05_stage02_hidden_drop.sql \
+            sql/06_stage02_visible_drops.sql sql/07_stage02_bowls.sql \
+            sql/08_stage02_bowl_round.sql sql/09_stage02_post_stir_round.sql \
+            sql/10_stage02_sauce.sql sql/11_stage02_answer_stream.sql \
+            sql/12_stage02_choose_rank.sql sql/13_stage02_gate_gaps.sql \
+            sql/14_stage02_gate_day_selector.sql sql/15_stage02_year5000_gate_candidates.sql \
+            sql/16_stage02_year5000.sql sql/17_stage02_adjacent_year_navigation.sql \
+            sql/18_stage02_target_year_navigation.sql sql/19_stage02_cutlet_count.sql \
+            sql/20_stage02_cutlet_partition.sql sql/21_stage02_cutlet_names.sql \
+            sql/22_stage02_month_count.sql sql/23_stage02_month_lengths.sql \
+            sql/24_stage02_month_weaving.sql sql/25_stage02_month_names.sql \
+            sql/26_stage02_year_structure.sql sql/27_stage02_calendar_date.sql \
+            sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl \
+            phase-evidence/*.sql phase-evidence/manifest.json \
+            > phase-evidence/source-sha256.txt
+      - name: Start isolated offline PostgreSQL 17.12
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-s25-one-case --network none \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-s25-one-case pg_isready -q -U postgres; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres tamil-s25-one-case postgres --version \
+            | tee -a phase-evidence/versions.txt
+      - name: Load all 28 unchanged production SQL files and QA aliases only
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+          done
+          test "${#args[@]}" -eq 56
+          if [ "$MODE" = "phase" ]; then
+            args+=(-f /work/phase-evidence/phase-overrides.sql)
+          fi
+          if docker exec -u postgres tamil-s25-one-case \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            "${args[@]}" > phase-evidence/production-load.log 2>&1; then
+            load_exit=0
+          else
+            load_exit=$?
+          fi
+          printf 'SOURCE_LOAD_EXIT=%s\n' "$load_exit" > phase-evidence/load-exit.txt
+          if [ "$load_exit" -ne 0 ]; then
+            cat phase-evidence/production-load.log
+            exit 3
+          fi
+          docker exec -u postgres tamil-s25-one-case \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -c "SELECT 1 / ((to_regnamespace('pastafari_sql_tamil') IS NOT NULL AND to_regprocedure('pastafari_sql_tamil.calendar_date(numeric,numeric)') IS NOT NULL)::integer)" \
+            > phase-evidence/schema-check.log 2>&1
+      - name: One bounded 720-second SQL diagnostic with 750-second watchdog
+        shell: bash
+        run: |
+          set -uo pipefail
+          set +e
+          timeout --signal=TERM --kill-after=15s 750s \
+            docker exec -u postgres tamil-s25-one-case \
+            psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres \
+            -f /work/phase-evidence/test.sql \
+            > phase-evidence/phase.log 2>&1
+          result=$?
+          set -e
+          printf 'PSQL_EXIT=%s\nEND_UTC=%s\n' "$result" "$(date -u +%FT%TZ)" \
+            > phase-evidence/exit.txt
+          if [ "$MODE" = "phase" ]; then
+            case "$CASE_ID" in
+              prev_3_prev_last)
+                for phase in exact_gate_index negative_gate_gap gate_gap_signed sauce stone_value stone_state; do
+                  printf '%s ENTER=%s EXIT=%s\n' "$phase" \
+                    "$(grep -c "SQL_TAMIL_PHASE_ENTER=$phase:" phase-evidence/phase.log || true)" \
+                    "$(grep -c "SQL_TAMIL_PHASE_EXIT=$phase:" phase-evidence/phase.log || true)" \
+                    >> phase-evidence/phase-counts.txt
+                done
+                ;;
+              next_3_next_middle)
+                for phase in bowl_factorial post_stir_chain sauce; do
+                  printf '%s ENTER=%s EXIT=%s\n' "$phase" \
+                    "$(grep -c "SQL_TAMIL_PHASE_ENTER=$phase:" phase-evidence/phase.log || true)" \
+                    "$(grep -c "SQL_TAMIL_PHASE_EXIT=$phase:" phase-evidence/phase.log || true)" \
+                    >> phase-evidence/phase-counts.txt
+                done
+                ;;
+            esac
+            grep -E 'SQL_TAMIL_PHASE_(ENTER|EXIT)=' phase-evidence/phase.log \
+              > phase-evidence/phase-markers.txt || true
+            if [ "$result" -eq 0 ]; then
+              test "$(grep -c "SQL_TAMIL_PHASE_FIELD_PASS=$CASE_ID\\." phase-evidence/phase.log)" -eq 5
+              grep -q "SQL_TAMIL_PHASE_ORACLE=PASS; CASE=$CASE_ID; FIELDS=5/5" phase-evidence/phase.log
+              for phase in $(cut -d' ' -f1 phase-evidence/phase-counts.txt); do
+                test "$(grep -c "SQL_TAMIL_PHASE_ENTER=$phase:" phase-evidence/phase.log)" -gt 0
+                test "$(grep -c "SQL_TAMIL_PHASE_EXIT=$phase:" phase-evidence/phase.log)" -gt 0
+              done
+            fi
+          else
+            if [ "$result" -eq 0 ]; then
+              test "$(grep -c "SQL_TAMIL_DIRECT_FIELD_PASS=$CASE_ID\\." phase-evidence/phase.log)" -eq 5
+              grep -q "SQL_TAMIL_DIRECT_ORACLE=PASS; CASE=$CASE_ID; FIELDS=5/5" phase-evidence/phase.log
+            fi
+          fi
+          tail -80 phase-evidence/phase.log || true
+          if [ "$result" -ne 0 ]; then
+            printf 'RESULT=NOT_ACCEPTED; reason=psql_or_watchdog_exit_%s\n' "$result" \
+              > phase-evidence/status.txt
+            exit 1
+          fi
+          printf 'RESULT=CASE_ORACLE_PASS; FULL_SLICE25=NOT_ACCEPTED\n' \
+            > phase-evidence/status.txt
+      - name: Preserve exact sources, generated SQL, phase markers and original logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-${{ matrix.mode }}-${{ matrix.case_id }}-${{ github.run_id }}
+          path: phase-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated PostgreSQL container
+        if: always()
+        run: docker rm -f tamil-s25-one-case 2>/dev/null || true
