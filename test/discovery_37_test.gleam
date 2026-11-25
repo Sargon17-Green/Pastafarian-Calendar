@@ -65,7 +65,7 @@ fn gaps(context: bootstrap.MonsterContext, ids: List(Int)) -> List(Int) {
 fn verify(
   ids: List(Int),
   left_bands: List(discovery_27_sum_bands.SumBand),
-  right_bands: List(discovery_27_sum_bands.SumBand>,
+  right_bands: List(discovery_27_sum_bands.SumBand),
 ) -> #(Int, Int) {
   let context = bootstrap.new_context(11, 21)
   let windows = sums(gaps(context, ids))
