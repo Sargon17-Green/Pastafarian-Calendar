@@ -21,6 +21,7 @@ import sys
 from funge.program import Program
 from funge.languages.funge98 import Befunge98
 from funge.platform import BufferedPlatform
+from qa31cm_retired_space_guard import RetiredSpaces
 
 SOURCES = [
     "src/interleaved_work_counts.b98",
@@ -63,11 +64,12 @@ BASE_POSITIONS=((0,0),(5,0),(10,49),(500,1500),(100,500),(1528,2014))
 def sample(space,vector_cls,positions):
     return tuple(space.get(vector_cls(p)) for p in positions)
 
-def replay(program,source_path,raw,iteration,previous,receipts=None):
+def replay(program,source_path,raw,iteration,previous,guard,ownership,receipts=None):
     if program.ips:
         raise AssertionError("prior native IP was not fully terminated")
 
     old_space=program.space
+    guard.check(old_space, "before-reset")
     old_semantics=program.semantics
     object_id=id(program)
     if previous:
@@ -83,6 +85,7 @@ def replay(program,source_path,raw,iteration,previous,receipts=None):
     # object is explicitly reinitialized via PyFunge's own constructor.
     # This refreshes semantics, Funge-space, IP queue, and I/O together.
     Program.__init__(program,Befunge98,platform=platform)
+    guard.check(program.space, "after-reset")
     if id(program)!=object_id:
         raise AssertionError("reset replaced the original Program identity")
     if program.semantics is old_semantics:
@@ -108,27 +111,27 @@ def replay(program,source_path,raw,iteration,previous,receipts=None):
 
     if len(stdout.getvalue())!=0:
         raise AssertionError("unexpected output before execute")
-    written=set()
-    if receipts is None:
+    space=program.space
+    cls=type(space)
+    original_put=cls.put
+    written={}
+    def observed_put(receiver,*args,**kwargs):
+        if receiver is not space or len(args)<2:
+            raise AssertionError("foreign or unrecognized native memory write")
+        address=tuple(int(v) for v in args[0])
+        result=original_put(receiver,*args,**kwargs)
+        value=int(args[1])
+        if len(address)!=2 or int(receiver.get(args[0]))!=value:
+            raise AssertionError("native write value or dimension mismatch")
+        writes=written.get(address,(0,None))[0]
+        written[address]=(writes+1,str(value))
+        return result
+    cls.put=observed_put
+    try:
         program.execute()
-    else:
-        space=program.space
-        cls=type(space)
-        original_put=cls.put
-        def observed_put(receiver,*args,**kwargs):
-            if receiver is not space or len(args)<2:
-                raise AssertionError("foreign or unrecognized native memory write")
-            address=tuple(int(v) for v in args[0])
-            result=original_put(receiver,*args,**kwargs)
-            if len(address)!=2 or int(receiver.get(args[0]))!=int(args[1]):
-                raise AssertionError("native write value or dimension mismatch")
-            written.add(address)
-            return result
-        cls.put=observed_put
-        try:
-            program.execute()
-        finally:
-            cls.put=original_put
+    finally:
+        cls.put=original_put
+    guard.check(space, "after-execute")
     if program.ips:
         raise AssertionError("native Program.execute left unclean IP list")
     got=stdout.getvalue().split()
@@ -140,12 +143,19 @@ def replay(program,source_path,raw,iteration,previous,receipts=None):
     if previous:
         if sample(old_space,old_vector_type,old_positions)!=old_snapshot:
             raise AssertionError("new Program run contaminated old Funge-space")
-    positions=tuple(sorted(set(BASE_POSITIONS) | written))
+    code=CODES[source_path]
+    blob=hashlib.sha1("blob %d\0"%len(code)+code).hexdigest()
+    record=guard.retain(space,vector_cls,BASE_POSITIONS,written)
+    record.update(path=source_path, source_blob=blob, input=raw, output=got,
+                  native_fresh_cli=expected,
+                  writes=[[list(pos),count,last] for pos,(count,last) in sorted(written.items())])
+    ownership.append(record)
+    # Preserve the legacy receipt format. The separate record above covers every run.
+    positions=tuple(sorted(set(BASE_POSITIONS) | (set(written) if receipts is not None else set())))
     snapshot=sample(program.space,vector_cls,positions)
     if receipts is not None:
-        code=CODES[source_path]
         receipts.append({"path":source_path,"input":raw,"output":got,"native_fresh_cli":expected,
-                         "source_blob":hashlib.sha1("blob %d\0"%len(code)+code).hexdigest(),
+                         "source_blob":blob,
                          "written_addresses":[list(p) for p in sorted(written)],
                          "previous_addresses_checked":len(old_positions) if previous else 0,
                          "retained_addresses":len(positions)})
@@ -180,9 +190,11 @@ platform,output=fresh_platform("")
 program=Program(Befunge98,platform=platform)
 identity=id(program)
 previous=None
+guard=RetiredSpaces()
+ownership=[]
 print("NATIVE_SAME_PROGRAM_RESET_PREFLIGHT_PASS")
 for iteration,(source_path,raw) in enumerate(CASES):
-    previous=replay(program,source_path,raw,iteration,previous)
+    previous=replay(program,source_path,raw,iteration,previous,guard,ownership)
     if id(program)!=identity:
         raise AssertionError("test accidentally replaced Program object")
     print("NATIVE_SAME_PROGRAM_OBJECT_REPLAY_PASS",iteration,
@@ -204,7 +216,7 @@ extra_cases=[
 receipts=[]
 for index,(name,raw) in enumerate(extra_cases):
     name="src/"+name+".b98"
-    previous=replay(program,name,raw+"\n",index,previous,receipts)
+    previous=replay(program,name,raw+"\n",index,previous,guard,ownership,receipts)
     if id(program)!=identity:
         raise AssertionError("lost the original Program identity")
     if index and receipts[-1]["previous_addresses_checked"]!=receipts[-2]["retained_addresses"]:
@@ -217,5 +229,13 @@ if {r["path"] for r in receipts if r["written_addresses"]}!=stateful:
 if len(sys.argv)>1:
     with open(sys.argv[1],"wb") as stream:
         stream.write(json.dumps(receipts,indent=2,sort_keys=True)+"\n")
+if len(sys.argv)>2:
+    with open(sys.argv[2],"wb") as stream:
+        stream.write(json.dumps({"runs":ownership,"phases":guard.checks},
+                                sort_keys=True, separators=(",",":"))+"\n")
+if len(ownership)!=31 or len(guard.checks)!=93 or sum(r["retired"] for r in guard.checks)!=1395:
+    raise AssertionError("incomplete all-spaces native ownership record")
+print("NATIVE_ALL_RETIRED_SPACES_PASS",len(ownership),len(guard.checks),
+      sum(r["cells"] for r in guard.checks),"cell comparisons")
 print("NATIVE_STAGE1_ALL_ENTRYPOINTS_EXPLICIT_RESET_PASS",len(OUTPUT_WIDTH),"sources",
       len(receipts),"executions",len(stateful),"physical writers")

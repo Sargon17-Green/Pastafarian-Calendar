@@ -74,6 +74,9 @@ def native_payload(row):
 
 
 class Scanner:
+    handoff = HANDOFF
+    handoff_delta = (-241, -41)
+
     def __init__(self, source_lines):
         self.lines = source_lines
         self.visited = set()
@@ -170,8 +173,8 @@ class Scanner:
                 need((dx, dy) == EAST, "reader boundary orientation")
                 stop = "read"
                 break
-            if (x, y) == HANDOFF:
-                need((dx, dy) == (-241, -41), "handoff direction")
+            if (x, y) == self.handoff:
+                need((dx, dy) == self.handoff_delta, "handoff direction")
                 stop = "handoff"
                 break
         else:
