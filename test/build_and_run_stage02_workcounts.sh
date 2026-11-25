@@ -1,7 +1,23 @@
 #!/usr/bin/env bash
 # Native differential gate. Run from repository root.
 set -u -o pipefail
-mkdir -p evidence build
+mkdir -p evidence build || exit $?
+run_step() {
+  local label="$1" status=0
+  shift
+  "$@" || status=$?
+  printf 'STAGE02_%s_EXIT=%s\n' "$label" "$status"
+  return "$status"
+}
+compile_suite() (
+  cd test || exit $?
+  fpc -B -Fu../src -FE../build "$1.pas"
+)
+run_suite() {
+  local label="$1" binary="$2"
+  run_step "${label}_COMPILE" compile_suite "$binary" || return $?
+  run_step "${label}_SUITE" "./build/$binary" build/stage02_workcounts_vectors.tsv
+}
 (
   set -euo pipefail
   echo "PROJECT_ID=PC-BRANCH-OBJECT-PASCAL-PORTUGUESE"
@@ -15,21 +31,9 @@ mkdir -p evidence build
   digest="$(sha256sum build/stage02_workcounts_vectors.tsv | cut -d' ' -f1)"
   echo "STAGE02_TSV_SHA256=$digest"
   test "$digest" = "1a25f13aacd70d3cf23458d331c7a9148c5d749994099c2c9c9c4849ce674d12"
-  (
-    cd test
-    fpc -B -Fu../src -FE../build stage02_workcounts_regression.pas
-  )
-  ./build/stage02_workcounts_regression build/stage02_workcounts_vectors.tsv
-  (
-    cd test
-    fpc -B -Fu../src -FE../build stage02_context_integration.pas
-  )
-  ./build/stage02_context_integration build/stage02_workcounts_vectors.tsv
-  (
-    cd test
-    fpc -B -Fu../src -FE../build stage02_lifecycle_boundaries.pas
-  )
-  ./build/stage02_lifecycle_boundaries build/stage02_workcounts_vectors.tsv
+  run_suite WORKCOUNTS stage02_workcounts_regression
+  run_suite CONTEXT stage02_context_integration
+  run_suite LIFECYCLE stage02_lifecycle_boundaries
 ) 2>&1 | tee evidence/stage02-native-fpc.log
 status=$?
 echo "STAGE02_EXIT=$status" | tee -a evidence/stage02-native-fpc.log
