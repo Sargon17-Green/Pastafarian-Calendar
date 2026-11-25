@@ -145,6 +145,19 @@ jobs:
               --output build/stage01-scroll-component-diff.json) \
             | tee build/stage01-scroll-component-diff.log
           grep -Fxq 'STAGE01_SCROLL_COMPONENT_EXACT_DIFF=37/37' build/stage01-scroll-component-diff.log
+      - name: Exact independent Seal32 conditional suffix (fixed opening prefix only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_scroll_weaving_suffix_oracle.py
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 60s \
+            python3 -u test/stage01_scroll_weaving_suffix_oracle.py \
+              --self-test --foundation-json build/stage01-scroll-months-foundation.json \
+              --output build/stage01-scroll-weaving-suffix.json) \
+            | tee build/stage01-scroll-weaving-suffix.log
+          grep -Fxq 'SEAL32_SUFFIX_SELFTEST=304 SHAPES; 4770 RANKS' build/stage01-scroll-weaving-suffix.log
+          grep -Fxq 'SEAL32_FIXED_PREFIX_44_MONTHS_4399_DAYS=PASS_CONDITIONAL_ONLY' build/stage01-scroll-weaving-suffix.log
+          sha256sum build/stage01-scroll-weaving-suffix.json | tee build/stage01-scroll-weaving-suffix.sha256
       - name: Preserve canonical component evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -167,5 +180,8 @@ jobs:
             build/stage01-scroll-weaving-small.log
             build/stage01-scroll-component-diff.json
             build/stage01-scroll-component-diff.log
+            build/stage01-scroll-weaving-suffix.json
+            build/stage01-scroll-weaving-suffix.log
+            build/stage01-scroll-weaving-suffix.sha256
           if-no-files-found: warn
           retention-days: 30
