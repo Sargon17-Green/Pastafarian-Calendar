@@ -33,8 +33,8 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
-        self.assertEqual([p["first_line"] for p in r["probes"]],[180,181,182,183,184,185,186,187])
-        self.assertEqual(r["instrumentation_mode"],"line180_181_counterfactual_focus_180_187")
+        self.assertEqual([p["first_line"] for p in r["probes"]],[188,189,190,191,192,193,194,195])
+        self.assertEqual(r["instrumentation_mode"],"line188_195_residual_focus_after_v17_180_187")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
@@ -43,6 +43,8 @@ class ResidualTests(unittest.TestCase):
         for p,value in zip(r["qa_only_patches"],(17,47)):
             self.assertEqual(p["counterfactual"],p["original"].replace(f"(⊂{value})",f"(⊂,{value})",1))
         self.assertEqual(r["prior_line181_witness_run"],45551684196)
+        self.assertEqual(r["prior_residual_run"],45658001179)
+        self.assertEqual(r["prior_residual_artifact_sha256"],"ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e")
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
 

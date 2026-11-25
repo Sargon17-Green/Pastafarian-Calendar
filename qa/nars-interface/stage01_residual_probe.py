@@ -102,9 +102,9 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V17: advance past independently proven V15/V16 lines180/181 mismatches.
-    # Uninstrumented statements elsewhere are retained exactly, not skipped.
-    focus = [180, 181, 182, 183, 184, 185, 186, 187]
+    # V18: isolate the next eight source-anchored assertions after V17's completed span.
+    # The already-proven line180/181 QA-only counterfactuals remain; their standalone witnesses are not rerun.
+    focus = [188, 189, 190, 191, 192, 193, 194, 195]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
@@ -234,12 +234,14 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=False,qa_only_patches=patches,
-                   instrumentation_mode="line180_181_counterfactual_focus_180_187",
+                   instrumentation_mode="line188_195_residual_focus_after_v17_180_187",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
                    marker_token=FINAL,marker_path=marker,program_count=28,prior_line181_witness_run=45551684196,
+                   prior_residual_run=45658001179,
+                   prior_residual_artifact_sha256="ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e",
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 
