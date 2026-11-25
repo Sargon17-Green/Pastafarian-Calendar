@@ -1,0 +1,103 @@
+name: Issue29 v194 GMP index overflow explicit bypass RED GREEN NO F
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-index-overflow-bypass-v194
+    paths:
+      - '.github/workflows/issue29-v194-index-bounds.yml'
+permissions:
+  contents: read
+jobs:
+  index-boundary-red-green:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Lock original source and verify exact bypass scope
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD^)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          test "$(git rev-parse 1160096aa847c54cbef27c232771ce1549d7ba8f:src/canonical_full_weave_gmp_v164.adb)" = 845bd8905943a54e63d6aba0334404a5051fe666
+          test "$(git diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD | wc -l)" -eq 4
+          test "$(grep -Fc '    if: ${{ false }}' .github/workflows/canonical-names-lock.yml)" -eq 42
+          git diff 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD -- src > evidence/candidate.patch
+          python3 -B - <<'PY'
+          import subprocess
+          from pathlib import Path
+          p=Path('src/canonical_full_weave_gmp_v164.adb')
+          old=subprocess.check_output(['git','show','1160096aa847c54cbef27c232771ce1549d7ba8f:'+str(p)]).decode()
+          a="            N : constant Natural := Lengths (Lengths'First + J - 1);"
+          b="            --  Issue #29 v194: retain the legacy index expression except\n            --  when its intermediate addition would exceed Positive'Last.\n            N : constant Natural :=\n              (if Lengths'Last = Positive'Last and then J = F.Month_Count\n               then Lengths (Lengths'Last)\n               else Lengths (Lengths'First + J - 1));"
+          assert old.count(a)==1 and p.read_bytes()==old.replace(a,b).encode()
+          PY
+          git rev-parse HEAD > evidence/HEAD.txt
+          git diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD > evidence/changed-paths.txt
+          git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb > evidence/candidate-blob.txt
+      - name: Install GNAT13 and GMP
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/compiler.txt
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build unchanged baseline and isolated candidate with strict overflow checks
+        run: |
+          set -euo pipefail
+          mkdir -p baseline/tests
+          git archive 1160096aa847c54cbef27c232771ce1549d7ba8f src | tar -x -C baseline
+          cp tests/issue29_v194_index_bounds.adb baseline/tests/
+          cp issue29_v194_index_bounds.gpr baseline/
+          (cd baseline && timeout -k 5s 180s gprbuild -p -j2 -P issue29_v194_index_bounds.gpr) > evidence/baseline-build.log 2>&1
+          timeout -k 5s 180s gprbuild -p -j2 -P issue29_v194_index_bounds.gpr > evidence/candidate-build.log 2>&1
+          sha256sum baseline/bin_v194/issue29_v194_index_bounds bin_v194/issue29_v194_index_bounds > evidence/binaries.sha256
+          for f in baseline/bin_v194/issue29_v194_index_bounds bin_v194/issue29_v194_index_bounds; do
+            nm "$f" > evidence/$(echo "$f" | tr / _).symbols
+            if nm "$f" | grep -i 'normative_oracle__calendar_date' >/dev/null; then exit 1; fi
+          done
+      - name: Observe baseline RED and candidate GREEN without invoking calendar
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; ulimit -t 180; timeout -k 5s 180s baseline/bin_v194/issue29_v194_index_bounds 2147483647) > evidence/red.stdout 2> evidence/red.stderr
+          red=$?
+          (ulimit -v 1048576; ulimit -t 180; timeout -k 5s 180s bin_v194/issue29_v194_index_bounds 2147483647) > evidence/green.stdout 2> evidence/green.stderr
+          green=$?
+          set -e
+          printf '%s\n' "$red" > evidence/red.exitcode
+          printf '%s\n' "$green" > evidence/green.exitcode
+          python3 -B - <<'PY'
+          import json, re
+          from pathlib import Path
+          e=Path('evidence')
+          r=(e/'red.stdout').read_text()
+          g=(e/'green.stdout').read_text()
+          red=int((e/'red.exitcode').read_text())
+          green=int((e/'green.exitcode').read_text())
+          red_observed=(red not in (0,124,137) and r.count('V194_BOUND_MATCH')==1 and 'V194_BUILD_CONSTRAINT_ERROR' in r and 'overflow check failed' in (r+(e/'red.stderr').read_text()).lower())
+          green_observed=(green==0 and not (e/'green.stderr').read_bytes() and g.count('V194_BOUND_MATCH')==6 and 'V194_ALL_BOUND_CONTROLS_PASS_ZERO_F' in g)
+          result={'schema':'ISSUE29_V194_COMPONENT_INDEX_BYPASS/1','baseline_overflow_observed':red_observed,'candidate_all_bounds_pass':green_observed,'baseline_exit':red,'candidate_exit':green,'checks':int(re.search(r'V194_ASSERTIONS=\s*(\d+)',g).group(1)) if green_observed else None,'calendar_calls':0,'year_credit':0,'overflow_checks':'-gnato'}
+          (e/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+          assert red_observed and green_observed,result
+          PY
+      - name: Preserve evidence on failure too
+        if: always()
+        run: |
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          e=Path('evidence')
+          m={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(e.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (e/'members.sha256.json').write_text(json.dumps(m,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v194-index-overflow-red-green-zero-F
+          path: evidence/
+          retention-days: 90

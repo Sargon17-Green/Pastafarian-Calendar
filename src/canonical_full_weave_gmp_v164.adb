@@ -47,7 +47,12 @@ package body Canonical_Full_Weave_GMP_V164 is
       end if;
       for J in 1 .. F.Month_Count loop
          declare
-            N : constant Natural := Lengths (Lengths'First + J - 1);
+            --  Issue #29 v194: retain the legacy index expression except
+            --  when its intermediate addition would exceed Positive'Last.
+            N : constant Natural :=
+              (if Lengths'Last = Positive'Last and then J = F.Month_Count
+               then Lengths (Lengths'Last)
+               else Lengths (Lengths'First + J - 1));
          begin
             if N < 2 or else N > 123 then
                raise Constraint_Error with "GMP full-family month lengths outside 2..123";
