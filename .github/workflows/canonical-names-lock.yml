@@ -876,3 +876,44 @@ jobs:
             build/calendar_bowl_answer_rank.map
             build/calendar_bowl_answer_rank.sym
           if-no-files-found: error
+  dmg-gate-gap-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Independent Host gate and year-path oracles
+        run: |
+          python3 tests/test_sm83_stage1_selection_oracle.py
+          python3 tests/test_sm83_stage1_year_path_oracle.py
+      - name: Build isolated Native394 with RGBDS v1.0.4
+        run: |
+          docker run --rm --mount type=bind,src="$PWD",dst=/work \
+            -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
+            sh -c 'make build/calendar_gate_gap.gb'
+      - name: Check measured ROM0 budget and default370 contract
+        run: |
+          python3 - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('tests').resolve()))
+          from test_rom0_budget import ROM0_SIZE, rom0_usage
+          allocated, free, gap, tail, sections = rom0_usage('build/calendar_gate_gap.map')
+          assert allocated + free == ROM0_SIZE and free >= 10, (allocated, free)
+          from test_rom import TOTAL_CASES, MAX_BOOT_AND_TEST_FRAMES
+          assert (TOTAL_CASES, MAX_BOOT_AND_TEST_FRAMES) == (370, 9000)
+          print(f'ROM0_GATE_GAP=MEASURED allocated={allocated} free={free} maxgap={gap}', flush=True)
+          PY
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install real PyBoy
+        run: python -m pip install 'pyboy>=2,<3'
+      - name: Native394 PyBoy maximum 120000 frames
+        run: python tests/test_rom_gate_gap.py build/calendar_gate_gap.gb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sm83-native394-gate-gap
+          path: |
+            build/calendar_gate_gap.gb
+            build/calendar_gate_gap.map
+            build/calendar_gate_gap.sym
+          if-no-files-found: error

@@ -1,5 +1,5 @@
 ; SM83 Stage1 Native392 candidate: A0 and direction from retained orderAt46.
-; Input bowl 1..6, seal 10..12, six post-stir bowls, owner/ordinal lease.
+; Input bowl 1..6, seal 1 or 10..12, six post-stir bowls, owner/ordinal lease.
 ; Atomic output A0[16] LE and direction (1/-1); status 0/2/6.
 SECTION "Calendar Stage1 A0 direction", ROMX, BANK[1]
 CalendarBowlAnswerA0Direction::
@@ -13,10 +13,13 @@ CalendarBowlAnswerA0Direction::
     cp 7
     jp nc, .invalid
     ld a, [wCalendarAnswerInputSeal]
+    cp 1
+    jr z, .sealValid
     cp 10
     jp c, .invalid
     cp 13
     jp nc, .invalid
+.sealValid:
     ; Validate a permutation of six identities and canonical residues.
     xor a
     ld [wCalendarAnswerSeen], a

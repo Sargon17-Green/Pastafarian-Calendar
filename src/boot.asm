@@ -331,6 +331,10 @@ ELIF DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarBowlAnswerRankBench
+ELIF DEF(STAGE1_GATE_GAP_NATIVE_BENCH)
+    ld a, 1
+    ld [$2000], a
+    call RunCalendarGateGapBench
 ELIF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
@@ -591,4 +595,10 @@ ENDC
 IF DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
 INCLUDE "src/runtime/calendar_bowl_answer_rank.asm"
 INCLUDE "src/tests/calendar_bowl_answer_rank_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_GATE_GAP_NATIVE_BENCH)
+INCLUDE "src/runtime/calendar_bowl_answer_rank.asm"
+INCLUDE "src/runtime/calendar_gate_gap.asm"
+INCLUDE "src/tests/calendar_gate_gap_native_test.asm"
 ENDC
