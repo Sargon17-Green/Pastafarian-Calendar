@@ -39,7 +39,7 @@ def decode_paired(raw: bytes):
 def instrument(root: pathlib.Path, marker: str):
     """Instrument bounded original-source spans to avoid 266 native filesystem writes.
 
-    All original statements except the exact line180 QA-only substitution remain unchanged.
+    All original statements except the exact line180 and line181 QA-only substitutions remain unchanged.
     Control-flow blocks are indivisible; the evidence is diagnostic only.
     """
     locked = load_locked_sources(root)
@@ -51,13 +51,15 @@ def instrument(root: pathlib.Path, marker: str):
     if not source[0].startswith("RunStage01Tests;"):
         raise ValueError("SUITE_HEADER_CHANGED")
     original_source = source.copy()
-    patch_index = 180 - block["start_line"]
-    anchor = "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES) "
-    if not source[patch_index].strip().startswith(anchor):
-        raise ValueError("LINE180_PATCH_ANCHOR_MISMATCH")
-    source[patch_index] = source[patch_index].replace("(⊂17)", "(⊂,17)", 1)
-    patch = dict(source_line=180, original=original_source[patch_index], counterfactual=source[patch_index])
-    if [i for i,(a,b) in enumerate(zip(original_source,source)) if a != b] != [patch_index]:
+    patches = []
+    for line_number, value, catalog in ((180, 17, "CUTLET_NAMES"), (181, 47, "MONTH_NAMES")):
+        idx = line_number - block["start_line"]
+        anchor = f"AssertEqual (⊂{value}) (⊂⍴{catalog}) "
+        if not source[idx].strip().startswith(anchor):
+            raise ValueError(f"LINE{line_number}_PATCH_ANCHOR_MISMATCH")
+        source[idx] = source[idx].replace(f"(⊂{value})", f"(⊂,{value})", 1)
+        patches.append(dict(source_line=line_number, original=original_source[idx], counterfactual=source[idx]))
+    if [i for i,(a,b) in enumerate(zip(original_source,source)) if a != b] != [n-block["start_line"] for n in (180,181)]:
         raise ValueError("UNEXPECTED_SOURCE_COPY_CHANGE")
     out = [ALIAS + source[0][len("RunStage01Tests"):]]
     wp = pathlib.PureWindowsPath(marker)
@@ -100,7 +102,7 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V16: advance past the independently proven V15 line180 mismatch.
+    # V17: advance past independently proven V15/V16 lines180/181 mismatches.
     # Uninstrumented statements elsewhere are retained exactly, not skipped.
     focus = [180, 181, 182, 183, 184, 185, 186, 187]
     focused = [(start, end, kind) for start, end, kind in units
@@ -142,7 +144,7 @@ def instrument(root: pathlib.Path, marker: str):
         raise ValueError("ORIGINAL_STATEMENTS_CHANGED")
     if not all(probes[i]["index"] == i+1 for i in range(len(probes))):
         raise ValueError("PROBE_INDEX_NOT_MONOTONIC")
-    return out, probes, locked["manifest"]["manifest_sha256"], patch
+    return out, probes, locked["manifest"]["manifest_sha256"], patches
 
 
 def line181_witness(root, marker):
@@ -193,7 +195,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     before = [hashlib.sha256(x.encode()).hexdigest() for x in programs[:25]]
     if before[:23] != base["import_program_sha256"]:
         raise ValueError("LOCKED_95_FX_PREFIX_CHANGED")
-    definition, probes, manifest_sha, patch = instrument(root, marker)
+    definition, probes, manifest_sha, patches = instrument(root, marker)
     if manifest_sha != base["source_manifest_sha256"]:
         raise ValueError("SOURCE_MANIFEST_CHANGED")
     wp = pathlib.PureWindowsPath(marker)
@@ -210,10 +212,9 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     if programs[25].count(target) != 1:
         raise ValueError("PAIRED_ENTRYPOINT_NOT_UNIQUE")
     suite_program = programs[25].replace(target,replacement)
-    witness_program, witness = line181_witness(root, marker)
-    programs = programs[:25] + [compile_program,suite_program,witness_program,
+    programs = programs[:25] + [compile_program,suite_program,
                 "95 Stage01ChunkAssert 0 ⋄ " + marker_write(FINAL,marker)]
-    if len(programs) != 29:
+    if len(programs) != 28:
         raise ValueError("RESIDUAL_PROGRAM_COUNT_INVALID")
     outer = " ⋄ ".join("⎕EC ⎕UCS "+_codes(x) for x in programs)
     serial = outer.replace("⎕","{quad}").replace("⋄","{diamond}")
@@ -232,13 +233,13 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
-                   source_statements_preserved=False,qa_only_patch=patch,
-                   instrumentation_mode="line180_counterfactual_focus_180_187",
+                   source_statements_preserved=False,qa_only_patches=patches,
+                   instrumentation_mode="line180_181_counterfactual_focus_180_187",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
                    original_stage01_acceptance_token_present=False,
-                   marker_token=FINAL,marker_path=marker,program_count=29,line181_witness=witness,
+                   marker_token=FINAL,marker_path=marker,program_count=28,prior_line181_witness_run=45551684196,
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 

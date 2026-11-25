@@ -78,7 +78,7 @@ jobs:
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
           if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: Execute original Stage1 entrypoint under two QA-only source copies
+      - name: Execute QA alias with four source-anchored counterfactuals
         shell: pwsh
         run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
       - name: Independent diagnostic receipt gate (never acceptance)
@@ -100,22 +100,20 @@ jobs:
              $a.suite_captured_exact -ne $true -or $a.suite_ec_valid -ne $true -or
              $a.final_marker_exact -ne $true -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
-             $a.statement_started -lt 2 -or $a.statement_receipts.Count -ne 8){
+             $a.statement_started -lt 3 -or $a.statement_receipts.Count -ne 8){
              throw 'RESIDUAL_DIAGNOSTIC_EVIDENCE_MISSING'}
           if(@($a.copies | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -ne 0){
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'line180_counterfactual_focus_180_187' -or
-             $b.program_count -ne 29 -or $b.original_entrypoint_invoked -ne $false -or
-             $b.source_statements_preserved -ne $false -or $b.qa_only_patch.source_line -ne 180){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
-          if($a.line181_witness.valid -ne $true -or
-             $a.line181_witness.start_exact -ne $true -or
-             $a.line181_witness.captured_exact -ne $true -or
-             $b.line181_witness.source_line -ne 181){throw 'LINE181_WITNESS_MISSING'}
+             $b.instrumentation_mode -cne 'line180_181_counterfactual_focus_180_187' -or
+             $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
+             $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181') -or $b.prior_line181_witness_run -ne 45551684196){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+          if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
           if($a.statement_receipts[0].first_line -ne 180 -or $a.statement_receipts[0].end_exact -ne $true -or
-             $a.statement_receipts[1].first_line -ne 181 -or $a.statement_receipts[1].start_exact -ne $true){throw 'LINE180_ADVANCEMENT_NOT_PROVEN'}
-          Write-Output ('LINE181_INDEPENDENT_GATE='+($a.line181_witness|ConvertTo-Json -Compress -Depth 8))
+             $a.statement_receipts[1].first_line -ne 181 -or $a.statement_receipts[1].start_exact -ne $true -or
+             $a.statement_receipts[1].end_exact -ne $true -or
+             $a.statement_receipts[2].first_line -ne 182 -or $a.statement_receipts[2].start_exact -ne $true){throw 'LINE181_ADVANCEMENT_NOT_PROVEN'}
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
@@ -131,7 +129,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-line181-witness-v16
+          name: apl-german-stage01-residual-v17
           path: |
             residual_evidence/
             residual_font_evidence/

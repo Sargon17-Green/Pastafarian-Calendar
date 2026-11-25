@@ -29,23 +29,25 @@ class ResidualTests(unittest.TestCase):
     def test_locked_prerequisites_and_source(self):
         r=self.receipt
         self.assertEqual(r["source_commit"],SOURCE_COMMIT)
-        self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,29))
+        self.assertEqual((r["function_count"],r["chunk_count"],r["program_count"]),(95,23,28))
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
         self.assertEqual([p["first_line"] for p in r["probes"]],[180,181,182,183,184,185,186,187])
-        self.assertEqual(r["instrumentation_mode"],"line180_counterfactual_focus_180_187")
+        self.assertEqual(r["instrumentation_mode"],"line180_181_counterfactual_focus_180_187")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
         self.assertFalse(r["source_statements_preserved"])
-        self.assertEqual(r["qa_only_patch"]["source_line"],180)
-        self.assertEqual(r["qa_only_patch"]["counterfactual"],r["qa_only_patch"]["original"].replace("(⊂17)","(⊂,17)",1))
+        self.assertEqual([p["source_line"] for p in r["qa_only_patches"]],[180,181])
+        for p,value in zip(r["qa_only_patches"],(17,47)):
+            self.assertEqual(p["counterfactual"],p["original"].replace(f"(⊂{value})",f"(⊂,{value})",1))
+        self.assertEqual(r["prior_line181_witness_run"],45551684196)
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
 
     def test_line181_exact_counterfactual(self):
-        w=self.receipt["line181_witness"]
+        _,w=probe.line181_witness(ROOT,MARKER)
         self.assertEqual(w["source_line"],181)
         self.assertTrue(w["original"].startswith("AssertEqual (⊂47) (⊂⍴MONTH_NAMES) "))
         self.assertEqual(w["counterfactual"],w["original"].replace("(⊂47)","(⊂,47)",1))
