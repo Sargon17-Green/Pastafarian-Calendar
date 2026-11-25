@@ -515,14 +515,19 @@ proc checkResearchForwardSingletonMatrix() {
       }
     }
   }
-  if cases != 5460 || entries != 79170 ||
-     singletonCases != 2470 || windowedCases != 1140 then
-    halt("Forward independent matrix oracle cardinality mismatch");
+  // Independent fixture enumeration: shape 0 contributes 900 eligible
+  // cases, shape 3's terminal singleton contributes 910, and q=0 shapes 2
+  // and 5 contribute 120 each. The earlier 1140 expectation omitted shape 3.
   writeln("RESEARCH_FORWARD_MATRIX_CASES=",cases);
   writeln("RESEARCH_FORWARD_MATRIX_ENTRIES=",entries);
   writeln("RESEARCH_FORWARD_SINGLETON_CASES=",singletonCases);
-  writeln("RESEARCH_FORWARD_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
   writeln("RESEARCH_FORWARD_WINDOWED_ELIGIBLE_CASES=",windowedCases);
+  if cases != 5460 || entries != 79170 ||
+     singletonCases != 2470 || windowedCases != 2050 then
+    halt("Forward independent matrix oracle cardinality mismatch: cases=",
+         cases," entries=",entries," singletonCases=",singletonCases,
+         " windowedCases=",windowedCases," expected=5460/79170/2470/2050");
+  writeln("RESEARCH_FORWARD_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
   writeln("RESEARCH_FORWARD_WINDOWED_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
   try! stdout.flush();
 }
