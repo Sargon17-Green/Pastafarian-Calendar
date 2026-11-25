@@ -1,0 +1,101 @@
+name: Issue29 v196 GMP lifecycle and exception contract RED GREEN NO F
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-lifecycle-contract-v196
+    paths:
+      - '.github/workflows/issue29-v196-lifecycle.yml'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v196-lifecycle
+  cancel-in-progress: false
+jobs:
+  lifecycle-contract:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify source, ancestry, QA-only scope and disabled gates
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD^)" = 8d25c64a5fbc3435cad035ee4bb883c2ea370556
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = 947c3325b705d61504f09dc1d46275ed14f52249
+          python3 -B - <<'PY'
+          import subprocess
+          expected = sorted([".github/workflows/issue29-v196-lifecycle.yml","issue29_v196_lifecycle.gpr","qa/issue29/v196_instrument.py","tests/issue29_v196_hooks.ads","tests/issue29_v196_hooks.adb","tests/issue29_v196_lifecycle.adb"])
+          actual = sorted(subprocess.check_output(['git','diff','--name-only','8d25c64a5fbc3435cad035ee4bb883c2ea370556','HEAD'],text=True).splitlines())
+          assert actual == expected, (actual, expected)
+          text = open('.github/workflows/canonical-names-lock.yml').read()
+          literal = '    if: ' + '$' + '{{ false }}'
+          count = text.count(literal)
+          print('V196_DISABLED_NATIVE_GATES=', count, flush=True)
+          assert count == 42, count
+          PY
+          git diff --exit-code 8d25c64a5fbc3435cad035ee4bb883c2ea370556 HEAD -- src
+          git rev-parse HEAD > evidence/HEAD.txt
+          git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb > evidence/candidate-source-blob.txt
+      - name: Install GNAT13 and GMP
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev binutils > evidence/apt-install.log 2>&1
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Create temporary instrumented source copy
+        run: |
+          set -euo pipefail
+          mkdir -p work/src work/tests
+          git archive HEAD src | tar -x -C work
+          cp tests/issue29_v196_lifecycle.adb tests/issue29_v196_hooks.ads tests/issue29_v196_hooks.adb work/tests/
+          cp issue29_v196_lifecycle.gpr work/
+          python3 -B qa/issue29/v196_instrument.py work/src/canonical_full_weave_gmp_v164.adb > evidence/instrumentation.log
+          test -s evidence/instrumented-package-body.diff
+      - name: Compile instrumented Ada contract test with strict checks
+        run: |
+          set -euo pipefail
+          (cd work && timeout -k 5s 180s gprbuild -p -j2 -P issue29_v196_lifecycle.gpr) > evidence/build.log 2>&1
+          sha256sum work/bin_v196/issue29_v196_lifecycle > evidence/binary.sha256
+      - name: Execute lifecycle, validation, and injected-failure tests
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; ulimit -t 180; timeout -k 5s 180s work/bin_v196/issue29_v196_lifecycle) > evidence/run.stdout 2> evidence/run.stderr
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/run.exitcode
+          python3 -B - <<'PY'
+          import json, re
+          from pathlib import Path
+          e=Path('evidence')
+          out=(e/'run.stdout').read_text()
+          err=(e/'run.stderr').read_bytes()
+          code=int((e/'run.exitcode').read_text())
+          m=re.search(r'V196_ASSERTIONS=\s*(\d+)',out)
+          ok=(code==0 and not err and m is not None and 'V196_LIFECYCLE_CONTRACT_PASS_ZERO_F' in out)
+          result={'schema':'ISSUE29_V196_LIFECYCLE_CONTRACT/1','pass':ok,'assertions':int(m.group(1)) if m else None,'exit_code':code,'stderr_bytes':len(err),'historical_F_calls':0,'calendar_date_calls':0,'native_soak':False,'production_source_mutated':False}
+          (e/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+          assert ok,result
+          PY
+      - name: Freeze evidence, including failed runs
+        if: always()
+        run: |
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          e=Path('evidence')
+          m={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(e.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (e/'members.sha256.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v196-lifecycle-contract-zero-F
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: warn
