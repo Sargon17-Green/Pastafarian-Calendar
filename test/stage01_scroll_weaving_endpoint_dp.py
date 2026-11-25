@@ -3,7 +3,7 @@
 
 PROJECT_ID: PC-BRANCH-FORTRAN-ENGLISH
 Authority: Megilat_HaItim_Yehuda_FINAL_2026-09-18.md, sha256
-7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7.
+7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b.
 
 All copies of each month are indistinguishable. First occurrences must be in
 month-ID order, as must last occurrences. The largest month ID must occur

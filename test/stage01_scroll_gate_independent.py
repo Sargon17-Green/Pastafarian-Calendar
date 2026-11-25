@@ -14,7 +14,7 @@ import json
 from functools import lru_cache
 
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
-SCROLL_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7"
+SCROLL_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b"
 SCROLL_NAME = "Megilat_HaItim_Yehuda_FINAL_2026-09-18.md"
 MODULUS = (1 << 127) - 1
 # Stage-1 year-pair bounds; match the normative calendar contract.

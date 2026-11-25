@@ -10,7 +10,7 @@
 The governing source is the Hebrew Scroll snapshot:
 
 - File: `Megilat_HaItim_Yehuda_FINAL_2026-09-18.md`
-- SHA-256: `7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7`
+- SHA-256: `7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b`
 - Chapter: `לוח ארבעה עשר: לבלול שתים עשרה פעמים אחר הטיפה האחרונה`
 - Snapshot lines: 831–885
 

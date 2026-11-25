@@ -8,7 +8,7 @@ import json
 import math
 
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
-SOURCE_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7"
+SOURCE_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b"
 MONTH_NAMES = (
     "טין", "רימון", "מרפק", "קנאה", "ארידו", "משחת־שיניים",
     "שלושה חלקים מחמישה", "כַּרְשׁוּמַב", "נמר", "בדיל", "ערפל", "לבונה",
