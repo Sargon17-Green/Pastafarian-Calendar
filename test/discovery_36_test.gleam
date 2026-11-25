@@ -47,7 +47,8 @@ fn oracle(i: Int, n: Int) -> #(Int, Int) {
 }
 
 fn gaps(context: bootstrap.MonsterContext, ids: List(Int)) -> List(Int) {
-  let assert Ok(samples) = discovery_21_gate_batch.dispatch_discovery_21(context, ids)
+  let assert Ok(samples) =
+    discovery_21_gate_batch.dispatch_discovery_21(context, ids)
   list.map(samples, fn(s) { s.gap })
 }
 
@@ -60,13 +61,24 @@ fn verify(
   let windows = sums(gaps(context, ids))
   let l = list.length(list.filter(windows, fn(w) { member(a, w) }))
   let r = list.length(list.filter(windows, fn(w) { member(b, w) }))
-  let i = list.length(list.filter(windows, fn(w) { member(a, w) && member(b, w) }))
-  let u = list.length(list.filter(windows, fn(w) { member(a, w) || member(b, w) }))
-  let x = list.length(list.filter(windows, fn(w) { member(a, w) != member(b, w) }))
+  let i =
+    list.length(list.filter(windows, fn(w) { member(a, w) && member(b, w) }))
+  let u =
+    list.length(list.filter(windows, fn(w) { member(a, w) || member(b, w) }))
+  let x =
+    list.length(list.filter(windows, fn(w) { member(a, w) != member(b, w) }))
   let t = list.length(windows)
-  let assert Ok(out) = discovery_36_directional_coverage.dispatch_discovery_36(context, ids, a, b)
+  let assert Ok(out) =
+    discovery_36_directional_coverage.dispatch_discovery_36(context, ids, a, b)
   let p = out.previous
-  #(p.left_windows, p.right_windows, p.intersection_windows, p.combined_windows, p.symmetric_difference_windows, p.total_windows)
+  #(
+    p.left_windows,
+    p.right_windows,
+    p.intersection_windows,
+    p.combined_windows,
+    p.symmetric_difference_windows,
+    p.total_windows,
+  )
   |> should.equal(#(l, r, i, u, x, t))
   #(p.jaccard_numerator, p.jaccard_denominator) |> should.equal(oracle(i, u))
   #(p.dice_numerator, p.dice_denominator) |> should.equal(oracle(2 * i, l + r))
@@ -100,7 +112,8 @@ pub fn discovery_36_empty_test() {
 }
 
 pub fn discovery_36_empty_with_bands_test() {
-  verify([], [band(1, 3), band(9, 8)], [band(-9, -1)]) |> should.equal(#(#(1, 1), #(1, 1)))
+  verify([], [band(1, 3), band(9, 8)], [band(-9, -1)])
+  |> should.equal(#(#(1, 1), #(1, 1)))
 }
 
 pub fn discovery_36_closed_endpoints_test() {
@@ -117,12 +130,14 @@ pub fn discovery_36_vacuous_direction_test() {
 
 pub fn discovery_36_two_gaps_test() {
   let assert [g, _] = gaps(bootstrap.new_context(11, 21), [2, 2])
-  verify([2, 2], [band(g, g)], [band(g, 2 * g)]) |> should.equal(#(#(1, 1), #(2, 3)))
+  verify([2, 2], [band(g, g)], [band(g, 2 * g)])
+  |> should.equal(#(#(1, 1), #(2, 3)))
 }
 
 pub fn discovery_36_asymmetric_nontrivial_test() {
   let assert [g, _, _] = gaps(bootstrap.new_context(11, 21), [2, 2, 2])
-  verify([2, 2, 2], [band(g, 2 * g)], [band(2 * g, 3 * g)]) |> should.equal(#(#(2, 5), #(2, 3)))
+  verify([2, 2, 2], [band(g, 2 * g)], [band(2 * g, 3 * g)])
+  |> should.equal(#(#(2, 5), #(2, 3)))
 }
 
 pub fn discovery_36_strict_subset_test() {
@@ -144,7 +159,13 @@ pub fn discovery_36_wide_and_inverted_test() {
   let a = [band(-w, -1), band(0, 100), band(101, 2000), band(3, 2)]
   let b = [band(-w, w), band(w, w)]
   let _ = verify([3, 5, 2, 4], a, b)
-  let assert Ok(out) = discovery_36_directional_coverage.dispatch_discovery_36(bootstrap.new_context(11, 21), [3, 5, 2, 4], a, b)
+  let assert Ok(out) =
+    discovery_36_directional_coverage.dispatch_discovery_36(
+      bootstrap.new_context(11, 21),
+      [3, 5, 2, 4],
+      a,
+      b,
+    )
   out.previous.canonical_left_bands |> should.equal([band(-w, 2000)])
   out.previous.canonical_right_bands |> should.equal([band(-w, w)])
   out.previous.canonical_combined_bands |> should.equal([band(-w, w)])
@@ -152,7 +173,8 @@ pub fn discovery_36_wide_and_inverted_test() {
 
 pub fn discovery_36_index_multiplicity_test() {
   let assert [g, _, _, _] = gaps(bootstrap.new_context(11, 21), [4, 4, 4, 4])
-  verify([4, 4, 4, 4], [band(g, 2 * g)], [band(2 * g, 3 * g)]) |> should.equal(#(#(3, 7), #(3, 5)))
+  verify([4, 4, 4, 4], [band(g, 2 * g)], [band(2 * g, 3 * g)])
+  |> should.equal(#(#(3, 7), #(3, 5)))
 }
 
 pub fn discovery_36_error_priority_test() {
@@ -161,14 +183,28 @@ pub fn discovery_36_error_priority_test() {
   |> should.equal(Error(discovery_19_interval_value.InvalidBowlId))
   let invalid = bootstrap.MonsterContext(..context, retry_budget: -1)
   discovery_36_directional_coverage.dispatch_discovery_36(invalid, [7], [], [])
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(bootstrap.InvalidRetryBudget)))
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
+  )
   discovery_36_directional_coverage.dispatch_discovery_36(invalid, [], [], [])
-  |> should.equal(Error(discovery_19_interval_value.InvalidContext(bootstrap.InvalidRetryBudget)))
+  |> should.equal(
+    Error(discovery_19_interval_value.InvalidContext(
+      bootstrap.InvalidRetryBudget,
+    )),
+  )
 }
 
 pub fn discovery_36_matrix_test() {
   let ids = [6, 2, 6, 3, 5, 1, 4, 4, 2, 6, 1, 5]
-  let families = [[], [band(42, 963)], [band(500, 3000)], [band(0, 20_000)], [band(100, 99), band(800, 900)]]
+  let families = [
+    [],
+    [band(42, 963)],
+    [band(500, 3000)],
+    [band(0, 20_000)],
+    [band(100, 99), band(800, 900)],
+  ]
   list.each(list.range(0, 12), fn(k) {
     let selected = list.take(ids, k)
     list.each(families, fn(a) {

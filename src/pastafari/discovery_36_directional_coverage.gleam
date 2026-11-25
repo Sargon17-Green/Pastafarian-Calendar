@@ -45,13 +45,18 @@ pub fn dispatch_discovery_36(
   requested_bowl_ids: List(Int),
   left_bands: List(discovery_27_sum_bands.SumBand),
   right_bands: List(discovery_27_sum_bands.SumBand),
-) -> Result(DirectionalWindowCoverage, discovery_19_interval_value.Discovery19Error) {
-  case discovery_35_overlap_bands.dispatch_discovery_35(
-    context,
-    requested_bowl_ids,
-    left_bands,
-    right_bands,
-  ) {
+) -> Result(
+  DirectionalWindowCoverage,
+  discovery_19_interval_value.Discovery19Error,
+) {
+  case
+    discovery_35_overlap_bands.dispatch_discovery_35(
+      context,
+      requested_bowl_ids,
+      left_bands,
+      right_bands,
+    )
+  {
     Error(error) -> Error(error)
     Ok(previous) -> {
       let l = previous.left_windows
@@ -71,12 +76,30 @@ pub fn dispatch_discovery_36(
       let dq = previous.dice_denominator
       let op = previous.overlap_numerator
       let oq = previous.overlap_denominator
-      let counts_ok = l >= 0 && r >= 0 && i >= 0 && x >= 0 && u >= 0 && t >= 0 && i <= m && l <= u && r <= u && u <= t && u == l + r - i && x == u - i && t == k * (k + 1) / 2
+      let counts_ok =
+        l >= 0
+        && r >= 0
+        && i >= 0
+        && x >= 0
+        && u >= 0
+        && t >= 0
+        && i <= m
+        && l <= u
+        && r <= u
+        && u <= t
+        && u == l + r - i
+        && x == u - i
+        && t == k * { k + 1 } / 2
       let overlap_ok = case m == 0 && l + r > 0 {
         True -> op == 0 && oq == 1
         False -> valid(op, oq, i, m)
       }
-      case counts_ok && valid(jp, jq, i, u) && valid(dp, dq, 2 * i, l + r) && overlap_ok {
+      case
+        counts_ok
+        && valid(jp, jq, i, u)
+        && valid(dp, dq, 2 * i, l + r)
+        && overlap_ok
+      {
         False -> Error(discovery_19_interval_value.InvalidStream)
         True -> {
           let #(lp, lq) = reduced(i, l)
@@ -86,10 +109,22 @@ pub fn dispatch_discovery_36(
             False -> #(rp, rq, lp, lq)
           }
           let relations = case l > 0 && r > 0 {
-            True -> high_p * oq == op * high_q && low_p * dq <= dp * low_q && dp * high_q <= high_p * dq && jp * low_q <= low_p * jq
+            True ->
+              high_p * oq == op * high_q
+              && low_p * dq <= dp * low_q
+              && dp * high_q <= high_p * dq
+              && jp * low_q <= low_p * jq
             False -> True
           }
-          case valid(lp, lq, i, l) && valid(rp, rq, i, r) && { { lp == lq } == { i == l } } && { { rp == rq } == { i == r } } && relations {
+          let left_subset = { lp == lq } == { i == l }
+          let right_subset = { rp == rq } == { i == r }
+          case
+            valid(lp, lq, i, l)
+            && valid(rp, rq, i, r)
+            && left_subset
+            && right_subset
+            && relations
+          {
             False -> Error(discovery_19_interval_value.InvalidStream)
             True -> Ok(DirectionalWindowCoverage(
               previous: previous,
