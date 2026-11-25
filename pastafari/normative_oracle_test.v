@@ -2466,7 +2466,6 @@ fn test_stage44_catalan_eighth_prefix_fork_at_17_and_47_months() {
 	println('V_AMHARIC_STAGE44_EIGHTH_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
 }
 
- 
 // Stage45: ninth Dyck-prefix fork, within the [1,2,3,4,5,6,7,8,9] block.
 // Sum the nine disjoint earlier prefix blocks using reflection-principle ballot counts.
 // Independent DP/reflection ranks: n=17 129433282/129433283;
