@@ -484,10 +484,18 @@ INCLUDE "src/tests/variable_add_test.asm"
 INCLUDE "src/tests/sram_owner_test.asm"
 INCLUDE "src/tests/owner_byte_test.asm"
 INCLUDE "src/tests/owner_signed_cmp_test.asm"
+IF !DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_invocation_lifecycle_test.asm"
+ENDC
+IF !DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_year_projection_test.asm"
+ENDC
+IF !DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_year_step_test.asm"
+ENDC
+IF !DEF(STAGE1_ANSWER_RANK_NATIVE_BENCH)
 INCLUDE "src/tests/calendar_answer_select_test.asm"
+ENDC
 INCLUDE "src/tests/calendar_stone_transition_test.asm"
 INCLUDE "src/tests/calendar_stone_range_test.asm"
 IF DEF(STAGE1_I46_NATIVE_BENCH)

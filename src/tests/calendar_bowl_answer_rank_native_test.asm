@@ -16,7 +16,10 @@ RunCalendarBowlAnswerRankBench::
     ld [wCalendarAnswerInputBowl], a
     ld a, 10
     ld [wCalendarAnswerInputSeal], a
+    call .snapshotInputs
     call CalendarBowlAnswerShortRank
+    call .checkInputSnapshot
+    jp nz, .fail
     ld a, [wCalendarStatus]
     cp 6
     jp nz, .fail
@@ -43,6 +46,8 @@ RunCalendarBowlAnswerRankBench::
     ld [$0000], a
     ld a, $6e
     ld [$a000], a
+    ld a, 1
+    ld [wCalendarOrdinalLength], a
     call CalendarBowlTrace46
     ld a, [wCalendarStatus]
     or a
@@ -228,12 +233,23 @@ RunCalendarBowlAnswerRankBench::
     jp nz, .fail
     ld a, [wCalendarAnswerSavedByte]
     ld [wCalendarBowlsOld+15], a
+    ld a, 2
+    ld [wCalendarOrdinalSign], a
+    call .expectInvalid
+    jp nz, .fail
+    xor a
+    ld [wCalendarOrdinalSign], a
+    ; Negative zero is independently invalid even with an otherwise valid lease.
+    xor a
+    ld [wCalendarOrdinalLength], a
     ld a, 1
     ld [wCalendarOrdinalSign], a
     call .expectInvalid
     jp nz, .fail
     xor a
     ld [wCalendarOrdinalSign], a
+    ld a, 1
+    ld [wCalendarOrdinalLength], a
 
     ld a, [wCalendarActiveOwner]
     cp 70
@@ -250,7 +266,10 @@ RunCalendarBowlAnswerRankBench::
     ld a, [wCalendarStatus]
     or a
     jp nz, .fail
+    call .snapshotInputs
     call CalendarBowlAnswerShortRank
+    call .checkInputSnapshot
+    jp nz, .fail
     ld a, [wCalendarStatus]
     cp 6
     jp nz, .fail
@@ -271,7 +290,10 @@ RunCalendarBowlAnswerRankBench::
 .checkAnswer:
     push bc
     push de
+    call .snapshotInputs
     call CalendarBowlAnswerShortRank
+    call .checkInputSnapshot
+    jr nz, .answerError
     ld a, [wCalendarStatus]
     or a
     jr nz, .answerError
@@ -298,7 +320,10 @@ RunCalendarBowlAnswerRankBench::
     or a
     ret
 .expectInvalid:
+    call .snapshotInputs
     call CalendarBowlAnswerShortRank
+    call .checkInputSnapshot
+    ret nz
     ld a, [wCalendarStatus]
     cp 2
     ret nz
@@ -348,6 +373,143 @@ RunCalendarBowlAnswerRankBench::
     dec b
     jr nz, .checkAccepted
     ret
+.snapshotInputs:
+    ; Preserve the complete source tuple around each answer/rank call:
+    ; six Q residues, orderAt46, ordinal sign/length, and live ordinal byte.
+    push bc
+    push de
+    push hl
+    ld hl, wCalendarBowlsOld
+    ld de, wCalendarPostStirSavedBowls
+    ld b, 96
+.copyQ:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyQ
+    ld hl, wCalendarBowlOrderAt46
+    ld de, wCalendarBowlOrderScratch
+    ld b, 6
+.copyOrder:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyOrder
+    ld hl, wCalendarOrdinalSign
+    ld de, wCalendarPostStirSum
+    ld b, 4
+.copyOrdinal:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .copyOrdinal
+    ld a, [wCalendarActive]
+    or a
+    jr z, .noOrdinalByte
+    ld a, [wCalendarOrdinalLength]
+    ld b, a
+    ld a, [wCalendarOrdinalLength+1]
+    or b
+    ld b, a
+    ld a, [wCalendarOrdinalLength+2]
+    or b
+    jr z, .noOrdinalByte
+    ld a, 3
+    ld [$4000], a
+    ld a, $0a
+    ld [$0000], a
+    ld a, [$a000]
+    ld [wCalendarPostStirSum+4], a
+    jr .snapshotDone
+.noOrdinalByte:
+    ld a, $ff
+    ld [wCalendarPostStirSum+4], a
+.snapshotDone:
+    pop hl
+    pop de
+    pop bc
+    ret
+
+.checkInputSnapshot:
+    push bc
+    push de
+    push hl
+    ld hl, wCalendarBowlsOld
+    ld de, wCalendarPostStirSavedBowls
+    ld b, 96
+.checkQ:
+    ld a, [hli]
+    ld c, a
+    ld a, [de]
+    cp c
+    jr nz, .changed
+    inc de
+    dec b
+    jr nz, .checkQ
+    ld hl, wCalendarBowlOrderAt46
+    ld de, wCalendarBowlOrderScratch
+    ld b, 6
+.checkOrder:
+    ld a, [hli]
+    ld c, a
+    ld a, [de]
+    cp c
+    jr nz, .changed
+    inc de
+    dec b
+    jr nz, .checkOrder
+    ld hl, wCalendarOrdinalSign
+    ld de, wCalendarPostStirSum
+    ld b, 4
+.checkOrdinal:
+    ld a, [hli]
+    ld c, a
+    ld a, [de]
+    cp c
+    jr nz, .changed
+    inc de
+    dec b
+    jr nz, .checkOrdinal
+    ld a, [wCalendarActive]
+    or a
+    jr z, .checkNoOrdinalByte
+    ld a, [wCalendarOrdinalLength]
+    ld b, a
+    ld a, [wCalendarOrdinalLength+1]
+    or b
+    ld b, a
+    ld a, [wCalendarOrdinalLength+2]
+    or b
+    jr z, .checkNoOrdinalByte
+    ld a, 3
+    ld [$4000], a
+    ld a, $0a
+    ld [$0000], a
+    ld a, [$a000]
+    ld c, a
+    ld a, [wCalendarPostStirSum+4]
+    cp c
+    jr nz, .changed
+    jr .same
+.checkNoOrdinalByte:
+    ld a, [wCalendarPostStirSum+4]
+    cp $ff
+    jr nz, .changed
+.same:
+    xor a
+    jr .snapshotCheckDone
+.changed:
+    ld a, 1
+    or a
+.snapshotCheckDone:
+    pop hl
+    pop de
+    pop bc
+    ret
+
 .compare:
     ld a, [de]
     cp [hl]
@@ -400,8 +562,11 @@ RunCalendarBowlAnswerRankBench::
     inc de
     ld [wCalendarSelectDirection], a
     push de
+    call .snapshotInputs
     call CalendarBowlAnswerShortRank.select
     pop de
+    call .checkInputSnapshot
+    jr nz, .syntheticError
     ld a, [wCalendarStatus]
     or a
     jr nz, .syntheticError
