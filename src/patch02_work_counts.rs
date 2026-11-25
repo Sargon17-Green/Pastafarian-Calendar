@@ -188,3 +188,150 @@ mod wrapper_reconciliation_tests {
         println!("STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69");
     }
 }
+
+
+/// DISCOVERY03: yalnız bu çağırışda PATCH02 etiketlərinin köhnə məsafəsi.
+/// Normativ PATCH02 marşrutu ayrıca qalır; PATCH03 burada tətbiq edilmir.
+pub struct LegacyTagDistanceDiscovery03;
+
+impl PhaseHandler for LegacyTagDistanceDiscovery03 {
+    fn name(&self) -> &'static str {
+        "DISCOVERY03:LEGACY-TAG-DISTANCE"
+    }
+
+    fn handle(&self, context: &mut MonsterContext) -> Result<(), MonsterError> {
+        if context.metrics.get("discovery03.distance.calls") != 0 {
+            return Err(MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "DISCOVERY03: təkrar çağırış qadağandır.".to_owned(),
+            });
+        }
+        let counts = context
+            .work_counts_observation
+            .as_mut()
+            .ok_or_else(|| MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "DISCOVERY03: PATCH02 müşahidəsi yoxdur.".to_owned(),
+            })?;
+        counts.distance = (&counts.action - &counts.target).abs();
+        context.logs.push(format!(
+            "DISCOVERY03:legacy-tag-distance={}",
+            counts.distance
+        ));
+        context.metrics.bump("discovery03.distance.calls");
+        Ok(())
+    }
+}
+
+/// İki signed BigInt giriş; həqiqi dispatcher PATCH02 və DISCOVERY03 zənciri.
+pub fn discover_legacy_tag_distance(
+    calculation_day: BigInt,
+    target_day: BigInt,
+) -> Result<Patch02Observation, MonsterError> {
+    let mut manager = MonsterManager::default();
+    manager.dispatcher_mut().register(WorkCountsPatch02);
+    manager.dispatcher_mut().register(LegacyTagDistanceDiscovery03);
+    let context = manager.execute_bootstrap_shell(calculation_day.clone(), target_day.clone())?;
+    let counts = context
+        .work_counts_observation
+        .clone()
+        .ok_or_else(|| MonsterError {
+            code: MonsterErrorCode::InvalidState,
+            message: "DISCOVERY03: nəticə yoxdur.".to_owned(),
+        })?;
+    Ok(Patch02Observation {
+        calculation_day,
+        target_day,
+        counts,
+        context,
+    })
+}
+
+#[cfg(test)]
+mod distance_discovery03_tests {
+    use super::*;
+
+    #[test]
+    fn discovery03_exact_expected_red_and_controls() {
+        let f = BigInt::from(-15_055_671i64);
+        let mut offsets: Vec<BigInt> = [-8i64, -3, -2, -1, 0, 1, 2, 3, 8]
+            .into_iter()
+            .map(BigInt::from)
+            .collect();
+        for bits in [129usize, 1031] {
+            let n = BigInt::one() << bits;
+            offsets.push(-&n);
+            offsets.push(n);
+        }
+        let mut red = 0;
+        let mut control = 0;
+        let zero = BigInt::from(0u8);
+        let two = BigInt::from(2u8);
+        for c in &offsets {
+            for t in &offsets {
+                // Müstəqil oracle: eyni tərəfdə ikiqat xronoloji fərq;
+                // müxtəlif tərəflərdə signed offset cəminin tək kodu.
+                let chronological = (t - c).abs();
+                let expected = if (c < &zero) == (t < &zero) {
+                    &chronological * &two
+                } else {
+                    ((c + t) * &two + BigInt::one()).abs()
+                };
+                let normative = &chronological + BigInt::one();
+                let observed = discover_legacy_tag_distance(&f + c, &f + t).unwrap();
+                assert_eq!(observed.counts.distance, expected);
+                assert_eq!(
+                    observed.context.metrics.get("patch02.work_counts.calls"),
+                    1
+                );
+                assert_eq!(
+                    observed.context.metrics.get("patch02.legacy.action.calls"),
+                    1
+                );
+                assert_eq!(
+                    observed.context.metrics.get("patch02.legacy.target.calls"),
+                    1
+                );
+                assert_eq!(observed.context.metrics.get("discovery03.distance.calls"), 1);
+                assert_eq!(
+                    observed.context.branch_trace,
+                    vec![
+                        "PATCH02:NORMATIVE-WORK-COUNTS".to_owned(),
+                        "DISCOVERY03:LEGACY-TAG-DISTANCE".to_owned(),
+                    ]
+                );
+                let unchanged = calculate_work_counts(&f + c, &f + t).unwrap();
+                assert_eq!(unchanged.counts.distance, normative);
+                assert_eq!(observed.counts.action, unchanged.counts.action);
+                assert_eq!(observed.counts.target, unchanged.counts.target);
+                assert_eq!(observed.counts.connection, unchanged.counts.connection);
+                assert_eq!(observed.counts.direction, unchanged.counts.direction);
+                let mut duplicate = observed.context.clone();
+                let snapshot = duplicate.clone();
+                let error = LegacyTagDistanceDiscovery03
+                    .handle(&mut duplicate)
+                    .unwrap_err();
+                assert_eq!(error.code, MonsterErrorCode::InvalidState);
+                assert_eq!(duplicate, snapshot);
+                let expected_red = expected != normative;
+                assert_eq!(observed.counts.distance != normative, expected_red);
+                if expected_red {
+                    red += 1;
+                } else {
+                    control += 1;
+                }
+                println!(
+                    "DISCOVERY03_DISTANCE_ROW c={c} t={t} legacy={} normative={normative} red={expected_red}",
+                    observed.counts.distance
+                );
+            }
+        }
+        let mut missing = MonsterContext::new(f.clone(), f);
+        let snapshot = missing.clone();
+        let error = LegacyTagDistanceDiscovery03.handle(&mut missing).unwrap_err();
+        assert_eq!(error.code, MonsterErrorCode::InvalidState);
+        assert_eq!(missing, snapshot);
+        assert_eq!((red, control), (153, 16));
+        println!("STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170");
+    }
+}
