@@ -52,7 +52,7 @@ fn signed_oracle(left: Int, right: Int, intersection: Int) -> #(Int, Int) {
     True, True -> #(0, 1)
     True, False -> #(1, 1)
     False, True -> #(-1, 1)
-    False, False -> fraction(intersection * (right - left), left * right)
+    False, False -> fraction(intersection * { right - left }, left * right)
   }
 }
 
@@ -161,9 +161,10 @@ fn verify(
   )
   actual |> should.equal(signed_oracle(left_count, right_count, intersection))
   let #(numerator, denominator) = actual
-  (denominator > 0) |> should.equal(True)
-  (numerator >= 0 - denominator && numerator <= denominator)
-  |> should.equal(True)
+  let denominator_positive = denominator > 0
+  denominator_positive |> should.equal(True)
+  let numerator_in_range = numerator >= -denominator && numerator <= denominator
+  numerator_in_range |> should.equal(True)
   actual
 }
 

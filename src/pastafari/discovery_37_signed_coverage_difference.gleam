@@ -121,8 +121,8 @@ pub fn dispatch_discovery_37(
                 True, False -> numerator == 1 && denominator == 1
                 False, True -> numerator == -1 && denominator == 1
                 False, False ->
-                  numerator * (left_count * right_count)
-                  == intersection * (right_count - left_count) * denominator
+                  numerator * left_count * right_count
+                  == intersection * { right_count - left_count } * denominator
               }
 
               case
