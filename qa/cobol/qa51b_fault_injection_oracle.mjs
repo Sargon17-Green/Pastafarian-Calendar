@@ -9,7 +9,7 @@ const partial = "123456789012345678";
 const chunks = [partial.slice(-9), partial.slice(0, -9)];
 assert.equal(partial.length, 18);
 assert.deepEqual(chunks.map(x => x.length), [9, 9]);
-assert.equal(chunks.join(""), partial);
+assert.equal([...chunks].reverse().join(""), partial);
 
 const injected = [
   {point: "SUB", status: 91},
