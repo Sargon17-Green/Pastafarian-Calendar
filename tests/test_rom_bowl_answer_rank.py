@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Real Native393 end-to-end PyBoy gate; not a synthetic host test."""
 import argparse
-import re
 from pathlib import Path
 from test_rom import SUCCESS, UNIMPLEMENTED, check_header, discover_case_high_byte, wait_for_completion
 
@@ -11,10 +10,11 @@ def discover_source_symbols(symbol_path: Path) -> dict[str, int]:
     wanted = {"wCalendarPostStirSavedBowls", "wCalendarBowlOrderScratch"}
     found: dict[str, int] = {}
     for line in symbol_path.read_text(encoding="utf-8").splitlines():
-        match = re.fullmatch(r"([0-9A-Fa-f]{2}):([0-9A-Fa-f]{4})\\s+([A-Za-z_]\\w*)", line.strip())
-        if match is None or match.group(3) not in wanted:
+        fields = line.strip().split()
+        if len(fields) != 2 or fields[1] not in wanted or ":" not in fields[0]:
             continue
-        bank, address, name = int(match.group(1), 16), int(match.group(2), 16), match.group(3)
+        bank_text, address_text = fields[0].split(":", 1)
+        bank, address, name = int(bank_text, 16), int(address_text, 16), fields[1]
         assert bank == 0, f"{name}: expected WRAM bank 00, found {bank:02X}"
         assert name not in found, f"duplicate linker symbol {name}"
         found[name] = address
