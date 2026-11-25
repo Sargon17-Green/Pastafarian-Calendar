@@ -139,10 +139,16 @@ def selftest():
           (TOTAL_UNORDERED,TOTAL_ORDERED,len(INVALID)))
 
 def main():
+    global SOURCE
     parser=argparse.ArgumentParser()
     parser.add_argument('--shard',type=int,choices=range(4))
     parser.add_argument('--selftest',action='store_true')
+    parser.add_argument('--digit-gate',action='store_true',help='Run the active seven-field program.')
     args=parser.parse_args()
+    if args.digit_gate:
+        del PINS[SOURCE]
+        SOURCE='src/work_counts.b98'
+        PINS[SOURCE]='7418e1ec5fe88fe5c14b75710dea2d5607527f28'
     selftest()
     if args.selftest:return
     require(args.shard is not None,'specify --shard')

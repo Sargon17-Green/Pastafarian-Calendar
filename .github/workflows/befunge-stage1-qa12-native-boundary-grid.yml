@@ -6,6 +6,7 @@ on:
       - 'qa/stage1_qa12_native_boundary_grid.py'
       - 'qa/stage1_qa12_native_boundary_grid_audit.py'
       - '.github/workflows/befunge-stage1-qa12-native-boundary-grid.yml'
+      - 'src/work_counts.b98'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,13 +24,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object src/work_counts.b98)" = "7418e1ec5fe88fe5c14b75710dea2d5607527f28"
           test "$(git hash-object reference/work_counts.b98)" = "f941efc793c9eee4accf5d03873f8ed029b16725"
           test "$(git hash-object reference/save.b98)" = "7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44"
           python3 -m py_compile qa/stage1_qa12_native_boundary_grid_audit.py
-          python3 qa/stage1_qa12_native_boundary_grid_audit.py --selftest
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py --digit-gate --selftest
           python3 -m py_compile qa/stage1_qa12_native_boundary_grid.py
-          python3 qa/stage1_qa12_native_boundary_grid.py --selftest
+          python3 qa/stage1_qa12_native_boundary_grid.py --digit-gate --selftest
           mkdir -p "$RUNNER_TEMP/qa12-receipts"
       - name: Download and verify pinned Python2 PyFunge-98 package
         shell: bash
@@ -52,7 +53,7 @@ jobs:
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
               pyfunge --version
-              python qa/stage1_qa12_native_boundary_grid.py --shard "$QA12_SHARD"
+              python qa/stage1_qa12_native_boundary_grid.py --digit-gate --shard "$QA12_SHARD"
             '
       - name: Preserve completed or partial receipt and failure diagnostics
         if: always()
@@ -76,8 +77,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 qa/stage1_qa12_native_boundary_grid_audit.py --selftest
-          python3 qa/stage1_qa12_native_boundary_grid_audit.py \
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py --digit-gate --selftest
+          python3 qa/stage1_qa12_native_boundary_grid_audit.py --digit-gate \
             qa12-receipts/qa12_shard_0.json \
             qa12-receipts/qa12_shard_1.json \
             qa12-receipts/qa12_shard_2.json \

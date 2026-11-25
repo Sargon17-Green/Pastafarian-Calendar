@@ -66,7 +66,7 @@ const promotedTwoField = {
   save:"f99b49cef13a1a036fa43e675cb68bf56f3b03e5",
   interleaved_day_save:"04212ba0681f583524fb9f5553b075d8a0794d58"
 };
-function audit(rows, promoted=false) {
+function audit(rows, promoted=false, digitGate=false) {
  const fail=(s)=>{throw Error(s)};
  const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  const cmp=(a,b)=>a[0]-b[0]||a[1]-b[1];
@@ -75,8 +75,11 @@ function audit(rows, promoted=false) {
  let previous=base.length, fields=0, writers=0;
  for(let i=0;i<seq.length;i++){
   const r=rows[i], [n,input]=seq[i], [width,writer,blob]=specs[n];
-  const sourceBlob = promoted && promotedTwoField[n] ? promotedTwoField[n] : blob;
-  if(!r||r.path!==`src/${n}.b98`||r.input!==input+"\n"||r.source_blob!==sourceBlob)fail("source/order/input "+i);
+  const current = digitGate && n === "interleaved_work_counts";
+  const path = current ? "src/work_counts.b98" : `src/${n}.b98`;
+  const sourceBlob = current ? "7418e1ec5fe88fe5c14b75710dea2d5607527f28" :
+    (promoted && promotedTwoField[n] ? promotedTwoField[n] : blob);
+  if(!r||r.path!==path||r.input!==input+"\n"||r.source_blob!==sourceBlob)fail("source/order/input "+i);
   if(!Array.isArray(r.output)||r.output.length!==width||!r.output.every(v=>typeof v==="string"&&/^(0|-?[1-9][0-9]*)$/.test(v))||!equal(r.output,r.native_fresh_cli))fail("output parity/width "+i);
   const w=r.written_addresses;
   if(!Array.isArray(w)||w.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isSafeInteger))||w.some((p,j)=>j>0&&cmp(w[j-1],p)>=0)||Boolean(w.length)!==writer)fail("writer/address "+i);
@@ -97,9 +100,10 @@ function selftest(){
  if(rejected!==mutations.length)throw Error("hostile control escaped");return {synthetic:true,positive,rejected,total:mutations.length};
 }
 if (require.main === module) {
-  const promoted = process.argv[2] === "--promoted-two-field";
+  const digitGate = process.argv[2] === "--digit-gate";
+  const promoted = digitGate || process.argv[2] === "--promoted-two-field";
   const arg = process.argv[promoted ? 3 : 2];
-  if (!arg) throw Error("usage: node qa/qa31cm_reset_receipt_audit.js [--promoted-two-field] --selftest|entrypoints.json");
-  const result = arg === "--selftest" ? selftest() : audit(JSON.parse(require("fs").readFileSync(arg,"utf8")), promoted);
+  if (!arg) throw Error("usage: node qa/qa31cm_reset_receipt_audit.js [--digit-gate|--promoted-two-field] --selftest|entrypoints.json");
+  const result = arg === "--selftest" ? selftest() : audit(JSON.parse(require("fs").readFileSync(arg,"utf8")), promoted, digitGate);
   console.log(JSON.stringify(result,null,2));
 }

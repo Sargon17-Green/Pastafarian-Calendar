@@ -2,6 +2,19 @@
 
 > Канондук repository: `Sargon17-Green/Pastafarian-Calendar`; branch: `Befunge+Кыргызча`. Бардык `src/`, `reference/`, `test/` жолдору branch root'уна салыштырмалуу көрсөтүлөт. 2026-10-08деги туура repo native regression: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/37790547734 (421/421 PASS). Төмөндөгү `pastafari-calendar` URL'дери көчүрүүгө чейинки **тарыхый QA** гана; азыркы репонун жыйынтыктары катары колдонбоо керек.
 
+## Жети талаалуу негизги программа · QA бутагы, 2026-11-25
+
+Эки датанын беш иш санагын жана эки SAVE маанисин алуу үчүн репозиторийдин түбүнөн иштетиңиз:
+
+```sh
+printf '0 21 1 12\n' | pyfunge --disable-fprint --no-concurrent --no-filesystem -v98 -d2 src/work_counts.b98
+```
+
+Тартиби: `actionCount targetCount distanceCount connectionCount directionCount SAVE(A) SAVE(C)`.
+Мисалда биринчи төрт сан `30111385 30111319 34 60222704`. Жараксыз киргизүү жети `-1` чыгарат.
+Азыркы аткарылуучу файл — `src/work_counts.b98`. Мурунку `src/interleaved_work_counts.b98` ошол эле CLI келишими менен эски чакыруучулар жана ошол версияга байланган Native издер үчүн сакталган.
+
+
 Бул файл `Stage 1` үчүн Befunge-98 менен жергиликтүү аткаруунун минималдуу тартибин берет.
 
 ## Интерпретатор шарты

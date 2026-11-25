@@ -138,10 +138,16 @@ def selftest():
 
 
 def main():
+    global SOURCE
     parser=argparse.ArgumentParser()
     parser.add_argument('receipts',nargs='*')
     parser.add_argument('--selftest',action='store_true')
+    parser.add_argument('--digit-gate',action='store_true',help='Require the active seven-field source in every receipt.')
     args=parser.parse_args()
+    if args.digit_gate:
+        del PINS[SOURCE]
+        SOURCE='src/work_counts.b98'
+        PINS[SOURCE]='7418e1ec5fe88fe5c14b75710dea2d5607527f28'
     selftest()
     if args.selftest:return
     require(len(args.receipts)==4,'exactly four independent Native JSON receipts')

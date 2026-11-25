@@ -24,13 +24,13 @@ from funge.platform import BufferedPlatform
 from qa31cm_retired_space_guard import RetiredSpaces
 
 SOURCES = [
-    "src/interleaved_work_counts.b98",
+    "src/work_counts.b98",
     "qa/interleaved_work_counts_pre_lexical_baseline.b98",
 ]
 OUTPUT_WIDTH = {
     "src/base_context.b98": 4, "src/base_validator.b98": 1, "src/bootstrap.b98": 1,
     "src/day_count.b98": 1, "src/error_wrapper.b98": 1, "src/interleaved_day_save.b98": 2,
-    "src/interleaved_work_counts.b98": 7, "src/logging_shell.b98": 2,
+    "src/work_counts.b98": 7, "src/logging_shell.b98": 2,
     "src/metrics_shell.b98": 2, "src/runtime_contract.b98": 1, "src/save.b98": 1,
 }
 CODES = {}
@@ -210,7 +210,7 @@ extra_cases=[
     ("interleaved_day_save","1 15055672"), ("metrics_shell","42 7"),
     ("day_count","0 0"), ("error_wrapper","1 42"), ("save","1 1"),
     ("runtime_contract",""), ("logging_shell","42 7"),
-    ("interleaved_work_counts","0 0 0 1"), ("day_count","1 0"),
+    ("work_counts","0 0 0 1"), ("day_count","1 0"),
     ("interleaved_day_save","0 0"), ("save","0 0"), ("base_context",""),
 ]
 receipts=[]
@@ -221,7 +221,7 @@ for index,(name,raw) in enumerate(extra_cases):
         raise AssertionError("lost the original Program identity")
     if index and receipts[-1]["previous_addresses_checked"]!=receipts[-2]["retained_addresses"]:
         raise AssertionError("missed addresses written by the previous execution")
-stateful={"src/"+n+".b98" for n in ("bootstrap","day_count","save","interleaved_day_save","interleaved_work_counts")}
+stateful={"src/"+n+".b98" for n in ("bootstrap","day_count","save","interleaved_day_save","work_counts")}
 if {r["path"] for r in receipts}!=set(OUTPUT_WIDTH):
     raise AssertionError("incomplete Stage-1 entry-point coverage")
 if {r["path"] for r in receipts if r["written_addresses"]}!=stateful:

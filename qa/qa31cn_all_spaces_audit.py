@@ -12,16 +12,17 @@ def require(ok, message):
         raise ValueError(message)
 
 
-def audit(data, legacy, root, original_two_field=False):
+def audit(data, legacy, root, original_two_field=False, digit_gate=False):
     runs, phases = data["runs"], data["phases"]
     require(len(runs) == 31 and len(phases) == 93 and len(legacy) == 15, "receipt cardinality")
     retired_cells = space_checks = cell_checks = put_count = 0
     sources = set()
+    work_counts = "src/work_counts.b98" if digit_gate else "src/interleaved_work_counts.b98"
     for index, run in enumerate(runs):
         name = run["path"]
         if index < 16:
             original = "qa/interleaved_work_counts_pre_lexical_baseline.b98"
-            require(name == (original if index in (5,7,14) else "src/interleaved_work_counts.b98"), "original 16 sources")
+            require(name == (original if index in (5,7,14) else work_counts), "original 16 sources")
         else:
             old = legacy[index-16]
             for key in ("path","input","source_blob","output","native_fresh_cli"):
@@ -38,6 +39,11 @@ def audit(data, legacy, root, original_two_field=False):
         writes = {tuple(p):(n,v) for p,n,v in run["writes"]}
         require(len(writes) == len(run["writes"]) and len(snap) == len(run["snapshot"]), "duplicate address")
         require(set(snap) == (BASE | set(writes)), "snapshot address set")
+        if digit_gate and name == work_counts:
+            # A fresh blank (32) is recorded by the source image. Executions
+            # with no decimal iterations never write the new arithmetic gate.
+            if (1020,1046) in writes:
+                require(writes[(1020,1046)][1] in ("62","118"), "non-arrow in the active numeric gate")
         for p,value in snap.items():
             require(len(p) == 2 and all(type(v) is int for v in p) and str(int(value)) == value, "snapshot value")
             if p in writes:
@@ -70,6 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--original-two-field", action="store_true",
                         help="Audit the pre-promotion Native receipt against its archived source bytes.")
+    parser.add_argument("--digit-gate", action="store_true", help="Require the active signed-digit entrypoint.")
     args = parser.parse_args()
     print(json.dumps(audit(json.loads(args.all_spaces.read_bytes()),
-                           json.loads(args.entrypoints.read_bytes()), args.root,args.original_two_field), sort_keys=True))
+                           json.loads(args.entrypoints.read_bytes()), args.root,args.original_two_field,args.digit_gate), sort_keys=True))

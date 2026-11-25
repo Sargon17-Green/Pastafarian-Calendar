@@ -22,6 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
+          test "$(git hash-object src/work_counts.b98)" = "7418e1ec5fe88fe5c14b75710dea2d5607527f28"
           test "$(git hash-object qa/interleaved_work_counts_lexical_candidate.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
           test "$(git hash-object src/day_count.b98)" = "ccff205ce45fe267433950ca994ec5aaa49c0352"
@@ -125,10 +126,10 @@ jobs:
               five=invoke(root+"reference/work_counts.b98",textargs)
               savedC=invoke(root+"reference/save.b98",str(signC)+" "+str(magC))
               savedT=invoke(root+"reference/save.b98",str(signT)+" "+str(magT))
-              exact("fused-workcounts:"+textargs,"src/interleaved_work_counts.b98",textargs,five+savedC+savedT)
+              exact("fused-workcounts:"+textargs,"src/work_counts.b98",textargs,five+savedC+savedT)
           for invalid in ["1 0 0 0","0 0 1 0","2 10 0 10","0 10 2 10"]:
               exact("fused-workcounts-rejection:"+invalid,
-                    "src/interleaved_work_counts.b98",invalid,["-1"]*7)
+                    "src/work_counts.b98",invalid,["-1"]*7)
           for fixture in ["REFERENCE_PRIMITIVE_FIXTURES.tsv","REFERENCE_INTEGRATION_FIXTURES.tsv"]:
               with open(root+"fixtures/"+fixture,"rb") as f:
                   for i,row in enumerate(csv.DictReader(f,delimiter="\t"),1):
@@ -386,8 +387,8 @@ jobs:
               timeout --kill-after=5s 240s python -u qa/stage1_native_same_program_reset.py /reset-evidence/entrypoints.json /reset-evidence/all_spaces.json
             '
           test -s "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
-          node qa/qa31cm_reset_receipt_audit.js --promoted-two-field "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
-          python3 qa/qa31cn_all_spaces_audit.py "$RUNNER_TEMP/stage1-reset-receipts/all_spaces.json" \
+          node qa/qa31cm_reset_receipt_audit.js --digit-gate "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
+          python3 qa/qa31cn_all_spaces_audit.py --digit-gate "$RUNNER_TEMP/stage1-reset-receipts/all_spaces.json" \
             "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json" | tee "$RUNNER_TEMP/stage1-reset-receipts/audit.json"
       - name: Retain per-source reset and native memory evidence
         if: always()
