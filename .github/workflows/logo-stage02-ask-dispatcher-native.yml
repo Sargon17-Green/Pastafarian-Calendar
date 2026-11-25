@@ -59,11 +59,11 @@ jobs:
           git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
           sha256sum qa/logo_ido_ask_dispatcher_code_bundle.zip qa/logo_stage2_ask_dispatcher_common.logo qa/logo_stage2_ask_dispatcher_oracle.py QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md .github/workflows/logo-stage02-ask-dispatcher-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
           cat > "$RUNNER_TEMP/native.logo" <<EOF
-make "AD.DIRECTION "$DIRECTION
-make "AD.GROUP "$GROUP
-load "qa/logo_stage2_ask_dispatcher_common.logo
-ad.run
-EOF
+          make "AD.DIRECTION "$DIRECTION
+          make "AD.GROUP "$GROUP
+          load "qa/logo_stage2_ask_dispatcher_common.logo
+          ad.run
+          EOF
       - name: Build pinned UCBLogo 6.2.5
         shell: bash
         run: |
