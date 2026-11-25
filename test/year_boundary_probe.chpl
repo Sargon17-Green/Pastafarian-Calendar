@@ -510,10 +510,23 @@ proc profileResearchSelectedForward(const ref lens: [?D] int,
          candidate.values[t] != baseline.values[t] then
         halt("Selected forward snapshot value mismatch step=",step," month=",j," index=",t);
     }
+    // Record the actual hot suffix dimensions outside both kernel timers.
+    // One row per already-verified transfer; no extra kernel calls.
+    const isSingleton = researchForwardSingletonEligible(specs[j]);
+    writeln("RESEARCH_FORWARD_COST step=",step," month=",j,
+            " n=",sizes[j-1]," k=",lens[j],
+            " inputFirst=",states[j-1].first,
+            " inputSupport=",states[j-1].values.size,
+            " outputFirst=",baseline.first,
+            " outputSupport=",baseline.values.size,
+            " q=",specs[j].q," fixedSum=",specs[j].fixedSum,
+            " firstFixed=",specs[j].firstFixed," tail=",specs[j].tail,
+            " singleton=",isSingleton,
+            " baselineSeconds=",bt.elapsed()," candidateSeconds=",ct.elapsed());
     baselineSeconds += bt.elapsed();
     candidateSeconds += ct.elapsed();
     calls += 1;
-    if researchForwardSingletonEligible(specs[j]) {
+    if isSingleton {
       singletonCalls += 1;
       baselineSingletonSeconds += bt.elapsed();
       candidateSingletonSeconds += ct.elapsed();
