@@ -233,6 +233,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Observe ordinal-day First/Step with independent oracle
         shell: powershell
         run: |
@@ -272,6 +274,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Probe 72 additional First/Step observations
         shell: powershell
         run: |
@@ -310,6 +314,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Probe oracle-derived year-5000 boundaries
         shell: powershell
         run: |
@@ -348,6 +354,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Stage32 239-assertion independent-oracle research
         shell: powershell
         run: |
@@ -366,6 +374,9 @@ jobs:
             & .\tests\Stage32.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            . .\src\StageMetadataState.ps1
+            $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                               ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
@@ -380,6 +391,7 @@ jobs:
                                   ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                                    ($stageLines -contains 'LAST_COMPLETED_STAGE=33'))) -and
                                  ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage32PriorSeal = $stage32PriorSeal -or ($stage43Allowed -and ($stageLines -contains 'STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -411,6 +423,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Stage33 native 560-assertion mixed finite differences
         shell: powershell
         run: |
@@ -430,6 +444,9 @@ jobs:
             & .\tests\Stage33.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage33 native research failed' }
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            . .\src\StageMetadataState.ps1
+            $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                               ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and
@@ -442,6 +459,7 @@ jobs:
             $stage33PriorSeal = ((($stageLines -contains 'CURRENT_STAGE=33') -or ($stageLines -contains 'CURRENT_STAGE=34')) -and
                                  ($stageLines -contains 'LAST_COMPLETED_STAGE=33') -and
                                  ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage33PriorSeal = $stage33PriorSeal -or ($stage43Allowed -and ($stageLines -contains 'STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -473,6 +491,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Independent-oracle 448-assertion research on Windows PowerShell 5.1
         shell: powershell
         run: |
@@ -493,6 +513,9 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'Stage34 third-axis research failed' }
             Write-Host ('STAGE34_NATIVE_SHA=' + $sha)
             $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+            . .\src\StageMetadataState.ps1
+            $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage38Sealed = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending
@@ -501,6 +524,7 @@ jobs:
             $stage34Seal = (($stageLines -contains 'CURRENT_STAGE=34') -and
                             ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
                             ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+            $stage34Seal = $stage34Seal -or ($stage43Allowed -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             if ($stage36Allowed -or $stage34Seal -or (($stageLines -contains 'CURRENT_STAGE=35') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'CURRENT_STAGE=35') -or ($stageLines -contains 'CURRENT_STAGE=36')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=35') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) {
               Add-Content -Path stage34-metadata.txt -Value 'STAGE34_STAGE_SEAL=EVIDENCE_ONLY_CONFIRMED' -Encoding UTF8
               Write-Host 'STAGE34_SEAL_RECHECK=PASS'
