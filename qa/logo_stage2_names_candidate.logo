@@ -1,0 +1,67 @@
+; Isolated Stage2 QA candidate: one-based partial-permutation names.
+; All rank arithmetic uses the existing exact BI; IDs and radices <=47.
+to qnames.dimension :n :k
+  if not numberp :n [output "false]
+  if not numberp :k [output "false]
+  if not equalp :n (int :n) [output "false]
+  if not equalp :k (int :k) [output "false]
+  output (and (:n >= 1) (:n <= 47) (:k >= 1) (:k <= :n))
+end
+to qnames.pool :n
+  localmake "pool []
+  repeat :n [make "pool lput repcount :pool]
+  output :pool
+end
+to qnames.remove :pool :index
+  if :index = 1 [output butfirst :pool]
+  output fput (first :pool) (qnames.remove (butfirst :pool) (:index - 1))
+end
+to qnames.index :pool :id
+  if emptyp :pool [output 0]
+  if equalp first :pool :id [output 1]
+  localmake "tailindex qnames.index (butfirst :pool) :id
+  if :tailindex = 0 [output 0]
+  output (:tailindex + 1)
+end
+to qnames.total :n :k
+  localmake "total bi.small 1
+  repeat :k [make "total bi.mul.small :total (:n - repcount + 1)]
+  output :total
+end
+to qnames.unrank :n :k :rank1
+  if not (qnames.dimension :n :k) [output []]
+  if not (monster.stage02.bi.canonical :rank1) [output []]
+  if bi.lt :rank1 (bi.small 1) [output []]
+  if bi.gt :rank1 (qnames.total :n :k) [output []]
+  localmake "q bi.sub :rank1 (bi.small 1)
+  localmake "digits []
+  repeat :k [
+    localmake "radix (:n - :k + repcount)
+    localmake "qr bi.divmod.floor :q (bi.small :radix)
+    make "digits fput (bi.to.small (last :qr)) :digits
+    make "q first :qr
+  ]
+  localmake "pool qnames.pool :n
+  localmake "answer []
+  foreach :digits [
+    localmake "pos (? + 1)
+    make "answer lput (item :pos :pool) :answer
+    make "pool qnames.remove :pool :pos
+  ]
+  output :answer
+end
+to qnames.rank :n :ids
+  if not listp :ids [output []]
+  if not (qnames.dimension :n (count :ids)) [output []]
+  localmake "pool qnames.pool :n
+  localmake "r bi.zero
+  foreach :ids [
+    if not numberp ? [output []]
+    if not equalp ? (int ?) [output []]
+    localmake "pos qnames.index :pool ?
+    if :pos = 0 [output []]
+    make "r bi.add (bi.mul.small :r (count :pool)) (bi.small (:pos - 1))
+    make "pool qnames.remove :pool :pos
+  ]
+  output bi.add :r (bi.small 1)
+end

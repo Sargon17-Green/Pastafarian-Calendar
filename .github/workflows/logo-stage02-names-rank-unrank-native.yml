@@ -1,0 +1,75 @@
+name: Logo Stage2 QA Native Names Rank Unrank
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-names-rank-unrank-20261125'
+permissions:
+  contents: read
+jobs:
+  native-names:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source and generate independent fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-names-rank-unrank-20261125"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object qa/logo_stage2_names_candidate.logo)" = 6a1a4722733d7883d3aef3d0fa8a89d136e5b3ef
+          test "$(git hash-object qa/logo_stage2_names_oracle.mjs)" = bae2a296d023c8d6a25fad3ff7770f47c417f0b8
+          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
+          sha256sum src/exact_integer.logo src/stage02_context.logo qa/logo_stage2_names_candidate.logo qa/logo_stage2_names_oracle.mjs .github/workflows/logo-stage02-names-rank-unrank-native.yml > "$RUNNER_TEMP/source-hashes.txt"
+          node qa/logo_stage2_names_oracle.mjs "$RUNNER_TEMP/native.logo" | tee "$RUNNER_TEMP/host.log"
+          grep -Fq '"enumerated":16064' "$RUNNER_TEMP/host.log"
+          grep -Fq '"cases":36' "$RUNNER_TEMP/host.log"
+          grep -Fq '"checks":78' "$RUNNER_TEMP/host.log"
+      - name: Build UCBLogo at pinned upstream SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
+          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$RUNNER_TEMP/ucblogo-source"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Run bounded Native fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$SECONDS
+          set +e
+          printf 'bye\n' | timeout --signal=TERM --kill-after=5s 600 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
+          code=$?
+          set -e
+          echo "$code" > "$RUNNER_TEMP/exit.txt"
+          echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
+          cat "$RUNNER_TEMP/native.log"
+          test "$code" = 0
+          grep -Fxq "NAMES_QA_CASES_PASIS 36" "$RUNNER_TEMP/native.log"
+          grep -Fxq "NAMES_QA_CHECKS_PASIS 78" "$RUNNER_TEMP/native.log"
+          grep -Fxq "NAMES_QA_PASIS" "$RUNNER_TEMP/native.log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$RUNNER_TEMP/native.log"; then exit 1; fi
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logo-stage2-names-rank-unrank-evidence
+          path: |
+            ${{ runner.temp }}/commit.txt
+            ${{ runner.temp }}/source-hashes.txt
+            ${{ runner.temp }}/host.log
+            ${{ runner.temp }}/native.logo
+            ${{ runner.temp }}/native.log
+            ${{ runner.temp }}/exit.txt
+            ${{ runner.temp }}/elapsed.txt
+          if-no-files-found: warn
+          retention-days: 30
