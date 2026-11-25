@@ -187,7 +187,7 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll full-date differential (28 cases: boundary, wide, legacy pairs)
+    name: Independent Hebrew Scroll full-date differential (28 cases — boundary, wide, legacy pairs)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
     timeout-minutes: 20
