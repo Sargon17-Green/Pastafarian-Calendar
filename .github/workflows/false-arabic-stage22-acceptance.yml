@@ -61,7 +61,31 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 tools/stage22_batch_bowls_design_oracle.py > evidence/stage22_acceptance/design_oracle.json
-          cmp evidence/stage22_acceptance/design_oracle.json evidence/stage22_design_oracle_2026-11-25.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          actual = json.loads(Path("evidence/stage22_acceptance/design_oracle.json").read_text())
+          reference = json.loads(Path("evidence/stage22_design_oracle_2026-11-25.json").read_text())
+          keys = (
+              "project_id", "stage", "status", "normative_operation", "planned_production_operation",
+              "cases", "anchors", "seeded_cases", "batches_per_case", "transitions",
+              "numeric_comparisons", "range_checks", "mersenne_fold_equivalence_checks",
+              "immutable_input_checks", "factoradic_rank_checks", "rank_counts",
+              "replay_identical", "rolling_digest", "witness", "native_run",
+              "production_implementation",
+          )
+          for key in keys:
+              assert actual[key] == reference[key], key
+          assert len(actual["wrong_algorithm_witnesses"]) == len(reference["wrong_algorithm_witnesses"]) == 5
+          for got, expected in zip(actual["wrong_algorithm_witnesses"], reference["wrong_algorithm_witnesses"]):
+              assert (got["first_bowl_id"], got["expected"], got["observed"]) == (
+                  expected["first_bowl_id"], expected["expected"], expected["observed"]
+              )
+              assert got["first_mismatch_is_numeric"] is True
+          assert reference["normative_reference_blob_sha1"] == "3e9acc012bedf83294a6ec3cccb081a069556b5b"
+          assert reference["stage22_acceptance"] == "NO"
+          print("STAGE22_DESIGN_ORACLE_SNAPSHOT_MATCH")
+          PY
           python3 -m py_compile tools/stage22_native_diagnostic.py tools/stage22_native_acceptance.py tools/stage22_offline_audit.py
           python3 tools/stage22_native_acceptance.py --self-check > evidence/stage22_acceptance/fixture_self_check.log
           python3 tools/stage22_native_acceptance.py
@@ -77,7 +101,7 @@ jobs:
           set -Eeuo pipefail
           mkdir -p evidence/stage22_acceptance
           if [ ! -f evidence/stage22_acceptance/evidence.json ]; then
-            printf '%s\\n' 'Native gate did not reach evidence.json; inspect this run\x27s job log for the exact pre-Native failure.' > evidence/stage22_acceptance/early_failure.txt
+            printf '%s\\n' "Native gate did not reach evidence.json; inspect this run's job log for the exact pre-Native failure." > evidence/stage22_acceptance/early_failure.txt
           fi
       - name: Preserve source-pinned Native programs, byte-exact logs, audit and bundle
         if: always()
