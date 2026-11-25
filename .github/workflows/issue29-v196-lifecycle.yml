@@ -5,6 +5,11 @@ on:
       - qa/issue29-gmp-lifecycle-contract-v196
     paths:
       - '.github/workflows/issue29-v196-lifecycle.yml'
+      - 'qa/issue29/v196_instrument.py'
+      - 'tests/issue29_v196_lifecycle.adb'
+      - 'tests/issue29_v196_hooks.ads'
+      - 'tests/issue29_v196_hooks.adb'
+      - 'issue29_v196_lifecycle.gpr'
 permissions:
   contents: read
 concurrency:
@@ -24,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p evidence
-          test "$(git rev-parse HEAD^)" = 8d25c64a5fbc3435cad035ee4bb883c2ea370556
+          test "$(git rev-parse HEAD^)" = 83711e0c4c2448ac57cea702c170e3091162c8a7
           test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = 947c3325b705d61504f09dc1d46275ed14f52249
           python3 -B - <<'PY'
           import subprocess

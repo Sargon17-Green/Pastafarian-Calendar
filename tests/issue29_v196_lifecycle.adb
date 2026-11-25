@@ -33,16 +33,21 @@ procedure Issue29_V196_Lifecycle is
       end;
       Check (Raised, Label_Text & " Count must reject unbuilt Family");
       Raised := False;
+      declare
+         Returned : Boolean := False;
       begin
-         declare
-            Ignored : constant W.Natural_Array := W.Unrank (F, G.Make ("1"));
          begin
-            Check (Ignored'Length = 0, "unreachable unbuilt Unrank result");
+            declare
+               Ignored : constant W.Natural_Array := W.Unrank (F, G.Make ("1"));
+            begin
+               Returned := True;
+            end;
+         exception
+            when Program_Error => Raised := True;
          end;
-      exception
-         when Program_Error => Raised := True;
+         Check (Raised and then not Returned,
+                Label_Text & " Unrank must reject unbuilt Family");
       end;
-      Check (Raised, Label_Text & " Unrank must reject unbuilt Family");
    end Expect_Unbuilt;
 
    procedure Expect_Build_CE

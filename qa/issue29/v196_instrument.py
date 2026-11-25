@@ -40,11 +40,15 @@ for old, new, label in changes:
     assert instrumented.count(old) == 1, (label, instrumented.count(old))
     instrumented = instrumented.replace(old, new, 1)
 path.write_text(instrumented)
-patch = subprocess.check_output(
+diff_result = subprocess.run(
     ["git", "diff", "--no-index", "--", "/dev/null", str(path)],
     text=True,
+    stdout=subprocess.PIPE,
     stderr=subprocess.STDOUT,
+    check=False,
 )
+assert diff_result.returncode in (0, 1), diff_result.stdout
+patch = diff_result.stdout
 Path("evidence").mkdir(exist_ok=True)
 Path("evidence/instrumented-package-body.diff").write_text(patch)
 Path("evidence/instrumented-package-body.sha256").write_text(
