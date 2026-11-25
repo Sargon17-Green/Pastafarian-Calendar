@@ -54,3 +54,7 @@ No pointer corruption, dangling pointer, aliased owner, heap-counter mutation, r
 - Only this test-build diagnostic can be accepted from this run. It does not reopen or reaccept Stage55, close true OOM/real FREE-A/real HEAP-LIVE failures, create Stage56, or assert whole-calendar completion.
 
 NEXT: inspect the natural exact-SHA run, job log and artifact; diagnose any compile/runtime failure before a narrow test-only repair. Keep the four nonclaims above in the tracker.
+
+## CI wiring correction — 2026-11-25
+
+The repository's existing canonical-names-lock workflow is the active push-triggered workflow on this branch. A newly added standalone workflow file was not discovered as a run for the branch commit, while the existing canonical workflow did run. To avoid claiming a run that does not exist, the standalone workflow is removed and this diagnostic is appended as one supplemental job to the already-active canonical workflow. Expected total: 57 jobs (the existing 56 plus this separately labelled diagnostic job). This does not create Stage56 or change the 55-stage acceptance.

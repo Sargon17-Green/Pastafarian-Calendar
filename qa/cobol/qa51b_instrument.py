@@ -21,6 +21,12 @@ instrumented = instrumented.replace(
     old_id, "PROGRAM-ID. BIG-INTEGER-SERVICE-REAL.", 1
 )
 
+old_end = "END PROGRAM BIG-INTEGER-SERVICE."
+assert instrumented.count(old_end) == 1
+instrumented = instrumented.replace(
+    old_end, "END PROGRAM BIG-INTEGER-SERVICE-REAL.", 1
+)
+
 fields_anchor = "01 BI-ARENA-ACTIVE PIC 9 VALUE 0.\n"
 fields = fields_anchor + """01 WS-QA51B-CMD PIC X(8) VALUE SPACES.
 01 WS-QA51B-TARGET PIC X(16) VALUE SPACES.
