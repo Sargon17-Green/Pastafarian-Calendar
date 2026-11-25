@@ -205,7 +205,7 @@ pub fn discovery_36_matrix_test() {
     [band(0, 20_000)],
     [band(100, 99), band(800, 900)],
   ]
-  list.each(list.range(0, 12), fn(k) {
+  list.each([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], fn(k) {
     let selected = list.take(ids, k)
     list.each(families, fn(a) {
       list.each(families, fn(b) {
