@@ -131,6 +131,7 @@ jobs:
           if(-not $a.line234_witness.start_exact -or -not $a.line234_witness.captured_exact -or
              -not $a.line234_witness.rank_valid -or $a.line234_witness.rank.Count -ne 1 -or [long]$a.line234_witness.rank[0] -ne 1 -or
              -not $a.line234_witness.shape_valid -or $a.line234_witness.shape.Count -ne 1 -or [long]$a.line234_witness.shape[0] -ne 7 -or
+             -not $a.line234_witness.values_valid -or
              -not $a.line234_witness.original_ec_valid -or $a.line234_witness.original_ec -ne 0 -or
              -not $a.line234_witness.counterfactual_ec_valid -or $a.line234_witness.counterfactual_ec -ne 3 -or
              -not $a.line234_witness.original_message_length_valid -or $a.line234_witness.original_message_length -le 0 -or

@@ -40,7 +40,7 @@ def line_value_witness(source_line, variable, original, counterfactual, marker, 
     """Capture local vector shape and original/counterfactual AssertEqual outcomes."""
     wp = pathlib.PureWindowsPath(marker)
     stem = f"{wp.stem}_line{source_line}"
-    keys = ("rank", "shape", "values", "original_ec", "original_message_codepoints",
+    keys = ("rank", "shape", "values", "original_ec",
             "original_message_length", "counterfactual_ec", "counterfactual_message_length")
     paths = {key: str(wp.with_name(f"{stem}_{key}.txt")) for key in keys}
     start_path = str(wp.with_name(f"{stem}_start.txt"))
@@ -59,7 +59,6 @@ def line_value_witness(source_line, variable, original, counterfactual, marker, 
         write(variable, "values"),
         f"{var}OriginalEC←⎕EC ⎕UCS {_codes(original)}",
         write(f"{var}OriginalEC[1]", "original_ec"),
-        write(f"⎕UCS ⊃{var}OriginalEC[3]", "original_message_codepoints"),
         write(f"≢,⊃{var}OriginalEC[3]", "original_message_length"),
         f"{var}CounterfactualEC←⎕EC ⎕UCS {_codes(counterfactual)}",
         write(f"{var}CounterfactualEC[1]", "counterfactual_ec"),

@@ -66,6 +66,7 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(w234["original"],r["qa_only_patches"][2]["original"].strip())
         self.assertEqual(w234["counterfactual"],r["qa_only_patches"][2]["counterfactual"].strip())
         self.assertIn("⍴⍴hidden",w234["metrics_expression"])
+        self.assertNotIn("original_message_codepoints",w234["paths"])
         w237=r["line237_witness"]
         self.assertEqual(w237["source_line"],237)
         self.assertFalse(w237["applied_to_suite_copy"])

@@ -35,6 +35,15 @@ function ReadNumbers([string]$path,[string]$dest){
  $values=@([regex]::Matches($s,'\d+') | ForEach-Object {[long]$_.Value})
  return @{valid=$true;values=$values;sha256=$sha}
 }
+function ReadText([string]$path,[string]$dest){
+ if(-not(Test-Path -LiteralPath $path -PathType Leaf)){return @{valid=$false;text=$null;sha256=$null}}
+ [byte[]]$data=[IO.File]::ReadAllBytes($path)
+ Copy-Item -LiteralPath $path -Destination $dest -Force
+ $sha=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+ if($data.Length -lt 1 -or $data.Length -gt 8192){return @{valid=$false;text=$null;sha256=$sha}}
+ $s=[Text.Encoding]::ASCII.GetString($data)
+ return @{valid=$true;text=$s.Trim();sha256=$sha}
+}
 function ReadLineWitness($w,[string]$name){
  $dir=Join-Path $Evidence 'line_witness_files'
  New-Item -ItemType Directory -Force $dir | Out-Null
@@ -42,7 +51,10 @@ function ReadLineWitness($w,[string]$name){
  $captured=ReadExact $w.captured_path $w.captured_token (Join-Path $dir ($name+'_captured.txt'))
  $result=[ordered]@{source_line=[int]$w.source_line;applied_to_suite_copy=[bool]$w.applied_to_suite_copy;
    start_exact=[bool]$start.exact;captured_exact=[bool]$captured.exact}
- foreach($key in @('rank','shape','values','original_ec','original_message_codepoints','original_message_length','counterfactual_ec','counterfactual_message_length')){
+ $values=ReadText $w.paths.PSObject.Properties['values'].Value (Join-Path $dir ($name+'_values.txt'))
+ $result['values_valid']=[bool]$values.valid
+ $result['values']=$values.text
+ foreach($key in @('rank','shape','original_ec','original_message_length','counterfactual_ec','counterfactual_message_length')){
    $path=$w.paths.PSObject.Properties[$key].Value
    $v=ReadNumbers $path (Join-Path $dir ($name+'_'+$key+'.txt'))
    $result[$key+'_valid']=[bool]$v.valid
@@ -224,6 +236,7 @@ try {
    $r['line234_witness'].start_exact -and $r['line234_witness'].captured_exact -and
    $r['line234_witness'].rank_valid -and $r['line234_witness'].rank.Count -eq 1 -and [long]$r['line234_witness'].rank[0] -eq 1 -and
    $r['line234_witness'].shape_valid -and $r['line234_witness'].shape.Count -eq 1 -and [long]$r['line234_witness'].shape[0] -eq 7 -and
+   $r['line234_witness'].values_valid -and
    $r['line234_witness'].original_ec_valid -and $r['line234_witness'].original_ec -eq 0 -and
    $r['line234_witness'].counterfactual_ec_valid -and $r['line234_witness'].counterfactual_ec -eq 3 -and
    $r['line234_witness'].original_message_length_valid -and $r['line234_witness'].original_message_length -gt 0 -and
