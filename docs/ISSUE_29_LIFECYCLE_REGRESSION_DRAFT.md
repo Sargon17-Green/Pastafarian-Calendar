@@ -23,7 +23,7 @@ The instrumentation generator refuses to proceed if either blob differs.
    - a late invalid month length, e.g. **(2, 124)**;
    - a null Natural_Array range;
    - total family length exceeds 5,778, e.g. 47 months of length 123 (5,781).
-3. After each pre-allocation rejection, the same Family object must accept a legal **Build**. For 47 months, use 47 lengths of 2; assert Count > 0 and the independently enumerated lexicographically first word 11 22 ... 47 47, without asserting an unverified exact large count.
+3. After each pre-allocation rejection, the same Family object must accept a legal **Build**. For 47 months, use 47 lengths of 2; assert Count > 0 and check elementwise that the lexicographically first word is **11 22 ... 47 47**, without asserting an unverified exact large count.
 
 ### B. Successful build and repeat behavior
 
@@ -42,12 +42,13 @@ After a successful **Build**, a second **Build** on the same object must raise *
 
 ### C. Partial allocation and finalization
 
-The generator creates a temporary instrumented copy of the locked package body; no production hook is added. It places test-only counters and one-shot exceptions at these exact points:
+The generator creates a temporary instrumented copy of the locked package body; no production hook is added. It inserts one-shot failure injections at these three exact points:
 
 1. immediately before the terminal **H(Month_Count)** allocation;
 2. immediately after the terminal allocation succeeds;
-3. immediately after the first lower-row allocation succeeds;
-4. immediately after each successful **Free_Row** call.
+3. immediately after the first lower-row allocation succeeds.
+
+It also increments the row-allocation counter immediately after each successful **Big_Row** allocation and the free counter immediately after each successful **Free_Row** call. These counters cover only the **Big_Row** rows managed through **F.H**; they do not measure GMP's internal limb allocations or total process memory.
 
 Expected behavior:
 
@@ -64,7 +65,7 @@ From the repository root:
 
     python3 tests/issue29_lifecycle_instrument.py --check
 
-This checks the pinned source blobs, exact instrumentation anchors, generated source layout, and manifest. It does not call GNAT, compile Ada, execute the test driver, or dispatch CI.
+This verifies the pinned source blob hashes, uniqueness of the exact instrumentation anchors, expected instrumentation-site counts, and the six small-family literal oracles. It also confirms that the temporary source tree and its hash manifest can be generated. It does not call GNAT, compile Ada, execute the test driver, or dispatch CI.
 
 To prepare a temporary tree for a separately authorized native run:
 
