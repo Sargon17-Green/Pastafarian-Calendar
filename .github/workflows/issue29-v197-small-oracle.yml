@@ -1,0 +1,106 @@
+name: Issue29 v197 exact small-family GMP oracle all ranks and extreme bounds
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-small-exhaustive-oracle-v197
+    paths:
+      - '.github/workflows/issue29-v197-small-oracle.yml'
+      - 'issue29_v197_small_oracle.gpr'
+      - 'qa/issue29/v197_families.txt'
+      - 'qa/issue29/v197_validate.py'
+      - 'tests/issue29_v197_small_oracle.adb'
+permissions:
+  contents: read
+concurrency:
+  group: issue29-v197-small-oracle
+  cancel-in-progress: false
+jobs:
+  exact-small-oracle:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify pinned source, QA-only diff, and soak gates
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD^)" = 86dae225d8069bc4ef4bd32ca209568901ea9a3c
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = 947c3325b705d61504f09dc1d46275ed14f52249
+          python3 -B - <<'PY'
+          import subprocess
+          expected = sorted([".github/workflows/issue29-v197-small-oracle.yml","issue29_v197_small_oracle.gpr","qa/issue29/v197_families.txt","qa/issue29/v197_validate.py","tests/issue29_v197_small_oracle.adb"])
+          actual = sorted(subprocess.check_output(['git','diff','--name-only','86dae225d8069bc4ef4bd32ca209568901ea9a3c','HEAD'],text=True).splitlines())
+          assert actual == expected, (actual, expected)
+          text = open('.github/workflows/canonical-names-lock.yml').read()
+          literal = '    if: ' + '$' + '{{ false }}'
+          count = text.count(literal)
+          print('V197_DISABLED_NATIVE_GATES=', count, flush=True)
+          assert count == 42, count
+          PY
+          git diff --exit-code 86dae225d8069bc4ef4bd32ca209568901ea9a3c HEAD -- src
+          git rev-parse HEAD > evidence/HEAD.txt
+          git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb > evidence/source-blob.txt
+      - name: Independently regenerate every legal word in frozen fixtures
+        run: |
+          set -euo pipefail
+          python3 -B qa/issue29/v197_validate.py | tee evidence/independent-oracle.log
+      - name: Install GNAT13 and GMP
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build pinned corrected Ada component
+        run: |
+          set -euo pipefail
+          mkdir -p work/src work/tests
+          git archive HEAD src | tar -x -C work
+          cp tests/issue29_v197_small_oracle.adb work/tests/
+          cp issue29_v197_small_oracle.gpr work/
+          timeout -k 5s 180s bash -c 'cd work && gprbuild -p -j2 -P issue29_v197_small_oracle.gpr' > evidence/build.log 2>&1
+          sha256sum work/bin_v197/issue29_v197_small_oracle > evidence/binary.sha256
+      - name: Compare all 192 literal ranks at three array lower bounds
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; ulimit -t 180; timeout -k 5s 180s work/bin_v197/issue29_v197_small_oracle) > evidence/run.stdout 2> evidence/run.stderr
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/run.exitcode
+          python3 -B - <<'PY'
+          import json,re
+          from pathlib import Path
+          e=Path('evidence')
+          out=(e/'run.stdout').read_text()
+          err=(e/'run.stderr').read_bytes()
+          code=int((e/'run.exitcode').read_text())
+          fam=re.search(r'V197_FAMILIES=\s*(\d+)',out)
+          words=re.search(r'V197_EXACT_WORDS=\s*(\d+)',out)
+          checks=re.search(r'V197_ASSERTIONS=\s*(\d+)',out)
+          ok=(code==0 and not err and fam and words and checks and int(fam.group(1))==14 and int(words.group(1))==192 and 'V197_EXHAUSTIVE_SMALL_ORACLE_PASS_ZERO_F' in out)
+          result={'schema':'ISSUE29_V197_EXHAUSTIVE_SMALL_FAMILY_ORACLE/1','pass':bool(ok),'families':int(fam.group(1)) if fam else None,'exact_words':int(words.group(1)) if words else None,'assertions':int(checks.group(1)) if checks else None,'array_lower_bounds':['1','7','Positive\'Last-minus-M-plus-1'],'native_ada_rank_comparisons':int(words.group(1))*3 if words else None,'historical_F_calls':0,'calendar_date_calls':0,'whole_year_credit':0}
+          (e/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+          assert ok,result
+          PY
+      - name: Freeze evidence on pass or failure
+        if: always()
+        run: |
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          e=Path('evidence')
+          m={p.name:{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(e.iterdir()) if p.is_file() and p.name!='members.sha256.json'}
+          (e/'members.sha256.json').write_text(json.dumps(m,indent=2,sort_keys=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v197-exhaustive-small-oracle-zero-F
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: warn
