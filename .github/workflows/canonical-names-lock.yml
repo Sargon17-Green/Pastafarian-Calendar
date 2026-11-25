@@ -1423,6 +1423,18 @@ jobs:
           fi
           grep -Fx 'STAGE56_BIGINT_KARATSUBA_PASS cases=5 max_digits=3000' stage56-b4-evidence/karatsuba-stdout.txt
           grep -Fx 'STAGE56_WEAVING_RANKER_B4 vectors=120 words=3940 rank_checks=3940 unrank_checks=3940 positions=83776 out_of_range=360 invalid=5 fast_vectors=4 fast_words=31419 legacy_checks=12 huge=2 status=PASS' stage56-b4-evidence/stdout.txt
+      - name: Stage56 opt-in unrank profiler schema and output neutrality
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage56-b4-evidence
+          timeout 60s php -d memory_limit=512M tests/stage56_unrank_profile_tests.php \
+            > stage56-b4-evidence/unrank-profiler-stdout.txt \
+            2> stage56-b4-evidence/unrank-profiler-stderr.txt
+          cat stage56-b4-evidence/unrank-profiler-stdout.txt
+          test ! -s stage56-b4-evidence/unrank-profiler-stderr.txt
+          grep -Fx 'STAGE56_UNRANK_PROFILE_SCHEMA_PASS positions=259 buckets=2 status=PASS' \
+            stage56-b4-evidence/unrank-profiler-stdout.txt
       - name: Retain SHA-bound B4 Native evidence
         if: always()
         uses: actions/upload-artifact@v4

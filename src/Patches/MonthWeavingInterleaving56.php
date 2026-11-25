@@ -12,6 +12,7 @@ final class MonthWeavingInterleaving56
 {
     private const SMALL_FACTOR_LIMIT = 999999999;
     private static int $dpProfileSequence = 0;
+    private static int $unrankProfileSequence = 0;
     /** @var array<int, list<BigInt>> */
     private array $suffixCache = [];
     /** @var array<int, list<BigInt>> Immutable reusable absolute-stride rows. */
@@ -129,11 +130,34 @@ final class MonthWeavingInterleaving56
     /** @return list<int> zero-based month IDs */
     public function unrank(BigInt $rank): array
     {
+        $profilePath = getenv('STAGE56_UNRANK_PROFILE_PATH');
+        $profileEnabled = is_string($profilePath) && $profilePath !== '';
+        $profileId = $profileEnabled ? ++self::$unrankProfileSequence : 0;
+        $unrankStartNs = $profileEnabled ? hrtime(true) : 0;
+        $bucketStartNs = 0;
+        $bucketStartPosition = 1;
+        $bucketIndex = 1;
+        $bucketPositions = 0;
+        $setupElapsedNs = 0;
+        $profile = $profileEnabled ? self::emptyUnrankProfile() : null;
+
         $totalLength = array_sum($this->lengths);
-        $total = $this->count();
-        if ($rank->compare(BigInt::one()) < 0 || $rank->compare($total) > 0) {
+        $total = $this->monthCount === 1
+            ? BigInt::one()
+            : $this->suffixCount(0, $this->lengths[0], $profile);
+        if ($profileEnabled) {
+            self::trackUnrankDigits($profile, 'rank', $rank);
+            self::trackUnrankDigits($profile, 'total', $total);
+            ++$profile['direct_bigint_compare_calls'];
+        }
+        if ($rank->compare(BigInt::one()) < 0) {
             throw new InvalidArgumentException('STAGE56_INTERLEAVING_RANK_RANGE');
         }
+        if ($profileEnabled) ++$profile['direct_bigint_compare_calls'];
+        if ($rank->compare($total) > 0) {
+            throw new InvalidArgumentException('STAGE56_INTERLEAVING_RANK_RANGE');
+        }
+
         $weave = array_fill(0, $totalLength, 0);
         $remaining = $this->lengths;
         --$remaining[0];
@@ -141,6 +165,11 @@ final class MonthWeavingInterleaving56
         $high = 0;
         $activeTotal = $remaining[0];
         $baseCount = BigInt::one();
+        if ($profileEnabled) {
+            self::trackUnrankDigits($profile, 'base_count', $baseCount);
+            $setupElapsedNs = hrtime(true) - $unrankStartNs;
+            $bucketStartNs = hrtime(true);
+        }
 
         for ($position = 1; $position < $totalLength; ++$position) {
             $prefix = [];
@@ -150,8 +179,10 @@ final class MonthWeavingInterleaving56
                 $prefix[] = $running;
             }
             $futureSame = $high < $this->monthCount - 1
-                ? $this->suffixCount($high, $activeTotal)
+                ? $this->suffixCount($high, $activeTotal, $profile)
                 : BigInt::one();
+            if ($profileEnabled) self::trackUnrankDigits($profile, 'suffix_count', $futureSame);
+
             // Prefix sums of sibling bases are monotone. Compare scaled
             // prefix sums rather than multiplying each individual sibling.
             // At most 47 candidates, and the first candidate retains a fast path.
@@ -164,39 +195,85 @@ final class MonthWeavingInterleaving56
             $chosen = null;
             for ($month = $low; $month <= $high; ++$month) {
                 $remainingForMonth = $remaining[$month];
-                if ($remainingForMonth === 1 && $month !== $low) continue;
-                $nextBaseCount = $previousMonth === null
-                    ? self::firstBranchBaseCount($baseCount, $remainingForMonth, $prefix, $low, $month, $activeTotal)
-                    : self::nextBranchBaseCount($previousBaseCount, $remaining, $prefix, $low, $previousMonth, $month);
+                if ($remainingForMonth === 1 && $month !== $low) {
+                    if ($profileEnabled) ++$profile['candidate_skipped_count'];
+                    continue;
+                }
+                $branchBaseStartNs = $profileEnabled ? hrtime(true) : 0;
+                if ($previousMonth === null) {
+                    $nextBaseCount = self::firstBranchBaseCount(
+                        $baseCount, $remainingForMonth, $prefix, $low, $month, $activeTotal
+                    );
+                    if ($profileEnabled) ++$profile['candidate_first_branch_count'];
+                } else {
+                    $nextBaseCount = self::nextBranchBaseCount(
+                        $previousBaseCount, $remaining, $prefix, $low, $previousMonth, $month
+                    );
+                    if ($profileEnabled) ++$profile['candidate_next_branch_count'];
+                }
+                if ($profileEnabled) {
+                    $profile['branch_base_generation_ns'] += hrtime(true) - $branchBaseStartNs;
+                    ++$profile['candidate_count'];
+                    self::trackUnrankDigits($profile, 'branch_base', $nextBaseCount);
+                }
                 $sum = $sum->add($nextBaseCount);
+                if ($profileEnabled) self::trackUnrankDigits($profile, 'cumulative_base', $sum);
                 $ids[] = $month;
                 $bases[] = $nextBaseCount;
                 $cumulative[] = $sum;
-                if (count($ids) === 1 && $rank->compare($sum->mul($futureSame)) <= 0) {
-                    $chosen = 0;
-                    break;
+                if (count($ids) === 1) {
+                    if ($profileEnabled) ++$profile['direct_bigint_mul_calls'];
+                    $scaledFirst = $sum->mul($futureSame);
+                    if ($profileEnabled) {
+                        self::trackUnrankDigits($profile, 'scaled_first_block', $scaledFirst);
+                        ++$profile['direct_bigint_compare_calls'];
+                    }
+                    if ($rank->compare($scaledFirst) <= 0) {
+                        $chosen = 0;
+                        break;
+                    }
                 }
                 $previousMonth = $month;
                 $previousBaseCount = $nextBaseCount;
             }
             if ($chosen === null && $ids !== []) {
+                if ($profileEnabled) ++$profile['direct_bigint_mul_calls'];
                 $scaledTotal = $sum->mul($futureSame);
+                if ($profileEnabled) {
+                    self::trackUnrankDigits($profile, 'scaled_total_block', $scaledTotal);
+                    ++$profile['direct_bigint_compare_calls'];
+                }
                 if ($rank->compare($scaledTotal) > 0) {
+                    if ($profileEnabled) ++$profile['direct_bigint_sub_calls'];
                     $rank = $rank->sub($scaledTotal);
+                    if ($profileEnabled) self::trackUnrankDigits($profile, 'rank', $rank);
                 } else {
                     // The first candidate was already ruled out.
                     $left = 1;
                     $right = count($ids) - 1;
                     while ($left < $right) {
                         $mid = intdiv($left + $right, 2);
-                        if ($rank->compare($cumulative[$mid]->mul($futureSame)) <= 0) {
+                        if ($profileEnabled) ++$profile['direct_bigint_mul_calls'];
+                        $scaledMid = $cumulative[$mid]->mul($futureSame);
+                        if ($profileEnabled) {
+                            self::trackUnrankDigits($profile, 'scaled_mid_block', $scaledMid);
+                            ++$profile['direct_bigint_compare_calls'];
+                        }
+                        if ($rank->compare($scaledMid) <= 0) {
                             $right = $mid;
                         } else {
                             $left = $mid + 1;
                         }
                     }
                     $chosen = $left;
-                    $rank = $rank->sub($cumulative[$chosen - 1]->mul($futureSame));
+                    if ($profileEnabled) ++$profile['direct_bigint_mul_calls'];
+                    $scaledPrefix = $cumulative[$chosen - 1]->mul($futureSame);
+                    if ($profileEnabled) {
+                        self::trackUnrankDigits($profile, 'scaled_prefix_block', $scaledPrefix);
+                        ++$profile['direct_bigint_sub_calls'];
+                    }
+                    $rank = $rank->sub($scaledPrefix);
+                    if ($profileEnabled) self::trackUnrankDigits($profile, 'rank', $rank);
                 }
             }
             if ($chosen !== null) {
@@ -205,40 +282,171 @@ final class MonthWeavingInterleaving56
                 --$remaining[$month];
                 --$activeTotal;
                 $baseCount = $bases[$chosen];
+                if ($profileEnabled) self::trackUnrankDigits($profile, 'base_count', $baseCount);
                 if ($remaining[$month] === 0) ++$low;
-                continue;
+            } else {
+                $month = $high + 1;
+                if ($month >= $this->monthCount) {
+                    throw new LogicException('STAGE56_INTERLEAVING_EXHAUSTED');
+                }
+                $newRemaining = $this->lengths[$month] - 1;
+                $branchBaseStartNs = $profileEnabled ? hrtime(true) : 0;
+                $nextBaseCount = self::multiplyByBinomial(
+                    $baseCount, $activeTotal + $newRemaining - 1, $newRemaining - 1
+                );
+                if ($profileEnabled) {
+                    $profile['branch_base_generation_ns'] += hrtime(true) - $branchBaseStartNs;
+                    ++$profile['new_month_branch_count'];
+                    self::trackUnrankDigits($profile, 'branch_base', $nextBaseCount);
+                }
+                $nextActiveTotal = $activeTotal + $newRemaining;
+                $future = $month < $this->monthCount - 1
+                    ? $this->suffixCount($month, $nextActiveTotal + 1, $profile)
+                    : BigInt::one();
+                if ($profileEnabled) self::trackUnrankDigits($profile, 'suffix_count', $future);
+                if ($nextBaseCount->isZero() || $future->isZero()) {
+                    throw new LogicException('STAGE56_INTERLEAVING_EMPTY_NEW_MONTH');
+                }
+                if ($profileEnabled) ++$profile['direct_bigint_mul_calls'];
+                $block = $nextBaseCount->mul($future);
+                if ($profileEnabled) {
+                    self::trackUnrankDigits($profile, 'new_month_block', $block);
+                    ++$profile['direct_bigint_compare_calls'];
+                }
+                if ($rank->compare($block) > 0) {
+                    throw new LogicException('STAGE56_INTERLEAVING_FINAL_BRANCH');
+                }
+                $weave[$position] = $month;
+                $high = $month;
+                --$remaining[$month];
+                if ($low > $month - 1) $low = $month;
+                $activeTotal = $nextActiveTotal;
+                $baseCount = $nextBaseCount;
+                if ($profileEnabled) self::trackUnrankDigits($profile, 'base_count', $baseCount);
             }
 
-            $month = $high + 1;
-            if ($month >= $this->monthCount) throw new LogicException('STAGE56_INTERLEAVING_EXHAUSTED');
-            $newRemaining = $this->lengths[$month] - 1;
-            $nextBaseCount = self::multiplyByBinomial($baseCount, $activeTotal + $newRemaining - 1, $newRemaining - 1);
-            $nextActiveTotal = $activeTotal + $newRemaining;
-            $future = $month < $this->monthCount - 1
-                ? $this->suffixCount($month, $nextActiveTotal + 1)
-                : BigInt::one();
-            $block = $nextBaseCount->mul($future);
-            if ($rank->compare($block) > 0) throw new LogicException('STAGE56_INTERLEAVING_FINAL_BRANCH');
-            $weave[$position] = $month;
-            $high = $month;
-            --$remaining[$month];
-            if ($low > $month - 1) $low = $month;
-            $activeTotal = $nextActiveTotal;
-            $baseCount = $nextBaseCount;
+            if ($profileEnabled) {
+                ++$bucketPositions;
+                if ($bucketPositions >= 256 || $position === $totalLength - 1) {
+                    self::writeUnrankProfileBucket(
+                        $profilePath,
+                        $profileId,
+                        $bucketIndex,
+                        $bucketStartPosition,
+                        $position,
+                        $bucketPositions,
+                        $bucketStartNs,
+                        $unrankStartNs,
+                        $setupElapsedNs,
+                        $profile
+                    );
+                    $bucketPositions = 0;
+                    $bucketStartPosition = $position + 1;
+                    $bucketStartNs = hrtime(true);
+                    ++$bucketIndex;
+                }
+            }
         }
-        if (array_sum($remaining) !== 0 || !$rank->equals(BigInt::one())) {
+        if (array_sum($remaining) !== 0) {
+            throw new InvalidArgumentException('STAGE56_INTERLEAVING_WORD_REMAINDER');
+        }
+        if ($profileEnabled) ++$profile['direct_bigint_compare_calls'];
+        if (!$rank->equals(BigInt::one())) {
             throw new LogicException('STAGE56_INTERLEAVING_REMAINDER');
         }
         return $weave;
     }
 
-    private function suffixCount(int $lastSeen, int $q): BigInt
+    /** @return array<string, int|array<string, int>> */
+    private static function emptyUnrankProfile(): array
     {
-        if ($lastSeen >= $this->monthCount - 1) return BigInt::one();
+        return [
+            'candidate_count' => 0,
+            'candidate_first_branch_count' => 0,
+            'candidate_next_branch_count' => 0,
+            'candidate_skipped_count' => 0,
+            'new_month_branch_count' => 0,
+            'branch_base_generation_ns' => 0,
+            'direct_bigint_mul_calls' => 0,
+            'direct_bigint_compare_calls' => 0,
+            'direct_bigint_sub_calls' => 0,
+            'suffix_count_calls' => 0,
+            'suffix_cache_hits' => 0,
+            'suffix_checkpoint_hits' => 0,
+            'suffix_rebuilds' => 0,
+            'suffix_terminal_shortcuts' => 0,
+            'max_decimal_digits' => 0,
+            'max_decimal_digits_by_role' => [],
+        ];
+    }
+
+    private static function trackUnrankDigits(?array &$profile, string $role, BigInt $value): void
+    {
+        if ($profile === null) return;
+        $digits = strlen(ltrim($value->toString(), '-'));
+        $profile['max_decimal_digits'] = max($profile['max_decimal_digits'], $digits);
+        $profile['max_decimal_digits_by_role'][$role] = max(
+            $profile['max_decimal_digits_by_role'][$role] ?? 0,
+            $digits
+        );
+    }
+
+    /** One JSONL write per 256 unrank positions; never per candidate or cell. */
+    private static function writeUnrankProfileBucket(
+        string $path,
+        int $profileId,
+        int $bucketIndex,
+        int $positionStart,
+        int $positionEnd,
+        int $positions,
+        int $bucketStartNs,
+        int $unrankStartNs,
+        int $setupElapsedNs,
+        array &$profile
+    ): void {
+        $now = hrtime(true);
+        $record = [
+            'schema_version' => 1,
+            'event' => 'bucket',
+            'method' => 'MonthWeavingInterleaving56::unrank',
+            'profile_id' => $profileId,
+            'bucket_index' => $bucketIndex,
+            'position_start' => $positionStart,
+            'position_end' => $positionEnd,
+            'positions' => $positions,
+            'bucket_elapsed_ns' => $now - $bucketStartNs,
+            'unrank_elapsed_ns' => $now - $unrankStartNs,
+            'setup_elapsed_ns' => $bucketIndex === 1 ? $setupElapsedNs : 0,
+            'timestamp_ns' => $now,
+        ];
+        foreach ($profile as $key => $value) $record[$key] = $value;
+        $record['allocated_bytes'] = memory_get_usage(true);
+        $record['process_peak_bytes'] = memory_get_peak_usage(true);
+        $line = json_encode($record, JSON_THROW_ON_ERROR) . "\n";
+        if (file_put_contents($path, $line, FILE_APPEND | LOCK_EX) !== strlen($line)) {
+            throw new LogicException('STAGE56_UNRANK_PROFILE_WRITE');
+        }
+        $profile = self::emptyUnrankProfile();
+    }
+
+    private function suffixCount(int $lastSeen, int $q, ?array &$profile = null): BigInt
+    {
+        if ($profile !== null) ++$profile['suffix_count_calls'];
+        if ($lastSeen >= $this->monthCount - 1) {
+            if ($profile !== null) ++$profile['suffix_terminal_shortcuts'];
+            return BigInt::one();
+        }
         $cached = $this->suffixCache[$lastSeen] ?? null;
-        if ($cached !== null && count($cached) > $q) return $cached[$q];
+        if ($cached !== null && count($cached) > $q) {
+            if ($profile !== null) ++$profile['suffix_cache_hits'];
+            return $cached[$q];
+        }
         $checkpoint = $this->suffixCheckpoints[$lastSeen] ?? null;
-        if ($checkpoint !== null && count($checkpoint) > $q) return $checkpoint[$q];
+        if ($checkpoint !== null && count($checkpoint) > $q) {
+            if ($profile !== null) ++$profile['suffix_checkpoint_hits'];
+            return $checkpoint[$q];
+        }
+        if ($profile !== null) ++$profile['suffix_rebuilds'];
         $this->rebuildSuffix($lastSeen, $q);
         return $this->suffixCache[$lastSeen][$q]
             ?? throw new LogicException('STAGE56_INTERLEAVING_CACHE_MISS');
