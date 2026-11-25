@@ -1,0 +1,74 @@
+name: Stage55 independent full-prefix inverse rank (GMP)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_full_prefix_inverse_rank.cpp'
+      - 'tools/run_stage55_full_prefix_inverse_rank.py'
+      - 'docs/stage55-full-prefix-inverse-rank-contract.md'
+      - '.github/workflows/stage55-full-prefix-inverse-rank.yml'
+      - 'tests/fixtures/stage55_year5000_middle_word.json'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage55-full-prefix-inverse-rank-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-inverse-rank:
+    name: GMP two-basis inverse DP / all 4,244 prefix intervals
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Pin exact source and fixture blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          test "$(git hash-object tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+
+      - name: Install bounded GMP build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y g++ libgmp-dev
+          python3 --version
+          g++ --version | head -1
+
+      - name: Compile and verify every prefix interval
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -m py_compile tools/run_stage55_full_prefix_inverse_rank.py
+          python3 tools/run_stage55_full_prefix_inverse_rank.py \
+            --word tests/fixtures/stage55_year5000_middle_word.json \
+            --fixture tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --cpp tools/stage55_full_prefix_inverse_rank.cpp \
+            --out evidence/stage55-full-prefix-inverse-rank \
+            --time-limit-seconds 270 \
+            > evidence/console.log 2>&1
+          grep -q '^STAGE55_FULL_PREFIX_INVERSE_RANK_PASS ' evidence/stage55-full-prefix-inverse-rank/run.log
+          grep -q '^PREFIX_INTERVALS_PASS COUNT=4244 ' evidence/stage55-full-prefix-inverse-rank/run.log
+          grep -q '^MIDDLE_RANK_POLICY_PASS R=floor(T/2)+1$' evidence/stage55-full-prefix-inverse-rank/run.log
+
+      - name: Retain exact trace and logs on PASS or FAIL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-full-prefix-inverse-rank-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
