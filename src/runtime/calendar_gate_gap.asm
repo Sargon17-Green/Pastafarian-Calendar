@@ -30,20 +30,20 @@ CalendarGateGap::
     ld b, a
     ld a, [wCalendarGateGapIndex+1]
     or b
-    jr z, .invalid
+    jp z, .invalid
     ld a, [wCalendarGateGapIndex+1]
     cp 2
     jr c, .indexValid
-    jr nz, .invalid
+    jp nz, .invalid
     ld a, [wCalendarGateGapIndex]
     or a
-    jr nz, .invalid
+    jp nz, .invalid
 .indexValid:
     ld a, [wCalendarGateGapDirection]
     cp 1
     jr z, .inputsValid
     cp 2
-    jr nz, .invalid
+    jp nz, .invalid
 
 .inputsValid:
     ; Preserve caller-owned pair and answer-input state.
