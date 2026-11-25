@@ -58,8 +58,13 @@ pub fn dispatch_discovery_36(
     )
   {
     Error(error) -> Error(error)
-    Ok(previous) -> {
-      let l = previous.left_windows
+    Ok(previous) ->
+      // The inherited pipeline may skip per-bowl validation for an empty ID list.
+      case bootstrap.validate_context(context) {
+        Error(error) ->
+          Error(discovery_19_interval_value.InvalidContext(error))
+        Ok(_) -> {
+          let l = previous.left_windows
       let r = previous.right_windows
       let i = previous.intersection_windows
       let u = previous.combined_windows
@@ -137,6 +142,7 @@ pub fn dispatch_discovery_36(
           }
         }
       }
-    }
+        }
+      }
   }
 }
