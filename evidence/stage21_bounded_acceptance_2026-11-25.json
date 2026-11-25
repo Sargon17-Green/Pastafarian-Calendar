@@ -89,7 +89,17 @@
     "node": "v24.22.3",
     "unicode_pick_preflight": "PASS",
     "positive": {
-      "cases": [
+      "full_46_drop_paths": 3,
+      "instrumented_paths": 3,
+      "assertions_total": 12262,
+      "all_exit_0": true,
+      "all_stderr_empty": true,
+      "independently_recomputed": true,
+      "max_elapsed_seconds": 97.048,
+      "peak_child_rss_kib_cumulative": 518220,
+      "address_space_limit_bytes": 2147483648,
+      "case_count": 6,
+      "case_details": [
         {
           "name": "full_boundary",
           "steps": 46,
@@ -132,16 +142,7 @@
           "assertions": 1381,
           "seconds": 59.497
         }
-      ],
-      "full_46_drop_paths": 3,
-      "instrumented_paths": 3,
-      "assertions_total": 12262,
-      "all_exit_0": true,
-      "all_stderr_empty": true,
-      "independently_recomputed": true,
-      "max_elapsed_seconds": 97.048,
-      "peak_child_rss_kib_cumulative": 518220,
-      "address_space_limit_bytes": 2147483648
+      ]
     },
     "replay": {
       "full_reverse_equals_replay_reverse": true,

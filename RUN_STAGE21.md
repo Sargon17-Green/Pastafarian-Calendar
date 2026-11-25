@@ -87,7 +87,7 @@ Historical NEXT (superseded by the 2026-11-25 acceptance below): inspect the dia
 
 ## 2026-11-25 — bounded Native acceptance and independent audit
 
-<badge>ACCEPTED_BOUNDED</badge>
+**ACCEPTED_BOUNDED**
 
 The source-locked acceptance run completed on exact source SHA `2753a30eaa95c4f5c1061ffec5f17d12a9c3e165`; original interpreter runtime remained pinned to `eb3135565a8670cced3f6bbca4dbf7b014c45634`.
 
