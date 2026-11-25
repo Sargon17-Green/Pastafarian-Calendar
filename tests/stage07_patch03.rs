@@ -72,11 +72,23 @@ fn stage07_patch03_corrects_distance_and_preserves_stage06_observation() {
                 .expect("Stage06 müşahidəsi saxlanmalıdır");
             assert_eq!(stage06.distance, expected_legacy);
             assert_eq!(observed.context.metrics.get("patch02.work_counts.calls"), 1);
-            assert_eq!(observed.context.metrics.get("patch02.legacy.action.calls"), 1);
-            assert_eq!(observed.context.metrics.get("patch02.legacy.target.calls"), 1);
-            assert_eq!(observed.context.metrics.get("discovery03.distance.calls"), 1);
+            assert_eq!(
+                observed.context.metrics.get("patch02.legacy.action.calls"),
+                1
+            );
+            assert_eq!(
+                observed.context.metrics.get("patch02.legacy.target.calls"),
+                1
+            );
+            assert_eq!(
+                observed.context.metrics.get("discovery03.distance.calls"),
+                1
+            );
             assert_eq!(observed.context.metrics.get("patch03.distance.calls"), 1);
-            assert_eq!(observed.context.metrics.get("dispatcher.handler.completed"), 3);
+            assert_eq!(
+                observed.context.metrics.get("dispatcher.handler.completed"),
+                3
+            );
             assert_eq!(
                 observed.context.branch_trace,
                 vec![
@@ -134,8 +146,6 @@ fn stage07_patch03_corrects_distance_and_preserves_stage06_observation() {
     let bootstrap_error = calendar_date_spaghetti(foundation.clone(), foundation).unwrap_err();
     assert_eq!(bootstrap_error.code, MonsterErrorCode::BootstrapOnly);
 
-    println!(
-        "STAGE07_PATCH03_ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226"
-    );
+    println!("STAGE07_PATCH03_ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226");
     println!("STAGE07_PATCH03_BOOTSTRAP_ONLY=PASS");
 }

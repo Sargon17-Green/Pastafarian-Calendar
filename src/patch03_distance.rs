@@ -95,9 +95,7 @@ pub fn calculate_patched_distance(
     manager
         .dispatcher_mut()
         .register(LegacyTagDistanceDiscovery03);
-    manager
-        .dispatcher_mut()
-        .register(Patch03DistanceCorrection);
+    manager.dispatcher_mut().register(Patch03DistanceCorrection);
 
     let context = manager.execute_bootstrap_shell(calculation_day.clone(), target_day.clone())?;
     let result = context
