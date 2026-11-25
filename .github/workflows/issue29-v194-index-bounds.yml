@@ -1,4 +1,4 @@
-name: Issue29 v194 GMP index overflow explicit bypass RED GREEN NO F
+name: Issue29 v195 repaired v194 guard GMP index overflow RED GREEN NO F
 on:
   push:
     branches:
@@ -19,12 +19,23 @@ jobs:
           persist-credentials: false
       - name: Lock original source and verify exact bypass scope
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           mkdir -p evidence
-          test "$(git rev-parse HEAD^)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          test "$(git rev-parse HEAD^)" = 7a4d5f797a9da452ad1b67f6abcef44e0b3b8095
+          test "$(git merge-base HEAD 1160096aa847c54cbef27c232771ce1549d7ba8f)" = 1160096aa847c54cbef27c232771ce1549d7ba8f
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/issue29-v194-index-bounds.yml
           test "$(git rev-parse 1160096aa847c54cbef27c232771ce1549d7ba8f:src/canonical_full_weave_gmp_v164.adb)" = 845bd8905943a54e63d6aba0334404a5051fe666
           test "$(git diff --name-only 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD | wc -l)" -eq 4
-          test "$(grep -Fc '    if: ${{ false }}' .github/workflows/canonical-names-lock.yml)" -eq 42
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = 947c3325b705d61504f09dc1d46275ed14f52249
+          test "$(git rev-parse HEAD:tests/issue29_v194_index_bounds.adb)" = 8807e58f67e584a764f1887b2cad5ea14c0d2cb8
+          test "$(git rev-parse HEAD:issue29_v194_index_bounds.gpr)" = 3aa5399dc4a24b61d31104fde484640e5bd2e481
+          python3 -B - <<'PY'
+          from pathlib import Path
+          literal = "    if: " + "$" + "{{ false }}"
+          count = Path(".github/workflows/canonical-names-lock.yml").read_text().count(literal)
+          print("V195_DISABLED_GATE_COUNT =", count, flush=True)
+          assert count == 42, count
+          PY
           git diff 1160096aa847c54cbef27c232771ce1549d7ba8f HEAD -- src > evidence/candidate.patch
           python3 -B - <<'PY'
           import subprocess
