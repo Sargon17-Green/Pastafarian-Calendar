@@ -189,7 +189,6 @@ mod wrapper_reconciliation_tests {
     }
 }
 
-
 /// DISCOVERY03: yalnız bu çağırışda PATCH02 etiketlərinin köhnə məsafəsi.
 /// Normativ PATCH02 marşrutu ayrıca qalır; PATCH03 burada tətbiq edilmir.
 pub struct LegacyTagDistanceDiscovery03;
@@ -230,7 +229,9 @@ pub fn discover_legacy_tag_distance(
 ) -> Result<Patch02Observation, MonsterError> {
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(WorkCountsPatch02);
-    manager.dispatcher_mut().register(LegacyTagDistanceDiscovery03);
+    manager
+        .dispatcher_mut()
+        .register(LegacyTagDistanceDiscovery03);
     let context = manager.execute_bootstrap_shell(calculation_day.clone(), target_day.clone())?;
     let counts = context
         .work_counts_observation
@@ -280,10 +281,7 @@ mod distance_discovery03_tests {
                 let normative = &chronological + BigInt::one();
                 let observed = discover_legacy_tag_distance(&f + c, &f + t).unwrap();
                 assert_eq!(observed.counts.distance, expected);
-                assert_eq!(
-                    observed.context.metrics.get("patch02.work_counts.calls"),
-                    1
-                );
+                assert_eq!(observed.context.metrics.get("patch02.work_counts.calls"), 1);
                 assert_eq!(
                     observed.context.metrics.get("patch02.legacy.action.calls"),
                     1
@@ -292,7 +290,10 @@ mod distance_discovery03_tests {
                     observed.context.metrics.get("patch02.legacy.target.calls"),
                     1
                 );
-                assert_eq!(observed.context.metrics.get("discovery03.distance.calls"), 1);
+                assert_eq!(
+                    observed.context.metrics.get("discovery03.distance.calls"),
+                    1
+                );
                 assert_eq!(
                     observed.context.branch_trace,
                     vec![
@@ -328,7 +329,9 @@ mod distance_discovery03_tests {
         }
         let mut missing = MonsterContext::new(f.clone(), f);
         let snapshot = missing.clone();
-        let error = LegacyTagDistanceDiscovery03.handle(&mut missing).unwrap_err();
+        let error = LegacyTagDistanceDiscovery03
+            .handle(&mut missing)
+            .unwrap_err();
         assert_eq!(error.code, MonsterErrorCode::InvalidState);
         assert_eq!(missing, snapshot);
         assert_eq!((red, control), (153, 16));
