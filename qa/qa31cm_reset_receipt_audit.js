@@ -61,7 +61,12 @@ const specs={
 };
 const seq=[["base_context",""],["bootstrap","10"],["base_validator","1 0"],["interleaved_day_save","1 15055672"],["metrics_shell","42 7"],["day_count","0 0"],["error_wrapper","1 42"],["save","1 1"],["runtime_contract",""],["logging_shell","42 7"],["interleaved_work_counts","0 0 0 1"],["day_count","1 0"],["interleaved_day_save","0 0"],["save","0 0"],["base_context",""]];
 const base=[[0,0],[5,0],[10,49],[500,1500],[100,500],[1528,2014]];
-function audit(rows) {
+const promotedTwoField = {
+  day_count:"ccff205ce45fe267433950ca994ec5aaa49c0352",
+  save:"f99b49cef13a1a036fa43e675cb68bf56f3b03e5",
+  interleaved_day_save:"04212ba0681f583524fb9f5553b075d8a0794d58"
+};
+function audit(rows, promoted=false) {
  const fail=(s)=>{throw Error(s)};
  const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
  const cmp=(a,b)=>a[0]-b[0]||a[1]-b[1];
@@ -70,7 +75,8 @@ function audit(rows) {
  let previous=base.length, fields=0, writers=0;
  for(let i=0;i<seq.length;i++){
   const r=rows[i], [n,input]=seq[i], [width,writer,blob]=specs[n];
-  if(!r||r.path!==`src/${n}.b98`||r.input!==input+"\n"||r.source_blob!==blob)fail("source/order/input "+i);
+  const sourceBlob = promoted && promotedTwoField[n] ? promotedTwoField[n] : blob;
+  if(!r||r.path!==`src/${n}.b98`||r.input!==input+"\n"||r.source_blob!==sourceBlob)fail("source/order/input "+i);
   if(!Array.isArray(r.output)||r.output.length!==width||!r.output.every(v=>typeof v==="string"&&/^(0|-?[1-9][0-9]*)$/.test(v))||!equal(r.output,r.native_fresh_cli))fail("output parity/width "+i);
   const w=r.written_addresses;
   if(!Array.isArray(w)||w.some(p=>!Array.isArray(p)||p.length!==2||!p.every(Number.isSafeInteger))||w.some((p,j)=>j>0&&cmp(w[j-1],p)>=0)||Boolean(w.length)!==writer)fail("writer/address "+i);
@@ -90,4 +96,10 @@ function selftest(){
  let rejected=0;for(const mutate of mutations){const r=JSON.parse(JSON.stringify(rows));mutate(r);try{audit(r)}catch(e){rejected++}}
  if(rejected!==mutations.length)throw Error("hostile control escaped");return {synthetic:true,positive,rejected,total:mutations.length};
 }
-if(require.main===module){const arg=process.argv[2];if(!arg)throw Error("usage: node qa/qa31cm_reset_receipt_audit.js --selftest|entrypoints.json");console.log(JSON.stringify(arg==="--selftest"?selftest():audit(JSON.parse(require("fs").readFileSync(arg,"utf8"))),null,2));}
+if (require.main === module) {
+  const promoted = process.argv[2] === "--promoted-two-field";
+  const arg = process.argv[promoted ? 3 : 2];
+  if (!arg) throw Error("usage: node qa/qa31cm_reset_receipt_audit.js [--promoted-two-field] --selftest|entrypoints.json");
+  const result = arg === "--selftest" ? selftest() : audit(JSON.parse(require("fs").readFileSync(arg,"utf8")), promoted);
+  console.log(JSON.stringify(result,null,2));
+}

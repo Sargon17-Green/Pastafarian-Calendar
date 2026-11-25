@@ -12,7 +12,7 @@ def require(ok, message):
         raise ValueError(message)
 
 
-def audit(data, legacy, root):
+def audit(data, legacy, root, original_two_field=False):
     runs, phases = data["runs"], data["phases"]
     require(len(runs) == 31 and len(phases) == 93 and len(legacy) == 15, "receipt cardinality")
     retired_cells = space_checks = cell_checks = put_count = 0
@@ -27,7 +27,10 @@ def audit(data, legacy, root):
             for key in ("path","input","source_blob","output","native_fresh_cli"):
                 require(run[key] == old[key], "legacy row mismatch")
         sources.add(name)
-        code = (root/name).read_bytes()
+        source_path = root/name
+        if original_two_field and name in ("src/day_count.b98","src/save.b98","src/interleaved_day_save.b98"):
+            source_path = root/"qa/evidence/qa31cn/pre_scanner"/source_path.name
+        code = source_path.read_bytes()
         blob = hashlib.sha1(b"blob "+str(len(code)).encode()+b"\0"+code).hexdigest()
         require(run["ordinal"] == index and run["source_blob"] == blob, "ordinal/source")
         require(run["output"] and run["output"] == run["native_fresh_cli"], "CLI disagreement")
@@ -65,6 +68,8 @@ if __name__ == "__main__":
     parser.add_argument("all_spaces", type=Path)
     parser.add_argument("entrypoints", type=Path)
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--original-two-field", action="store_true",
+                        help="Audit the pre-promotion Native receipt against its archived source bytes.")
     args = parser.parse_args()
     print(json.dumps(audit(json.loads(args.all_spaces.read_bytes()),
-                           json.loads(args.entrypoints.read_bytes()), args.root), sort_keys=True))
+                           json.loads(args.entrypoints.read_bytes()), args.root,args.original_two_field), sort_keys=True))

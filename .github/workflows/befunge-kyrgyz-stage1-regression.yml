@@ -24,8 +24,9 @@ jobs:
           test "$(git hash-object src/interleaved_work_counts.b98)" = "560d6aa5807a7f766213a33835cce85eab0fa40c"
           test "$(git hash-object qa/interleaved_work_counts_lexical_candidate.b98)" = "e2b39b066d1d47bcb8ce4f234b093fca94cb21d1"
           test "$(git hash-object qa/interleaved_work_counts_pre_lexical_baseline.b98)" = "e06d8f75d6502b2771d6a76b00397c6b6dbee543"
-          test "$(git hash-object src/day_count.b98)" = "4f25f514f7b6362105dfff77db6f36769efe36c3"
-          test "$(git hash-object src/save.b98)" = "dd6f10aa196e3a9523ee786e4ba41a91f303d199"
+          test "$(git hash-object src/day_count.b98)" = "ccff205ce45fe267433950ca994ec5aaa49c0352"
+          test "$(git hash-object src/save.b98)" = "f99b49cef13a1a036fa43e675cb68bf56f3b03e5"
+          test "$(git hash-object src/interleaved_day_save.b98)" = "04212ba0681f583524fb9f5553b075d8a0794d58"
           test "$(git hash-object README.md)" = "74c424b44eadd4ece3f29072ddbf873236557604"
           test "$(git hash-object qa/interleaved_work_counts_pre_reflective_production.b98)" = "44c5c33f4fe88ad82b8172235f18ad5d5175e517"
           test "$(git hash-object qa/interleaved_work_counts_pre_two_valid_w_production.b98)" = "8f2cf8afef61818244747582fe7c20a74ee18943"
@@ -385,7 +386,7 @@ jobs:
               timeout --kill-after=5s 240s python -u qa/stage1_native_same_program_reset.py /reset-evidence/entrypoints.json /reset-evidence/all_spaces.json
             '
           test -s "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
-          node qa/qa31cm_reset_receipt_audit.js "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
+          node qa/qa31cm_reset_receipt_audit.js --promoted-two-field "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json"
           python3 qa/qa31cn_all_spaces_audit.py "$RUNNER_TEMP/stage1-reset-receipts/all_spaces.json" \
             "$RUNNER_TEMP/stage1-reset-receipts/entrypoints.json" | tee "$RUNNER_TEMP/stage1-reset-receipts/audit.json"
       - name: Retain per-source reset and native memory evidence
@@ -402,15 +403,24 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Apply the three static BF98 candidate edits in an isolated directory
+      - name: Reconstruct the promoted sources from the original BF98 and verify all three bodies
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/befunge-two-field/src" "$RUNNER_TEMP/two-field-receipts"
-          cp src/{day_count,save,interleaved_day_save}.b98 "$RUNNER_TEMP/befunge-two-field/src/"
+          originals=qa/evidence/qa31cn/pre_scanner
+          cp "$originals"/*.b98 "$RUNNER_TEMP/befunge-two-field/src/"
           (cd "$RUNNER_TEMP/befunge-two-field" && git apply "$GITHUB_WORKSPACE/qa/two_field_scanners.patch")
-          python3 qa/qa31cn_two_field_scanners.py src "$RUNNER_TEMP/befunge-two-field/src" \
+          for name in day_count save interleaved_day_save; do
+            cmp "src/$name.b98" "$RUNNER_TEMP/befunge-two-field/src/$name.b98"
+          done
+          python3 qa/qa31cn_two_field_scanners.py "$originals" src \
             "$RUNNER_TEMP/two-field-receipts/induction.json"
+          python3 qa/qa31cn_two_field_suffix.py "$originals" src "$RUNNER_TEMP/befunge-two-field/isolation.json"
+          cmp "$RUNNER_TEMP/befunge-two-field/isolation.json" qa/evidence/qa31cn/suffix_isolation.json
+          python3 qa/qa31co_standalone_equations.py "$originals" reference "$RUNNER_TEMP/befunge-two-field/equations.json"
+          cmp "$RUNNER_TEMP/befunge-two-field/equations.json" qa/evidence/qa31cn/two_field_equations.json
+          python3 qa/qa31co_verify_native.py qa/evidence/qa31cn/two_field_native.zip "$originals" src reference
       - name: Execute original and corrected sources with native BF98 reference and arithmetic route parity
         shell: bash
         run: |
@@ -418,12 +428,12 @@ jobs:
           curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
           echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
           docker run --rm -e PYFUNGE_NO_PSYCO=1 \
-            -v "$GITHUB_WORKSPACE:/work:ro" -v "$RUNNER_TEMP/befunge-two-field/src:/candidate:ro" \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
             -v "$RUNNER_TEMP/two-field-receipts:/receipts" \
             -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
             -w /work python:2.7-slim sh -ceu '
               pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
-              timeout --kill-after=5s 350s python -u qa/qa31cn_native_two_field.py /candidate /receipts/native.json
+              timeout --kill-after=5s 350s python -u qa/qa31cn_native_two_field.py qa/evidence/qa31cn/pre_scanner src /receipts/native.json
             '
       - name: Retain original observations and corrected BF98 results
         if: always()

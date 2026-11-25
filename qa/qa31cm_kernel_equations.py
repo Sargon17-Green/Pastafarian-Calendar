@@ -157,13 +157,17 @@ def output_contract(valid):
 
 
 def execute(lines, ip, delta, memory, *, expected=None, inputs=(), scope, end, observe=None,
-            nonzero=None):
+            nonzero=None, sign_facts=()):
     """Symbolic or concrete execution directly from live source, including move and memory owners."""
     memory = dict(memory)
     stack, output, fetches = [], [], []
     index = cursor = 0
     width, height = max(map(len,lines)), len(lines)
     backed = set(memory)
+    need(not sign_facts or scope == "reference", "reference-only sign partition")
+
+    def known_sign(value):
+        return next((s for term,s in sign_facts if value == term), None)
 
     def glyph(point):
         x,y = point
@@ -199,11 +203,18 @@ def execute(lines, ip, delta, memory, *, expected=None, inputs=(), scope, end, o
             elif op == "*": value = left*right
             elif op == "/": value = quotient(left,right)
             elif op == "%": value = rem(left,right)
-            else: value = positive(left-right)
+            else:
+                difference = left-right
+                sign = known_sign(difference)
+                value = positive(difference) if sign is None else int(sign > 0)
             stack.append(value)
         elif op == "!":
             value = pop()
-            stack.append(0 if nonzero is not None and value == nonzero else is_zero(value))
+            sign = known_sign(value)
+            if sign is not None:
+                stack.append(int(sign == 0))
+            else:
+                stack.append(0 if nonzero is not None and value == nonzero else is_zero(value))
         elif op in "pg":
             y,x = constant(pop()),constant(pop())
             point = x,y
@@ -239,7 +250,9 @@ def execute(lines, ip, delta, memory, *, expected=None, inputs=(), scope, end, o
             stack.append(inputs[cursor])
             cursor += 1
         elif op in "|_":
-            value = constant(pop())
+            value = pop()
+            sign = known_sign(value)
+            value = constant(value) if sign is None else sign
             delta = ((0,-1) if value else (0,1)) if op == "|" else ((-1,0) if value else (1,0))
         elif op == "#":
             advance = 2

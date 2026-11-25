@@ -59,9 +59,9 @@ def read(directory, name):
 
 
 def main():
-    candidates, outfile = sys.argv[1:]
+    originals, candidates, outfile = sys.argv[1:]
     names = ("day_count", "save", "interleaved_day_save")
-    before = dict((n, read("src", n)) for n in names)
+    before = dict((n, read(originals, n)) for n in names)
     after = dict((n, read(candidates, n)) for n in names)
     refs = [read("reference", n) for n in names[:2]]
     # Whitespace, EOF without newline, semantic sign rejection, internal anchor, moduli and large integers.

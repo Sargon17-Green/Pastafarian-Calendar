@@ -1,0 +1,89 @@
+{
+  "day_count": {
+    "exit_steps": {
+      "invalid": 1232,
+      "valid": 1248
+    },
+    "first_gate_direction": [
+      445,
+      1009
+    ],
+    "initial_sign_magnitude_classes": 6,
+    "initial_steps": 1135,
+    "output_fields": 1,
+    "private_stack_cells_discarded_at_halt": 0,
+    "rejected_remainder_to_division_sites": [
+      [
+        375,
+        476
+      ]
+    ],
+    "source": "4f25f514f7b6362105dfff77db6f36769efe36c3",
+    "steps_per_decimal_digit": 1013
+  },
+  "interleaved_day_save": {
+    "exit_steps": {
+      "invalid": 1278,
+      "valid": 1310
+    },
+    "first_gate_direction": [
+      730,
+      293
+    ],
+    "initial_sign_magnitude_classes": 6,
+    "initial_steps": 1181,
+    "output_fields": 2,
+    "private_stack_cells_discarded_at_halt": 1,
+    "rejected_remainder_to_division_sites": [
+      [
+        765,
+        185
+      ],
+      [
+        1143,
+        185
+      ],
+      [
+        755,
+        369
+      ],
+      [
+        850,
+        838
+      ]
+    ],
+    "source": "4da7c9af6d5b52a42f3fc7679c42eec0e51fc6dc",
+    "steps_per_decimal_digit": 1221
+  },
+  "native_reference_source_equations": 14,
+  "save": {
+    "exit_steps": {
+      "invalid": 1085,
+      "valid": 1101
+    },
+    "first_gate_direction": [
+      279,
+      510
+    ],
+    "initial_sign_magnitude_classes": 6,
+    "initial_steps": 1749,
+    "output_fields": 1,
+    "private_stack_cells_discarded_at_halt": 0,
+    "rejected_remainder_to_division_sites": [
+      [
+        760,
+        280
+      ],
+      [
+        940,
+        375
+      ],
+      [
+        941,
+        945
+      ]
+    ],
+    "source": "dd6f10aa196e3a9523ee786e4ba41a91f303d199",
+    "steps_per_decimal_digit": 1117
+  }
+}
