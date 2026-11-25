@@ -78,7 +78,7 @@ jobs:
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
           if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: V24.1 - four QA-only shape substitutions and two local-value witnesses
+      - name: V25 - nine QA-only statement probes after V24.1; reuse prior witnesses
         shell: pwsh
         run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
       - name: Independent diagnostic receipt gate (never acceptance)
@@ -100,13 +100,13 @@ jobs:
              $a.suite_captured_exact -ne $true -or $a.suite_ec_valid -ne $true -or
              $a.final_marker_exact -ne $true -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
-             $a.statement_started -lt 1 -or $a.statement_receipts.Count -ne 11){
+             $a.statement_started -lt 1 -or $a.statement_receipts.Count -ne 9){
              throw 'RESIDUAL_DIAGNOSTIC_EVIDENCE_MISSING'}
           if(@($a.copies | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -ne 0){
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_244_after_v23' -or
+             $b.instrumentation_mode -cne 'statement_focus246_255_after_v24_1' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $b.prior_line181_witness_run -ne 45551684196 -or
              $b.prior_v17_run -ne 45658001179 -or
@@ -123,30 +123,26 @@ jobs:
              $b.prior_v22_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
              $b.prior_v23_run -ne 45676884530 -or
              $b.prior_v23_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
-             $b.prior_residual_run -ne 45676884530 -or
-             $b.prior_residual_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
+             $b.prior_v24_1_run -ne 45678986496 -or
+             $b.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+             $b.prior_v24_1_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589' -or
+             $b.prior_residual_run -ne 45678986496 -or
+             $b.prior_residual_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
              $b.line234_witness.source_line -ne 234 -or $b.line234_witness.applied_to_suite_copy -ne $true -or
-             $b.line237_witness.source_line -ne 237 -or $b.line237_witness.applied_to_suite_copy -ne $true){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
-          if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
-          if($a.statement_receipts[0].first_line -ne 234 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[10].first_line -ne 244){throw 'V24_RESIDUAL_FOCUS_NOT_PROVEN'}
-          if(-not $a.line234_witness.start_exact -or -not $a.line234_witness.captured_exact -or
-             -not $a.line234_witness.rank_valid -or $a.line234_witness.rank.Count -ne 1 -or [long]$a.line234_witness.rank[0] -ne 1 -or
-             -not $a.line234_witness.shape_valid -or $a.line234_witness.shape.Count -ne 1 -or [long]$a.line234_witness.shape[0] -ne 7 -or
-             -not $a.line234_witness.values_valid -or
-             -not $a.line234_witness.original_ec_valid -or $a.line234_witness.original_ec -ne 0 -or
-             -not $a.line234_witness.counterfactual_ec_valid -or $a.line234_witness.counterfactual_ec -ne 3 -or
-             -not $a.line234_witness.original_message_length_valid -or $a.line234_witness.original_message_length -le 0 -or
-             -not $a.line234_witness.counterfactual_message_length_valid -or $a.line234_witness.counterfactual_message_length -ne 0){throw 'LINE234_SHAPE_WITNESS_NOT_PROVEN'}
-          if(-not $a.line237_witness.start_exact -or -not $a.line237_witness.captured_exact -or
-             -not $a.line237_witness.rank_valid -or $a.line237_witness.rank.Count -ne 1 -or [long]$a.line237_witness.rank[0] -ne 1 -or
-             -not $a.line237_witness.shape_valid -or $a.line237_witness.shape.Count -ne 1 -or [long]$a.line237_witness.shape[0] -ne 46 -or
-             -not $a.line237_witness.values_valid -or
-             -not $a.line237_witness.original_ec_valid -or $a.line237_witness.original_ec -ne 0 -or
-             -not $a.line237_witness.counterfactual_ec_valid -or $a.line237_witness.counterfactual_ec -ne 3 -or
-             -not $a.line237_witness.original_message_length_valid -or $a.line237_witness.original_message_length -le 0 -or
-             -not $a.line237_witness.counterfactual_message_length_valid -or $a.line237_witness.counterfactual_message_length -ne 0){throw 'LINE237_SHAPE_WITNESS_NOT_PROVEN'}
-          Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
+             $b.line234_witness.evidence_run -ne 45678986496 -or $b.line234_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+             $b.line237_witness.source_line -ne 237 -or $b.line237_witness.applied_to_suite_copy -ne $true -or
+             $b.line237_witness.evidence_run -ne 45678986496 -or $b.line237_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+          if($a.prior_line181_witness_run -ne 45551684196 -or
+             $a.prior_v24_1_run -ne 45678986496 -or
+             $a.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'){
+             throw 'PRIOR_WITNESS_REFERENCE_MISSING'
+          }
+          if($a.statement_receipts[0].first_line -ne 246 -or $a.statement_receipts[0].start_exact -ne $true -or
+             $a.statement_receipts[8].first_line -ne 255){
+             throw 'V25_RESIDUAL_FOCUS_NOT_PROVEN'
+          }
+          Write-Output ('PRIOR_V24_1_WITNESS_REFERENCE='+$a.prior_v24_1_run+'|ARTIFACT_SHA256='+$a.prior_v24_1_artifact_sha256)
+          Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)          Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
       - name: Hash all diagnostic evidence
@@ -161,7 +157,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v24-1
+          name: apl-german-stage01-residual-v25
           path: |
             residual_evidence/
             residual_font_evidence/

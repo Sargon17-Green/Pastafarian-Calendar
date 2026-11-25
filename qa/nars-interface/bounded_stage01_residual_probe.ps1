@@ -78,7 +78,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v24_1'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v25'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -90,10 +90,17 @@ try {
     $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
-    $m.program_count -ne 28 -or $m.probe_count -ne 11 -or
-    $m.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_244_after_v23' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
-    $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
+    $m.program_count -ne 28 -or $m.probe_count -ne 9 -or
+    $m.instrumentation_mode -cne 'statement_focus246_255_after_v24_1' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or
+    $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
+    $m.line234_witness.evidence_run -ne 45678986496 -or $m.line234_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+    $m.line234_witness.rank.Count -ne 1 -or [long]$m.line234_witness.rank[0] -ne 1 -or $m.line234_witness.shape.Count -ne 1 -or [long]$m.line234_witness.shape[0] -ne 7 -or
+    $m.line234_witness.original_ec -ne 0 -or $m.line234_witness.original_message_length -ne 369 -or $m.line234_witness.counterfactual_ec -ne 3 -or $m.line234_witness.counterfactual_message_length -ne 0 -or
     $m.line237_witness.source_line -ne 237 -or $m.line237_witness.applied_to_suite_copy -ne $true -or
+    $m.line237_witness.evidence_run -ne 45678986496 -or $m.line237_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+    $m.line237_witness.rank.Count -ne 1 -or [long]$m.line237_witness.rank[0] -ne 1 -or $m.line237_witness.shape.Count -ne 1 -or [long]$m.line237_witness.shape[0] -ne 46 -or
+    $m.line237_witness.original_ec -ne 0 -or $m.line237_witness.original_message_length -ne 360 -or $m.line237_witness.counterfactual_ec -ne 3 -or $m.line237_witness.counterfactual_message_length -ne 0 -or
     $m.prior_line181_witness_run -ne 45551684196 -or
     $m.prior_v17_run -ne 45658001179 -or
     $m.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
@@ -109,11 +116,13 @@ try {
     $m.prior_v22_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
     $m.prior_v23_run -ne 45676884530 -or
     $m.prior_v23_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
-    $m.prior_residual_run -ne 45676884530 -or
-    $m.prior_residual_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
+    $m.prior_v24_1_run -ne 45678986496 -or
+    $m.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
+    $m.prior_v24_1_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589' -or
+    $m.prior_residual_run -ne 45678986496 -or
+    $m.prior_residual_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
     $m.original_unmodified_suite_proven -ne $false -or
-    $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
- if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
+    $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'} if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
  $r['candidate_sha256']=$m.candidate_sha256
  foreach($path in @($m.marker_path,$m.suite.start_path,$m.suite.captured_path,$m.suite.code_path,$m.suite.message_path)){
    if(Test-Path -LiteralPath $path){throw 'PREEXISTING_RESIDUAL_SUITE_EVIDENCE'}
@@ -185,15 +194,10 @@ try {
          last_line=[int]$s.last_line;kind=$s.kind}
    }
  }
- $r['line234_witness']=ReadLineWitness $m.line234_witness 'line234'
- $r['line237_witness']=ReadLineWitness $m.line237_witness 'line237'
- Write-Output ('LINE234_WITNESS|START='+$r['line234_witness'].start_exact+
-   '|CAPTURED='+$r['line234_witness'].captured_exact+'|RANK='+($r['line234_witness'].rank -join ',')+
-   '|SHAPE='+($r['line234_witness'].shape -join ',')+'|ORIGINAL_EC='+$r['line234_witness'].original_ec+
-   '|COUNTERFACTUAL_EC='+$r['line234_witness'].counterfactual_ec)
- Write-Output ('LINE237_WITNESS|START='+$r['line237_witness'].start_exact+
-   '|CAPTURED='+$r['line237_witness'].captured_exact+'|ORIGINAL_EC='+$r['line237_witness'].original_ec+
-   '|COUNTERFACTUAL_EC='+$r['line237_witness'].counterfactual_ec)
+ $r['prior_v24_1_run']=45678986496
+ $r['prior_v24_1_artifact_sha256']='ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
+ Write-Output ('PRIOR_V24_1_SHAPE_WITNESSES|RUN='+$r['prior_v24_1_run']+
+   '|ARTIFACT_SHA256='+$r['prior_v24_1_artifact_sha256'])
  Write-Output ('RESIDUAL_STATEMENTS|STARTED='+$r['statement_started']+
    '|ENDED='+$r['statement_ended']+'|FIRST_INCOMPLETE='+($r['first_incomplete']|ConvertTo-Json -Compress))
  $start=ReadExact $m.suite.start_path $m.suite.start_token (Join-Path $Evidence 'suite_start.txt')
@@ -225,8 +229,10 @@ try {
  $r['prior_v22_artifact_sha256']='6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf'
  $r['prior_v23_run']=45676884530
  $r['prior_v23_artifact_sha256']='366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38'
- $r['prior_residual_run']=45676884530
- $r['prior_residual_artifact_sha256']='366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38'
+ $r['prior_v24_1_run']=45678986496
+ $r['prior_v24_1_artifact_sha256']='ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
+ $r['prior_residual_run']=45678986496
+ $r['prior_residual_artifact_sha256']='ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
  $all= ($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
    (@($r['fx_checkpoints'] | Where-Object {$_.exact -ne $true}).Count -eq 0) -and
    ($r['copies'].Count -eq 2) -and
@@ -234,25 +240,12 @@ try {
    $r['suite_start_exact'] -and $r['suite_captured_exact'] -and
    $r['suite_ec_valid'] -and $r['final_marker_exact'] -and
    $r['compile_exact'] -and $r['compile_name_exact'] -and
-   $r['statement_receipts'].Count -eq $m.probe_count -and $r['statement_started'] -ge 1 -and
-   $r['statement_receipts'][0].first_line -eq 234 -and $r['statement_receipts'][0].start_exact -and
-   $r['statement_receipts'][10].first_line -eq 244 -and
-   $r['line234_witness'].start_exact -and $r['line234_witness'].captured_exact -and
-   $r['line234_witness'].rank_valid -and $r['line234_witness'].rank.Count -eq 1 -and [long]$r['line234_witness'].rank[0] -eq 1 -and
-   $r['line234_witness'].shape_valid -and $r['line234_witness'].shape.Count -eq 1 -and [long]$r['line234_witness'].shape[0] -eq 7 -and
-   $r['line234_witness'].values_valid -and
-   $r['line234_witness'].original_ec_valid -and $r['line234_witness'].original_ec -eq 0 -and
-   $r['line234_witness'].counterfactual_ec_valid -and $r['line234_witness'].counterfactual_ec -eq 3 -and
-   $r['line234_witness'].original_message_length_valid -and $r['line234_witness'].original_message_length -gt 0 -and
-   $r['line234_witness'].counterfactual_message_length_valid -and $r['line234_witness'].counterfactual_message_length -eq 0 -and
-   $r['line237_witness'].start_exact -and $r['line237_witness'].captured_exact -and
-   $r['line237_witness'].rank_valid -and $r['line237_witness'].rank.Count -eq 1 -and [long]$r['line237_witness'].rank[0] -eq 1 -and
-   $r['line237_witness'].shape_valid -and $r['line237_witness'].shape.Count -eq 1 -and [long]$r['line237_witness'].shape[0] -eq 46 -and
-   $r['line237_witness'].values_valid -and
-   $r['line237_witness'].original_ec_valid -and $r['line237_witness'].original_ec -eq 0 -and
-   $r['line237_witness'].counterfactual_ec_valid -and $r['line237_witness'].counterfactual_ec -eq 3 -and
-   $r['line237_witness'].original_message_length_valid -and $r['line237_witness'].original_message_length -gt 0 -and
-   $r['line237_witness'].counterfactual_message_length_valid -and $r['line237_witness'].counterfactual_message_length -eq 0
+   $r['statement_receipts'].Count -eq $m.probe_count -and $m.probe_count -eq 9 -and
+   $r['statement_started'] -ge 1 -and
+   $r['statement_receipts'][0].first_line -eq 246 -and $r['statement_receipts'][0].start_exact -and
+   $r['statement_receipts'][8].first_line -eq 255 -and
+   $r['prior_v24_1_run'] -eq 45678986496 -and
+   $r['prior_v24_1_artifact_sha256'] -ceq 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'
  $r['status']=if(-not $all){'INCOMPLETE_RESIDUAL_DIAGNOSTIC_NOT_STAGE01'}elseif($r['suite_no_error']){
     'RESIDUAL_SUITE_NO_ERROR_DIAGNOSTIC_ONLY'
  }else{'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY'}
