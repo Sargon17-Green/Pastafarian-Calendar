@@ -109,7 +109,10 @@ def main():
             )
             if (result, case, status) != (SUCCESS, 393, UNIMPLEMENTED):
                 count_bytes = read_symbol(boy, "wCalendarSelectCount", 2)
-                print(f"NATIVE393_DIAG_REMAINING_SOURCE_CASES={read_symbol(boy,'wCalendarAnswerSavedByte',1)[0]}", flush=True)
+                print(f"NATIVE393_DIAG_RESULT_COUNT={read_symbol(boy,'wNative393ResultCount',1)[0]}", flush=True)
+                print(f"NATIVE393_DIAG_MODE={read_symbol(boy,'wNative393Mode',1)[0]}", flush=True)
+                print(f"NATIVE393_DIAG_STATUS_ACTIVE={read_symbol(boy,'wCalendarStatus',1)[0]:02x}/{read_symbol(boy,'wCalendarActive',1)[0]:02x}", flush=True)
+                print(f"NATIVE393_DIAG_ORDINAL={read_symbol(boy,'wCalendarOrdinalSign',1)[0]:02x}/{read_symbol(boy,'wCalendarOrdinalLength',3).hex()}", flush=True)
                 print(f"NATIVE393_DIAG_INPUT_BOWL_SEAL_COUNT={read_symbol(boy,'wCalendarAnswerInputBowl',1)[0]},{read_symbol(boy,'wCalendarAnswerInputSeal',1)[0]},{int.from_bytes(count_bytes,'little')}", flush=True)
                 print(f"NATIVE393_DIAG_A0={read_symbol(boy,'wCalendarAnswerA0',16).hex()}", flush=True)
                 print(f"NATIVE393_DIAG_DIRECTION={read_symbol(boy,'wCalendarAnswerDirection',1)[0]:02x}", flush=True)

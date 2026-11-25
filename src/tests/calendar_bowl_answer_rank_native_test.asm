@@ -210,9 +210,10 @@ RunCalendarBowlAnswerRankBench::
     ld a, 10
     ld [wCalendarAnswerInputSeal], a
 
+    ; Force a duplicate regardless of the valid source pair's first bowl ID.
     ld a, [wCalendarBowlOrderAt46]
     ld [wCalendarAnswerSavedByte], a
-    ld a, 6
+    ld a, [wCalendarBowlOrderAt46+1]
     ld [wCalendarBowlOrderAt46], a
     call .expectInvalid
     jp nz, .fail

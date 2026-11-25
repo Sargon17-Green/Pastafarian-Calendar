@@ -29,3 +29,6 @@ Run 45672668795 on `171b825abfa4cbbb4dcc1697be8d892781d17fc8`: 24/25 jobs succee
 
 ## Prior Foundation-only exact-SHA result
 Run 45673927216 on `5ccf201158ee3ac1a29ff1974e5d251de81f63c0`: 25/25 jobs success; Native393 `A5/393/40` in 22,442 frames; 18 Foundation bowl/seal vectors, 26 synthetic boundaries, invalid counts, output and input snapshots passed. This was still one Foundation c/t pair; the five-pair matrix above is the next acceptance gate.
+
+## Nonfoundation invalid-order harness correction
+Run 1869c8ba8a94549c6a96971c11f48d0205cb5c9e: Foundation pair passed; the first nonfoundation pair completed the 18 answer calls but failed the invalid-order negative test. Its valid `orderAt46` began `06 05...`; the test's hardcoded replacement value 6 therefore made no mutation. Corrected the test to replace element 0 with element 1, guaranteeing a duplicate in every valid permutation. This is a test-harness assumption, not a source algorithm failure.
