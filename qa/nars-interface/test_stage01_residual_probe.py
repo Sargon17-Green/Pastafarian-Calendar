@@ -33,14 +33,14 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(len(r["locked_prerequisite_program_sha256"]),25)
         self.assertEqual(r["probe_count"],len(r["probes"]))
         self.assertEqual(r["probe_count"],8)
-        self.assertEqual([p["first_line"] for p in r["probes"]],[228,230,231,233,234,235,236,237])
-        self.assertEqual(r["instrumentation_mode"],"statements228_230_231_233_234_235_236_237_after_v21_218_227")
+        self.assertEqual([p["first_line"] for p in r["probes"]],[234,235,236,237,238,239,240,241])
+        self.assertEqual(r["instrumentation_mode"],"line234_shape_witness_line237_counterfactual_focus234_241_after_v22")
         self.assertEqual(r["candidate_bytes"],len(self.data))
         self.assertEqual([p["index"] for p in r["probes"]],list(range(1,r["probe_count"]+1)))
         self.assertEqual(r["source_manifest_sha256"],load_locked_sources(ROOT)["manifest"]["manifest_sha256"])
         self.assertFalse(r["source_statements_preserved"])
-        self.assertEqual([p["source_line"] for p in r["qa_only_patches"]],[180,181])
-        for p,value in zip(r["qa_only_patches"],(17,47)):
+        self.assertEqual([p["source_line"] for p in r["qa_only_patches"]],[180,181,234])
+        for p,value in zip(r["qa_only_patches"],(17,47,7)):
             self.assertEqual(p["counterfactual"],p["original"].replace(f"(⊂{value})",f"(⊂,{value})",1))
         self.assertEqual(r["prior_line181_witness_run"],45551684196)
         self.assertEqual(r["prior_v17_run"],45658001179)
@@ -51,11 +51,30 @@ class ResidualTests(unittest.TestCase):
         self.assertEqual(r["prior_v19_artifact_sha256"],"a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5")
         self.assertEqual(r["prior_v20_run"],45672323607)
         self.assertEqual(r["prior_v20_artifact_sha256"],"aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391")
-        self.assertEqual(r["prior_residual_run"],45672648212)
-        self.assertEqual(r["prior_residual_artifact_sha256"],"e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb")
+        self.assertEqual(r["prior_v21_run"],45672648212)
+        self.assertEqual(r["prior_v21_artifact_sha256"],"e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb")
+        self.assertEqual(r["prior_v22_run"],45673022324)
+        self.assertEqual(r["prior_v22_artifact_sha256"],"6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf")
+        self.assertEqual(r["prior_residual_run"],45673022324)
+        self.assertEqual(r["prior_residual_artifact_sha256"],"6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf")
         self.assertEqual(hashlib.sha256(self.data).hexdigest(),r["candidate_sha256"])
         self.assertEqual([p["kind"] for p in r["probes"]],["statement"]*8)
         self.assertEqual(len([p for p in r["probes"] if p["kind"]=="bounded_for_block"]),0)
+        w234=r["line234_witness"]
+        self.assertEqual(w234["source_line"],234)
+        self.assertTrue(w234["applied_to_suite_copy"])
+        self.assertEqual(w234["original"],r["qa_only_patches"][2]["original"].strip())
+        self.assertEqual(w234["counterfactual"],r["qa_only_patches"][2]["counterfactual"].strip())
+        self.assertIn("⍴⍴hidden",w234["metrics_expression"])
+        w237=r["line237_witness"]
+        self.assertEqual(w237["source_line"],237)
+        self.assertFalse(w237["applied_to_suite_copy"])
+        self.assertEqual(w237["counterfactual"],w237["original"].replace("(⊂46)","(⊂,46)",1))
+        all_paths=[]
+        for w in (w234,w237):
+            all_paths.extend(w["paths"].values())
+            all_paths.extend((w["start_path"],w["captured_path"]))
+        self.assertEqual(len(all_paths),len(set(all_paths)))
 
     def test_line181_exact_counterfactual(self):
         _,w=probe.line181_witness(ROOT,MARKER)

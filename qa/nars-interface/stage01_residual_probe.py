@@ -36,11 +36,52 @@ def decode_paired(raw: bytes):
                 for u in units]
     return lines, pos, match, programs
 
-def instrument(root: pathlib.Path, marker: str):
-    """Instrument bounded original-source spans to avoid 266 native filesystem writes.
+def line_value_witness(source_line, variable, original, counterfactual, marker, applied_to_suite_copy):
+    """Capture local vector shape and original/counterfactual AssertEqual outcomes."""
+    wp = pathlib.PureWindowsPath(marker)
+    stem = f"{wp.stem}_line{source_line}"
+    keys = ("rank", "shape", "values", "original_ec", "original_message_codepoints",
+            "original_message_length", "counterfactual_ec", "counterfactual_message_length")
+    paths = {key: str(wp.with_name(f"{stem}_{key}.txt")) for key in keys}
+    start_path = str(wp.with_name(f"{stem}_start.txt"))
+    captured_path = str(wp.with_name(f"{stem}_captured.txt"))
+    start_token = (f"APL_GERMAN_LINE{source_line}_WITNESS_V1|SOURCE={SOURCE_COMMIT}|"
+                   f"LINE={source_line}|PHASE=START")
+    captured_token = (f"APL_GERMAN_LINE{source_line}_WITNESS_V1|SOURCE={SOURCE_COMMIT}|"
+                      f"LINE={source_line}|PHASE=CAPTURED_NOT_PASS")
+    def write(expression, key):
+        return f"(⍕({expression})) ⎕NAPPEND ((⎕UCS {_codes(paths[key])}) ⎕NCREATE 0)"
+    var = f"QALine{source_line}"
+    expressions = [
+        marker_write(start_token, start_path),
+        write(f"⍴⍴{variable}", "rank"),
+        write(f"⍴{variable}", "shape"),
+        write(variable, "values"),
+        f"{var}OriginalEC←⎕EC ⎕UCS {_codes(original)}",
+        write(f"{var}OriginalEC[1]", "original_ec"),
+        write(f"⎕UCS ⊃{var}OriginalEC[3]", "original_message_codepoints"),
+        write(f"≢,⊃{var}OriginalEC[3]", "original_message_length"),
+        f"{var}CounterfactualEC←⎕EC ⎕UCS {_codes(counterfactual)}",
+        write(f"{var}CounterfactualEC[1]", "counterfactual_ec"),
+        write(f"≢,⊃{var}CounterfactualEC[3]", "counterfactual_message_length"),
+        marker_write(captured_token, captured_path),
+    ]
+    program = " ⋄ ".join(expressions)
+    return program, dict(source_line=source_line, variable=variable,
+                         original=original, counterfactual=counterfactual,
+                         applied_to_suite_copy=bool(applied_to_suite_copy),
+                         start_path=start_path, start_token=start_token,
+                         captured_path=captured_path, captured_token=captured_token,
+                         paths=paths,
+                         metrics_expression=f"⍴⍴{variable};⍴{variable};{variable}",
+                         program_sha256=hashlib.sha256(program.encode()).hexdigest())
 
-    All original statements except the exact line180 and line181 QA-only substitutions remain unchanged.
-    Control-flow blocks are indivisible; the evidence is diagnostic only.
+
+def instrument(root: pathlib.Path, marker: str):
+    """Instrument bounded source spans plus exact local-value witnesses; diagnostic only.
+
+    Only the exact QA-only counterfactual substitutions at lines180, 181 and 234 alter the copied suite.
+    The original production source remains unchanged.
     """
     locked = load_locked_sources(root)
     blocks = [b for b in locked["blocks"] if b["name"] == "RunStage01Tests"]
@@ -59,7 +100,30 @@ def instrument(root: pathlib.Path, marker: str):
             raise ValueError(f"LINE{line_number}_PATCH_ANCHOR_MISMATCH")
         source[idx] = source[idx].replace(f"(⊂{value})", f"(⊂,{value})", 1)
         patches.append(dict(source_line=line_number, original=original_source[idx], counterfactual=source[idx]))
-    if [i for i,(a,b) in enumerate(zip(original_source,source)) if a != b] != [n-block["start_line"] for n in (180,181)]:
+    idx234 = 234 - block["start_line"]
+    original234 = original_source[idx234].strip()
+    if not original234.startswith("AssertEqual (⊂7) (⊂⍴hidden) "):
+        raise ValueError("LINE234_PATCH_ANCHOR_MISMATCH")
+    source[idx234] = source[idx234].replace("(⊂7)", "(⊂,7)", 1)
+    patches.append(dict(source_line=234, original=original_source[idx234], counterfactual=source[idx234]))
+    idx237 = 237 - block["start_line"]
+    original237 = original_source[idx237].strip()
+    if not original237.startswith("AssertEqual (⊂46) (⊂⍴visible) "):
+        raise ValueError("LINE237_WITNESS_ANCHOR_MISMATCH")
+    counterfactual237 = original237.replace("(⊂46)", "(⊂,46)", 1)
+    if counterfactual237 == original237:
+        raise ValueError("LINE237_COUNTERFACTUAL_NOT_CONSTRUCTED")
+    witnesses = {}
+    witness_programs = {}
+    for line_number, variable, original, counterfactual, applied in (
+        (234, "hidden", original234, source[idx234].strip(), True),
+        (237, "visible", original237, counterfactual237, False),
+    ):
+        program, metadata = line_value_witness(
+            line_number, variable, original, counterfactual, marker, applied)
+        witnesses[f"line{line_number}"] = metadata
+        witness_programs[line_number] = program
+    if [i for i,(a,b) in enumerate(zip(original_source,source)) if a != b] != [n-block["start_line"] for n in (180,181,234)]:
         raise ValueError("UNEXPECTED_SOURCE_COPY_CHANGE")
     out = [ALIAS + source[0][len("RunStage01Tests"):]]
     wp = pathlib.PureWindowsPath(marker)
@@ -102,9 +166,9 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V22: isolate the second work-count, stone snapshot, post-stir sum, and hidden/visible setup.
-    # V21 proved lines218-227 complete; keep the two established QA-only counterfactuals unchanged.
-    focus = [228, 230, 231, 233, 234, 235, 236, 237]
+    # V23: witness the hidden/visible shape assertions and continue through the next setup statements.
+    # V22 isolated the first failing line at 234; only the line234 scalar/vector correction is applied.
+    focus = [234, 235, 236, 237, 238, 239, 240, 241]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
@@ -124,7 +188,11 @@ def instrument(root: pathlib.Path, marker: str):
                   f"IDX={idx:03d}|LINE={last_line}|PHASE=END")
         indent_s = source[start][:len(source[start])-len(source[start].lstrip())]
         indent_e = source[end-1][:len(source[end-1])-len(source[end-1].lstrip())]
-        before[start] = indent_s + marker_write(stoken, spath)
+        prefix_parts = []
+        if first_line in witness_programs:
+            prefix_parts.append(witness_programs[first_line])
+        prefix_parts.append(marker_write(stoken, spath))
+        before[start] = indent_s + " ⋄ ".join(prefix_parts)
         after[end-1] = indent_e + marker_write(etoken, epath)
         probes.append(dict(index=idx, kind=kind,
                            first_line=first_line, last_line=last_line,
@@ -144,7 +212,7 @@ def instrument(root: pathlib.Path, marker: str):
         raise ValueError("ORIGINAL_STATEMENTS_CHANGED")
     if not all(probes[i]["index"] == i+1 for i in range(len(probes))):
         raise ValueError("PROBE_INDEX_NOT_MONOTONIC")
-    return out, probes, locked["manifest"]["manifest_sha256"], patches
+    return out, probes, locked["manifest"]["manifest_sha256"], patches, witnesses
 
 
 def line181_witness(root, marker):
@@ -195,7 +263,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
     before = [hashlib.sha256(x.encode()).hexdigest() for x in programs[:25]]
     if before[:23] != base["import_program_sha256"]:
         raise ValueError("LOCKED_95_FX_PREFIX_CHANGED")
-    definition, probes, manifest_sha, patches = instrument(root, marker)
+    definition, probes, manifest_sha, patches, witnesses = instrument(root, marker)
     if manifest_sha != base["source_manifest_sha256"]:
         raise ValueError("SOURCE_MANIFEST_CHANGED")
     wp = pathlib.PureWindowsPath(marker)
@@ -228,13 +296,14 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    source_manifest_sha256=manifest_sha,function_count=95,chunk_count=23,
                    chunk_records=base["chunk_records"],copies=base["copies"],
                    locked_prerequisite_program_sha256=before,probe_count=len(probes),
-                   probes=probes,compiled=dict(path=compile_path,token=compile_token,
+                   probes=probes,line234_witness=witnesses["line234"],line237_witness=witnesses["line237"],
+                   compiled=dict(path=compile_path,token=compile_token,
                       name_code_path=compare_path,alias=ALIAS,
                       definition_sha256=hashlib.sha256("\n".join(definition).encode()).hexdigest()),
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=False,qa_only_patches=patches,
-                   instrumentation_mode="statements228_230_231_233_234_235_236_237_after_v21_218_227",
+                   instrumentation_mode="line234_shape_witness_line237_counterfactual_focus234_241_after_v22",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
@@ -248,8 +317,12 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    prior_v19_artifact_sha256="a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5",
                    prior_v20_run=45672323607,
                    prior_v20_artifact_sha256="aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391",
-                   prior_residual_run=45672648212,
-                   prior_residual_artifact_sha256="e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb",
+                   prior_v21_run=45672648212,
+                   prior_v21_artifact_sha256="e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb",
+                   prior_v22_run=45673022324,
+                   prior_v22_artifact_sha256="6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf",
+                   prior_residual_run=45673022324,
+                   prior_residual_artifact_sha256="6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf",
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 

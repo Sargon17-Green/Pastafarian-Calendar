@@ -78,7 +78,7 @@ jobs:
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
           if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: Execute QA alias with four source-anchored counterfactuals
+      - name: Execute QA alias with five source-anchored counterfactuals and two local-value witnesses
         shell: pwsh
         run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
       - name: Independent diagnostic receipt gate (never acceptance)
@@ -106,9 +106,9 @@ jobs:
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'statements228_230_231_233_234_235_236_237_after_v21_218_227' -or
+             $b.instrumentation_mode -cne 'line234_shape_witness_line237_counterfactual_focus234_241_after_v22' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
-             $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181') -or $b.prior_line181_witness_run -ne 45551684196 -or
+             $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181,234') -or $b.prior_line181_witness_run -ne 45551684196 -or
              $b.prior_v17_run -ne 45658001179 -or
              $b.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
              $b.prior_v18_run -ne 45671179161 -or
@@ -117,11 +117,24 @@ jobs:
              $b.prior_v19_artifact_sha256 -cne 'a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5' -or
              $b.prior_v20_run -ne 45672323607 -or
              $b.prior_v20_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391' -or
-             $b.prior_residual_run -ne 45672648212 -or
-             $b.prior_residual_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+             $b.prior_v21_run -ne 45672648212 -or
+             $b.prior_v21_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb' -or
+             $b.prior_v22_run -ne 45673022324 -or
+             $b.prior_v22_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
+             $b.prior_residual_run -ne 45673022324 -or
+             $b.prior_residual_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
+             $b.line234_witness.source_line -ne 234 -or $b.line234_witness.applied_to_suite_copy -ne $true -or
+             $b.line237_witness.source_line -ne 237 -or $b.line237_witness.applied_to_suite_copy -ne $false){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
           if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
-          if($a.statement_receipts[0].first_line -ne 228 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[7].first_line -ne 237){throw 'V22_RESIDUAL_FOCUS_NOT_PROVEN'}
+          if($a.statement_receipts[0].first_line -ne 234 -or $a.statement_receipts[0].start_exact -ne $true -or
+             $a.statement_receipts[7].first_line -ne 241){throw 'V23_RESIDUAL_FOCUS_NOT_PROVEN'}
+          if(-not $a.line234_witness.start_exact -or -not $a.line234_witness.captured_exact -or
+             -not $a.line234_witness.rank_valid -or $a.line234_witness.rank.Count -ne 1 -or [long]$a.line234_witness.rank[0] -ne 1 -or
+             -not $a.line234_witness.shape_valid -or $a.line234_witness.shape.Count -ne 1 -or [long]$a.line234_witness.shape[0] -ne 7 -or
+             -not $a.line234_witness.original_ec_valid -or $a.line234_witness.original_ec -ne 0 -or
+             -not $a.line234_witness.counterfactual_ec_valid -or $a.line234_witness.counterfactual_ec -ne 3 -or
+             -not $a.line234_witness.original_message_length_valid -or $a.line234_witness.original_message_length -le 0 -or
+             -not $a.line234_witness.counterfactual_message_length_valid -or $a.line234_witness.counterfactual_message_length -ne 0){throw 'LINE234_SHAPE_WITNESS_NOT_PROVEN'}
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
@@ -137,7 +150,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v22
+          name: apl-german-stage01-residual-v23
           path: |
             residual_evidence/
             residual_font_evidence/
