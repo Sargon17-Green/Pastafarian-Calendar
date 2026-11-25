@@ -13,7 +13,7 @@ import time
 import unittest
 import warnings
 import zipfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 MIB = 1024 * 1024
 JAR_LIMIT = 64 * MIB
@@ -22,7 +22,7 @@ JSON_LIMIT = 256 * 1024
 OUTER_LIMIT = JAR_LIMIT + EVIDENCE_LIMIT + JSON_LIMIT + MIB
 IDENTITY = ("repository", "branch", "source_sha", "run_id", "attempt",
             "job_id", "workflow_path", "workflow_blob_sha",
-            "evidence_artifact_id", "receipt_artifact_id")
+            "evidence_artifact_id")
 MEMBERS = {"production.jar": JAR_LIMIT, "receipt.json": JSON_LIMIT,
            "worker-evidence.zip": EVIDENCE_LIMIT}
 
@@ -135,8 +135,11 @@ def validate(bundle, pins):
             and hex_digest(receipt["workflow_blob_sha"], 40)
             and safe_path(receipt["workflow_path"])
             and all(type(receipt[k]) is int and receipt[k] > 0 for k in
-                    ("run_id", "attempt", "job_id", "evidence_artifact_id", "receipt_artifact_id"))
-            and receipt["evidence_artifact_id"] != receipt["receipt_artifact_id"], "IDENTITY")
+                    ("run_id", "attempt", "job_id", "evidence_artifact_id"))
+            and type(pins.get("receipt_artifact_id")) is int
+            and pins["receipt_artifact_id"] > 0
+            and receipt["evidence_artifact_id"] != pins["receipt_artifact_id"]
+            and "receipt_artifact_id" not in receipt, "IDENTITY")
     evidence = outer["worker-evidence.zip"]
     require(hex_digest(pins.get("evidence_archive_sha256")) and
             digest(evidence) == pins["evidence_archive_sha256"], "EVIDENCE_DIGEST")
@@ -186,7 +189,7 @@ def fixture(jar=b"synthetic jar bytes", receipt_patch=None, worker_patch=None,
     r = dict(schema="jar-byte-receipt-v1", repository="Sargon17-Green/Pastafarian-Calendar",
              branch="Kotlin+Cymraeg", source_sha="a"*40, run_id=10, attempt=1, job_id=11,
              workflow_path=".github/workflows/qa.yml", workflow_blob_sha="b"*40,
-             evidence_artifact_id=12, receipt_artifact_id=13, jar_size=len(jar),
+             evidence_artifact_id=12, jar_size=len(jar),
              jar_pre_sha256=d, jar_post_sha256=d, compiler_sha256="c"*64,
              compiler_version="synthetic", compile_argv=["compiler", "source.kt"],
              sources=[{"path":"source.kt", "sha256":"d"*64}])
@@ -200,7 +203,8 @@ def fixture(jar=b"synthetic jar bytes", receipt_patch=None, worker_patch=None,
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         bundle = pack(members)
-    p.update(schema="external-readback-v1", run_status="completed", job_status="completed",
+    p.update(schema="external-readback-v1", receipt_artifact_id=13,
+             run_status="completed", job_status="completed",
              run_conclusion="success", job_conclusion="success",
              evidence_archive_sha256=digest(evidence), receipt_archive_sha256=digest(bundle))
     p.update(pin_patch or {})
@@ -232,6 +236,8 @@ class Controls(unittest.TestCase):
         for key in IDENTITY:
             with self.subTest(key=key):
                 self.reject("IDENTITY", fixture(receipt_patch={key:"swapped"}))
+        self.reject("IDENTITY", fixture(pin_patch={"receipt_artifact_id":12}))
+        self.reject("IDENTITY", fixture(receipt_patch={"receipt_artifact_id":13}))
 
     def test_A5_drift(self):
         self.reject("JAR_DRIFT", fixture(receipt_patch={"jar_post_sha256":"e"*64}))
@@ -248,6 +254,10 @@ class Controls(unittest.TestCase):
     def test_A7_build_drift(self):
         self.reject("BUILD_DRIFT", fixture(receipt_patch={"compiler_sha256":"f"*64}))
         self.reject("BUILD_DRIFT", fixture(receipt_patch={"sources":[]}))
+
+    def test_external_status_and_evidence(self):
+        self.reject("PROVIDER_STATUS", fixture(pin_patch={"job_status":"in_progress"}))
+        self.reject("EVIDENCE_DIGEST", fixture(pin_patch={"evidence_archive_sha256":"f"*64}))
 
     def test_historical(self):
         self.assertEqual(historical()["BYTE_BINDING"], "NOT_ASSESSED")
