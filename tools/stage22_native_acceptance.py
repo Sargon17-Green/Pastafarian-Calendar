@@ -85,13 +85,13 @@ def main():
     persist()
     cases = ("ones", "witness", "boundary")
     for name in cases:
-        if not run("positive", "full_" + name, d.case(name), 12, source, 600):
-            sys.exit("STAGE22_FULL_" + name.upper() + "_NOT_VERIFIED")
-    for name in cases:
         for steps in (1, 6):
             label = f"probe{steps}_{name}"
             if not run("positive", label, d.case(name), steps, d.instrument(source, steps), 180):
                 sys.exit("STAGE22_PROBE_" + label.upper() + "_NOT_VERIFIED")
+    for name in cases:
+        if not run("positive", "full_" + name, d.case(name), 12, source, 600):
+            sys.exit("STAGE22_FULL_" + name.upper() + "_NOT_VERIFIED")
     if not run("positive", "replay_witness", d.case("witness"), 12, source, 600):
         sys.exit("STAGE22_REPLAY_NOT_VERIFIED")
 

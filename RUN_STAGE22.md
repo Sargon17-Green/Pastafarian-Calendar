@@ -112,6 +112,8 @@ Production operation `39` is appended after accepted operation `38`. It validate
 - Operation 39: source committed at parent `609a1645af71dad6e3bb19ce02c0ba1e76c0748c`.
 - First CI attempt: run `45684008657`, job `139451675350`, failed at source-pin verification because `SOURCE_PIN` contained a literal backslash; build and Native steps were skipped.
 - Second CI attempt: run `45684287557`, job `139452646856`, passed source/runtime pin, compiler build and Unicode preflight, then stopped before Native because `cmp` required byte-identical JSON key order and historical metadata. The generated and committed mathematical oracle values agree; the gate is being changed to compare the full mathematical fields and all five numeric witnesses semantically. Artifact `15056140710` has SHA-256 `df9f01220730ca81fed08e1b1d0db14ae8e2fdf64288180e1e370fd9e7a91d8b`; ZIP CRC test passed.
+- Third CI attempt: run `45684661404`, job `139453960901`, reached the original FALSE interpreter and failed immediately at `op22` with `stack type mismatch` while adding `6+149u` to the BigInt total; no numeric result was accepted. The fixture self-check passed. Artifact `15054463704` has SHA-256 `237c7b788a01afd604ce8d2568bad1a1d0db729104dc5ee26fafe89d5f55db3a`; ZIP CRC test passed.
+- Repair: replace the two scalar `op22` constructions with explicit `op20` small-to-BigInt, `op23` small multiplication, and `op9` BigInt addition; compute `u+p²` as BigInt via `op20`/`op14`/`op9`. Mathematical recurrence is unchanged. Prefix probes now run before full paths for faster fault localization.
 - Native/CI: not yet completed; no PASS claimed.
 - Independent offline audit: prepared, not yet executed.
 - Stage22 acceptance: NO.

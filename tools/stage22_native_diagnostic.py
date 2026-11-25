@@ -31,7 +31,7 @@ OP = b'z;39=~["E_BOWL_BATCH_LAYOUT"'
 LOOP = b" 1i:\n [i;13<]["
 MUTANTS = {
     "t_offset_149_to_148": (
-        (b"z;b:s;a;!i;149*6+;a;!b;22h;!!t:", b"z;b:s;a;!i;148*6+;a;!b;22h;!!t:"),
+        (b"z;b:v;a;!149a;!b;23h;!!v:", b"z;b:v;a;!148a;!b;23h;!!v:"),
     ),
     "rank_modulus_7_to_6": (
         (b"z;b:7a;!b;20h;!!v:", b"z;b:6a;!b;20h;!!v:"),
@@ -41,7 +41,7 @@ MUTANTS = {
         (b"z;b:l;a;!5a;!b;23h;!!f:", b"z;b:l;a;!3a;!b;23h;!!f:"),
     ),
     "omit_position_squared": (
-        (b"z;b:d;a;!i;p;p;*+;a;!b;22h;!!d:", b"z;b:d;a;!i;a;!b;22h;!!d:"),
+        (b"z;b:p;a;!b;20h;!!v:", b"z;b:0a;!b;20h;!!v:"),
     ),
     "cross_weight_7_to_6": (
         (b"z;b:n;a;!7a;!b;23h;!!n:", b"z;b:n;a;!6a;!b;23h;!!n:"),
