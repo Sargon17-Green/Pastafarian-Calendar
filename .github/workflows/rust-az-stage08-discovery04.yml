@@ -35,11 +35,27 @@ jobs:
           set -euo pipefail
           test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          grep -Fxq 'CURRENT_STAGE=8' DEVELOPMENT_STAGE.md
-          grep -Fxq 'CURRENT_KIND=DISCOVERY04' DEVELOPMENT_STAGE.md
-          grep -Fxq 'CURRENT_PATCH=PATCH03' DEVELOPMENT_STAGE.md
-          grep -Fxq 'LAST_COMPLETED_STAGE=7' DEVELOPMENT_STAGE.md
-          grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY04_STAGE08_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          if grep -Fxq 'CURRENT_STAGE=8' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=DISCOVERY04' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH03' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=7' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY04_STAGE08_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=8' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY04_STAGE08_ACCEPTED_HOLD_NO_STAGE09' DEVELOPMENT_STAGE.md
+            fi
+          elif grep -Fxq 'CURRENT_STAGE=9' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=PATCH04' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH04' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=8' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH04_STAGE09_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=9' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH04_STAGE09_ACCEPTED_HOLD_NO_STAGE10' DEVELOPMENT_STAGE.md
+            fi
+          else
+            exit 1
+          fi
           grep -Fxq 'STAGE08_SCOPE=SEQUENTIAL_STONE_UPDATE_DISCOVERY' audit/STAGE_08_DISCOVERY04_CONTRACT_2026-11-25.md
           grep -Fxq 'STAGE07_CLOSURE=ACCEPTED' audit/STAGE_07_PATCH03_ACCEPTANCE_2026-11-25.md
           grep -Fq 'pub mod discovery04_stone_probe;' src/lib.rs

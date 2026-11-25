@@ -84,6 +84,15 @@ jobs:
               grep -Fxq 'LAST_COMPLETED_STAGE=8' DEVELOPMENT_STAGE.md
               grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY04_STAGE08_ACCEPTED_HOLD_NO_STAGE09' DEVELOPMENT_STAGE.md
             fi
+          elif grep -Fxq 'CURRENT_STAGE=9' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=PATCH04' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH04' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=8' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH04_STAGE09_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=9' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH04_STAGE09_ACCEPTED_HOLD_NO_STAGE10' DEVELOPMENT_STAGE.md
+            fi
           else
             exit 1
           fi
@@ -247,7 +256,7 @@ jobs:
             python3 tools/stage04_whole_stage_acceptance.py --self-test \
             > evidence/stage04_whole_stage_contract_tests.txt 2>&1
           cat evidence/stage04_whole_stage_contract_tests.txt
-          grep -Fq 'Ran 10 tests' evidence/stage04_whole_stage_contract_tests.txt
+          grep -Fq 'Ran 12 tests' evidence/stage04_whole_stage_contract_tests.txt
           grep -Fxq 'OK' evidence/stage04_whole_stage_contract_tests.txt
           timeout --signal=TERM --kill-after=5s 30s \
             python3 tools/stage04_whole_stage_acceptance.py --repo . --evidence evidence \
