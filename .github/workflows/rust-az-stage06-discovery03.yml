@@ -7,8 +7,10 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - 'tools/stage06_discovery03_distance_oracle.py'
       - 'Cargo.toml'
       - 'DEVELOPMENT_STAGE.md'
+      - 'audit/STAGE_06_DISCOVERY03_DISTANCE_CONTRACT_2026-11-25.md'
       - 'audit/STAGE_06_DISCOVERY03_STONES_CONTRACT_2026-11-23.md'
       - '.github/workflows/rust-az-stage06-discovery03.yml'
   workflow_dispatch:
@@ -44,9 +46,19 @@ jobs:
             grep -Fxq 'LAST_COMPLETED_STAGE=6' DEVELOPMENT_STAGE.md
             grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_ACCEPTED_HOLD_NO_STAGE07' DEVELOPMENT_STAGE.md
           fi
-          grep -Fq 'pub mod discovery03_stone_probe;' src/lib.rs
+          grep -Fq 'pub mod patch02_work_counts;' src/lib.rs
+          grep -Fq 'pub struct LegacyTagDistanceDiscovery03;' src/patch02_work_counts.rs
+          grep -Fq 'pub fn discover_legacy_tag_distance(' src/patch02_work_counts.rs
+          grep -Fxq 'STAGE06_SCOPE=LEGACY_TAG_DISTANCE' audit/STAGE_06_DISCOVERY03_DISTANCE_CONTRACT_2026-11-25.md
           test -f audit/STAGE_06_DISCOVERY03_STONES_CONTRACT_2026-11-23.md
           cargo fmt --all -- --check
+      - name: Self-test independent distance oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 tools/stage06_discovery03_distance_oracle.py --self-test | tee evidence/stage06_oracle_self_test.txt
+          grep -Fxq 'STAGE06_DISTANCE_ORACLE_SELF_TEST=PASS' evidence/stage06_oracle_self_test.txt
       - name: Native Stage01 to Stage06 and independent oracle
         shell: bash
         run: |
@@ -56,8 +68,7 @@ jobs:
           rustc --version > evidence/toolchain.txt
           cargo --version >> evidence/toolchain.txt
           set +e
-          timeout --signal=TERM --kill-after=5s 900s \
-            cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
+          timeout --signal=TERM --kill-after=5s 900s cargo test --all-targets -- --nocapture > evidence/stdout.txt 2> evidence/stderr.txt
           code=$?
           set -e
           printf '%s\n' "$code" > evidence/exit.txt
@@ -67,9 +78,11 @@ jobs:
             exit "$code"
           fi
           for marker in \
+            'STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170' \
             'STAGE06_DISCOVERY03_ROWS=46 CELLS=230' \
             'STAGE06_DISCOVERY03_BOUNDS=230 DETERMINISM=PASS' \
             'STAGE06_DISCOVERY03_BOOTSTRAP_ONLY=PASS' \
+            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \
             'STAGE05_PATCH02_LOCAL_PAIRS=49' \
             'STAGE05_PATCH02_LARGE_PAIRS=8' \
             'STAGE04_DISCOVERY02_BIJECTION_CASES=1025' \
@@ -80,7 +93,10 @@ jobs:
           if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
             exit 1
           fi
-          printf 'STAGE06_STONE_AUXILIARY_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE=NOT_CLAIMED\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+          python3 tools/stage06_discovery03_distance_oracle.py evidence/stdout.txt | tee evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS ROWS=169 RED=153 CONTROL=16 GUARDS=170' evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE05_PATCH02_WRAPPER_ORACLE=PASS ROWS=69 RED_SCAR=34 CONTROL=35 GUARDS=69' evidence/stage06_distance_oracle.txt
+          printf 'STAGE06_STONE_AUXILIARY_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE_NATIVE=PASS\nSTAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS\nSTAGE06_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
           cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Upload evidence regardless of result
         if: always()
