@@ -200,8 +200,9 @@ function stage55Planning() {
     "CNT-ORIENTATION-0", "CNT-ORIENTATION-1",
     "CNT-ORIENTATION-2", "CNT-ORIENTATION-3"
   ];
+  const cobolLines = cobol.split(/\r?\n/);
   const missingFields = requiredFields.filter(name =>
-    !new RegExp("^01\\\\s+" + name + "\\\\b", "m").test(cobol));
+    !cobolLines.some(line => line.startsWith("01 " + name + " ")));
   const orientationUpdates = new Set(
     [...cobol.matchAll(/ADD 1 TO CNT-ORIENTATION-([0-3])/g)]
       .map(match => match[1]));
@@ -209,7 +210,7 @@ function stage55Planning() {
     `missing COBOL fields: ${missingFields.join(",")}`);
   requireCheck(orientationUpdates.size === 4,
     "orientation counters are not all updated");
-  const maxLineLength = Math.max(...cobol.split(/\\r?\\n/).map(line => line.length));
+  const maxLineLength = Math.max(...cobolLines.map(line => line.length));
   requireCheck(paragraphNames.length >= 15, "paragraph inventory");
   requireCheck(missingParagraphs.length === 0,
     `missing PERFORM targets: ${missingParagraphs.join(",")}`);
