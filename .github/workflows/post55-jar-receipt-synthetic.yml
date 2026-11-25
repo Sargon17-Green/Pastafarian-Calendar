@@ -1,9 +1,10 @@
-name: Post55 prospective JAR receipt synthetic QA
+name: Post55 prospective JAR receipt and observer trace synthetic QA
 on:
   push:
     branches: ['Kotlin+Cymraeg']
     paths:
       - 'soak/post55_jar_byte_receipt.py'
+      - 'soak/post55_observer_trace.py'
       - '.github/workflows/post55-jar-receipt-synthetic.yml'
 permissions:
   contents: read
@@ -13,7 +14,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Exact-source synthetic controls only
+      - name: Exact-source synthetic JAR receipt controls only
         shell: bash
         run: |
           set -euo pipefail
@@ -25,9 +26,26 @@ jobs:
           python3 soak/post55_jar_byte_receipt.py --historical | tee evidence/jar-receipt/historical.json
           python3 -c 'import json; d=json.load(open("evidence/jar-receipt/historical.json")); assert d["BYTE_BINDING"] == d["CI_PROCESS_OBSERVATION"] == "NOT_ASSESSED" and d["OS_ATTESTATION"] is False'
           printf 'SYNTHETIC_ONLY; NO_PRODUCER; NO_NATIVE; NO_CERTIFICATION\n' | tee evidence/jar-receipt/scope.txt
+      - name: Exact-source synthetic observer trace controls only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/observer-trace
+          git rev-parse HEAD | tee evidence/observer-trace/source-sha.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          sha256sum soak/post55_observer_trace.py | tee evidence/observer-trace/parser-sha256.txt
+          timeout 120s python3 soak/post55_observer_trace.py --self-test 2>&1 | tee evidence/observer-trace/synthetic-tests.log
+          printf 'SYNTHETIC_ONLY; NO_PROVIDER_AUTH; NO_PRODUCER; NO_JAVA; NO_OS_ATTESTATION; NO_CERTIFICATION\n' | tee evidence/observer-trace/scope.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: post55-jar-receipt-synthetic
           path: evidence/jar-receipt/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: post55-observer-trace-synthetic
+          path: evidence/observer-trace/
+          if-no-files-found: error
+
