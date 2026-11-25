@@ -7,6 +7,8 @@ on:
     paths:
       - tests/stage02_calendar_weave_independent_oracle.py
       - tests/stage02_calendar_weave_boundary_qa.py
+      - tests/stage02_calendar_weave_large_rank_offset_differential.py
+      - artifacts/stage02-weave-large-rank-offset-audit-20261125.md
       - .github/workflows/wat-stage02-weave-boundary-qa.yml
   workflow_dispatch:
 
@@ -26,18 +28,24 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain)"
           python3 --version
-          sha256sum tests/stage02_calendar_weave_independent_oracle.py tests/stage02_calendar_weave_boundary_qa.py
+          sha256sum tests/stage02_calendar_weave_independent_oracle.py tests/stage02_calendar_weave_boundary_qa.py tests/stage02_calendar_weave_large_rank_offset_differential.py artifacts/stage02-weave-large-rank-offset-audit-20261125.md
       - name: Focused source-fresh independent boundary and mutation QA
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p evidence/wat-weave-boundary
           printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nSHA=%s\nRUN=%s\nATTEMPT=%s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > evidence/wat-weave-boundary/identity.txt
-          sha256sum tests/stage02_calendar_weave_independent_oracle.py tests/stage02_calendar_weave_boundary_qa.py > evidence/wat-weave-boundary/sha256.txt
+          sha256sum tests/stage02_calendar_weave_independent_oracle.py tests/stage02_calendar_weave_boundary_qa.py tests/stage02_calendar_weave_large_rank_offset_differential.py artifacts/stage02-weave-large-rank-offset-audit-20261125.md > evidence/wat-weave-boundary/sha256.txt
           python3 -m py_compile tests/stage02_calendar_weave_boundary_qa.py
           python3 tests/stage02_calendar_weave_boundary_qa.py --enumerator-only | tee evidence/wat-weave-boundary/enumeration.json
           python3 tests/stage02_calendar_weave_independent_oracle.py --selftest | tee evidence/wat-weave-boundary/prior-selftest.log
           python3 tests/stage02_calendar_weave_boundary_qa.py | tee evidence/wat-weave-boundary/boundary.json
+      - name: Exact-source Python differential against independent JavaScript rank/offset witnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tests/stage02_calendar_weave_large_rank_offset_differential.py
+          python3 tests/stage02_calendar_weave_large_rank_offset_differential.py | tee evidence/wat-weave-boundary/large-rank-offset-python-differential.json
       - name: Preserve focused QA evidence
         if: always()
         uses: actions/upload-artifact@v4
