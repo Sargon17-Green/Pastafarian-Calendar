@@ -3,6 +3,8 @@
 import argparse
 from pathlib import Path
 from test_rom import SUCCESS, UNIMPLEMENTED, check_header, discover_case_high_byte, wait_for_completion
+from test_sm83_stage1_sauce_oracle import FOUNDATION, compute_sauce, counts_for
+from test_sm83_stage1_selection_oracle import bowl_answer_flow, select
 
 M = (1 << 127) - 1
 
@@ -14,6 +16,10 @@ def discover_source_symbols(symbol_path: Path) -> dict[str, int]:
         "wCalendarSelectRank", "wCalendarAnswerAccepted", "wCalendarStatus", "wCalendarActive",
         "wCalendarSelectValue", "wCalendarSelectDirection", "wCalendarOrdinalSign",
         "wCalendarOrdinalLength",
+        "wPairCalcOffset", "wPairTargetOffset", "wNative393Mode",
+        "wNative393ResultCount", "wCalendarAnswerNativeResults",
+        "wWorkCalcCount", "wWorkTargetCount", "wWorkDistance", "wWorkSum", "wWorkDirection",
+        "wCalendarBowlOrderAt46", "wCalendarPostStirSums",
     }
     found: dict[str, int] = {}
     for line in symbol_path.read_text(encoding="utf-8").splitlines():
@@ -46,88 +52,152 @@ def rank_and_accepted(a0: int, direction: int, count: int) -> tuple[int, int]:
         return (1 if direction == 1 else count), (1 if direction == 1 else limit)
     return 1 + ((a0 - 1) % count), a0
 
-def main():
-    p=argparse.ArgumentParser()
-    p.add_argument("rom",type=Path)
-    path=p.parse_args().rom
-    check_header(path.read_bytes())
-    symbol_path = path.with_suffix(".sym")
-    high=discover_case_high_byte(symbol_path)
-    source_symbols = discover_source_symbols(symbol_path)
-    from pyboy import PyBoy
-    boy=PyBoy(str(path),window="null")
-    try:
-        boy.set_emulation_speed(0)
-        result,case,status,frames=wait_for_completion(boy,max_frames=120000,high_byte_address=high)
-        print(f"ROM_BOWL_ANSWER_RANK_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} "
-              f"DISPATCH_STATUS={status:02X} FRAMES={frames}",flush=True)
-        def read_symbol(name, size):
-            return bytes(int(boy.memory[source_symbols[name] + i]) for i in range(size))
-        if (result,case,status)!=(SUCCESS,393,UNIMPLEMENTED):
-            count_bytes = read_symbol("wCalendarSelectCount", 2)
-            print(f"NATIVE393_DIAG_RESULT={result:02X} CASE={case} STATUS={status:02X} FRAMES={frames}", flush=True)
-            print(f"NATIVE393_DIAG_REMAINING_SOURCE_CASES={read_symbol('wCalendarAnswerSavedByte',1)[0]}", flush=True)
-            print(f"NATIVE393_DIAG_INPUT_BOWL_SEAL_COUNT={read_symbol('wCalendarAnswerInputBowl',1)[0]},{read_symbol('wCalendarAnswerInputSeal',1)[0]},{int.from_bytes(count_bytes,'little')}", flush=True)
-            print(f"NATIVE393_DIAG_A0={read_symbol('wCalendarAnswerA0',16).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_SELECT_VALUE={read_symbol('wCalendarSelectValue',16).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_DIRECTION={read_symbol('wCalendarAnswerDirection',1)[0]:02x}/{read_symbol('wCalendarSelectDirection',1)[0]:02x}", flush=True)
-            print(f"NATIVE393_DIAG_RANK={read_symbol('wCalendarSelectRank',2).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_AK={read_symbol('wCalendarAnswerAccepted',16).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_STATUS_ACTIVE={read_symbol('wCalendarStatus',1)[0]:02x}/{read_symbol('wCalendarActive',1)[0]:02x}", flush=True)
-            print(f"NATIVE393_DIAG_ORDINAL={read_symbol('wCalendarOrdinalSign',1)[0]:02x}/{read_symbol('wCalendarOrdinalLength',3).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_Q={read_symbol('wCalendarPostStirSavedBowls',96).hex()}", flush=True)
-            print(f"NATIVE393_DIAG_ORDER={read_symbol('wCalendarBowlOrderScratch',6).hex()}", flush=True)
-        assert (result,case,status)==(SUCCESS,393,UNIMPLEMENTED)
-        q_bytes = bytes(int(boy.memory[source_symbols["wCalendarPostStirSavedBowls"] + i]) for i in range(96))
-        order_bytes = bytes(int(boy.memory[source_symbols["wCalendarBowlOrderScratch"] + i]) for i in range(6))
-        q = [int.from_bytes(q_bytes[i:i+16], "little") for i in range(0, 96, 16)]
-        order = list(order_bytes)
-        assert all(0 < value <= M for value in q), "Native393 Q snapshot is not six canonical SAVE residues"
-        assert sorted(order) == [1, 2, 3, 4, 5, 6], f"Native393 orderAt46 is not a permutation: {order}"
-        fixtures = [
-            (1, 10, 1, "0c6c8121da308925a2da405d4a491c38", 1, 1, "0c6c8121da308925a2da405d4a491c38"),
-            (1, 11, 2, "abcdb55a7e61a599c7080559efcc571a", 255, 1, "abcdb55a7e61a599c7080559efcc571a"),
-            (6, 12, 922, "d0e39c5ce6a31044c08e4ca5d880176c", 255, 810, "d0e39c5ce6a31044c08e4ca5d880176c"),
-            (4, 12, 19044, "b11ae66b81ee806d27d965511b7a9239", 1, 11525, "b11ae66b81ee806d27d965511b7a9239"),
-            (1, 12, 3, "4b2fea932292c10ded36c9549450937c", 255, 2, "4b2fea932292c10ded36c9549450937c"),
-            (2, 10, 7, "e221aace70808f8257646fa52648852f", 1, 3, "e221aace70808f8257646fa52648852f"),
-            (2, 11, 138, "a9962f206eabee8e2b52a71e7258b16f", 1, 83, "a9962f206eabee8e2b52a71e7258b16f"),
-            (2, 12, 922, "730bb5716bd64d9bff3fdf97bd68dd2f", 255, 329, "730bb5716bd64d9bff3fdf97bd68dd2f"),
-            (3, 10, 5778, "7d36809f9ad694464d656034b491dd1c", 255, 2639, "7d36809f9ad694464d656034b491dd1c"),
-            (3, 11, 19044, "9131d11bbcc344121dc5b194d6d8a96e", 255, 1709, "9131d11bbcc344121dc5b194d6d8a96e"),
-            (3, 12, 3, "a82c2298ddb0f4ddec2403f5f81f7640", 1, 3, "a82c2298ddb0f4ddec2403f5f81f7640"),
-            (4, 10, 7, "01ff3bc8af4c6a50db748fe6ac297e21", 1, 1, "01ff3bc8af4c6a50db748fe6ac297e21"),
-            (4, 11, 138, "d80c119a989df55e01a7fa1be451882d", 1, 62, "d80c119a989df55e01a7fa1be451882d"),
-            (5, 10, 922, "f71606cce7a0b57c04d18e3dd2112e09", 255, 447, "f71606cce7a0b57c04d18e3dd2112e09"),
-            (5, 11, 5778, "63c9e95d06f68cdea61fde49da64bc5b", 255, 937, "63c9e95d06f68cdea61fde49da64bc5b"),
-            (5, 12, 19044, "d27bcdef244b6440496e2d56e2b74a2e", 1, 3122, "d27bcdef244b6440496e2d56e2b74a2e"),
-            (6, 10, 3, "30dcee9d02c65169d4e07c6c568e701d", 255, 1, "30dcee9d02c65169d4e07c6c568e701d"),
-            (6, 11, 7, "ffdf457df434b156cab7e4889707c444", 1, 3, "ffdf457df434b156cab7e4889707c444"),
-        ]
-        for bowl, seal, count, expected_hex, expected_direction, expected_rank, expected_accepted_hex in fixtures:
-            actual, direction = source_a0_direction(bowl, seal, q, order)
-            assert actual.to_bytes(16, "little").hex() == expected_hex, (
-                f"independent source A0 mismatch bowl={bowl} seal={seal}: "
-                f"{actual.to_bytes(16, 'little').hex()} != {expected_hex}"
-            )
-            assert direction == expected_direction, (
-                f"independent source direction mismatch bowl={bowl} seal={seal}: "
-                f"{direction:02X} != {expected_direction:02X}"
-            )
-            rank, accepted = rank_and_accepted(actual, direction, count)
-            assert rank == expected_rank, (
-                f"independent source rank mismatch bowl={bowl} seal={seal} N={count}: "
-                f"{rank} != {expected_rank}"
-            )
-            assert accepted.to_bytes(16, "little").hex() == expected_accepted_hex, (
-                f"independent source A_k mismatch bowl={bowl} seal={seal} N={count}: "
-                f"{accepted.to_bytes(16, 'little').hex()} != {expected_accepted_hex}"
-            )
-        print(f"NATIVE393_SOURCE_Q={q_bytes.hex()}", flush=True)
-        print(f"NATIVE393_SOURCE_ORDER_AT_46={order_bytes.hex()}", flush=True)
-        print("NATIVE393_SOURCE_A0_DIRECTION_RANK_AK_ORACLE=PASS cases=18 foundation=4 nonfoundation=14", flush=True)
-        print("STAGE1_BOWL_ANSWER_RANK_NATIVE=PASS A0_direction_rank_Ak=CHECKED "
-              "source_derived=18 synthetic_boundaries invalid_count=0/19045 idle_invalid output_sentinels Q_order_ordinal_SRAM_snapshots owner_lease=CHECKED",flush=True)
-    finally: boy.stop()
+SOURCE_CASES = [
+    (1, 10, 1), (1, 11, 2), (6, 12, 922), (4, 12, 19044),
+    (1, 12, 3), (2, 10, 7), (2, 11, 138), (2, 12, 922),
+    (3, 10, 5778), (3, 11, 19044), (3, 12, 3), (4, 10, 7),
+    (4, 11, 138), (5, 10, 922), (5, 11, 5778), (5, 12, 19044),
+    (6, 10, 3), (6, 11, 7),
+]
+PAIR_CASES = [
+    ("foundation", 0, 0, 0),
+    ("c_lt_adjacent", -1, 1, 1),
+    ("c_gt_adjacent", 1, -1, 1),
+    ("signed32_min_to_max", -(1 << 31), (1 << 31) - 1, 1),
+    ("signed32_max_to_min", (1 << 31) - 1, -(1 << 31), 1),
+]
 
-if __name__=="__main__": main()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("rom", type=Path)
+    path = parser.parse_args().rom
+    check_header(path.read_bytes())
+    high = discover_case_high_byte(path.with_suffix(".sym"))
+    source_symbols = discover_source_symbols(path.with_suffix(".sym"))
+    from pyboy import PyBoy
+
+    def read_symbol(boy, name: str, size: int) -> bytes:
+        address = source_symbols[name]
+        return bytes(int(boy.memory[address + i]) for i in range(size))
+
+    def write_symbol(boy, name: str, data: bytes) -> None:
+        address = source_symbols[name]
+        for i, value in enumerate(data):
+            boy.memory[address + i] = value
+
+    def signed32_bytes(value: int) -> bytes:
+        assert -(1 << 31) <= value <= (1 << 31) - 1
+        return (value & 0xffffffff).to_bytes(4, "little")
+
+    total_frames = 0
+    for pair_name, calc_offset, target_offset, mode in PAIR_CASES:
+        boy = PyBoy(str(path), window="null")
+        try:
+            boy.set_emulation_speed(0)
+            write_symbol(boy, "wPairCalcOffset", signed32_bytes(calc_offset))
+            write_symbol(boy, "wPairTargetOffset", signed32_bytes(target_offset))
+            write_symbol(boy, "wNative393Mode", bytes((mode,)))
+            write_symbol(boy, "wCalendarAnswerNativeResults", bytes(18 * 35))
+            write_symbol(boy, "wNative393ResultCount", b"\\x00")
+            result, case, status, frames = wait_for_completion(
+                boy, max_frames=120000, high_byte_address=high
+            )
+            print(
+                f"ROM_BOWL_ANSWER_RANK_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} "
+                f"DISPATCH_STATUS={status:02X} FRAMES={frames} PAIR={pair_name}",
+                flush=True,
+            )
+            if (result, case, status) != (SUCCESS, 393, UNIMPLEMENTED):
+                count_bytes = read_symbol(boy, "wCalendarSelectCount", 2)
+                print(f"NATIVE393_DIAG_REMAINING_SOURCE_CASES={read_symbol(boy,'wCalendarAnswerSavedByte',1)[0]}", flush=True)
+                print(f"NATIVE393_DIAG_INPUT_BOWL_SEAL_COUNT={read_symbol(boy,'wCalendarAnswerInputBowl',1)[0]},{read_symbol(boy,'wCalendarAnswerInputSeal',1)[0]},{int.from_bytes(count_bytes,'little')}", flush=True)
+                print(f"NATIVE393_DIAG_A0={read_symbol(boy,'wCalendarAnswerA0',16).hex()}", flush=True)
+                print(f"NATIVE393_DIAG_DIRECTION={read_symbol(boy,'wCalendarAnswerDirection',1)[0]:02x}", flush=True)
+                print(f"NATIVE393_DIAG_RANK={read_symbol(boy,'wCalendarSelectRank',2).hex()}", flush=True)
+                print(f"NATIVE393_DIAG_AK={read_symbol(boy,'wCalendarAnswerAccepted',16).hex()}", flush=True)
+                print(f"NATIVE393_DIAG_Q={read_symbol(boy,'wCalendarPostStirSavedBowls',96).hex()}", flush=True)
+                print(f"NATIVE393_DIAG_ORDER={read_symbol(boy,'wCalendarBowlOrderScratch',6).hex()}", flush=True)
+            assert (result, case, status) == (SUCCESS, 393, UNIMPLEMENTED)
+            total_frames += frames
+
+            calculation = FOUNDATION + calc_offset
+            target = FOUNDATION + target_offset
+            sauce = compute_sauce(calculation, target)
+            expected_counts = counts_for(calculation, target)
+            actual_counts = (
+                int.from_bytes(read_symbol(boy, "wWorkCalcCount", 5), "little"),
+                int.from_bytes(read_symbol(boy, "wWorkTargetCount", 5), "little"),
+                int.from_bytes(read_symbol(boy, "wWorkDistance", 5), "little"),
+                int.from_bytes(read_symbol(boy, "wWorkSum", 5), "little"),
+                read_symbol(boy, "wWorkDirection", 1)[0],
+            )
+            assert actual_counts == expected_counts, (
+                f"{pair_name}: WorkCountsFromOffsets32 {actual_counts} != {expected_counts}"
+            )
+            expected_q = b"".join(x.to_bytes(16, "little") for x in sauce.bowls)
+            actual_q = read_symbol(boy, "wCalendarPostStirSavedBowls", 96)
+            assert actual_q == expected_q, f"{pair_name}: final six-bowl Q mismatch"
+            actual_order = read_symbol(boy, "wCalendarBowlOrderScratch", 6)
+            assert actual_order == bytes(sauce.order_at_46), (
+                f"{pair_name}: orderAt46 {actual_order.hex()} != {bytes(sauce.order_at_46).hex()}"
+            )
+            expected_sums = b"".join(x.to_bytes(16, "little") for x in sauce.retained_post_stir_sums)
+            actual_sums = read_symbol(boy, "wCalendarPostStirSums", 192)
+            assert actual_sums == expected_sums, f"{pair_name}: retained post-stir sums mismatch"
+
+            result_count = read_symbol(boy, "wNative393ResultCount", 1)[0]
+            assert result_count == 18, f"{pair_name}: only {result_count}/18 answer records"
+            records = read_symbol(boy, "wCalendarAnswerNativeResults", 18 * 35)
+            for index, (bowl, seal, count) in enumerate(SOURCE_CASES):
+                record = records[index * 35:(index + 1) * 35]
+                actual_a0 = int.from_bytes(record[0:16], "little")
+                actual_direction = record[16]
+                actual_rank = int.from_bytes(record[17:19], "little")
+                actual_accepted = int.from_bytes(record[19:35], "little")
+                flow = bowl_answer_flow(sauce, bowl, seal)
+                choice = select(flow, count)
+                expected_direction = 1 if flow.step == 1 else 0xff
+                formula_a0, formula_direction = source_a0_direction(
+                    bowl, seal, list(sauce.bowls), list(sauce.order_at_46)
+                )
+                assert formula_a0 == flow.first, f"{pair_name}: independent A0 formulas disagree"
+                assert formula_direction == expected_direction, f"{pair_name}: independent direction formulas disagree"
+                formula_rank, formula_accepted = rank_and_accepted(
+                    formula_a0, formula_direction, count
+                )
+                assert (formula_rank, formula_accepted) == (
+                    choice.rank, choice.accepted_word
+                ), f"{pair_name}: independent rank/Ak formulas disagree"
+                assert actual_a0 == flow.first, (
+                    f"{pair_name}: bowl={bowl} seal={seal} A0 {actual_a0:032x} != {flow.first:032x}"
+                )
+                assert actual_direction == expected_direction, (
+                    f"{pair_name}: bowl={bowl} seal={seal} direction {actual_direction:02x} != {expected_direction:02x}"
+                )
+                assert actual_rank == choice.rank, (
+                    f"{pair_name}: bowl={bowl} seal={seal} rank {actual_rank} != {choice.rank}"
+                )
+                assert actual_accepted == choice.accepted_word, (
+                    f"{pair_name}: bowl={bowl} seal={seal} Ak {actual_accepted:032x} != {choice.accepted_word:032x}"
+                )
+            print(
+                f"NATIVE393_PAIR={pair_name} PASS offsets={calc_offset},{target_offset} "
+                f"work_counts=CHECKED Q=CHECKED orderAt46=CHECKED post_stirs=12/12 "
+                f"answer_vectors=18 FRAMES={frames}",
+                flush=True,
+            )
+        finally:
+            boy.stop()
+
+    print(
+        f"STAGE1_BOWL_ANSWER_RANK_NATIVE=PASS pairs={len(PAIR_CASES)} "
+        f"source_answer_vectors={len(PAIR_CASES) * len(SOURCE_CASES)} "
+        f"frames_total={total_frames} signed32_endpoints=CHECKED "
+        "work_counts_Q_orderAt46_post_stir_sums_A0_direction_rank_Ak=CHECKED "
+        "synthetic_boundaries_invalid_count_idle_owner_lease_SRAM=CHECKED",
+        flush=True,
+    )
+
+
+if __name__ == "__main__":
+    main()

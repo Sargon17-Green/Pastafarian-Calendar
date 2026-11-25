@@ -226,6 +226,11 @@ wCalendarAnswerDirectionScratch:: ds 1
 wCalendarAnswerA0:: ds 16
 wCalendarAnswerDirection:: ds 1
 wCalendarAnswerSavedByte:: ds 1
+; Native393 input mode and captured answer results for source-pair differential runs.
+wNative393Mode:: ds 1
+wNative393ResultCount:: ds 1
+wNative393ResultCursor:: ds 2
+wCalendarAnswerNativeResults:: ds 630
 ; Native389 initializer shares the 96-byte bowl scratch.
 
 SECTION "Bootstrap", ROM0[$0150]

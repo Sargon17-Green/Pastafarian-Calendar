@@ -11,6 +11,13 @@ RunCalendarBowlAnswerRankBench::
     ld [wTestCaseHi], a
     ld a, 137
     ld [wTestCase], a    ; 393
+    ld hl, wCalendarAnswerNativeResults
+    ld a, l
+    ld [wNative393ResultCursor], a
+    ld a, h
+    ld [wNative393ResultCursor+1], a
+    xor a
+    ld [wNative393ResultCount], a
     call .fillSentinel
     ld a, 1
     ld [wCalendarAnswerInputBowl], a
@@ -25,13 +32,6 @@ RunCalendarBowlAnswerRankBench::
     jp nz, .fail
     call .checkSentinel
     jp nz, .fail
-    ld hl, wPairCalcOffset
-    ld b, 8
-    xor a
-.zero:
-    ld [hli], a
-    dec b
-    jr nz, .zero
     ld a, 70
     ld [wCalendarRequestedOwner], a
     ld a, 1
@@ -57,53 +57,8 @@ RunCalendarBowlAnswerRankBench::
     or a
     jp nz, .fail
 
-    ld a, 1
-    ld [wCalendarAnswerInputBowl], a
-    ld a, 10
-    ld [wCalendarAnswerInputSeal], a
-    ld a, 1
-    ld [wCalendarSelectCount], a
-    ld a, 0
-    ld [wCalendarSelectCount+1], a
-    ld de, .a1z10
-    ld c, 1
-    call .checkAnswer
-    jp nz, .fail
-    ld a, 11
-    ld [wCalendarAnswerInputSeal], a
-    ld a, 2
-    ld [wCalendarSelectCount], a
-    ld a, 0
-    ld [wCalendarSelectCount+1], a
-    ld de, .a1z11
-    ld c, $ff
-    call .checkAnswer
-    jp nz, .fail
-    ld a, 6
-    ld [wCalendarAnswerInputBowl], a
-    ld a, 12
-    ld [wCalendarAnswerInputSeal], a
-    ld a, 154
-    ld [wCalendarSelectCount], a
-    ld a, 3
-    ld [wCalendarSelectCount+1], a
-    ld de, .a6z12
-    ld c, $ff
-    call .checkAnswer
-    jp nz, .fail
-    ld a, 4
-    ld [wCalendarAnswerInputBowl], a
-    ld a, 100
-    ld [wCalendarSelectCount], a
-    ld a, 74
-    ld [wCalendarSelectCount+1], a
-    ld de, .a4z12
-    ld c, 1
-    call .checkAnswer
-    jp nz, .fail
-
-    ; Four Foundation cases above; all remaining bowl/seal pairs are source-derived.
-    ld a, 14
+    ; One 18-row table drives Foundation fixture checks and dynamic source-pair runs.
+    ld a, 18
     ld [wCalendarAnswerSavedByte], a
     ld hl, .sourceCases
 .sourceCaseLoop:
@@ -122,14 +77,23 @@ RunCalendarBowlAnswerRankBench::
     ld a, [hli]
     ld d, a
     push hl
+    ld a, [wNative393Mode]
+    or a
+    jr nz, .dynamicSourceCase
     call .checkAnswer
+    jr .sourceCaseResult
+.dynamicSourceCase:
+    call .runDynamicAnswer
+.sourceCaseResult:
     pop hl
     jp nz, .fail
-    ; Keep HL on the next table row; do not replace it with the counter address.
     ld a, [wCalendarAnswerSavedByte]
     dec a
     ld [wCalendarAnswerSavedByte], a
     jr nz, .sourceCaseLoop
+    ld a, [wNative393ResultCount]
+    cp 18
+    jp nz, .fail
 
     ld de, .s0
     call .synthetic
@@ -341,13 +305,53 @@ RunCalendarBowlAnswerRankBench::
     ret nz
     ld hl, wCalendarAnswerAccepted
     ld b, 16
-    jp .compare
+    call .compare
+    ret nz
+    call .recordAnswerResult
+    xor a
+    ret
 .answerError:
     pop de
     pop bc
     ld a, 1
     or a
     ret
+.runDynamicAnswer:
+    call .snapshotInputs
+    call CalendarBowlAnswerShortRank
+    call .checkInputSnapshot
+    jr nz, .dynamicAnswerError
+    ld a, [wCalendarStatus]
+    or a
+    jr nz, .dynamicAnswerError
+    ; Require canonical nonzero A0 and a valid signed direction.
+    ld hl, wCalendarAnswerA0
+    ld b, 16
+    xor a
+.dynamicA0Nonzero:
+    or [hl]
+    inc hl
+    dec b
+    jr nz, .dynamicA0Nonzero
+    or a
+    jr z, .dynamicAnswerError
+    ld a, [wCalendarAnswerA0+15]
+    bit 7, a
+    jr nz, .dynamicAnswerError
+    ld a, [wCalendarAnswerDirection]
+    cp 1
+    jr z, .dynamicDirectionOk
+    cp $ff
+    jr nz, .dynamicAnswerError
+.dynamicDirectionOk:
+    call .recordAnswerResult
+    xor a
+    ret
+.dynamicAnswerError:
+    ld a, 1
+    or a
+    ret
+
 .expectInvalid:
     call .snapshotInputs
     call CalendarBowlAnswerShortRank
@@ -534,6 +538,53 @@ RunCalendarBowlAnswerRankBench::
     ld a, 1
     or a
 .snapshotCheckDone:
+    pop hl
+    pop de
+    pop bc
+    ret
+
+.recordAnswerResult:
+    push bc
+    push de
+    push hl
+    ld a, [wNative393ResultCursor]
+    ld e, a
+    ld a, [wNative393ResultCursor+1]
+    ld d, a
+    ld hl, wCalendarAnswerA0
+    ld b, 16
+.recordA0:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .recordA0
+    ld a, [wCalendarAnswerDirection]
+    ld [de], a
+    inc de
+    ld hl, wCalendarSelectRank
+    ld b, 2
+.recordRank:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .recordRank
+    ld hl, wCalendarAnswerAccepted
+    ld b, 16
+.recordAccepted:
+    ld a, [hli]
+    ld [de], a
+    inc de
+    dec b
+    jr nz, .recordAccepted
+    ld a, e
+    ld [wNative393ResultCursor], a
+    ld a, d
+    ld [wNative393ResultCursor+1], a
+    ld a, [wNative393ResultCount]
+    inc a
+    ld [wNative393ResultCount], a
     pop hl
     pop de
     pop bc
@@ -772,8 +823,16 @@ RunCalendarBowlAnswerRankBench::
     db 2
     dw 19044
     db $44,$bd,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff,$7f
-; Fourteen source-derived nonfoundation vectors from the real Native393 Q/orderAt46.
+; Eighteen answer cases: four fixed Foundation fixtures plus fourteen other bowl/seal combinations.
 .sourceCases:
+    db 1, 10, 1, 0, $01
+    dw .a1z10
+    db 1, 11, 2, 0, $ff
+    dw .a1z11
+    db 6, 12, 154, 3, $ff
+    dw .a6z12
+    db 4, 12, 100, 74, $01
+    dw .a4z12
     db 1, 12, 3, 0, $ff
     dw .a1z12
     db 2, 10, 7, 0, $01
