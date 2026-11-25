@@ -48,7 +48,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v21'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v22'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -61,7 +61,7 @@ try {
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
     $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
-    $m.instrumentation_mode -cne 'statements218_219_221_223_225_227_after_v20_208_217' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.instrumentation_mode -cne 'statements228_230_231_233_234_235_236_237_after_v21_218_227' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181') -or $m.prior_line181_witness_run -ne 45551684196 -or
     $m.prior_v17_run -ne 45658001179 -or
     $m.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
@@ -69,8 +69,10 @@ try {
     $m.prior_v18_artifact_sha256 -cne '26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89' -or
     $m.prior_v19_run -ne 45671767802 -or
     $m.prior_v19_artifact_sha256 -cne 'a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5' -or
-    $m.prior_residual_run -ne 45672323607 -or
-    $m.prior_residual_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391' -or
+    $m.prior_v20_run -ne 45672323607 -or
+    $m.prior_v20_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391' -or
+    $m.prior_residual_run -ne 45672648212 -or
+    $m.prior_residual_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb' -or
     $m.original_unmodified_suite_proven -ne $false -or
     $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
  if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
@@ -168,8 +170,10 @@ try {
  $r['prior_v18_artifact_sha256']='26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89'
  $r['prior_v19_run']=45671767802
  $r['prior_v19_artifact_sha256']='a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5'
- $r['prior_residual_run']=45672323607
- $r['prior_residual_artifact_sha256']='aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391'
+ $r['prior_v20_run']=45672323607
+ $r['prior_v20_artifact_sha256']='aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391'
+ $r['prior_residual_run']=45672648212
+ $r['prior_residual_artifact_sha256']='e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb'
  $all= ($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
    (@($r['fx_checkpoints'] | Where-Object {$_.exact -ne $true}).Count -eq 0) -and
    ($r['copies'].Count -eq 2) -and
@@ -178,8 +182,8 @@ try {
    $r['suite_ec_valid'] -and $r['final_marker_exact'] -and
    $r['compile_exact'] -and $r['compile_name_exact'] -and
    $r['statement_receipts'].Count -eq $m.probe_count -and $r['statement_started'] -ge 1 -and
-   $r['statement_receipts'][0].first_line -eq 218 -and $r['statement_receipts'][0].start_exact -and
-   $r['statement_receipts'][7].first_line -eq 227
+   $r['statement_receipts'][0].first_line -eq 228 -and $r['statement_receipts'][0].start_exact -and
+   $r['statement_receipts'][7].first_line -eq 237
  $r['status']=if(-not $all){'INCOMPLETE_RESIDUAL_DIAGNOSTIC_NOT_STAGE01'}elseif($r['suite_no_error']){
     'RESIDUAL_SUITE_NO_ERROR_DIAGNOSTIC_ONLY'
  }else{'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY'}

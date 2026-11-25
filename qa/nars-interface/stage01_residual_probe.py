@@ -102,9 +102,9 @@ def instrument(root: pathlib.Path, marker: str):
             if len(pending) == 8:
                 flush()
     flush()
-    # V21: isolate the remaining SAVE, day-count, and initial work-count assertions.
-    # V20 proved lines208-217 complete; retain the already-established QA-only overrides.
-    focus = [218, 219, 221, 222, 223, 225, 226, 227]
+    # V22: isolate the second work-count, stone snapshot, post-stir sum, and hidden/visible setup.
+    # V21 proved lines218-227 complete; keep the two established QA-only counterfactuals unchanged.
+    focus = [228, 230, 231, 233, 234, 235, 236, 237]
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
@@ -234,7 +234,7 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    suite={**base["suite"],"program_sha256":hashlib.sha256(suite_program.encode()).hexdigest()},
                    original_entrypoint_invoked=False,paired_qa_overrides=True,
                    source_statements_preserved=False,qa_only_patches=patches,
-                   instrumentation_mode="statements218_219_221_223_225_227_after_v20_208_217",
+                   instrumentation_mode="statements228_230_231_233_234_235_236_237_after_v21_218_227",
                     outer_lx_chars=len(outer),candidate_bytes=len(candidate),
                     max_program_chars=max(map(len, programs)),production_source_modified=False,
                    original_unmodified_suite_proven=False,
@@ -246,8 +246,10 @@ def build_residual(raw: bytes, repo_root: pathlib.Path, marker: str):
                    prior_v18_artifact_sha256="26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89",
                    prior_v19_run=45671767802,
                    prior_v19_artifact_sha256="a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5",
-                   prior_residual_run=45672323607,
-                   prior_residual_artifact_sha256="aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391",
+                   prior_v20_run=45672323607,
+                   prior_v20_artifact_sha256="aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391",
+                   prior_residual_run=45672648212,
+                   prior_residual_artifact_sha256="e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb",
                    candidate_sha256=hashlib.sha256(candidate).hexdigest())
     return candidate,receipt
 

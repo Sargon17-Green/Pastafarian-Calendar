@@ -106,7 +106,7 @@ jobs:
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'statements218_219_221_223_225_227_after_v20_208_217' -or
+             $b.instrumentation_mode -cne 'statements228_230_231_233_234_235_236_237_after_v21_218_227' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181') -or $b.prior_line181_witness_run -ne 45551684196 -or
              $b.prior_v17_run -ne 45658001179 -or
@@ -115,11 +115,13 @@ jobs:
              $b.prior_v18_artifact_sha256 -cne '26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89' -or
              $b.prior_v19_run -ne 45671767802 -or
              $b.prior_v19_artifact_sha256 -cne 'a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5' -or
-             $b.prior_residual_run -ne 45672323607 -or
-             $b.prior_residual_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+             $b.prior_v20_run -ne 45672323607 -or
+             $b.prior_v20_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391' -or
+             $b.prior_residual_run -ne 45672648212 -or
+             $b.prior_residual_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
           if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
-          if($a.statement_receipts[0].first_line -ne 218 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[7].first_line -ne 227){throw 'V21_RESIDUAL_FOCUS_NOT_PROVEN'}
+          if($a.statement_receipts[0].first_line -ne 228 -or $a.statement_receipts[0].start_exact -ne $true -or
+             $a.statement_receipts[7].first_line -ne 237){throw 'V22_RESIDUAL_FOCUS_NOT_PROVEN'}
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
@@ -135,7 +137,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v21
+          name: apl-german-stage01-residual-v22
           path: |
             residual_evidence/
             residual_font_evidence/
