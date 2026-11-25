@@ -144,13 +144,18 @@ fn reconstructs_coverages(
   right_denominator: Int,
 ) -> Bool {
   let reconstructed_left_numerator =
-    mean_numerator * 2 * asymmetry_denominator
-    + mean_numerator * asymmetry_numerator
+    mean_numerator
+    * 2
+    * asymmetry_denominator
+    + mean_numerator
+    * asymmetry_numerator
   let reconstructed_right_numerator =
-    mean_numerator * 2 * asymmetry_denominator
-    - mean_numerator * asymmetry_numerator
-  let reconstructed_denominator =
-    2 * mean_denominator * asymmetry_denominator
+    mean_numerator
+    * 2
+    * asymmetry_denominator
+    - mean_numerator
+    * asymmetry_numerator
+  let reconstructed_denominator = 2 * mean_denominator * asymmetry_denominator
   let left_ok =
     reconstructed_left_numerator * left_denominator
     == left_numerator * reconstructed_denominator

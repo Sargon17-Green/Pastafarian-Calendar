@@ -182,24 +182,32 @@ fn verify(
     signed.signed_difference_numerator,
     signed.signed_difference_denominator,
   )
-  signed_fraction |> should.equal(signed_oracle(left_count, right_count, intersection))
+  signed_fraction
+  |> should.equal(signed_oracle(left_count, right_count, intersection))
   let mean_fraction = #(mean.mean_numerator, mean.mean_denominator)
-  mean_fraction |> should.equal(mean_oracle(left_count, right_count, intersection))
+  mean_fraction
+  |> should.equal(mean_oracle(left_count, right_count, intersection))
   let asymmetry = #(out.asymmetry_numerator, out.asymmetry_denominator)
-  asymmetry |> should.equal(asymmetry_oracle(left_count, right_count, intersection))
+  asymmetry
+  |> should.equal(asymmetry_oracle(left_count, right_count, intersection))
 
   let #(mean_numerator, mean_denominator) = mean_fraction
   let #(asymmetry_numerator, asymmetry_denominator) = asymmetry
   let #(left_numerator, left_denominator) = left_coverage
   let #(right_numerator, right_denominator) = right_coverage
   let reconstructed_left_numerator =
-    mean_numerator * 2 * asymmetry_denominator
-    + mean_numerator * asymmetry_numerator
+    mean_numerator
+    * 2
+    * asymmetry_denominator
+    + mean_numerator
+    * asymmetry_numerator
   let reconstructed_right_numerator =
-    mean_numerator * 2 * asymmetry_denominator
-    - mean_numerator * asymmetry_numerator
-  let reconstructed_denominator =
-    2 * mean_denominator * asymmetry_denominator
+    mean_numerator
+    * 2
+    * asymmetry_denominator
+    - mean_numerator
+    * asymmetry_numerator
+  let reconstructed_denominator = 2 * mean_denominator * asymmetry_denominator
   let left_reconstruction_ok =
     reconstructed_left_numerator * left_denominator
     == left_numerator * reconstructed_denominator
@@ -278,11 +286,10 @@ pub fn discovery_39_partial_overlap_positive_test() {
 
 pub fn discovery_39_index_multiplicity_and_duplicate_bands_test() {
   let assert [g, _, _, _] = gaps(bootstrap.new_context(11, 21), [4, 4, 4, 4])
-  verify(
-    [4, 4, 4, 4],
-    [band(g, 2 * g), band(g, 2 * g)],
-    [band(2 * g, 3 * g), band(2 * g, 3 * g)],
-  )
+  verify([4, 4, 4, 4], [band(g, 2 * g), band(g, 2 * g)], [
+    band(2 * g, 3 * g),
+    band(2 * g, 3 * g),
+  ])
   |> should.equal(#(#(-1, 3), #(18, 35), #(-6, 35)))
 }
 
