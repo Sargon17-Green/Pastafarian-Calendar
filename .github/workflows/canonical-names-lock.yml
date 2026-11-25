@@ -2781,3 +2781,52 @@ jobs:
           path: build/stage53-native.log
           if-no-files-found: warn
           retention-days: 30
+
+  stage54-mixed-five-live-discovery-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install GnuCOBOL 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gnucobol3
+          cobc --version
+      - name: Stage54 strict Native and independent mixed-five-live oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage54-native.log
+          node test/stage54_planning_oracle.mjs 2>&1 | tee -a build/stage54-native.log
+          compile_sources=(
+            test/stage54_discovery_tests.cob
+            src/big_integer.cob
+            src/monster_distance.cob
+            src/legacy_distance.cob
+            src/patched_day_tag.cob
+            src/patched_distance.cob
+          )
+          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage54-mixed-five-live "${compile_sources[@]}" 2>&1 | tee -a build/stage54-native.log
+          timeout --signal=TERM --kill-after=10s 120s ./build/stage54-mixed-five-live 2>&1 | tee -a build/stage54-native.log
+          node -e 'const a=JSON.parse(require("fs").readFileSync("build/stage54-native.log","utf8").split("\n").find(x=>x.startsWith("{"))); for(const [k,v] of Object.entries({cases:20,arithmetic:100,chunkComparisons:91100,replacementArithmetic:20,replacementChunks:18220,plannedNativeOwnerChecks:1280,plannedNativeChunkChecks:1166080,gate:"PASS_NOT_NATIVE"})) if(a[k]!==v) throw Error(k)' 
+          grep -Fxq 'STAGE54_HEAP_MEASURED=YES' build/stage54-native.log
+          grep -Fxq 'RESULT=PASS_STAGE54_MIXED_FIVE_LIVE_NATIVE' build/stage54-native.log
+          for pair in 'RUNS 20' 'PASS 20' 'INITIAL_OWNERS 100' 'ROUNDS 200' 'REJECTS 120' 'FITS 80' 'ROUND_OWNER_CHECKS 1000' 'FREE_SURVIVORS 80' 'REUSE_SURVIVORS 80' 'REPLACEMENT_OWNERS 20' 'REPLACEMENT_FITS 20' 'OWNER_WALKS 1280' 'CHUNK_CHECKS 1166080' 'HEAP_ZERO 20' 'HEAP_SAMPLES 280' 'TARGET_3 7' 'TARGET_4 7' 'TARGET_5 6' 'UNEXPECTED_FAILURES 0'; do
+            read -r key value <<<"$pair"
+            grep -Eq "^STAGE54_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage54-native.log
+          done
+          echo 'STAGE54_NATIVE_GATE=PASS' | tee -a build/stage54-native.log
+      - name: Preserve Stage54 evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobol-stage54-mixed-five-live-evidence
+          path: build/stage54-native.log
+          if-no-files-found: warn
+          retention-days: 30
