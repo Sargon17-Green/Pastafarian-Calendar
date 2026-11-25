@@ -408,8 +408,56 @@ proc researchSparseForwardSingleton(const ref previous: SparseWeavingVec,
   return result;
 }
 
+
+// Bounded research-only forward transfer for the unconstrained suffix case.
+// The production kernel allocates and packs [0..n+k], although its first
+// possible nonzero output is firstActive+1 and its last is n+1. Restrict both
+// the recurrence loop and dense packing domain to that exact output window.
+// Constrained fixed-prefix/tail specs deliberately fall back unchanged.
+proc researchSparseForwardWindowedEligible(
+    const ref previous: SparseWeavingVec, n: int,
+    spec: SparseWeavingGapSpec): bool {
+  return spec.fixedSum == 0 && spec.tail == 0 && spec.firstFixed < 0 &&
+         previous.values.size > 0 && max(spec.q,previous.first) <= n;
+}
+
+proc researchSparseForwardWindowed(const ref previous: SparseWeavingVec,
+                                   n: int, k: int,
+                                   spec: SparseWeavingGapSpec): SparseWeavingVec {
+  if !researchSparseForwardWindowedEligible(previous,n,spec) then
+    return sparseWeavingTransfer(previous,n,k,spec);
+
+  const firstActive = max(spec.q,previous.first);
+  var cumulative = new bigint(0);
+  const prefixCount = max(0,min(previous.values.size,
+                                firstActive-previous.first));
+  for t in 0..<prefixCount do cumulative += previous.values[t];
+
+  var dense: [firstActive+1..n+1] bigint;
+  const useRecurrence = k >= 8 && n-firstActive >= 8;
+  var coefficient = new bigint(0);
+  if useRecurrence then
+    coefficient = sparseWeavingChooseBig(k-2+n-firstActive,n-firstActive);
+
+  for i in firstActive..n {
+    cumulative += previous.at(i);
+    if cumulative != 0 {
+      if useRecurrence {
+        if coefficient != 0 then dense[i+1] = cumulative*coefficient;
+      } else {
+        const factor = sparseWeavingWeight(i,n,k,spec);
+        if factor != 0 then dense[i+1] = cumulative*factor;
+      }
+    }
+    if useRecurrence && i < n then
+      coefficient = (coefficient * new bigint(n-i)) /
+                    new bigint(k-2+n-i);
+  }
+  return sparseWeavingPack(dense);
+}
+
 proc checkResearchForwardSingletonMatrix() {
-  var cases = 0, entries = 0, singletonCases = 0;
+  var cases = 0, entries = 0, singletonCases = 0, windowedCases = 0;
   for n in 0..12 {
     for k in 1..10 {
       for q in 0..n {
@@ -438,82 +486,91 @@ proc checkResearchForwardSingletonMatrix() {
           }
           const packed = sparseWeavingPack(input);
           const actual = researchSparseForwardSingleton(packed,n,k,spec);
+          const windowed = researchSparseForwardWindowed(packed,n,k,spec);
           const baseline = sparseWeavingTransfer(packed,n,k,spec);
           if researchForwardSingletonEligible(spec) then singletonCases += 1;
+          if researchSparseForwardWindowedEligible(packed,n,spec) then
+            windowedCases += 1;
           var expected: [0..n+k] bigint;
           for i in 0..n {
             const w = researchGapAllocationCount(i,n,k,spec);
             for p in 0..i do expected[i+1] += input[p]*w;
           }
           for t in 0..n+k {
-            if actual.at(t) != expected[t] || baseline.at(t) != expected[t] then
-              halt("Forward singleton matrix mismatch n=",n," k=",k,
+            if actual.at(t) != expected[t] ||
+               baseline.at(t) != expected[t] ||
+               windowed.at(t) != expected[t] then
+              halt("Forward transfer matrix mismatch n=",n," k=",k,
                    " q=",q," shape=",shape," t=",t);
             entries += 1;
           }
           if actual.first != baseline.first ||
              actual.values.size != baseline.values.size then
             halt("Forward singleton packing mismatch");
+          if windowed.first != baseline.first ||
+             windowed.values.size != baseline.values.size then
+            halt("Forward windowed packing mismatch");
           cases += 1;
         }
       }
     }
   }
-  if cases != 5460 || entries != 79170 || singletonCases != 2470 then
-    halt("Forward singleton oracle cardinality mismatch");
+  if cases != 5460 || entries != 79170 ||
+     singletonCases != 2470 || windowedCases != 1140 then
+    halt("Forward independent matrix oracle cardinality mismatch");
   writeln("RESEARCH_FORWARD_MATRIX_CASES=",cases);
   writeln("RESEARCH_FORWARD_MATRIX_ENTRIES=",entries);
   writeln("RESEARCH_FORWARD_SINGLETON_CASES=",singletonCases);
   writeln("RESEARCH_FORWARD_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
+  writeln("RESEARCH_FORWARD_WINDOWED_ELIGIBLE_CASES=",windowedCases);
+  writeln("RESEARCH_FORWARD_WINDOWED_MATRIX_RESULT=EXACT_INDEPENDENT_MATRIX_PASS");
   try! stdout.flush();
 }
 
-// Frozen post-take states contain the actual updated selected suffix inputs
-// and specs. Compare the two kernels on the same input; never mutate states.
-// Time only the kernel calls, alternate order to reduce systematic bias.
-proc profileResearchSelectedForward(const ref lens: [?D] int,
-                                    const ref states: [?S] SparseWeavingVec,
-                                    const ref sizes: [?Z] int,
-                                    const ref specs: [?Q] SparseWeavingGapSpec,
-                                    chosen: int, step: int) {
-  var baselineSeconds = 0.0, candidateSeconds = 0.0;
-  var baselineSingletonSeconds = 0.0, candidateSingletonSeconds = 0.0;
-  var calls = 0, singletonCalls = 0;
+proc profileResearchForwardWindowed(const ref lens: [?D] int,
+                                      const ref states: [?S] SparseWeavingVec,
+                                      const ref sizes: [?Z] int,
+                                      const ref specs: [?Q] SparseWeavingGapSpec,
+                                      chosen: int, step: int) {
+  var baselineSeconds = 0.0, windowedSeconds = 0.0;
+  var calls = 0, optimizedCalls = 0;
   for j in max(2,chosen)..D.high {
-    // Explicit initialization prevents Chapel split-init order conflicts.
     var baseline: SparseWeavingVec = new SparseWeavingVec();
-    var candidate: SparseWeavingVec = new SparseWeavingVec();
+    var windowed: SparseWeavingVec = new SparseWeavingVec();
     var bt: stopwatch;
-    var ct: stopwatch;
+    var wt: stopwatch;
     if j%2 == 0 {
       bt.start();
       baseline = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
       bt.stop();
-      ct.start();
-      candidate = researchSparseForwardSingleton(states[j-1],sizes[j-1],lens[j],specs[j]);
-      ct.stop();
+      wt.start();
+      windowed = researchSparseForwardWindowed(states[j-1],sizes[j-1],
+                                                 lens[j],specs[j]);
+      wt.stop();
     } else {
-      ct.start();
-      candidate = researchSparseForwardSingleton(states[j-1],sizes[j-1],lens[j],specs[j]);
-      ct.stop();
+      wt.start();
+      windowed = researchSparseForwardWindowed(states[j-1],sizes[j-1],
+                                                 lens[j],specs[j]);
+      wt.stop();
       bt.start();
       baseline = sparseWeavingTransfer(states[j-1],sizes[j-1],lens[j],specs[j]);
       bt.stop();
     }
     if baseline.first != states[j].first ||
        baseline.values.size != states[j].values.size ||
-       candidate.first != baseline.first ||
-       candidate.values.size != baseline.values.size then
-      halt("Selected forward snapshot packing mismatch step=",step," month=",j);
+       windowed.first != baseline.first ||
+       windowed.values.size != baseline.values.size then
+      halt("Windowed forward snapshot packing mismatch step=",step,
+           " month=",j);
     for t in 0..<baseline.values.size {
       if baseline.values[t] != states[j].values[t] ||
-         candidate.values[t] != baseline.values[t] then
-        halt("Selected forward snapshot value mismatch step=",step," month=",j," index=",t);
+         windowed.values[t] != baseline.values[t] then
+        halt("Windowed forward snapshot value mismatch step=",step,
+             " month=",j," index=",t);
     }
-    // Record the actual hot suffix dimensions outside both kernel timers.
-    // One row per already-verified transfer; no extra kernel calls.
-    const isSingleton = researchForwardSingletonEligible(specs[j]);
-    writeln("RESEARCH_FORWARD_COST step=",step," month=",j,
+    const optimized = researchSparseForwardWindowedEligible(
+      states[j-1],sizes[j-1],specs[j]);
+    writeln("RESEARCH_WINDOWED_FORWARD_COST step=",step," month=",j,
             " n=",sizes[j-1]," k=",lens[j],
             " inputFirst=",states[j-1].first,
             " inputSupport=",states[j-1].values.size,
@@ -521,24 +578,19 @@ proc profileResearchSelectedForward(const ref lens: [?D] int,
             " outputSupport=",baseline.values.size,
             " q=",specs[j].q," fixedSum=",specs[j].fixedSum,
             " firstFixed=",specs[j].firstFixed," tail=",specs[j].tail,
-            " singleton=",isSingleton,
-            " baselineSeconds=",bt.elapsed()," candidateSeconds=",ct.elapsed());
+            " optimized=",optimized,
+            " baselineSeconds=",bt.elapsed(),
+            " windowedSeconds=",wt.elapsed());
     baselineSeconds += bt.elapsed();
-    candidateSeconds += ct.elapsed();
+    windowedSeconds += wt.elapsed();
     calls += 1;
-    if isSingleton {
-      singletonCalls += 1;
-      baselineSingletonSeconds += bt.elapsed();
-      candidateSingletonSeconds += ct.elapsed();
-    }
+    if optimized then optimizedCalls += 1;
   }
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CALLS=",calls);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_SINGLETON_CALLS=",singletonCalls);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_BASELINE_SECONDS=",baselineSeconds);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CANDIDATE_SECONDS=",candidateSeconds);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_BASELINE_SINGLETON_SECONDS=",baselineSingletonSeconds);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_CANDIDATE_SINGLETON_SECONDS=",candidateSingletonSeconds);
-  writeln("RESEARCH_SELECTED_FORWARD_STEP_",step,"_RESULT=EXACT_SELECTED_SUFFIX_MATCH_RESEARCH_ONLY");
+  writeln("RESEARCH_WINDOWED_FORWARD_STEP_",step,"_CALLS=",calls);
+  writeln("RESEARCH_WINDOWED_FORWARD_STEP_",step,"_OPTIMIZED_CALLS=",optimizedCalls);
+  writeln("RESEARCH_WINDOWED_FORWARD_STEP_",step,"_BASELINE_SECONDS=",baselineSeconds);
+  writeln("RESEARCH_WINDOWED_FORWARD_STEP_",step,"_WINDOWED_SECONDS=",windowedSeconds);
+  writeln("RESEARCH_WINDOWED_FORWARD_STEP_",step,"_RESULT=EXACT_SELECTED_SUFFIX_MATCH_RESEARCH_ONLY");
   try! stdout.flush();
 }
 
@@ -731,7 +783,7 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
       prefixTimer.stop();
       profileSparseCandidateSubphases(lens, states, sizes, specs, used,
                                       opened, closed, total, step);
-      profileResearchSelectedForward(lens, states, sizes, specs, chosen, step);
+      profileResearchForwardWindowed(lens, states, sizes, specs, chosen, step);
       prefixTimer.start();
     }
     if prefixTimer.elapsed() >= 30.0 then break;
