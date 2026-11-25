@@ -116,7 +116,7 @@ def probe_days() -> list[int]:
 
 
 def table_bytes() -> bytes:
-    lines = ["day\\ttag\\tinverse_day\\tside"]
+    lines = ["day\ttag\tinverse_day\tside"]
     days = probe_days()
     tags: set[int] = set()
     for day in days:
@@ -132,8 +132,8 @@ def table_bytes() -> bytes:
         if tag in tags:
             raise AssertionError(f"Tag collision: {tag}")
         tags.add(tag)
-        lines.append(f"{day}\\t{tag}\\t{inverse}\\t{side}")
-    return ("\\n".join(lines) + "\\n").encode("utf-8")
+        lines.append(f"{day}\t{tag}\t{inverse}\t{side}")
+    return ("\n".join(lines) + "\n").encode("utf-8")
 
 
 def self_test() -> bytes:
