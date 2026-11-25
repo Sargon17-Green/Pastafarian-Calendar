@@ -2900,7 +2900,6 @@ jobs:
           import subprocess
           expected = sorted([
               ".github/workflows/canonical-names-lock.yml",
-              ".github/workflows/cobol-qa51b-fault-injection.yml",
               "DEVELOPMENT_STAGE.md",
               "docs/POST_STAGE55_QA51B_TEST_BUILD_FAULT_INJECTION_CONTRACT_2026-11-25.md",
               "qa/cobol/qa51b_fault_control.cob",
