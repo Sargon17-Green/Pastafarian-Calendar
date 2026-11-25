@@ -90,7 +90,7 @@ try {
     $m.stage01 -cne 'NOT_ACCEPTED' -or $m.source_commit -cne $source -or
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
-    $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
+    $m.program_count -ne 28 -or $m.probe_count -ne 11 -or
     $m.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_244_after_v23' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
     $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
     $m.line237_witness.source_line -ne 237 -or $m.line237_witness.applied_to_suite_copy -ne $true -or
