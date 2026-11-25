@@ -26,6 +26,12 @@ $r=[ordered]@{
   fx_checkpoints=@()
   compile_exact=$false
   compile_name_exact=$false
+  paren_compile_exact=$false
+  paren_compile_name_exact=$false
+  paren_ec_valid=$false
+  paren_ec=$null
+  paren_result_valid=$false
+  paren_result=@()
   witness_start_exact=$false
   witness_captured_exact=$false
   init_all_exact=$false
@@ -128,13 +134,24 @@ try {
      $m.witness.input.Count -ne 5 -or
      (($m.witness.input -join ',') -cne '12,3,4,4,1') -or
      $m.witness.expected_fixture -cne 'FIX_BOUNDED_444' -or
-     $m.witness.init_markers.Count -ne 4 -or $m.witness.phase_markers.Count -ne 4){
+     $m.witness.init_markers.Count -ne 4 -or $m.witness.phase_markers.Count -ne 5 -or
+     $m.witness.paren_patch.changed_source_line -ne 398 -or
+     $m.witness.paren_patch.original_statement -cne ':If rem-x<0' -or
+     $m.witness.paren_patch.probe_statement -cne ':If (rem-x)<0' -or
+     $m.witness.paren_patch.qa_alias -cne 'QABoundedUnrankParenProbe' -or
+     $m.witness.paren_call -cne 'QABoundedUnrankParenProbe 12 3 4 4 1' -or
+     $m.witness.paren_patch.source_statements_changed -ne 1 -or
+     $m.witness.paren_patch.only_semantic_change_is_explicit_parenthesization -ne $true -or
+     $m.witness.paren_patch.source_definition_sha256 -cne $m.trace.source_definition_sha256 -or
+     $m.witness.paren_patch.production_source_modified -ne $false -or
+     $m.witness.expected_paren_result.Count -ne 3 -or
+     (($m.witness.expected_paren_result -join ',') -cne '4,4,4')){
     throw 'BOUNDED_UNRANK_CANDIDATE_CONTRACT_INVALID'
   }
   if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'BOUNDED_UNRANK_CANDIDATE_SHA_MISMATCH'}
   $r['candidate_sha256']=$m.candidate_sha256
 
-  $allPaths=@($m.marker_path,$m.witness.compile_marker_path,$m.witness.start_marker_path,$m.witness.captured_marker_path,$m.witness.compile_name_code_path)
+  $allPaths=@($m.marker_path,$m.witness.compile_marker_path,$m.witness.start_marker_path,$m.witness.captured_marker_path,$m.witness.compile_name_code_path,$m.witness.paren_compile_marker_path,$m.witness.paren_compile_name_code_path)
   foreach($c in $m.chunk_records){$allPaths+=@($c.marker_path)}
   foreach($mk in $m.witness.init_markers){$allPaths+=@([string]$mk.path)}
   foreach($mk in $m.witness.phase_markers){$allPaths+=@([string]$mk.path)}
@@ -183,6 +200,10 @@ try {
   $r['compile_exact']=[bool]$compile.exact
   $name=ReadNumbers $m.witness.compile_name_code_path (Join-Path $Evidence 'bounded_unrank_compile_name_code.txt')
   $r['compile_name_exact']=[bool]($name.valid -and $name.values.Count -eq 1 -and [long]$name.values[0] -eq 1)
+  $parenCompile=ReadExact $m.witness.paren_compile_marker_path $m.witness.paren_compile_token (Join-Path $Evidence 'bounded_unrank_paren_compiled.txt')
+  $r['paren_compile_exact']=[bool]$parenCompile.exact
+  $parenName=ReadNumbers $m.witness.paren_compile_name_code_path (Join-Path $Evidence 'bounded_unrank_paren_compile_name_code.txt')
+  $r['paren_compile_name_exact']=[bool]($parenName.valid -and $parenName.values.Count -eq 1 -and [long]$parenName.values[0] -eq 1)
 
   $start=ReadExact $m.witness.start_marker_path $m.witness.start_token (Join-Path $Evidence 'bounded_unrank_start.txt')
   $captured=ReadExact $m.witness.captured_marker_path $m.witness.captured_token (Join-Path $Evidence 'bounded_unrank_captured.txt')
@@ -216,6 +237,10 @@ try {
   if($original.valid -and $original.values.Count -eq 1){$r['original_ec_valid']=$true;$r['original_ec']=[long]$original.values[0]}
   $trace=$r['witness_files']['trace_ec']
   if($trace.valid -and $trace.values.Count -eq 1){$r['trace_ec_valid']=$true;$r['trace_ec']=[long]$trace.values[0]}
+  $parenCode=$r['witness_files']['paren_ec_code']
+  if($parenCode.valid -and $parenCode.values.Count -eq 1){$r['paren_ec_valid']=$true;$r['paren_ec']=[long]$parenCode.values[0]}
+  $parenResult=$r['witness_files']['paren_result']
+  if($parenResult.valid -and $parenResult.values.Count -eq 4 -and [long]$parenResult.values[0] -eq 0 -and [long]$parenResult.values[1] -eq 4 -and [long]$parenResult.values[2] -eq 4 -and [long]$parenResult.values[3] -eq 4){$r['paren_result_valid']=$true;$r['paren_result']=$parenResult.values}
   $runCode=$r['witness_files']['run_ec_code']
   if($runCode.valid -and $runCode.values.Count -eq 1){$r['run_ec_valid']=$true;$r['run_ec']=[long]$runCode.values[0]}
   $outputCode=$r['witness_files']['output_ec_code']
@@ -230,12 +255,14 @@ try {
   $final=ReadExact $marker $m.marker_token (Join-Path $Evidence 'bounded_unrank_final_diagnostic_marker.txt')
   $r['final_marker_exact']=[bool]$final.exact
 
-  $core=@('run_ec_code','run_ec_message_codes','output_ec_code','output_ec_message_codes','original_ec','original_message_codes','trace_ec','trace_message_codes','expected_values','expected_shape','expected_rank','expected_type','count_values','count_rank','count_type','trace_args','trace_dp_shape','trace_dp_values','trace_dp_type','trace_log','trace_loop_state','trace_candidate_state','trace_out','trace_rem','trace_rank','trace_result')
+  $core=@('run_ec_code','output_ec_code','original_ec','original_message_codes','trace_ec','trace_message_codes','paren_ec_code','paren_result','expected_values','expected_shape','expected_rank','expected_type','count_values','count_rank','count_type','trace_args','trace_dp_shape','trace_dp_values','trace_dp_type','trace_log','trace_loop_state','trace_candidate_state','trace_out','trace_rem','trace_rank','trace_result')
   $coreValid=$true
   foreach($key in $core){if(-not $r['witness_files'][$key].valid){$coreValid=$false}}
 
   if($r['runtime_verified'] -and $r['native_executed'] -and $r['fx_all_exact'] -and
      $r['compile_exact'] -and $r['compile_name_exact'] -and
+     $r['paren_compile_exact'] -and $r['paren_compile_name_exact'] -and
+     $r['paren_ec_valid'] -and $r['paren_ec'] -ne 0 -and $r['paren_result_valid'] -and
      $r['witness_start_exact'] -and $r['witness_captured_exact'] -and
      $r['init_all_exact'] -and $r['phase_all_exact'] -and
      $r['run_ec_valid'] -and $r['run_ec'] -ne 0 -and
@@ -257,7 +284,7 @@ try {
   Write-Output ('BOUNDED_UNRANK_WITNESS_STATUS='+$r['status'])
   Write-Output ('FX_LAST_CONTIGUOUS='+$r['fx_last_contiguous'])
   Write-Output ('TRACE_LAST_STAGE='+$r['trace_last_stage'])
-  Write-Output ('RUN_EC='+$r['run_ec']+'|OUTPUT_EC='+$r['output_ec'])
+  Write-Output ('RUN_EC='+$r['run_ec']+'|OUTPUT_EC='+$r['output_ec']+'|PAREN_EC='+$r['paren_ec'])
   Write-Output 'STAGE01_NOT_ACCEPTED'
 }
 if($exitCode -ne 0){exit 1}

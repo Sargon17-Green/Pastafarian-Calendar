@@ -191,6 +191,44 @@ def instrument_bounded_unrank(block: dict) -> tuple[list[str], dict]:
     return trace, metadata
 
 
+PAREN_ALIAS = "QABoundedUnrankParenProbe"
+
+
+def parenthesized_probe_definition(block: dict) -> tuple[list[str], dict]:
+    """Create a QA-only one-statement counterfactual; never edit source."""
+    source = fx_definition_lines(block)
+    if (len(source) != 24 or source[10].strip() != ":If rem-x<0"
+            or block.get("start_line") != 388 or block.get("end_line") != 412):
+        raise ValueError("BOUNDED_UNRANK_PRECEDENCE_PROBE_ANCHOR_CHANGED")
+    probe = list(source)
+    probe[0] = probe[0].replace("BoundedUnrank", PAREN_ALIAS, 1)
+    probe[10] = probe[10].replace(":If rem-x<0", ":If (rem-x)<0", 1)
+    normalized = list(probe)
+    normalized[0] = source[0]
+    changed = [i for i, (left, right) in enumerate(zip(source, normalized)) if left != right]
+    if changed != [10]:
+        raise ValueError("BOUNDED_UNRANK_PRECEDENCE_PROBE_NOT_ONE_LINE")
+    metadata = {
+        "source_function": "BoundedUnrank",
+        "source_path": block["path"],
+        "source_lines": [block["start_line"], block["end_line"]],
+        "qa_alias": PAREN_ALIAS,
+        "changed_source_line": 398,
+        "original_statement": ":If rem-x<0",
+        "probe_statement": ":If (rem-x)<0",
+        "source_definition_sha256": hashlib.sha256(
+            "\n".join(source).encode("utf-8")
+        ).hexdigest(),
+        "probe_definition_sha256": hashlib.sha256(
+            "\n".join(probe).encode("utf-8")
+        ).hexdigest(),
+        "source_statements_changed": 1,
+        "only_semantic_change_is_explicit_parenthesization": True,
+        "production_source_modified": False,
+    }
+    return probe, metadata
+
+
 def _decode_chunked_candidate(
     data: bytes,
     expected_program_count: int | None = None,
@@ -253,6 +291,7 @@ def build_bounded_unrank_witness(
     if len(blocks) != 1:
         raise ValueError("BOUNDED_UNRANK_SOURCE_NOT_UNIQUE")
     trace_definition, trace_meta = instrument_bounded_unrank(blocks[0])
+    paren_definition, paren_meta = parenthesized_probe_definition(blocks[0])
     manifest_sha = locked["manifest"]["manifest_sha256"]
     if manifest_sha != base_receipt["source_manifest_sha256"]:
         raise ValueError("SOURCE_MANIFEST_MISMATCH")
@@ -263,6 +302,8 @@ def build_bounded_unrank_witness(
         for key, suffix in {
             "compile_marker": "compile",
             "compile_name_code": "compile_name_code",
+            "paren_compile_marker": "paren_compile",
+            "paren_compile_name_code": "paren_compile_name_code",
             "start_marker": "start",
             "captured_marker": "captured",
             "run_ec_code": "run_ec_code",
@@ -271,6 +312,9 @@ def build_bounded_unrank_witness(
             "output_ec_message_codes": "output_ec_message_codes",
             "original_ec": "original_ec",
             "original_message_codes": "original_message_codes",
+            "paren_ec_code": "paren_ec_code",
+            "paren_message_codes": "paren_message_codes",
+            "paren_result": "paren_result",
             "trace_ec": "trace_ec",
             "trace_message_codes": "trace_message_codes",
             "expected_values": "expected_values",
@@ -306,6 +350,10 @@ def build_bounded_unrank_witness(
         f"APL_GERMAN_BOUNDED_UNRANK_V1|SOURCE={SOURCE_COMMIT}"
         "|PHASE=CAPTURED_NOT_PASS"
     )
+    paren_compile_token = (
+        f"APL_GERMAN_BOUNDED_UNRANK_V1|SOURCE={SOURCE_COMMIT}"
+        f"|FUNCTION={PAREN_ALIAS}|PATCH_LINE=398|PHASE=COMPILED_QA_COUNTERFACTUAL"
+    )
     init_names = [
         "SourceLanguageCatalogInit",
         "MonsterBootstrapInit",
@@ -326,6 +374,7 @@ def build_bounded_unrank_witness(
         "BOUNDED_COUNT_CAPTURED",
         "ORIGINAL_CALL_CAPTURED",
         "TRACE_CALL_CAPTURED",
+        "PAREN_CALL_CAPTURED",
     ]
     phase_markers = []
     for index, name in enumerate(phase_names, 1):
@@ -337,16 +386,26 @@ def build_bounded_unrank_witness(
         phase_markers.append({"index": index, "name": name, "token": token, "path": path})
 
     trace_name_var = "QABoundedTraceName"
+    paren_name_var = "QABoundedParenName"
     compile_program = (
         "95 Stage01ChunkAssert 0 ⋄ "
         + f"{trace_name_var}←⎕FX {nested_fx_expression(trace_definition)}"
+        + " ⋄ "
+        + f"{paren_name_var}←⎕FX {nested_fx_expression(paren_definition)}"
         + " ⋄ "
         + _write_expr(
             f"{trace_name_var}≡⎕UCS {_codes(ALIAS)}",
             paths["compile_name_code"],
         )
         + " ⋄ "
+        + _write_expr(
+            f"{paren_name_var}≡⎕UCS {_codes(PAREN_ALIAS)}",
+            paths["paren_compile_name_code"],
+        )
+        + " ⋄ "
         + marker_write(compile_token, paths["compile_marker"])
+        + " ⋄ "
+        + marker_write(paren_compile_token, paths["paren_compile_marker"])
     )
 
     init = (
@@ -361,6 +420,7 @@ def build_bounded_unrank_witness(
         "QABoundedCountRank←0 ⋄ QABoundedCountType←0 ⋄ "
         "QABoundedOriginalCode←999 ⋄ QABoundedOriginalMessageCodes←0 ⋄ "
         "QABoundedTraceCode←999 ⋄ QABoundedTraceMessageCodes←0 ⋄ "
+        "QABoundedParenCode←999 ⋄ QABoundedParenResult←0 ⋄ QABoundedParenMessageCodes←0 ⋄ "
         "QABoundedRunCode←999 ⋄ QABoundedRunMessageCodes←0 ⋄ "
         "QABoundedOutputCode←999 ⋄ QABoundedOutputMessageCodes←0"
     )
@@ -372,6 +432,18 @@ def build_bounded_unrank_witness(
         run_body_parts.append(item["name"])
         run_body_parts.append(marker_write(item["token"], item["path"]))
     run_body_parts.extend([
+        "QABoundedTraceLog←0 ⋄ QABoundedTraceArgs←0 ⋄ "
+        "QABoundedTraceDPShape←0 ⋄ QABoundedTraceDPType←0 ⋄ "
+        "QABoundedTraceDPValues←0 ⋄ QABoundedTraceLoopState←0 ⋄ "
+        "QABoundedTraceCandidateState←0 ⋄ QABoundedTraceOut←0 ⋄ "
+        "QABoundedTraceRem←0 ⋄ QABoundedTraceRank←0 ⋄ "
+        "QABoundedTraceResult←0 ⋄ QABoundedExpected←0 ⋄ "
+        "QABoundedExpectedShape←0 ⋄ QABoundedExpectedRank←0 ⋄ "
+        "QABoundedExpectedType←0 ⋄ QABoundedCountProbe←0 ⋄ "
+        "QABoundedCountRank←0 ⋄ QABoundedCountType←0 ⋄ "
+        "QABoundedOriginalCode←999 ⋄ QABoundedOriginalMessageCodes←0 ⋄ "
+        "QABoundedTraceCode←999 ⋄ QABoundedTraceMessageCodes←0 ⋄ "
+        "QABoundedParenCode←999 ⋄ QABoundedParenResult←0 ⋄ QABoundedParenMessageCodes←0",
         "QABoundedExpected←FIX_BOUNDED_444 ⋄ "
         "QABoundedExpectedShape←⍴FIX_BOUNDED_444 ⋄ "
         "QABoundedExpectedRank←⍴⍴FIX_BOUNDED_444 ⋄ "
@@ -389,6 +461,11 @@ def build_bounded_unrank_witness(
         "QABoundedTraceCode←QABoundedTraceEC[1] ⋄ "
         "QABoundedTraceMessageCodes←⎕UCS ⊃QABoundedTraceEC[3]",
         marker_write(phase_markers[3]["token"], phase_markers[3]["path"]),
+        f"QABoundedParenEC←⎕EC ⎕UCS {_codes(PAREN_ALIAS + ' 12 3 4 4 1')} ⋄ "
+        "QABoundedParenCode←QABoundedParenEC[1] ⋄ "
+        "QABoundedParenResult←QABoundedParenEC[2] ⋄ "
+        "QABoundedParenMessageCodes←⎕UCS ⊃QABoundedParenEC[3]",
+        marker_write(phase_markers[4]["token"], phase_markers[4]["path"]),
     ])
     run_body = " ⋄ ".join(run_body_parts)
 
@@ -399,6 +476,9 @@ def build_bounded_unrank_witness(
         _write_expr("0,QABoundedOriginalMessageCodes", paths["original_message_codes"]),
         _write_expr("QABoundedTraceCode", paths["trace_ec"]),
         _write_expr("0,QABoundedTraceMessageCodes", paths["trace_message_codes"]),
+        _write_expr("QABoundedParenCode", paths["paren_ec_code"]),
+        _write_expr("0,QABoundedParenMessageCodes", paths["paren_message_codes"]),
+        _write_expr("0,QABoundedParenResult", paths["paren_result"]),
         _write_expr("0,QABoundedExpected", paths["expected_values"]),
         _write_expr("0,QABoundedExpectedShape", paths["expected_shape"]),
         _write_expr("QABoundedExpectedRank", paths["expected_rank"]),
@@ -485,14 +565,20 @@ def build_bounded_unrank_witness(
             "compile_token": compile_token,
             "start_token": start_token,
             "captured_token": captured_token,
+            "paren_compile_token": paren_compile_token,
             "compile_marker_path": paths["compile_marker"],
+            "paren_compile_marker_path": paths["paren_compile_marker"],
+            "paren_compile_name_code_path": paths["paren_compile_name_code"],
+            "paren_patch": paren_meta,
+            "paren_call": f"{PAREN_ALIAS} 12 3 4 4 1",
+            "expected_paren_result": [4, 4, 4],
             "start_marker_path": paths["start_marker"],
             "captured_marker_path": paths["captured_marker"],
             "compile_name_code_path": paths["compile_name_code"],
             "init_markers": init_markers,
             "phase_markers": phase_markers,
             "paths": {k: v for k, v in paths.items()
-                      if k not in ("compile_marker", "start_marker", "captured_marker")},
+                      if k not in ("compile_marker", "paren_compile_marker", "start_marker", "captured_marker")},
         },
         "prior_v26_run": 45686659807,
         "prior_v26_artifact_id": 15056557607,

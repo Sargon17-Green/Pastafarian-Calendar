@@ -103,9 +103,11 @@ jobs:
              $a.fx_last_contiguous -ne 95 -or $a.fx_all_exact -ne $true -or
              $a.fx_checkpoints.Count -ne 23 -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
+             $a.paren_compile_exact -ne $true -or $a.paren_compile_name_exact -ne $true -or
+             $a.paren_ec_valid -ne $true -or $a.paren_ec -eq 0 -or $a.paren_result_valid -ne $true -or
              $a.witness_start_exact -ne $true -or $a.witness_captured_exact -ne $true -or
              $a.init_all_exact -ne $true -or $a.init_checkpoints.Count -ne 4 -or
-             $a.phase_all_exact -ne $true -or $a.phase_checkpoints.Count -ne 4 -or
+             $a.phase_all_exact -ne $true -or $a.phase_checkpoints.Count -ne 5 -or
              $a.run_ec_valid -ne $true -or $a.run_ec -eq 0 -or
              $a.output_ec_valid -ne $true -or $a.output_ec -eq 0 -or
              $a.original_ec_valid -ne $true -or $a.trace_ec_valid -ne $true -or
@@ -113,7 +115,7 @@ jobs:
              $a.final_marker_exact -ne $true){
             throw 'BOUNDED_UNRANK_NATIVE_RECEIPT_INCOMPLETE'
           }
-          $core=@('run_ec_code','run_ec_message_codes','output_ec_code','output_ec_message_codes',
+          $core=@('run_ec_code','output_ec_code','paren_ec_code','paren_result',
             'expected_values','expected_shape','expected_rank','expected_type',
             'count_values','count_rank','count_type','original_ec','original_message_codes',
             'trace_ec','trace_message_codes','trace_args','trace_dp_shape',
@@ -124,9 +126,33 @@ jobs:
               throw ('BOUNDED_UNRANK_WITNESS_FILE_INVALID_'+$key)
             }
           }
+          $domain=@(68,79,77,65,73,78,32,69,82,82,79,82)
+          $originalMsg=$a.witness_files.original_message_codes.values
+          $traceMsg=$a.witness_files.trace_message_codes.values
+          if($a.original_ec -ne 0 -or $a.trace_ec -ne 0 -or $a.trace_last_stage -ne 7 -or
+             (($a.trace_log -join ',') -cne '0,1,2,3,4,5,6,7') -or
+             (($a.witness_files.expected_values.values -join ',') -cne '0,4,4,4') -or
+             (($a.witness_files.count_values.values -join ',') -cne '0,1') -or
+             (($a.witness_files.trace_loop_state.values -join ',') -cne '0,1,2,12') -or
+             (($a.witness_files.paren_result.values -join ',') -cne '0,4,4,4') -or
+             $originalMsg.Count -lt 13 -or $traceMsg.Count -lt 13 -or
+             (($originalMsg[1..12] -join ',') -cne ($domain -join ',')) -or
+             (($traceMsg[1..12] -join ',') -cne ($domain -join ','))){
+            throw 'BOUNDED_UNRANK_PRECEDENCE_DIAGNOSTIC_MISMATCH'
+          }
           if($b.program_count -ne 26 -or $b.function_count -ne 95 -or
              $b.chunk_count -ne 23 -or $b.witness.init_markers.Count -ne 4 -or
-             $b.witness.phase_markers.Count -ne 4 -or
+             $b.witness.phase_markers.Count -ne 5 -or
+             $b.witness.paren_call -cne 'QABoundedUnrankParenProbe 12 3 4 4 1' -or
+             $b.witness.paren_patch.qa_alias -cne 'QABoundedUnrankParenProbe' -or
+             $b.witness.paren_patch.changed_source_line -ne 398 -or
+             $b.witness.paren_patch.original_statement -cne ':If rem-x<0' -or
+             $b.witness.paren_patch.probe_statement -cne ':If (rem-x)<0' -or
+             $b.witness.paren_patch.source_statements_changed -ne 1 -or
+             $b.witness.paren_patch.only_semantic_change_is_explicit_parenthesization -ne $true -or
+             $b.witness.paren_patch.source_definition_sha256 -cne $b.trace.source_definition_sha256 -or
+             $b.witness.paren_patch.production_source_modified -ne $false -or
+             (($b.witness.expected_paren_result -join ',') -cne '4,4,4') -or
              $b.final_expression -cne 'BOUNDED_UNRANK_WITNESS_ONLY' -or
              $b.trace.source_function -cne 'BoundedUnrank' -or
              $b.trace.alias -cne 'QABoundedUnrankTrace' -or
@@ -139,10 +165,11 @@ jobs:
              $b.prior_v26_artifact_sha256 -cne 'ef9a79666eb91c09a56518576e41bf191456a0ba870d0b73bf2c5a0a5e08e331'){
             throw 'BOUNDED_UNRANK_SOURCE_WITNESS_CONTRACT_MISMATCH'
           }
-          Write-Output ('RUN_EC='+$a.run_ec+'|OUTPUT_EC='+$a.output_ec+
+          Write-Output ('RUN_EC='+$a.run_ec+'|OUTPUT_EC='+$a.output_ec+'|PAREN_EC='+$a.paren_ec+
             '|ORIGINAL_BOUNDEDUNRANK_EC='+$a.original_ec+
             '|TRACE_COPY_EC='+$a.trace_ec+'|LAST_TRACE_STAGE='+$a.trace_last_stage)
           Write-Output 'NATIVE_95_OF_95_AND_23_OF_23_PREREQUISITES_VERIFIED'
+          Write-Output 'ORIGINAL_BOUNDEDUNRANK_DOMAIN_ERROR_AT_LINE398; QA_PAREN_PROBE_RETURNS_4_4_4'
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_RUNSTAGE01TESTS_NOT_EXECUTED'
       - name: Hash all diagnostic evidence
         if: always()

@@ -86,10 +86,25 @@ class BoundedUnrankWitnessTests(unittest.TestCase):
         )
         self.assertEqual(
             [x["name"] for x in w["phase_markers"]],
-            ["EXPECTED_FIXTURE_CAPTURED", "BOUNDED_COUNT_CAPTURED", "ORIGINAL_CALL_CAPTURED", "TRACE_CALL_CAPTURED"],
+            ["EXPECTED_FIXTURE_CAPTURED", "BOUNDED_COUNT_CAPTURED", "ORIGINAL_CALL_CAPTURED", "TRACE_CALL_CAPTURED", "PAREN_CALL_CAPTURED"],
         )
         self.assertIn("run_ec_code", w["paths"])
         self.assertIn("output_ec_code", w["paths"])
+        self.assertEqual(w["paren_call"], "QABoundedUnrankParenProbe 12 3 4 4 1")
+        self.assertEqual(w["expected_paren_result"], [4, 4, 4])
+        self.assertEqual(w["paren_patch"]["qa_alias"], "QABoundedUnrankParenProbe")
+        self.assertEqual(w["paren_patch"]["changed_source_line"], 398)
+        self.assertEqual(
+            w["paren_patch"]["source_definition_sha256"],
+            self.receipt["trace"]["source_definition_sha256"],
+        )
+        self.assertEqual(w["paren_patch"]["original_statement"], ":If rem-x<0")
+        self.assertEqual(w["paren_patch"]["probe_statement"], ":If (rem-x)<0")
+        self.assertEqual(w["paren_patch"]["source_statements_changed"], 1)
+        self.assertTrue(w["paren_patch"]["only_semantic_change_is_explicit_parenthesization"])
+        self.assertFalse(w["paren_patch"]["production_source_modified"])
+        self.assertIn("paren_ec_code", w["paths"])
+        self.assertIn("paren_result", w["paths"])
         self.assertEqual(self.receipt["trace"]["source_lines"], [388, 412])
         self.assertTrue(self.receipt["trace"]["source_statements_preserved"])
 
