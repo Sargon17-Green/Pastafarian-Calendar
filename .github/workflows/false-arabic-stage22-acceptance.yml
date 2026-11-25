@@ -12,7 +12,7 @@ jobs:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       PROJECT_ID: PC-BRANCH-FALSE-ARABIC
-      SOURCE_PIN: \${{ github.sha }}
+      SOURCE_PIN: ${{ github.sha }}
       RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +70,15 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 tools/stage22_offline_audit.py
+      - name: Preserve early failure context
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage22_acceptance
+          if [ ! -f evidence/stage22_acceptance/evidence.json ]; then
+            printf '%s\\n' 'Native gate did not reach evidence.json; inspect this run\x27s job log for the exact pre-Native failure.' > evidence/stage22_acceptance/early_failure.txt
+          fi
       - name: Preserve source-pinned Native programs, byte-exact logs, audit and bundle
         if: always()
         uses: actions/upload-artifact@v4
