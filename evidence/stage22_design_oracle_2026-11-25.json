@@ -1,0 +1,92 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 22,
+  "status": "DESIGN_ORACLE_PASS_NOT_NATIVE",
+  "normative_operation": 56,
+  "planned_production_operation": 39,
+  "normative_reference_blob_sha1": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+  "cases": 397,
+  "anchors": 13,
+  "seeded_cases": 384,
+  "batches_per_case": 12,
+  "transitions": 4764,
+  "numeric_comparisons": 28584,
+  "range_checks": 28584,
+  "mersenne_fold_equivalence_checks": 28584,
+  "immutable_input_checks": 397,
+  "factoradic_rank_checks": 720,
+  "rank_counts": {
+    "4": 703,
+    "5": 700,
+    "6": 625,
+    "7": 699,
+    "8": 707,
+    "9": 623,
+    "10": 707
+  },
+  "replay_identical": true,
+  "rolling_digest": "0xb2eaf77ee8b62ef6",
+  "witness": {
+    "input_bowls": [
+      "2",
+      "3",
+      "5",
+      "7",
+      "11",
+      "13"
+    ],
+    "first_batch_total": "196",
+    "first_batch_rank": 7,
+    "first_batch_order": [
+      1,
+      2,
+      4,
+      3,
+      5,
+      6
+    ],
+    "first_batch_output": [
+      "529",
+      "349",
+      "853",
+      "394",
+      "878",
+      "599"
+    ]
+  },
+  "wrong_algorithm_witnesses": [
+    {
+      "mutation": "t_offset_149_to_148",
+      "first_bowl_id": 1,
+      "expected": "529",
+      "observed": "384"
+    },
+    {
+      "mutation": "rank_modulus_7_to_6",
+      "first_bowl_id": 1,
+      "expected": "529",
+      "observed": "385"
+    },
+    {
+      "mutation": "swap_neighbor_weights",
+      "first_bowl_id": 1,
+      "expected": "529",
+      "observed": "549"
+    },
+    {
+      "mutation": "omit_p_squared",
+      "first_bowl_id": 1,
+      "expected": "529",
+      "observed": "528"
+    },
+    {
+      "mutation": "cross_weight_7_to_6",
+      "first_bowl_id": 1,
+      "expected": "529",
+      "observed": "490"
+    }
+  ],
+  "native_run": "NOT_RUN",
+  "production_implementation": "NOT_STARTED",
+  "stage22_acceptance": "NO"
+}

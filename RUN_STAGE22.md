@@ -1,0 +1,109 @@
+# Stage22 — Twelve-batch bowl evolution
+
+**State:** DESIGN CONTRACT DRAFTED; production operation 39 is not implemented; Native has not been run; Stage22 is not accepted.
+
+## Normative basis
+
+- Normative operation 56 in `test/normative_reference.false`, blob `3e9acc012bedf83294a6ec3cccb081a069556b5b`.
+- Its comment defines twelve batches after the 46th visible drop and input tuple `[bowls]`.
+- Normative operation 57 consumes operation 56's result as `finalBowls` and returns it together with `orderAt46`. Therefore operation 56 returns the final six-bowl state after twelve batches, not a history of twelve states.
+- The loop in operation 56 visits bowl IDs 1 through 6; sequence construction preserves that logical order. The production result is indexed by bowl ID.
+
+## Production mapping and data contract
+
+**Planned production operation:** `39` (corresponds to normative operation `56`).
+
+**Input:** one direct argument record `[1, bowlsHandle]`. `bowlsHandle` is a direct table `[6, B1, B2, B3, B4, B5, B6]`. Each `Bi` is a fully allocated canonical positive BigInt.
+
+**Output:** a fresh direct table `[6, N1, N2, N3, N4, N5, N6]`, representing the final state after exactly twelve batches. It is not wrapped in a second record and does not contain intermediate snapshots.
+
+BigInt contract:
+
+- (M=2^{127}-1).
+- Canonical positive values are in (1ldots M).
+- Sign cell is (+1); digit count is 1 through 15; each base-512 digit is 0 through 511; the most-significant digit is nonzero.
+- `SAVE(x)=1+((x-1) mod M)` for positive (x).
+
+**Ownership and mutation:** all six values in a batch are computed from one immutable old-state snapshot. The input record, bowl table, and BigInt records remain unchanged. The output table and its six BigInt values are fresh; no output aliases an input handle. Invalid/unallocated physical pointers, truncated allocations, corrupt heaps, and memory-unsafe aliasing are outside this contract.
+
+## Exact recurrence
+
+Let (B^{(0)}=(B_1,ldots,B_6)) be the input. For each batch (u=1,ldots,12):
+
+1. Compute the shared batch total:
+
+[
+T_u=operatorname{SAVE}left(sum_{i=1}^{6}B_i^{(u-1)}+6+149uight)
+]
+
+2. Compute the one-based lexicographic permutation rank:
+
+[
+r_u=4+left((T_u-4)mod 7ight)
+]
+
+The Euclidean remainder is in (0ldots6), so (r_u) is always in (4ldots10). Let (O_u) be the (r_u)-th lexicographic permutation of bowl IDs ((1,2,3,4,5,6)).
+
+3. For each bowl ID (b=1,ldots,6), let (p) be its one-based position in (O_u). The cyclic predecessor and successor IDs are:
+
+[
+ell=O_u[1+((p-2)mod6)],qquad
+q=O_u[1+(pmod6)]
+]
+
+Let (L=B_ell^{(u-1)}) and (R=B_q^{(u-1)}). Compute:
+
+[
+B_b^{(u)}=operatorname{SAVE}left(
+(B_b^{(u-1)})^2+3L+5R+T_u+u+p^2+7LR
+ight)
+]
+
+All six (B_b^{(u)}) values use the same (B^{(u-1)}); only after all six are computed does the next batch begin with (B^{(u)}).
+
+**Return:** (B^{(12)}), in bowl-ID order 1 through 6.
+
+## Independent design oracle
+
+`tools/stage22_batch_bowls_design_oracle.py` uses only Python's standard library and does not import production code or any other branch's implementation. It compares two independently structured calculations:
+
+- lexicographic permutation table plus exact modulo;
+- factoradic unranking plus repeated Mersenne folding.
+
+The deterministic run used 13 boundary/anchor inputs and 384 seeded inputs:
+
+- 397 six-bowl inputs;
+- 12 batches per input (4,764 transitions);
+- 28,584 numeric comparisons and range checks;
+- 28,584 checks that Mersenne folding agrees with `SAVE`;
+- 397 input-immutability checks;
+- all 720 permutation ranks checked;
+- one full replay, byte-identical at the serialized mathematical trace level.
+
+Oracle digest: `0xb2eaf77ee8b62ef6`.
+
+Witness input `[2,3,5,7,11,13]` gives first-batch (T_1=196), rank (7), order `[1,2,4,3,5,6]`, and output `[529,349,853,394,878,599]`.
+
+Five *mathematical wrong-algorithm witnesses* each produce a first numeric mismatch on bowl 1: changing (149u) to (148u), using modulus 6, swapping neighbor weights, omitting (p^2), or changing (7LR) to (6LR). These are design sensitivity witnesses, **not** Native source mutants and not acceptance evidence.
+
+The serialized oracle output is in `evidence/stage22_design_oracle_2026-11-25.json`.
+
+## Native acceptance gates after implementation
+
+1. Lock the production source SHA and original interpreter runtime SHA; verify both in the completed run, job logs, and artifact.
+2. Run at least three independent full twelve-batch inputs, instrumented probes after batches 1, 6, and 12, and an exact replay.
+3. Independently compare every returned bowl against the Python oracle; verify the final direct table shape, all canonical BigInts, input immutability, and fresh output handles.
+4. Run sixteen allocated semantic-invalid records covering outer record length, nested bowl-table length, sign, BigInt length, digit range, top digit, and value range. Each must emit its exact domain marker and nonzero exit.
+5. Run five actual source substitutions for the five arithmetic/order faults above. Each must fail at the first independently predicted numeric assertion, not at parser setup or timeout.
+6. Preserve raw stdout, stderr, exit code, source/runtime observations, logs, and artifacts; verify artifact SHA-256 and ZIP CRC. Use the existing bounded resource policy (2 GiB address-space cap, 600-second hard timeout, watchdog) and do not duplicate a run on the same accepted SHA.
+
+## Current gate state
+
+- Design contract: drafted.
+- Independent mathematical design oracle: PASS (397 cases).
+- Production operation 39: NOT_STARTED.
+- Native/CI: NOT_RUN.
+- Stage22 acceptance: NO.
+- Main/merge/release: NOT_AUTHORIZED and not performed.
+
+**NEXT:** implement operation 39 strictly from this contract, then build the source-locked Native acceptance suite.
