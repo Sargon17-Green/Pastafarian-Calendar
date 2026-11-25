@@ -73,6 +73,11 @@ FUNCTIONS = {
         ":prefix-cell-upper-bound kosten",
         ":date-proof-scope :bounded-prefix-only",
         ":month-weaving-computed? false",
+        "(prefix-op-rang-begrensd lengtes rang positie hoogste-begroting)",
+        "(when-not (and (vector? lengtes) (<= 2 (count lengtes) 47)\n                  (every? #(and (integer? %) (<= 4N % 123N)) lengtes))\n     (fout :invalid-prefix-profile))",
+        "(when-not (and (integer? positie) (<= 1N positie) (< positie dagen))\n       (fout :invalid-prefix-position))",
+        "(when-not (and (integer? begroting)\n                    (<= 1N begroting hoogste-begroting))\n       (fout :invalid-weaving-budget))",
+        "(when-not (and (integer? rang) (<= 1N rang totaal))\n         (fout :invalid-weaving-rank))",
     ),
 }
 
@@ -133,6 +138,10 @@ def source_guard(data, require_blob=True):
         # Boundary guard: both the active and new group have their own strict > test.
         if name == 'prefix-volgende-keuze' and form.count('(when (> ') != 2:
             raise AssertionError('Expected exactly two strict over-budget guards')
+        if name == 'prefix-op-rang-begrensd':
+            for clause in clauses:
+                if form.count(clause) != 1:
+                    raise AssertionError(f'expected exactly one validation/default clause: {clause!r}')
         forms[name] = hashlib.sha256(form.encode()).hexdigest()
     return forms
 
@@ -210,6 +219,73 @@ def model_mutation_tests():
     return checks
 
 
+def valid_profile(profile):
+    # Python list is the independent model's vector representation.
+    return (isinstance(profile, list) and 2 <= len(profile) <= 47 and
+            all(type(value) is int and 4 <= value <= 123 for value in profile))
+
+
+def valid_position(position, days):
+    return type(position) is int and 1 <= position < days
+
+
+def valid_budget(budget):
+    return type(budget) is int and 1 <= budget <= BUDGET
+
+
+def valid_rank(rank, total):
+    return type(rank) is int and 1 <= rank <= total
+
+
+def prefix_refusal(profile, rank, position, total, budget=BUDGET):
+    # Mirrors the ordered refusal contract independently of the Clojure source.
+    if not valid_profile(profile):
+        return ':invalid-prefix-profile'
+    days = sum(profile)
+    if not valid_position(position, days):
+        return ':invalid-prefix-position'
+    if not valid_budget(budget):
+        return ':invalid-weaving-budget'
+    if not valid_rank(rank, total):
+        return ':invalid-weaving-rank'
+    return None
+
+
+def model_validation_tests():
+    checks = 0
+    # Profile: vector type, count endpoints, and per-month integer endpoints.
+    assert valid_profile([4, 4]); checks += 1
+    assert valid_profile([123] * 47); checks += 1
+    for bad in ((4, 4), [4], [4] * 48, [3, 4], [124, 4],
+                [4.0, 4], [True, 4], None):
+        assert not valid_profile(bad); checks += 1
+
+    # Position is 1-based and strictly before the end of the full weaving.
+    assert valid_position(1, 8); checks += 1
+    assert valid_position(7, 8); checks += 1
+    for bad in (0, 8, 9, 1.0, True):
+        assert not valid_position(bad, 8); checks += 1
+
+    # Both the caller budget and rank are closed integer intervals.
+    assert valid_budget(1); checks += 1
+    assert valid_budget(BUDGET); checks += 1
+    for bad in (0, BUDGET + 1, 1.0, True):
+        assert not valid_budget(bad); checks += 1
+    assert valid_rank(1, 17); checks += 1
+    assert valid_rank(17, 17); checks += 1
+    for bad in (0, 18, 1.0, True):
+        assert not valid_rank(bad, 17); checks += 1
+
+    # Refusal-code association and the three-arity default-budget contract.
+    assert prefix_refusal([4, 4], 1, 1, 4) is None; checks += 1
+    assert prefix_refusal([4], 1, 1, 1) == ':invalid-prefix-profile'; checks += 1
+    assert prefix_refusal([4, 4], 1, 0, 4) == ':invalid-prefix-position'; checks += 1
+    assert prefix_refusal([4, 4], 1, 1, 4, 0) == ':invalid-weaving-budget'; checks += 1
+    assert prefix_refusal([4, 4], 0, 1, 4) == ':invalid-weaving-rank'; checks += 1
+    assert prefix_refusal([4, 4], 1, 1, 4, BUDGET) is None; checks += 1
+    return checks
+
+
 def source_mutation_tests(data):
     # Mutants must be rejected by the whole-blob guard; the semantic clauses
     # also reject changes when exercised without the blob gate.
@@ -261,6 +337,26 @@ def source_mutation_tests(data):
         ("prefix-op-rang-begrensd", ":prefix-cell-upper-bound kosten", ":prefix-cell-upper-bound 0N"),
         ("prefix-op-rang-begrensd", ":date-proof-scope :bounded-prefix-only", ":date-proof-scope :full-date"),
         ("prefix-op-rang-begrensd", ":month-weaving-computed? false", ":month-weaving-computed? true"),
+        ("prefix-op-rang-begrensd", "(prefix-op-rang-begrensd lengtes rang positie hoogste-begroting)", "(prefix-op-rang-begrensd lengtes rang positie 0N)"),
+        ("prefix-op-rang-begrensd", "(vector? lengtes)", "(seq? lengtes)"),
+        ("prefix-op-rang-begrensd", "(<= 2 (count lengtes) 47)", "(<= 1 (count lengtes) 47)"),
+        ("prefix-op-rang-begrensd", "(<= 2 (count lengtes) 47)", "(<= 2 (count lengtes) 48)"),
+        ("prefix-op-rang-begrensd", "(integer? %)", "(number? %)"),
+        ("prefix-op-rang-begrensd", "(<= 4N % 123N)", "(<= 3N % 123N)"),
+        ("prefix-op-rang-begrensd", "(<= 4N % 123N)", "(<= 4N % 124N)"),
+        ("prefix-op-rang-begrensd", ":invalid-prefix-profile", ":invalid-weaving-rank"),
+        ("prefix-op-rang-begrensd", "(integer? positie)", "(number? positie)"),
+        ("prefix-op-rang-begrensd", "(<= 1N positie)", "(<= 0N positie)"),
+        ("prefix-op-rang-begrensd", "(< positie dagen)", "(<= positie dagen)"),
+        ("prefix-op-rang-begrensd", ":invalid-prefix-position", ":invalid-prefix-profile"),
+        ("prefix-op-rang-begrensd", "(integer? begroting)", "(number? begroting)"),
+        ("prefix-op-rang-begrensd", "(<= 1N begroting hoogste-begroting)", "(<= 0N begroting hoogste-begroting)"),
+        ("prefix-op-rang-begrensd", "(<= 1N begroting hoogste-begroting)", "(<= 1N begroting (*' 2N hoogste-begroting))"),
+        ("prefix-op-rang-begrensd", ":invalid-weaving-budget", ":invalid-weaving-rank"),
+        ("prefix-op-rang-begrensd", "(integer? rang)", "(number? rang)"),
+        ("prefix-op-rang-begrensd", "(<= 1N rang totaal)", "(<= 0N rang totaal)"),
+        ("prefix-op-rang-begrensd", "(<= 1N rang totaal)", "(<= 1N rang (+ totaal 1N))"),
+        ("prefix-op-rang-begrensd", ":invalid-weaving-rank", ":invalid-prefix-position"),
     ]
     for name, before, after in mutants:
         original_form = definition(source, name)
@@ -286,7 +382,7 @@ def main():
     data = args.source.read_bytes()  # Missing files also fail closed.
     forms = source_guard(data)
     checks = source_mutation_tests(data)
-    model = model_mutation_tests()
+    model = model_mutation_tests() + model_validation_tests()
     print(json.dumps(dict(project_id=PROJECT_ID, result='PASS', scope='STATIC_PLUS_MODEL_ONLY',
                           source_blob=git_blob_sha(data), function_sha256=forms,
                           source_mutations_rejected=checks, model_assertions=model,
