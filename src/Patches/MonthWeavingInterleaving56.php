@@ -13,6 +13,8 @@ final class MonthWeavingInterleaving56
     private const SMALL_FACTOR_LIMIT = 999999999;
     /** @var array<int, list<BigInt>> */
     private array $suffixCache = [];
+    /** @var array<int, list<BigInt>> Immutable reusable absolute-stride rows. */
+    private array $suffixCheckpoints = [];
     /** @var list<int> */
     private array $lengths;
     private int $monthCount;
@@ -234,6 +236,8 @@ final class MonthWeavingInterleaving56
         if ($lastSeen >= $this->monthCount - 1) return BigInt::one();
         $cached = $this->suffixCache[$lastSeen] ?? null;
         if ($cached !== null && count($cached) > $q) return $cached[$q];
+        $checkpoint = $this->suffixCheckpoints[$lastSeen] ?? null;
+        if ($checkpoint !== null && count($checkpoint) > $q) return $checkpoint[$q];
         $this->rebuildSuffix($lastSeen, $q);
         return $this->suffixCache[$lastSeen][$q]
             ?? throw new LogicException('STAGE56_INTERLEAVING_CACHE_MISS');
@@ -246,9 +250,23 @@ final class MonthWeavingInterleaving56
         for ($index = $start; $index < $this->monthCount - 1; ++$index) {
             $needed[$index + 1] = $needed[$index] + $this->lengths[$index + 1] - 1;
         }
+        // A covering checkpoint is the exact same DP row, possibly with extra
+        // entries. Never reuse a shorter row; recompute from the terminal row.
         $following = null;
+        $stop = $this->monthCount - 1;
+        for ($index = $start + 1; $index < $this->monthCount - 1; ++$index) {
+            $checkpoint = $this->suffixCheckpoints[$index] ?? null;
+            if ($checkpoint !== null && count($checkpoint) > $needed[$index]) {
+                $following = $checkpoint;
+                $stop = $index - 1;
+                break;
+            }
+        }
+        // At most five absolute checkpoints (8,16,24,32,40); reserve
+        // the remaining slots of the original eight-row cache for active rows.
+        $activeRows = 8 - intdiv($this->monthCount - 2, 8);
         $this->suffixCache = [];
-        for ($index = $this->monthCount - 1; $index >= $start; --$index) {
+        for ($index = $stop; $index >= $start; --$index) {
             $qMax = $needed[$index];
             if ($index === $this->monthCount - 1) {
                 $current = array_fill(0, $qMax + 1, BigInt::one());
@@ -270,7 +288,11 @@ final class MonthWeavingInterleaving56
                 }
             }
             $following = $current;
-            if ($index <= $start + 7) $this->suffixCache[$index] = $current;
+            if ($index < $start + $activeRows) $this->suffixCache[$index] = $current;
+            if ($index > 0 && $index % 8 === 0 && $index < $this->monthCount - 1 &&
+                count($this->suffixCheckpoints[$index] ?? []) < count($current)) {
+                $this->suffixCheckpoints[$index] = $current;
+            }
         }
     }
 

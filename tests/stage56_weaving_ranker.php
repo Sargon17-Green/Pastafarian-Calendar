@@ -155,6 +155,41 @@ foreach ([BigInt::one(), $largeTotal] as $largeRank) {
     }
 }
 
+// Independent exact-integer recurrence constants (Python math.comb) and
+// lexicographic endpoint words from the ordered-start/ordered-end definition.
+// Exercise both sides of absolute checkpoint boundaries and repeated traversal.
+foreach ([
+    17 => '1336563913937742779015514226843205758749648930',
+    25 => '1143433233166452213708275330375098141285116391578055346520242843926364172612',
+] as $checkpointMonths => $expectedCount) {
+    $counts = array_fill(0, $checkpointMonths, 4);
+    $checkpointRanker = new MonthWeavingRanker56();
+    $total = $checkpointRanker->count($counts);
+    if ($total->toString() !== $expectedCount) {
+        throw new RuntimeException('STAGE56_CHECKPOINT_COUNT_' . $checkpointMonths);
+    }
+    $first = [];
+    $last = range(1, $checkpointMonths);
+    for ($i = 1; $i <= $checkpointMonths; ++$i) {
+        array_push($first, $i, $i, $i, $i);
+    }
+    for ($i = $checkpointMonths; $i >= 1; --$i) array_push($last, $i, $i);
+    $last = array_merge($last, range(1, $checkpointMonths));
+    foreach ([[BigInt::one(), $first], [$total, $last], [BigInt::one(), $first]] as [$r, $expectedWord]) {
+        if ($checkpointRanker->unrank($counts, $r) !== $expectedWord ||
+            !$checkpointRanker->rank($counts, $expectedWord)->equals($r) ||
+            !$checkpointRanker->count($counts)->equals($total)) {
+            throw new RuntimeException('STAGE56_CHECKPOINT_ENDPOINT_' . $checkpointMonths);
+        }
+    }
+    [$mid, $remainder] = $total->divMod(BigInt::fromInt(2));
+    $word = $checkpointRanker->unrank($counts, $mid);
+    if (!$checkpointRanker->rank($counts, $word)->equals($mid)) {
+        throw new RuntimeException('STAGE56_CHECKPOINT_MID_' . $checkpointMonths);
+    }
+}
+echo "STAGE56_SUFFIX_CHECKPOINT_REGRESSION vectors=2 endpoints=6 midpoints=2 status=PASS\n";
+
 if ($vectors !== 120 || $words !== 3940 || $rankChecks !== 3940 ||
     $unrankChecks !== 3940 || $positions !== 83776 || $outOfRange !== 360 ||
     $invalid !== 5 || $fastVectors !== 4 || $fastWords !== 31419 || $legacyChecks !== 12) {
