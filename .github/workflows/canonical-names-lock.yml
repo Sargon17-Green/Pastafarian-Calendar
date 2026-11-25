@@ -1371,3 +1371,152 @@ jobs:
           path: kotlin/post55-component/
           if-no-files-found: warn
           retention-days: 14
+
+  # D2 capability observation only; not a producer run or calendar certification.
+  post55-observer-capability:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 3
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Capture bounded benign child observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p observer-evidence
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import platform
+          import re
+          import resource
+          import shutil
+          import signal
+          import subprocess
+          import sys
+          import time
+
+          OUT = pathlib.Path("observer-evidence")
+          LIMIT = 1024 * 1024
+          trace = OUT / "raw.trace"
+          stderr = OUT / "observer.stderr"
+          trace.touch()
+          stderr.touch()
+
+          def sha256(path):
+              h = hashlib.sha256()
+              with open(path, "rb") as source:
+                  for block in iter(lambda: source.read(65536), b""):
+                      h.update(block)
+              return h.hexdigest()
+
+          def read_small(path):
+              try:
+                  with open(path, encoding="utf-8") as source:
+                      return source.read(4096).strip()
+              except OSError:
+                  return None
+
+          def limit_file():
+              resource.setrlimit(resource.RLIMIT_FSIZE, (LIMIT, LIMIT))
+
+          receipt = {
+              "schema": "post55-observer-capability-d2-v1",
+              "scope": "benign child only; no producer, no Java, no certification",
+              "source_sha": os.environ["GITHUB_SHA"],
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "job_key": os.environ["GITHUB_JOB"],
+              "runner_os": os.environ.get("RUNNER_OS"),
+              "runner_arch": os.environ.get("RUNNER_ARCH"),
+              "image_os": os.environ.get("ImageOS"),
+              "image_version": os.environ.get("ImageVersion"),
+              "os_release": platform.freedesktop_os_release().get("PRETTY_NAME"),
+              "kernel": platform.release(),
+              "boot_id": read_small("/proc/sys/kernel/random/boot_id"),
+              "ptrace_scope": read_small("/proc/sys/kernel/yama/ptrace_scope"),
+              "strace_path": None,
+              "strace_version": None,
+              "strace_sha256": None,
+              "observer_exit": None,
+              "timeout_seconds": 15,
+              "raw_limit_bytes": LIMIT,
+              "capture_status": "NOT_ASSESSED",
+              "reason": "not_started",
+              "CI_PROCESS_OBSERVATION": "NOT_ASSESSED",
+              "OS_ATTESTATION": False,
+              "monotonic_start_ns": None,
+              "monotonic_end_ns": None,
+          }
+          try:
+              exe = shutil.which("strace")
+              if not exe:
+                  receipt["reason"] = "strace_missing"
+              else:
+                  exe = str(pathlib.Path(exe).resolve(strict=True))
+                  receipt["strace_path"] = exe
+                  receipt["strace_sha256"] = sha256(exe)
+                  version = subprocess.run([exe, "-V"], capture_output=True,
+                                           timeout=3, check=False)
+                  if version.returncode != 0 or len(version.stdout) > 65536:
+                      raise RuntimeError("strace_version_unavailable")
+                  receipt["strace_version"] = version.stdout.decode("utf-8", "replace").strip()
+                  child = [sys.executable, "-I", "-S", "-c",
+                           "import subprocess; subprocess.run(['/usr/bin/true'], check=True)"]
+                  args = [exe, "-f", "-ttt", "-s", "4096", "-e",
+                          "trace=execve,execveat,clone,clone3,fork,vfork,exit,exit_group",
+                          "-o", str(trace), "--", *child]
+                  receipt["argv"] = args
+                  receipt["monotonic_start_ns"] = time.monotonic_ns()
+                  with open(stderr, "wb") as err:
+                      proc = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=err,
+                                              start_new_session=True, preexec_fn=limit_file)
+                      try:
+                          receipt["observer_exit"] = proc.wait(timeout=15)
+                      except subprocess.TimeoutExpired:
+                          os.killpg(proc.pid, signal.SIGKILL)
+                          proc.wait(timeout=3)
+                          receipt["observer_exit"] = proc.returncode
+                          receipt["reason"] = "timeout"
+                      else:
+                          if receipt["observer_exit"] != 0:
+                              receipt["reason"] = "observer_nonzero_or_denied"
+                          elif trace.stat().st_size == 0:
+                              receipt["reason"] = "empty_trace"
+                          elif trace.stat().st_size >= LIMIT or stderr.stat().st_size >= LIMIT:
+                              receipt["reason"] = "output_limit"
+                          else:
+                              receipt["capture_status"] = "CAPTURED_REVIEW_REQUIRED"
+                              receipt["reason"] = "raw_grammar_not_yet_assessed"
+                  receipt["monotonic_end_ns"] = time.monotonic_ns()
+          except (OSError, RuntimeError, subprocess.SubprocessError, ValueError) as exc:
+              receipt["reason"] = type(exc).__name__ + ": " + str(exc)[:256]
+          finally:
+              if receipt["monotonic_start_ns"] is not None and receipt["monotonic_end_ns"] is None:
+                  receipt["monotonic_end_ns"] = time.monotonic_ns()
+              receipt["raw_trace_bytes"] = trace.stat().st_size
+              receipt["raw_trace_sha256"] = sha256(trace)
+              receipt["stderr_bytes"] = stderr.stat().st_size
+              receipt["stderr_sha256"] = sha256(stderr)
+              (OUT / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+                                                encoding="utf-8")
+              print("D2_CAPTURE_STATUS=" + receipt["capture_status"])
+              print("CI_PROCESS_OBSERVATION=NOT_ASSESSED; OS_ATTESTATION=false")
+          PY
+      - name: Preserve D2 observation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-d2-observer-${{ github.run_id }}-${{ github.run_attempt }}
+          path: observer-evidence/
+          if-no-files-found: error
+          retention-days: 14
