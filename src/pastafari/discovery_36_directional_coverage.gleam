@@ -61,87 +61,86 @@ pub fn dispatch_discovery_36(
     Ok(previous) ->
       // The inherited pipeline may skip per-bowl validation for an empty ID list.
       case bootstrap.validate_context(context) {
-        Error(error) ->
-          Error(discovery_19_interval_value.InvalidContext(error))
+        Error(error) -> Error(discovery_19_interval_value.InvalidContext(error))
         Ok(_) -> {
           let l = previous.left_windows
-      let r = previous.right_windows
-      let i = previous.intersection_windows
-      let u = previous.combined_windows
-      let x = previous.symmetric_difference_windows
-      let t = previous.total_windows
-      let k = list.length(requested_bowl_ids)
-      let m = case l <= r {
-        True -> l
-        False -> r
-      }
-      let jp = previous.jaccard_numerator
-      let jq = previous.jaccard_denominator
-      let dp = previous.dice_numerator
-      let dq = previous.dice_denominator
-      let op = previous.overlap_numerator
-      let oq = previous.overlap_denominator
-      let counts_ok =
-        l >= 0
-        && r >= 0
-        && i >= 0
-        && x >= 0
-        && u >= 0
-        && t >= 0
-        && i <= m
-        && l <= u
-        && r <= u
-        && u <= t
-        && u == l + r - i
-        && x == u - i
-        && t == k * { k + 1 } / 2
-      let overlap_ok = case m == 0 && l + r > 0 {
-        True -> op == 0 && oq == 1
-        False -> valid(op, oq, i, m)
-      }
-      case
-        counts_ok
-        && valid(jp, jq, i, u)
-        && valid(dp, dq, 2 * i, l + r)
-        && overlap_ok
-      {
-        False -> Error(discovery_19_interval_value.InvalidStream)
-        True -> {
-          let #(lp, lq) = reduced(i, l)
-          let #(rp, rq) = reduced(i, r)
-          let #(low_p, low_q, high_p, high_q) = case lp * rq <= rp * lq {
-            True -> #(lp, lq, rp, rq)
-            False -> #(rp, rq, lp, lq)
+          let r = previous.right_windows
+          let i = previous.intersection_windows
+          let u = previous.combined_windows
+          let x = previous.symmetric_difference_windows
+          let t = previous.total_windows
+          let k = list.length(requested_bowl_ids)
+          let m = case l <= r {
+            True -> l
+            False -> r
           }
-          let relations = case l > 0 && r > 0 {
-            True ->
-              high_p * oq == op * high_q
-              && low_p * dq <= dp * low_q
-              && dp * high_q <= high_p * dq
-              && jp * low_q <= low_p * jq
-            False -> True
+          let jp = previous.jaccard_numerator
+          let jq = previous.jaccard_denominator
+          let dp = previous.dice_numerator
+          let dq = previous.dice_denominator
+          let op = previous.overlap_numerator
+          let oq = previous.overlap_denominator
+          let counts_ok =
+            l >= 0
+            && r >= 0
+            && i >= 0
+            && x >= 0
+            && u >= 0
+            && t >= 0
+            && i <= m
+            && l <= u
+            && r <= u
+            && u <= t
+            && u == l + r - i
+            && x == u - i
+            && t == k * { k + 1 } / 2
+          let overlap_ok = case m == 0 && l + r > 0 {
+            True -> op == 0 && oq == 1
+            False -> valid(op, oq, i, m)
           }
-          let left_subset = { lp == lq } == { i == l }
-          let right_subset = { rp == rq } == { i == r }
           case
-            valid(lp, lq, i, l)
-            && valid(rp, rq, i, r)
-            && left_subset
-            && right_subset
-            && relations
+            counts_ok
+            && valid(jp, jq, i, u)
+            && valid(dp, dq, 2 * i, l + r)
+            && overlap_ok
           {
             False -> Error(discovery_19_interval_value.InvalidStream)
-            True ->
-              Ok(DirectionalWindowCoverage(
-                previous: previous,
-                left_coverage_numerator: lp,
-                left_coverage_denominator: lq,
-                right_coverage_numerator: rp,
-                right_coverage_denominator: rq,
-              ))
+            True -> {
+              let #(lp, lq) = reduced(i, l)
+              let #(rp, rq) = reduced(i, r)
+              let #(low_p, low_q, high_p, high_q) = case lp * rq <= rp * lq {
+                True -> #(lp, lq, rp, rq)
+                False -> #(rp, rq, lp, lq)
+              }
+              let relations = case l > 0 && r > 0 {
+                True ->
+                  high_p * oq == op * high_q
+                  && low_p * dq <= dp * low_q
+                  && dp * high_q <= high_p * dq
+                  && jp * low_q <= low_p * jq
+                False -> True
+              }
+              let left_subset = { lp == lq } == { i == l }
+              let right_subset = { rp == rq } == { i == r }
+              case
+                valid(lp, lq, i, l)
+                && valid(rp, rq, i, r)
+                && left_subset
+                && right_subset
+                && relations
+              {
+                False -> Error(discovery_19_interval_value.InvalidStream)
+                True ->
+                  Ok(DirectionalWindowCoverage(
+                    previous: previous,
+                    left_coverage_numerator: lp,
+                    left_coverage_denominator: lq,
+                    right_coverage_numerator: rp,
+                    right_coverage_denominator: rq,
+                  ))
+              }
+            }
           }
-        }
-      }
         }
       }
   }
