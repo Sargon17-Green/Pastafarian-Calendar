@@ -540,3 +540,91 @@ z;38=~["E_BOWL_UPDATE_LAYOUT"0 0/]?
  z;r:2a;!y;a;!o;a;!
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+
+{ المرحلة 22: العملية 39؛ اثنتا عشرة دفعة متزامنة لتحديث ست كرات. }
+{ الإدخال سجل مباشر [1,bowls]، والنتيجة جدول جديد مباشر [6,B1,...,B6]. }
+{ كل دفعة تقرأ لقطة قديمة واحدة؛ لا تتغير أي خلية إدخال أو قيمة BigInt. }
+z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:x;g;!1=~["E_BOWL_BATCH_RECORD_LENGTH"0 0/]?
+ x;1+g;!y:
+ y;g;!6=~["E_BOWL_BATCH_BOWLS_LENGTH"0 0/]?
+ [
+  d:
+  d;g;!1=~["E_BOWL_BATCH_BIG_SIGN"0 0/]?
+  d;1+g;!e:
+  e;1<["E_BOWL_BATCH_BIG_LENGTH"0 0/]?
+  e;15>["E_BOWL_BATCH_BIG_LENGTH"0 0/]?
+  0f:
+  [f;e;<][
+   d;2+f;+g;!m:
+   m;0<["E_BOWL_BATCH_BIG_DIGIT"0 0/]?
+   m;511>["E_BOWL_BATCH_BIG_DIGIT"0 0/]?
+   f;1+f:
+  ]#
+  m;0=["E_BOWL_BATCH_BIG_TOP"0 0/]?
+  e;15=[m;1>["E_BOWL_BATCH_BIG_RANGE"0 0/]?]?
+ ]q:
+ 1j:[j;7<][y;j;+g;!q;!j;1+j:]#
+ 1i:
+ [i;13<][
+  { T = SAVE(sum(old bowls) + 6 + 149*batch). }
+  y;1+g;!s:
+  y;2+g;!n:
+  z;b:s;a;!n;a;!b;9h;!!s:
+  y;3+g;!n:
+  z;b:s;a;!n;a;!b;9h;!!s:
+  y;4+g;!n:
+  z;b:s;a;!n;a;!b;9h;!!s:
+  y;5+g;!n:
+  z;b:s;a;!n;a;!b;9h;!!s:
+  y;6+g;!n:
+  z;b:s;a;!n;a;!b;9h;!!s:
+  z;b:s;a;!i;149*6+;a;!b;22h;!!t:
+  z;b:t;a;!b;25h;!!t:
+  { rank = 4 + EuclideanRemainder(T-4,7); }
+  z;b:4a;!b;20h;!!v:
+  z;b:t;a;!v;a;!b;10h;!!n:
+  z;b:7a;!b;20h;!!v:
+  z;b:n;a;!v;a;!b;16h;!!n:
+  z;b:n;a;!0a;!b;3h;!!r:
+  r;4+r:
+  z;b:r;a;!b;34h;!!o:
+  { Build six new values from the same old snapshot, in bowl-ID order. }
+  0q:1u:
+  [u;7<][
+   z;b:o;a;!u;a;!b;36h;!!p:
+   y;u;+g;!m:
+   { Read cyclic predecessor and successor by permutation position. }
+   p;1-j:j;0=[6j:]?o;j;+g;!j:y;j;+g;!s:
+   p;1+j:j;7=[1j:]?o;j;+g;!j:y;j;+g;!l:
+   { SAVE(B_b^2 + 3L + 5R + T + batch + p^2 + 7LR). }
+   z;b:m;a;!m;a;!b;14h;!!d:
+   z;b:s;a;!3a;!b;23h;!!e:
+   z;b:l;a;!5a;!b;23h;!!f:
+   z;b:s;a;!l;a;!b;14h;!!n:
+   z;b:n;a;!7a;!b;23h;!!n:
+   z;b:d;a;!e;a;!b;9h;!!d:
+   z;b:d;a;!f;a;!b;9h;!!d:
+   z;b:d;a;!t;a;!b;9h;!!d:
+   z;b:d;a;!i;p;p;*+;a;!b;22h;!!d:
+   z;b:d;a;!n;a;!b;9h;!!d:
+   z;b:d;a;!b;25h;!!d:
+   { Reverse linked list; flatten after all six values are complete. }
+   z;r:d;a;!q;a;!r;q:
+   u;1+u:
+  ]#
+  z;x:6a;!1u:
+  [u;7<][
+   q;r:6u;-j:
+   [j;0>][r;1+g;!r:j;1-j:]#
+   r;g;!a;!u;1+u:
+  ]#
+  x;y:
+  i;1+i:
+ ]#
+ y;r:
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:g;!k:z;1-g;!
+]a;!

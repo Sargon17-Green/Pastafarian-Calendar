@@ -1,6 +1,6 @@
 # Stage22 — Twelve-batch bowl evolution
 
-**State:** DESIGN CONTRACT DRAFTED; production operation 39 is not implemented; Native has not been run; Stage22 is not accepted.
+**State (2026-11-25):** production operation 39 has been appended to `src/monster_bootstrap.false`; source/static review only; Native has not been run; Stage22 is not accepted.
 
 ## Normative basis
 
@@ -97,13 +97,14 @@ The serialized oracle output is in `evidence/stage22_design_oracle_2026-11-25.js
 5. Run five actual source substitutions for the five arithmetic/order faults above. Each must fail at the first independently predicted numeric assertion, not at parser setup or timeout.
 6. Preserve raw stdout, stderr, exit code, source/runtime observations, logs, and artifacts; verify artifact SHA-256 and ZIP CRC. Use the existing bounded resource policy (2 GiB address-space cap, 600-second hard timeout, watchdog) and do not duplicate a run on the same accepted SHA.
 
-## Current gate state
+## Implementation checkpoint — 2026-11-25
 
-- Design contract: drafted.
-- Independent mathematical design oracle: PASS (397 cases).
-- Production operation 39: NOT_STARTED.
-- Native/CI: NOT_RUN.
+Production operation `39` is appended after accepted operation `38`. It validates the allocated `[1,bowls]` argument and six canonical positive Base512 BigInts; sums the six old bowl values; computes `T=SAVE(sum+6+149u)`; derives rank `4+((T-4) mod 7)` with the signed BigInt Euclidean-remainder helper; obtains the lexicographic order from production operation `34`; maps predecessor/successor positions back to bowl IDs; computes all six new values from the same old snapshot; and only then builds a fresh direct `[6,...]` table for the next batch. It returns the final direct table after exactly twelve batches. Input records and BigInts are read-only. Invalid physical pointers, truncated allocations, corrupt heaps, and memory-unsafe aliasing remain outside the bounded contract.
+
+- Design oracle: PASS (397 cases; 4,764 transitions; 28,584 comparisons).
+- Production op39: source committed; Native/static execution not yet performed.
+- CI/Native: NOT_RUN.
 - Stage22 acceptance: NO.
-- Main/merge/release: NOT_AUTHORIZED and not performed.
+- Main/merge/release: not authorized and not performed.
 
-**NEXT:** implement operation 39 strictly from this contract, then build the source-locked Native acceptance suite.
+**NEXT:** add source/runtime-pinned Native QA for three full inputs, 1/6/12-batch probes, exact replay, 16 allocated semantic invalids, five actual numeric source mutants, and an independent offline audit. No main/merge.
