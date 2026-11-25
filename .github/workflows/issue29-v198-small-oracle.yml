@@ -1,0 +1,161 @@
+name: Issue29 v198 exhaustive small-family GMP oracle (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v198-small-oracle.yml
+      - issue29_v198_small_oracle.gpr
+      - tests/issue29_v198_small_oracle.adb
+      - qa/issue29/v198_families.txt
+      - qa/issue29/v198_validate.py
+
+permissions:
+  contents: read
+
+jobs:
+  exact-small-oracle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact parent, QA-only paths, frozen GMP source and halt gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "48f1a916cef60f889fa224be58521b0fcc799e8f"
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = "947c3325b705d61504f09dc1d46275ed14f52249"
+          test "$(git rev-parse origin/main)" = "56bc4173aae4975ded019ef5ab5a36249f1424df"
+          python3 - <<'PY'
+          import subprocess
+          expected = sorted([
+              ".github/workflows/issue29-v198-small-oracle.yml",
+              "issue29_v198_small_oracle.gpr",
+              "qa/issue29/v198_families.txt",
+              "qa/issue29/v198_validate.py",
+              "tests/issue29_v198_small_oracle.adb",
+          ])
+          actual = sorted(subprocess.check_output(
+              ["git", "diff", "--name-only", "48f1a916cef60f889fa224be58521b0fcc799e8f", "HEAD"],
+              text=True,
+          ).splitlines())
+          assert actual == expected, (actual, expected)
+          lock = open(".github/workflows/canonical-names-lock.yml", encoding="utf-8").read()
+          literal = "    if: " + "$" + "{{ false }}"
+          assert lock.count(literal) == 42, lock.count(literal)
+          source = open("tests/issue29_v198_small_oracle.adb", encoding="utf-8").read()
+          assert "with Normative_Oracle;" not in source
+          assert "Calendar_Date" not in source
+          assert "F(c,t)" not in source
+          PY
+          git diff --exit-code 48f1a916cef60f889fa224be58521b0fcc799e8f HEAD -- src
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/HEAD.txt
+          git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb > evidence/source-blob.txt
+
+      - name: Independently enumerate every legal small multiset word
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B qa/issue29/v198_validate.py | tee evidence/independent-oracle.log
+
+      - name: Install GNAT 13 and GMP bindings
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq > evidence/apt-update.log 2>&1
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+
+      - name: Build the pinned GMP component with no calendar oracle linkage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p work/src work/tests
+          git archive HEAD src | tar -x -C work
+          cp tests/issue29_v198_small_oracle.adb work/tests/
+          cp issue29_v198_small_oracle.gpr work/
+          timeout -k 5s 180s bash -c 'cd work && gprbuild -p -j2 -P issue29_v198_small_oracle.gpr' > evidence/build.log 2>&1
+          sha256sum work/bin_v198/issue29_v198_small_oracle > evidence/binary.sha256
+          if nm work/bin_v198/issue29_v198_small_oracle | grep -iq normative_oracle; then
+            echo FORBIDDEN_ORIGINAL_F_LINK >&2
+            exit 1
+          fi
+          echo V198_GMP_COMPONENT_LINKED_ZERO_F > evidence/build-verdict.txt
+
+      - name: Compare every exact rank at three array lower bounds
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; ulimit -t 180; timeout -k 5s 180s work/bin_v198/issue29_v198_small_oracle) > evidence/run.stdout 2> evidence/run.stderr
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/run.exitcode
+          python3 -B - <<'PY'
+          import json, re
+          from pathlib import Path
+          e = Path("evidence")
+          out = (e / "run.stdout").read_text(encoding="utf-8")
+          err = (e / "run.stderr").read_bytes()
+          code = int((e / "run.exitcode").read_text().strip())
+          def field(name):
+              match = re.search(r"^" + name + r"=\s*(\d+)\s*$", out, re.M)
+              assert match, (name, out)
+              return int(match.group(1))
+          families = field("V198_FAMILIES")
+          words = field("V198_EXACT_WORDS")
+          ranks = field("V198_NATIVE_RANK_COMPARISONS")
+          assertions = field("V198_ASSERTIONS")
+          ok = (
+              code == 0 and not err and families == 30 and words == 3424
+              and ranks == 10272 and assertions > 10000
+              and "V198_EXHAUSTIVE_1_TO_4_MONTH_ORACLE_PASS_ZERO_F" in out
+          )
+          result = {
+              "schema": "ISSUE29_V198_EXHAUSTIVE_SMALL_FAMILY_ORACLE/1",
+              "pass": bool(ok),
+              "families": families,
+              "exact_words": words,
+              "native_ada_rank_comparisons": ranks,
+              "assertions": assertions,
+              "array_lower_bounds": ["1", "7", "Positive'Last-minus-M-plus-1"],
+              "historical_F_calls": 0,
+              "calendar_date_calls": 0,
+              "whole_year_credit": 0,
+          }
+          (e / "result.json").write_text(json.dumps(result, sort_keys=True, indent=2) + "\n")
+          assert ok, result
+          PY
+
+      - name: Write immutable evidence member digests
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          d = Path("evidence")
+          manifest = {
+              p.name: {"bytes": p.stat().st_size, "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+              for p in sorted(d.iterdir())
+              if p.is_file() and p.name != "members.sha256.json"
+          }
+          (d / "members.sha256.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
+          PY
+
+      - name: Upload evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue29-v198-exhaustive-small-family-oracle-zero-F
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: warn
