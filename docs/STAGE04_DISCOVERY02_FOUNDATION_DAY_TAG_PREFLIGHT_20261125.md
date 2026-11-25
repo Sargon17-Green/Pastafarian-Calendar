@@ -156,3 +156,51 @@ to test. To proceed without changing policy, the missing input is either:
 
 Until that is resolved, do not claim Stage 04 PASS, do not create an artificial
 RED, and do not start Stage 05.
+
+
+## 7. Exact-SHA Actions, logs and artifact readback
+
+The underlying GitHub run/job metadata and downloaded ZIP bytes were
+independently checked; no run was repeated.
+
+All four records below identify the same tested code SHA
+`43add99d816cc0a8b5feb17df3e76935957e5a90`, branch
+`Object-Pascal+Português`, attempt 1:
+
+| Gate | Run / job | Run + job |
+|---|---|---|
+| Stage03 Native FPC | 45683447859 / 139449698044 | completed / success |
+| Stage02 regression | 45683447847 / 139449697992 | completed / success |
+| Stage01 regression | 45683447750 / 139449698038 | completed / success |
+| Canonical Names Lock | 45683447790 / 139449698294 | completed / success |
+
+Downloaded artifact checks:
+
+- Stage03 artifact 15055372564: 15,626-byte ZIP; SHA-256
+  `4be24f78f0c0fb84df848800485c652e9bdc39c774bb2496aeeaa3c96902e0a9`;
+  CRC test passed. Embedded log SHA-256
+  `2224feddcf850a66b2710f4d05f42e2d3a10448e152dd63eb19867c05ecdc02d`,
+  strict UTF-8. It records FPC 3.2.2, 128 cases, 17 EXPECTED_RED,
+  111 MATCH, 1,541 checks passed, zero failures and `STAGE03_EXIT=0`.
+  Embedded TSV SHA-256 is
+  `f011be78e4e6fe8489f8ae4f1e5040c0c161e6376db8b4d7c38e15d86b5b0017`.
+- Stage02 artifact 15054094276: 4,509-byte ZIP; SHA-256
+  `836173370a9758fe1d9bde8a4507ac7af0a260dedd2ba9cedd265760f1f95c42`;
+  CRC test passed. Embedded log SHA-256
+  `7c7e864792790ba7b7e6e4776288c485864af4d9089c29081dea76b6280152a3`,
+  strict UTF-8. It records FPC 3.2.2, exact source SHA, WorkCounts
+  1,449/1,449, Context 1,730/1,730, Lifecycle 3,654/3,654,
+  Discovery01 41/41 and `STAGE02_EXIT=0`. The 96 WorkCounts rows include
+  inputs at `F-1`, `F`, and `F+1`; the artifact TSV SHA-256 is
+  `1a25f13aacd70d3cf23458d331c7a9148c5d749994099c2c9c9c4849ce674d12`.
+- Stage01 artifact 15053698862: 4,050-byte ZIP; SHA-256
+  `2fd7a6b240401c15a31f1783d78df3f524c8c218d16fdeaa24ffce78cff942e3`;
+  CRC test passed. Embedded log SHA-256
+  `3bd5dfc059b00345ddc630079153886321f310ae22e2d7cae43a891c2242062b`,
+  strict UTF-8; 30/30 suite exit markers are zero.
+
+The artifact sizes and hashes above were computed from the downloaded bytes,
+not copied from the report. The Stage02 Native evidence directly exercises the
+live `CountForDay` path through `ComputeWorkCounts`; it does not supply a
+Stage04 EXPECTED_RED. These are historical exact-SHA acceptance records, not
+new Stage04 tests and not a reason to rerun them.
