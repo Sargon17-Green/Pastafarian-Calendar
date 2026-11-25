@@ -1,4 +1,4 @@
-name: APL German Stage1 residual statement isolation (QA ONLY)
+name: APL German Stage1 bounded-unrank witness (QA ONLY)
 on:
   push:
     branches: [qa/apl-german-nars-interface-20261116]
@@ -7,12 +7,15 @@ on:
       - 'qa/nars-interface/stage01_residual_probe.py'
       - 'qa/nars-interface/test_stage01_residual_probe.py'
       - 'qa/nars-interface/bounded_stage01_residual_probe.ps1'
+      - 'qa/nars-interface/stage01_bounded_unrank_witness.py'
+      - 'qa/nars-interface/test_stage01_bounded_unrank_witness.py'
+      - 'qa/nars-interface/bounded_unrank_witness.ps1'
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
 jobs:
-  residual-source-copy-native:
+  bounded-unrank-source-locked-native:
     runs-on: windows-2022
     timeout-minutes: 12
     steps:
@@ -33,7 +36,7 @@ jobs:
           $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
           $expectedBytes=9430788
           $expectedSHA='28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
-          New-Item -ItemType Directory -Force 'pinned_release/verified_release','residual_evidence' | Out-Null
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release','bounded_unrank_evidence' | Out-Null
           $failures=@()
           try {
             $downloaded=$false
@@ -60,115 +63,93 @@ jobs:
             Write-Output 'PINNED_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
           } catch {
             [ordered]@{
-              schema='APL_GERMAN_RESIDUAL_BOOTSTRAP_FAILURE_V1'
+              schema='APL_GERMAN_BOUNDED_UNRANK_BOOTSTRAP_FAILURE_V1'
               stage01='NOT_ACCEPTED'
               native_executed=$false
               source_commit=$sourceLock
               status='PRE_NATIVE_BOOTSTRAP_FAILURE'
               message=$_.Exception.Message
               failures=$failures
-            } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath 'residual_evidence/bootstrap_failure.json' -Encoding utf8
+            } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath 'bounded_unrank_evidence/bootstrap_failure.json' -Encoding utf8
             throw
           }
       - name: Provision verified runtime and ephemeral font
         shell: pwsh
         run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence residual_font_evidence -Runtime verified_runtime
-      - name: Unit test exact residual source copies before NARS
+      - name: Unit test exact BoundedUnrank source witness before NARS
         shell: pwsh
         run: |
-          python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
-          if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: V26 - eleven QA-only statement probes after V25; reuse prior evidence
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_bounded_unrank_witness.py' -v
+          if($LASTEXITCODE -ne 0){throw 'BOUNDED_UNRANK_WITNESS_UNIT_FAILED'}
+      - name: V27 - isolate BoundedUnrank DOMAIN ERROR in native NARS; no Stage1 suite rerun
         shell: pwsh
-        run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
-      - name: Independent diagnostic receipt gate (never acceptance)
+        run: ./qa/nars-interface/bounded_unrank_witness.ps1 -Runtime verified_runtime -Evidence bounded_unrank_evidence
+      - name: Independent bounded-unrank witness receipt gate (never acceptance)
         shell: pwsh
         run: |
-          $a=Get-Content residual_evidence/native_residual.json -Raw | ConvertFrom-Json
-          $b=Get-Content residual_evidence/residual_candidate.json -Raw | ConvertFrom-Json
+          $a=Get-Content bounded_unrank_evidence/native_bounded_unrank.json -Raw | ConvertFrom-Json
+          $b=Get-Content bounded_unrank_evidence/bounded_unrank_candidate.json -Raw | ConvertFrom-Json
           if($a.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or
              $b.source_commit -cne $a.source_commit -or
              $a.stage01 -cne 'NOT_ACCEPTED' -or $b.stage01 -cne 'NOT_ACCEPTED' -or
              $b.original_stage01_acceptance_token_present -ne $false -or
-             $b.original_unmodified_suite_proven -ne $false -or
-             $b.production_source_modified -ne $false){throw 'FALSE_ACCEPTANCE_OR_SOURCE_LOCK'}
-          if($a.status -cnotin @('RESIDUAL_SUITE_NO_ERROR_DIAGNOSTIC_ONLY',
-                                'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY') -or
+             $b.final_original_stage01_tests_executed -ne $false -or
+             $b.original_entrypoint_invoked -ne $false -or
+             $b.production_source_modified -ne $false){
+            throw 'FALSE_STAGE1_ACCEPTANCE_OR_SOURCE_LOCK'
+          }
+          if($a.status -cne 'BOUNDED_UNRANK_WITNESS_CAPTURED_NOT_STAGE01' -or
              $a.native_executed -ne $true -or $a.runtime_verified -ne $true -or
-             $a.fx_last_contiguous -ne 95 -or $a.fx_checkpoints.Count -ne 23 -or
-             $a.copies.Count -ne 2 -or $a.suite_start_exact -ne $true -or
-             $a.suite_captured_exact -ne $true -or $a.suite_ec_valid -ne $true -or
-             $a.final_marker_exact -ne $true -or
+             $a.fx_last_contiguous -ne 95 -or $a.fx_all_exact -ne $true -or
+             $a.fx_checkpoints.Count -ne 23 -or
              $a.compile_exact -ne $true -or $a.compile_name_exact -ne $true -or
-             $a.statement_started -lt 1 -or $a.statement_receipts.Count -ne 11){
-             throw 'RESIDUAL_DIAGNOSTIC_EVIDENCE_MISSING'}
-          if(@($a.copies | Where-Object {$_.marker_exact -ne $true -or $_.name_exact -ne $true}).Count -ne 0){
-            throw 'QA_COPY_NATIVE_NOT_VERIFIED'
+             $a.witness_start_exact -ne $true -or $a.witness_captured_exact -ne $true -or
+             $a.original_ec_valid -ne $true -or $a.trace_ec_valid -ne $true -or
+             $a.trace_log_valid -ne $true -or $a.trace_log.Count -lt 2 -or
+             $a.final_marker_exact -ne $true){
+            throw 'BOUNDED_UNRANK_NATIVE_RECEIPT_INCOMPLETE'
           }
-          if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'statement_focus256_267_after_v25' -or
-             $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
-             $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $b.prior_line181_witness_run -ne 45551684196 -or
-             $b.prior_v17_run -ne 45658001179 -or
-             $b.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
-             $b.prior_v18_run -ne 45671179161 -or
-             $b.prior_v18_artifact_sha256 -cne '26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89' -or
-             $b.prior_v19_run -ne 45671767802 -or
-             $b.prior_v19_artifact_sha256 -cne 'a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5' -or
-             $b.prior_v20_run -ne 45672323607 -or
-             $b.prior_v20_artifact_sha256 -cne 'aab79c9d52ceab9193338b4fa4e560441c32db13d59ed30cb66cad8fcc22f391' -or
-             $b.prior_v21_run -ne 45672648212 -or
-             $b.prior_v21_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb' -or
-             $b.prior_v22_run -ne 45673022324 -or
-             $b.prior_v22_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
-             $b.prior_v23_run -ne 45676884530 -or
-             $b.prior_v23_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
-             $b.prior_v24_1_run -ne 45678986496 -or
-             $b.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
-             $b.prior_v24_1_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45678986496/artifacts/15052963589' -or
-             $b.prior_v25_run -ne 45683881377 -or
-             $b.prior_v25_artifact_sha256 -cne 'f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297' -or
-             $b.prior_v25_artifact_url -cne 'https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45683881377/artifacts/15055108970' -or
-             $b.prior_v25_native_summary.fx_last_contiguous -ne 95 -or $b.prior_v25_native_summary.checkpoint_count -ne 23 -or
-             $b.prior_v25_native_summary.statement_count -ne 9 -or
-             (($b.prior_v25_native_summary.statement_lines -join ',') -cne '246,247,248,249,250,252,253,254,255') -or
-             $null -ne $b.prior_v25_native_summary.first_incomplete -or $b.prior_v25_native_summary.suite_ec_first -ne 0 -or
-             $b.prior_v25_native_summary.status -cne 'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY' -or
-             $b.prior_v25_native_summary.zip_crc_count -ne 57 -or $b.prior_v25_native_summary.manifest_verified_count -ne 56 -or
-             $b.prior_residual_run -ne 45683881377 -or
-             $b.prior_residual_artifact_sha256 -cne 'f24573eb3ea4fae5fa449c4dc26f7112aecfd91f5fa1be49565977b0bee3b297' -or
-             $b.line234_witness.source_line -ne 234 -or $b.line234_witness.applied_to_suite_copy -ne $true -or
-             $b.line234_witness.evidence_run -ne 45678986496 -or $b.line234_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013' -or
-             $b.line237_witness.source_line -ne 237 -or $b.line237_witness.applied_to_suite_copy -ne $true -or
-             $b.line237_witness.evidence_run -ne 45678986496 -or $b.line237_witness.evidence_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
-          if($a.prior_line181_witness_run -ne 45551684196 -or
-             $a.prior_v24_1_run -ne 45678986496 -or
-             $a.prior_v24_1_artifact_sha256 -cne 'ab4ad4efeee432f57e5784069787882d71ee093afbfd32d849419458c0a57013'){
-             throw 'PRIOR_WITNESS_REFERENCE_MISSING'
+          $core=@('expected_values','expected_shape','expected_rank','expected_type',
+            'count_values','count_rank','count_type','trace_args','trace_dp_shape',
+            'trace_dp_values','trace_dp_type','trace_loop_state','trace_candidate_state',
+            'trace_out','trace_rem','trace_rank','trace_result')
+          foreach($key in $core){
+            if($a.witness_files.PSObject.Properties[$key].Value.valid -ne $true){
+              throw ('BOUNDED_UNRANK_WITNESS_FILE_INVALID_'+$key)
+            }
           }
-          if($a.statement_receipts[0].first_line -ne 256 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[10].first_line -ne 267){
-             throw 'V25_RESIDUAL_FOCUS_NOT_PROVEN'
+          if($b.program_count -ne 26 -or $b.function_count -ne 95 -or
+             $b.chunk_count -ne 23 -or $b.final_expression -cne 'BOUNDED_UNRANK_WITNESS_ONLY' -or
+             $b.trace.source_function -cne 'BoundedUnrank' -or
+             $b.trace.alias -cne 'QABoundedUnrankTrace' -or
+             $b.trace.source_statements_preserved -ne $true -or
+             $b.trace.steps.Count -ne 17 -or
+             $b.witness.expected_fixture -cne 'FIX_BOUNDED_444' -or
+             (($b.witness.input -join ',') -cne '12,3,4,4,1') -or
+             $b.prior_v26_run -ne 45686659807 -or
+             $b.prior_v26_artifact_id -ne 15056557607 -or
+             $b.prior_v26_artifact_sha256 -cne 'ef9a79666eb91c09a56518576e41bf191456a0ba870d0b73bf2c5a0a5e08e331'){
+            throw 'BOUNDED_UNRANK_SOURCE_WITNESS_CONTRACT_MISMATCH'
           }
-          Write-Output ('PRIOR_V24_1_WITNESS_REFERENCE='+$a.prior_v24_1_run+'|ARTIFACT_SHA256='+$a.prior_v24_1_artifact_sha256)
-          Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)          Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
-          Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
-          Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
+          Write-Output ('ORIGINAL_BOUNDEDUNRANK_EC='+$a.original_ec+
+            '|TRACE_COPY_EC='+$a.trace_ec+'|LAST_TRACE_STAGE='+$a.trace_last_stage)
+          Write-Output 'NATIVE_95_OF_95_AND_23_OF_23_PREREQUISITES_VERIFIED'
+          Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_RUNSTAGE01TESTS_NOT_EXECUTED'
       - name: Hash all diagnostic evidence
         if: always()
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force residual_evidence,residual_font_evidence | Out-Null
-          Get-ChildItem residual_evidence,residual_font_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+          New-Item -ItemType Directory -Force bounded_unrank_evidence,residual_font_evidence | Out-Null
+          Get-ChildItem bounded_unrank_evidence,residual_font_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
             $hash=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$hash  $($_.FullName)"
-          } | Set-Content -Encoding utf8 residual_receipts.sha256
+          } | Set-Content -Encoding utf8 bounded_unrank_receipts.sha256
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v26
+          name: apl-german-stage01-bounded-unrank-v27
           path: |
-            residual_evidence/
+            bounded_unrank_evidence/
             residual_font_evidence/
-            residual_receipts.sha256
+            bounded_unrank_receipts.sha256
           retention-days: 21
