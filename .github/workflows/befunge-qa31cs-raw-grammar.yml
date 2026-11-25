@@ -1,0 +1,35 @@
+name: Befunge Native four-field raw bytes
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths: ['qa/qa31cs_raw_grammar.py', '.github/workflows/befunge-qa31cs-raw-grammar.yml', 'src/work_counts.b98']
+permissions:
+  contents: read
+jobs:
+  exact-input-streams:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Prove the loaded scanner and replay exact octets against Native Befunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/befunge-grammar"
+          mkdir -p "$d/bin"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$d/engine.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $d/engine.tar.gz" | sha256sum -c -
+          docker run -d --name befunge-raw -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:ro" -w /work \
+            -v "$d/engine.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" python:2.7-slim sleep 420
+          trap 'docker rm -f befunge-raw >/dev/null' EXIT
+          docker exec befunge-raw pip install --no-index --no-deps /tmp/PyFunge-0.5-rc2.tar.gz
+          printf '%s\n' '#!/bin/sh' 'exec docker exec -i befunge-raw timeout -k 2 45 pyfunge "$@"' > "$d/bin/pyfunge"
+          chmod 755 "$d/bin/pyfunge"
+          PATH="$d/bin:$PATH" timeout -k 4 300 python3 qa/qa31cs_raw_grammar.py "$d/grammar.json"
+          python3 qa/qa31cs_raw_grammar.py "$d/grammar.json" --verify
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-exact-input-streams
+          path: ${{ runner.temp }}/befunge-grammar/grammar.json
+          if-no-files-found: error
+          retention-days: 60
