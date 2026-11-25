@@ -7,6 +7,10 @@ RETURNS integer LANGUAGE SQL IMMUTABLE STRICT AS $$
     SELECT (ARRAY[1,2,3,4,5,1]::integer[])[p_position]
 $$;
 
+-- A stone state depends only on the one-based round index. The previous body
+-- called stone_value nine times per round; each call recursively rebuilt the
+-- same stone_state(p_i). Materialize that state once and read its five fields.
+-- This is a local exact-value reuse, not a persistent cache or shared state.
 CREATE OR REPLACE FUNCTION pastafari_sql_tamil.bowl_round(
     p_bowls numeric[], p_drop numeric, p_i integer
 )
@@ -20,23 +24,29 @@ RETURNS numeric[] LANGUAGE SQL STABLE STRICT AS $$
           AND array_lower(p_bowls,1) = 1
           AND array_length(p_bowls,1) = 6
           AND array_position(p_bowls,NULL::numeric) IS NULL
+    ), stone AS MATERIALIZED (
+        SELECT pastafari_sql_tamil.stone_state(p_i) AS stone_data
+        FROM ordering
     ), positions AS (
-        SELECT id,array_position(ord,id) AS pos,ord
-        FROM ordering CROSS JOIN generate_series(1,6) AS g(id)
+        SELECT id,array_position(o.ord,id) AS pos,o.ord,s.stone_data
+        FROM ordering AS o
+        CROSS JOIN stone AS s
+        CROSS JOIN generate_series(1,6) AS g(id)
     ), neighbors AS (
         SELECT id,pos,
           ord[CASE WHEN pos=1 THEN 6 ELSE pos-1 END] AS prev_id,
-          ord[CASE WHEN pos=6 THEN 1 ELSE pos+1 END] AS next_id
+          ord[CASE WHEN pos=6 THEN 1 ELSE pos+1 END] AS next_id,
+          stone_data
         FROM positions
     ), poured AS (
-        SELECT id,pos,prev_id,next_id,
+        SELECT id,pos,prev_id,next_id,stone_data,
           CASE pos
             WHEN 1 THEN pastafari_sql_tamil.save_value(
-                p_drop*p_drop + pastafari_sql_tamil.stone_value(p_i,1)*p_bowls[id]+3*p_i)
+                p_drop*p_drop + (stone_data).wheat*p_bowls[id]+3*p_i)
             WHEN 2 THEN pastafari_sql_tamil.save_value(
-                p_drop*p_drop + pastafari_sql_tamil.stone_value(p_i,2)*p_bowls[id]+5*p_i)
+                p_drop*p_drop + (stone_data).barley*p_bowls[id]+5*p_i)
             WHEN 3 THEN pastafari_sql_tamil.save_value(
-                p_drop*p_drop + pastafari_sql_tamil.stone_value(p_i,3)*p_bowls[id]+7*p_i)
+                p_drop*p_drop + (stone_data).salt*p_bowls[id]+7*p_i)
             ELSE 0::numeric
           END AS pour
         FROM neighbors
@@ -44,9 +54,14 @@ RETURNS numeric[] LANGUAGE SQL STABLE STRICT AS $$
         SELECT id,pos,prev_id,next_id,
           p_bowls[id] + 2*p_bowls[prev_id] + 3*p_bowls[next_id]
           + pour + p_drop
-          + pastafari_sql_tamil.stone_value(
-              p_i,pastafari_sql_tamil.stir_stone_kind_by_position(pos)
-            ) AS mix
+          + CASE pastafari_sql_tamil.stir_stone_kind_by_position(pos)
+              WHEN 1 THEN (stone_data).wheat
+              WHEN 2 THEN (stone_data).barley
+              WHEN 3 THEN (stone_data).salt
+              WHEN 4 THEN (stone_data).bitter
+              WHEN 5 THEN (stone_data).red
+              ELSE NULL::numeric
+            END AS mix
         FROM poured
     )
     SELECT array_agg(

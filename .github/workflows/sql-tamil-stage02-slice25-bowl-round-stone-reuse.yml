@@ -1,0 +1,43 @@
+name: SQL Tamil Slice25 two-timeout stone-state reuse
+on:
+  push:
+    branches: ['SQL+தமிழ்']
+    paths:
+      - 'sql/06_stage02_visible_drops.sql'
+      - 'sql/08_stage02_bowl_round.sql'
+      - 'sql/test/181_source_locks.txt'
+      - 'sql/test/181_test_locks.txt'
+      - 'sql/test/181_legacy_visible_drops.sql'
+      - 'sql/test/181_legacy_bowl_round.sql'
+      - 'sql/test/181_prev_3_prev_last.sql'
+      - 'sql/test/181_next_3_next_middle.sql'
+      - 'sql/test/run_181_stage25_bowl_round_stone_reuse.sh'
+      - '.github/workflows/sql-tamil-stage02-slice25-bowl-round-stone-reuse.yml'
+permissions:
+  contents: read
+jobs:
+  targeted-timeout-inputs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        case_id: [prev_3_prev_last, next_3_next_middle]
+    env:
+      CASE_ID: ${{ matrix.case_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Run bounded component differential and archived oracle
+        shell: bash
+        run: bash sql/test/run_181_stage25_bowl_round_stone_reuse.sh "$CASE_ID"
+      - name: Preserve source, generated SQL, versions, logs and exit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-slice25-stone-reuse-${{ matrix.case_id }}-${{ github.run_id }}
+          path: timeout-evidence/
+          if-no-files-found: warn
+          retention-days: 90
