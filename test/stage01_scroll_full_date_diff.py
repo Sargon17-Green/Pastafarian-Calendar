@@ -368,8 +368,9 @@ def compare(args):
         "scope": "nine independent Hebrew Scroll full-date differentials in the selected suite",
         "full_stage1_accepted": False, "cases": [],
     }
+    cases = BOUNDARY_CASES if args.suite == "boundary" else WIDE_CONTEXT_CASES
     matched_cases = matched_fields = 0
-    for index, (label, calculation_offset, target_offset) in enumerate(BOUNDARY_CASES, start=1):
+    for index, (label, calculation_offset, target_offset) in enumerate(cases, start=1):
         expected = full_date(calculation_offset, target_offset, args.max_seconds, args.max_states)
         actual = run_fortran(args.fortran_exe, calculation_offset, target_offset, args.fortran_timeout)
         expected_fields = tuple(expected["fields"])
@@ -390,19 +391,19 @@ def compare(args):
             print("STAGE01_SCROLL_FULL_DATE_EXPECTED=" + ",".join(map(str, expected_fields)))
             print("STAGE01_SCROLL_FULL_DATE_FORTRAN=" + ",".join(map(str, actual)))
     report["matched_cases"] = matched_cases
-    report["total_cases"] = len(BOUNDARY_CASES)
+    report["total_cases"] = len(cases)
     report["matched_fields"] = matched_fields
-    report["total_fields"] = 5 * len(BOUNDARY_CASES)
-    report["status"] = "PASS_BOUNDED_INDEPENDENT_SCROLL_DIFFERENTIAL" if matched_cases == len(BOUNDARY_CASES) and matched_fields == 5 * len(BOUNDARY_CASES) else "MISMATCH"
+    report["total_fields"] = 5 * len(cases)
+    report["status"] = "PASS_BOUNDED_INDEPENDENT_SCROLL_DIFFERENTIAL" if matched_cases == len(cases) and matched_fields == 5 * len(cases) else "MISMATCH"
     report["full_stage1_accepted"] = False
     output = args.output or Path(f"build/stage01-scroll-full-date-{args.suite}.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-    if matched_cases == len(BOUNDARY_CASES) and matched_fields == 5 * len(BOUNDARY_CASES):
-        print(f"STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL={matched_cases}/{len(BOUNDARY_CASES)} CASES; {matched_fields}/{5 * len(BOUNDARY_CASES)} EXACT FIELDS")
+    if matched_cases == len(cases) and matched_fields == 5 * len(cases):
+        print(f"STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL={matched_cases}/{len(cases)} CASES; {matched_fields}/{5 * len(cases)} EXACT FIELDS")
         print("STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE")
         return 0
-    print(f"STAGE01_SCROLL_FULL_DATE_NOT_ACCEPTED={matched_cases}/{len(BOUNDARY_CASES)} CASES; {matched_fields}/{5 * len(BOUNDARY_CASES)} EXACT FIELDS")
+    print(f"STAGE01_SCROLL_FULL_DATE_NOT_ACCEPTED={matched_cases}/{len(cases)} CASES; {matched_fields}/{5 * len(cases)} EXACT FIELDS")
     return 1
 
 

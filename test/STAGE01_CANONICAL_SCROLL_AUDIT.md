@@ -100,3 +100,10 @@ The next acceptance-quality step is a complete independent implementation derive
 - Artifact ID `15051426902`, 3,018 bytes; ZIP SHA-256 `fee86d82941fa7dcbb396866f6c834a8e8a6a60a07b40e8f4a92281e93717b1b`.
 - Artifact URL: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45674348982/artifacts/15051426902
 - This remains bounded QA, not Stage 1 acceptance. Next suite covers nine wider calculation contexts, including ±8192 and year crossings.
+
+ 
+## 2026-11-25 — Wide-suite selection correction
+
+- The first commit introducing `--suite wide` did not route the comparison loop to `WIDE_CONTEXT_CASES`; the parser accepted the option, but the loop still used `BOUNDARY_CASES`.
+- The automatic run `45675469692` on commit `cd6f6e4a734c713fc2decfb35074d2e07c231b00` is therefore not evidence for the wide suite. Do not count its output as a wide-context result.
+- Corrected the dispatch to select the case tuple by `args.suite`, and changed all result totals/acceptance comparisons to use the selected `cases` sequence. The next run is the first valid wide-suite execution.
