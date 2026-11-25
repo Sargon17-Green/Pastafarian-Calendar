@@ -171,7 +171,7 @@ def instrument(root: pathlib.Path, marker: str):
     focused = [(start, end, kind) for start, end, kind in units
                if block["start_line"] + start in focus]
     if ([block["start_line"] + start for start, _, _ in focused] != focus
-            or len(focused) != 8
+            or len(focused) != 12
             or any(kind != "statement" or end != start+1 for start, end, kind in focused)):
         raise ValueError("FOCUSED_SOURCE_LINES_CHANGED")
     spans = focused

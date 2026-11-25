@@ -78,7 +78,7 @@ try {
  Invoke-WebRequest -Uri 'https://www.nars2000.org/download/workspaces/2by2.ws.nars' -OutFile $official -TimeoutSec 90 -MaximumRedirection 3
  if((Get-FileHash -LiteralPath $official -Algorithm SHA256).Hash.ToLowerInvariant() -cne
    '2eba3f2eb9f826b992ffaf4054db9a09da38f4ae2687168173be4a16fd08b11b'){throw 'BASE_WORKSPACE_SHA_MISMATCH'}
- $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v23'
+ $prefix=Join-Path $env:RUNNER_TEMP 'apl_german_stage01_residual_v24'
  $marker=$prefix+'.txt'
  $candidate=$prefix+'.ws.nars'
  $receipt=Join-Path $Evidence 'residual_candidate.json'
@@ -91,9 +91,9 @@ try {
     $m.function_count -ne 95 -or $m.chunk_count -ne 23 -or
     $m.chunk_records.Count -ne 23 -or $m.copies.Count -ne 2 -or
     $m.program_count -ne 28 -or $m.probe_count -ne 8 -or
-    $m.instrumentation_mode -cne 'line234_shape_witness_line237_counterfactual_focus234_241_after_v22' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
-    $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234') -or $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
-    $m.line237_witness.source_line -ne 237 -or $m.line237_witness.applied_to_suite_copy -ne $false -or
+    $m.instrumentation_mode -cne 'line234_line237_shape_witness_focus234_246_after_v23' -or $m.original_entrypoint_invoked -ne $false -or $m.production_source_modified -ne $false -or
+    $m.source_statements_preserved -ne $false -or (($m.qa_only_patches.source_line -join ',') -cne '180,181,234,237') -or $m.line234_witness.source_line -ne 234 -or $m.line234_witness.applied_to_suite_copy -ne $true -or
+    $m.line237_witness.source_line -ne 237 -or $m.line237_witness.applied_to_suite_copy -ne $true -or
     $m.prior_line181_witness_run -ne 45551684196 -or
     $m.prior_v17_run -ne 45658001179 -or
     $m.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
@@ -107,8 +107,10 @@ try {
     $m.prior_v21_artifact_sha256 -cne 'e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb' -or
     $m.prior_v22_run -ne 45673022324 -or
     $m.prior_v22_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
-    $m.prior_residual_run -ne 45673022324 -or
-    $m.prior_residual_artifact_sha256 -cne '6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf' -or
+    $m.prior_v23_run -ne 45676884530 -or
+    $m.prior_v23_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
+    $m.prior_residual_run -ne 45676884530 -or
+    $m.prior_residual_artifact_sha256 -cne '366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38' -or
     $m.original_unmodified_suite_proven -ne $false -or
     $m.original_stage01_acceptance_token_present -ne $false){throw 'CANDIDATE_CONTRACT_INVALID'}
  if((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() -cne $m.candidate_sha256){throw 'CANDIDATE_SHA_MISMATCH'}
@@ -221,8 +223,10 @@ try {
  $r['prior_v21_artifact_sha256']='e6d9eeeaf55a90eef168504a8c64c04a34e4e93d33dc2d673ccacd757692daeb'
  $r['prior_v22_run']=45673022324
  $r['prior_v22_artifact_sha256']='6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf'
- $r['prior_residual_run']=45673022324
- $r['prior_residual_artifact_sha256']='6034e0bfe69400cd483ff7c45f5f8084f64bbe52e5b5316e3ece03c5c6899daf'
+ $r['prior_v23_run']=45676884530
+ $r['prior_v23_artifact_sha256']='366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38'
+ $r['prior_residual_run']=45676884530
+ $r['prior_residual_artifact_sha256']='366ef15ef999b790f1de55824f7d4f80b9525280447e2ec5ccb75423decc5b38'
  $all= ($r['fx_last_contiguous'] -eq 95) -and $r['fx_checkpoints'].Count -eq 23 -and
    (@($r['fx_checkpoints'] | Where-Object {$_.exact -ne $true}).Count -eq 0) -and
    ($r['copies'].Count -eq 2) -and
@@ -232,7 +236,7 @@ try {
    $r['compile_exact'] -and $r['compile_name_exact'] -and
    $r['statement_receipts'].Count -eq $m.probe_count -and $r['statement_started'] -ge 1 -and
    $r['statement_receipts'][0].first_line -eq 234 -and $r['statement_receipts'][0].start_exact -and
-   $r['statement_receipts'][7].first_line -eq 241 -and
+   $r['statement_receipts'][11].first_line -eq 246 -and
    $r['line234_witness'].start_exact -and $r['line234_witness'].captured_exact -and
    $r['line234_witness'].rank_valid -and $r['line234_witness'].rank.Count -eq 1 -and [long]$r['line234_witness'].rank[0] -eq 1 -and
    $r['line234_witness'].shape_valid -and $r['line234_witness'].shape.Count -eq 1 -and [long]$r['line234_witness'].shape[0] -eq 7 -and
@@ -240,7 +244,15 @@ try {
    $r['line234_witness'].original_ec_valid -and $r['line234_witness'].original_ec -eq 0 -and
    $r['line234_witness'].counterfactual_ec_valid -and $r['line234_witness'].counterfactual_ec -eq 3 -and
    $r['line234_witness'].original_message_length_valid -and $r['line234_witness'].original_message_length -gt 0 -and
-   $r['line234_witness'].counterfactual_message_length_valid -and $r['line234_witness'].counterfactual_message_length -eq 0
+   $r['line234_witness'].counterfactual_message_length_valid -and $r['line234_witness'].counterfactual_message_length -eq 0 -and
+   $r['line237_witness'].start_exact -and $r['line237_witness'].captured_exact -and
+   $r['line237_witness'].rank_valid -and $r['line237_witness'].rank.Count -eq 1 -and [long]$r['line237_witness'].rank[0] -eq 1 -and
+   $r['line237_witness'].shape_valid -and $r['line237_witness'].shape.Count -eq 1 -and [long]$r['line237_witness'].shape[0] -eq 46 -and
+   $r['line237_witness'].values_valid -and
+   $r['line237_witness'].original_ec_valid -and $r['line237_witness'].original_ec -eq 0 -and
+   $r['line237_witness'].counterfactual_ec_valid -and $r['line237_witness'].counterfactual_ec -eq 3 -and
+   $r['line237_witness'].original_message_length_valid -and $r['line237_witness'].original_message_length -gt 0 -and
+   $r['line237_witness'].counterfactual_message_length_valid -and $r['line237_witness'].counterfactual_message_length -eq 0
  $r['status']=if(-not $all){'INCOMPLETE_RESIDUAL_DIAGNOSTIC_NOT_STAGE01'}elseif($r['suite_no_error']){
     'RESIDUAL_SUITE_NO_ERROR_DIAGNOSTIC_ONLY'
  }else{'RESIDUAL_SUITE_ERROR_DIAGNOSTIC_ONLY'}
