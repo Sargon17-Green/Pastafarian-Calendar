@@ -1,0 +1,189 @@
+{
+  "project_id": "PC-BRANCH-MATLAB-POLSKI",
+  "current_head_at_manifest_capture": "7b37e6a74b351e10e6e229dba5bbd0d7438c458a",
+  "source_manifest": {
+    "tests/fixtures/stage55_year5000_appendix_a_metadata.json": "a1383b111a88203b0d652b8f0a0e9af1a8b75f25",
+    "tools/stage55_polish_month_length_rank_certificate.py": "405221d7796dd318774469e2f4481cf32e9311be",
+    "tools/run_stage55_source_month_rank_native.m": "bbf4220d5571d97bf5a1b24e7a6e237f047eeeae",
+    "tools/run_stage55_source_cutlet_names_native.m": "758cfc2eb10fe3b02b4bf79f24f8ba4f26582c46",
+    "tools/run_stage55_source_cutlet_day_lengths_native.m": "24c37eb58371d6378a9c57c23006b8dc3ff3cd82",
+    "src/+pastafari/sourceLanguageCatalog.m": "0201ce990e5725645590f36ea7eb14f61661aebf",
+    "docs/SOURCE_LANGUAGE_CATALOG.md": "44ba51aa1b3977728421817e5658fe83606d012c",
+    "src/+pastafari/sauceWithCurrentScars.m": "d9e36aa24d831315b1ab7681c691e5f05434e7c2",
+    "src/+pastafari/AnswerRingStreamFactory.m": "3fba348ec13d80b3533a4aea4fd61ae67ef3416c",
+    "src/+pastafari/GeneralSelectionCompatibilityRoute.m": "f59d541dc8a1aca58c9277d7284cdfe82d377a45",
+    "src/+pastafari/WideSelectionDetourPatch.m": "f81abce83878b0d484835ba510b2caacb9f165be",
+    "src/+pastafari/SmallPickCompatibilityRoute.m": "7996a39b0d84bed5cba08afa7f36cbb0a8e27452",
+    "src/+pastafari/AnswerRingRejectionPatch.m": "6d2a3b690764bef40a029b98f99ec9721c6c0452",
+    "src/+pastafari/LegacyBiasedPick.m": "3c06fc88134599d227a0b51a22749241d571a3b5",
+    "src/+pastafari/LatchedSuccessorPatch.m": "18dbe0c2ca05f281861b7fe34e3fdbf1d595d1b8",
+    "src/+pastafari/CutletPartitionCompatibilityRoute.m": "9afadfc7fb84fbb9ab5c1674fb2e4a49c10a0318",
+    "src/+pastafari/FilteredLegacyCutletPartitionFamily.m": "6459761d060df70f48f32d069637da521520fbf4",
+    "src/+pastafari/LegacyAllPositiveCutletPartitionFamily.m": "60fe3d47631af92e49d816e9c8be882096fff0a8",
+    "src/+pastafari/CutletNameCompatibilityRoute.m": "3f4f583b1c2cbf90d071b46b477b3e10abd45adf",
+    "src/+pastafari/RepeatedNamePatchWrapper.m": "2257dd1500b352e562d52d9c7fd62ade480e441e",
+    "src/+pastafari/partialPermutationNameRowCount.m": "c9e5c9bb1badef4256676c942729758aa2fe8865",
+    "src/+pastafari/partialPermutationNameRowUnrank.m": "26807c8c70146d7172a0c6e7f68d98000409fa2a",
+    "src/+pastafari/GateQuestionEngine.m": "4b774c90f9a2fcdccaa2baac3ef80b0e8e99489e",
+    "src/+pastafari/GateGapCompatibilityRoute.m": "571a133b786036ce2a075efd57ec010651e850e5",
+    "src/+pastafari/SignedGateQuestionPatch.m": "517fc6a270a347d1f3db2f500a2ecfef4250845b",
+    "src/+pastafari/LegacyPositiveOnlyGateQuestion.m": "9a03161c0100149b0231e2425ef2e73b88217459"
+  },
+  "native_run_source_paths": {
+    "month_length_certificate": [
+      "tests/fixtures/stage55_year5000_appendix_a_metadata.json",
+      "tools/stage55_polish_month_length_rank_certificate.py"
+    ],
+    "source_month_rank": [
+      "tools/run_stage55_source_month_rank_native.m",
+      "src/+pastafari/sauceWithCurrentScars.m",
+      "src/+pastafari/AnswerRingStreamFactory.m",
+      "src/+pastafari/GeneralSelectionCompatibilityRoute.m",
+      "src/+pastafari/WideSelectionDetourPatch.m",
+      "src/+pastafari/SmallPickCompatibilityRoute.m",
+      "src/+pastafari/AnswerRingRejectionPatch.m",
+      "src/+pastafari/LegacyBiasedPick.m",
+      "src/+pastafari/LatchedSuccessorPatch.m"
+    ],
+    "source_cutlet_names": [
+      "tools/run_stage55_source_cutlet_names_native.m",
+      "tests/fixtures/stage55_year5000_appendix_a_metadata.json",
+      "src/+pastafari/sourceLanguageCatalog.m",
+      "docs/SOURCE_LANGUAGE_CATALOG.md",
+      "src/+pastafari/sauceWithCurrentScars.m",
+      "src/+pastafari/AnswerRingStreamFactory.m",
+      "src/+pastafari/GeneralSelectionCompatibilityRoute.m",
+      "src/+pastafari/WideSelectionDetourPatch.m",
+      "src/+pastafari/SmallPickCompatibilityRoute.m",
+      "src/+pastafari/AnswerRingRejectionPatch.m",
+      "src/+pastafari/LegacyBiasedPick.m",
+      "src/+pastafari/LatchedSuccessorPatch.m",
+      "src/+pastafari/CutletPartitionCompatibilityRoute.m",
+      "src/+pastafari/FilteredLegacyCutletPartitionFamily.m",
+      "src/+pastafari/LegacyAllPositiveCutletPartitionFamily.m",
+      "src/+pastafari/CutletNameCompatibilityRoute.m",
+      "src/+pastafari/RepeatedNamePatchWrapper.m",
+      "src/+pastafari/partialPermutationNameRowCount.m",
+      "src/+pastafari/partialPermutationNameRowUnrank.m"
+    ],
+    "source_cutlet_day_lengths": [
+      "tools/run_stage55_source_cutlet_day_lengths_native.m",
+      "tests/fixtures/stage55_year5000_appendix_a_metadata.json",
+      "src/+pastafari/GateQuestionEngine.m",
+      "src/+pastafari/GateGapCompatibilityRoute.m",
+      "src/+pastafari/SignedGateQuestionPatch.m",
+      "src/+pastafari/LegacyPositiveOnlyGateQuestion.m"
+    ]
+  },
+  "historical_tree_comparison": {
+    "comparison_method": "GitHub recursive tree SHA comparison for each historical run commit versus current manifest-capture commit.",
+    "runs": {
+      "month_length_certificate": {
+        "commit": "3be694df96418ebe5eea46423e1e9d2cc2fc188c",
+        "run_relevant_blobs_match": true,
+        "path_count": 2
+      },
+      "source_month_rank": {
+        "commit": "53ddfb99ef34d1f4280f9358c3ac83572d2c7095",
+        "run_relevant_blobs_match": true,
+        "path_count": 9
+      },
+      "source_cutlet_names": {
+        "commit": "83a83402f01992ae05810c57d1924be17fe20d94",
+        "run_relevant_blobs_match": true,
+        "path_count": 19
+      },
+      "source_cutlet_day_lengths": {
+        "commit": "fa1a550520c48808bd55666b0a7c24e585031b25",
+        "run_relevant_blobs_match": true,
+        "path_count": 6
+      }
+    }
+  },
+  "runs": {
+    "month_length_certificate": {
+      "workflow_run_id": 41110586119,
+      "job_id": 124251655051,
+      "head_sha": "3be694df96418ebe5eea46423e1e9d2cc2fc188c",
+      "workflow_name": "Stage55 MATLAB Polish Independent Year-5000 Month-Length Certificate",
+      "job_name": "independent-composition-certificate",
+      "run_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41110586119",
+      "artifact_id": 13002028397,
+      "artifact_name": "stage55-month-length-composition-rank",
+      "artifact_size_bytes": 560,
+      "log_filename": "STAGE55_MONTH_LENGTH_COMPOSITION_RANK.log",
+      "status": "completed",
+      "conclusion": "success",
+      "job_status": "completed",
+      "job_conclusion": "success",
+      "artifact_expired": false,
+      "artifact_zip_sha256": "5f670efad2090697701b2aa03c95f3c62cf479c17b28dbeb1a79e91a417c3d39",
+      "artifact_zip_bytes": 560,
+      "log_sha256": "4d2f1347d5d38445b6f216261d1f9254db6e14fcf67f93d8b735c98765b5f163",
+      "log_text": "STAGE55_MONTH_LENGTH_SMALL_FORMULA_PASS FAMILIES=120\nSTAGE55_YEAR5000_MONTH_LENGTH_COMPOSITION_RANK_PASS MONTHS=45 DAYS=4244 LO=4 HI=123 COUNT_METHODS=2 RANK_METHODS=2 ROUNDTRIPS=2\nSTAGE55_MONTH_LENGTH_LEX_RANK=21706039149316943527912320903423885398156086660670683714452395033170314294340946533\nSTAGE55_MONTH_LENGTH_FAMILY_COUNT=28267369127220710176329716843724118975520840014877906533654334421021017631241800900\nSTAGE55_MONTH_LENGTH_VECTOR_SHA256=6d64022344c04935e6423aa6f96b285098d35b9b5ecb4b8c57a4c7149773a134\nSTAGE55_MONTH_LENGTH_CHOSEN_STREAM_RANK_NOT_VERIFIED\nSTAGE55_YEAR5000_MIDDLE_WEAVE_AND_FIVE_FIELD_ORACLE_NOT_VERIFIED\nSTAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n"
+    },
+    "source_month_rank": {
+      "workflow_run_id": 41117203268,
+      "job_id": 124274411337,
+      "head_sha": "53ddfb99ef34d1f4280f9358c3ac83572d2c7095",
+      "workflow_name": "Stage55 MATLAB Polish Source Month-Selection Rank Native",
+      "job_name": "native-source-month-rank",
+      "run_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41117203268",
+      "artifact_id": 13004749650,
+      "artifact_name": "stage55-source-month-rank-native-41117203268",
+      "artifact_size_bytes": 480,
+      "log_filename": "STAGE55_SOURCE_MONTH_RANK_NATIVE.log",
+      "status": "completed",
+      "conclusion": "success",
+      "job_status": "completed",
+      "job_conclusion": "success",
+      "artifact_expired": false,
+      "artifact_zip_sha256": "53b952ea31f2f61ff1c6c06f22809a9122be941d021966a8c96286c181d47516",
+      "artifact_zip_bytes": 480,
+      "log_sha256": "0cc477dc3e484a2d8fa4df7943ae2b72d30add11a71c5e0df5589b420769c759",
+      "log_text": "STAGE55_SOURCE_MONTH_RANK_PROBE_STARTED\nSTAGE55_SOURCE_MONTH_RANK_SAUCE_AND_RING_VERIFIED NEXT_BOWL=1 DIRECTION=-1\nSTAGE55_SOURCE_MONTH_RANK_PRODUCTION_PATCH14_AGREES\nSTAGE55_SOURCE_MONTH_RANK_ACTUAL=21706039149316943527912320903423885398156086660670683714452395033170314294340946533\nSTAGE55_SOURCE_MONTH_RANK_CERTIFIED=21706039149316943527912320903423885398156086660670683714452395033170314294340946533\nSTAGE55_SOURCE_MONTH_RANK_REJECTION_STEPS=0\nSTAGE55_SOURCE_MONTH_SELECTION_RANK_NATIVE_PASS YEAR=5000 MONTHS=45 DAYS=4244 BOWLS=6 PLACES=3\nSTAGE55_CUTLET_NAME_MIDDLE_WEAVE_FIVE_FIELD_ORACLE_NOT_VERIFIED\nSTAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\nSTAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n"
+    },
+    "source_cutlet_names": {
+      "workflow_run_id": 41119621651,
+      "job_id": 124282723095,
+      "head_sha": "83a83402f01992ae05810c57d1924be17fe20d94",
+      "workflow_name": "Stage55 MATLAB Polish Source Cutlet Names Native",
+      "job_name": "native-source-cutlet-names",
+      "run_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41119621651",
+      "artifact_id": 13007028942,
+      "artifact_name": "stage55-source-cutlet-names-native",
+      "artifact_size_bytes": 444,
+      "log_filename": "STAGE55_SOURCE_CUTLET_NAMES_NATIVE.log",
+      "status": "completed",
+      "conclusion": "success",
+      "job_status": "completed",
+      "job_conclusion": "success",
+      "artifact_expired": false,
+      "artifact_zip_sha256": "a329d2c3bd2fc2009c813c0a737cb8a4d48a30d5ea5185651ac268018c3e04c6",
+      "artifact_zip_bytes": 444,
+      "log_sha256": "d58872e6a91d5fec3b8de16d19758477c6824ab4834d887b996350a34b5dad71",
+      "log_text": "STAGE55_SOURCE_CUTLET_NAMES_BEGIN\nSTAGE55_SOURCE_CUTLET_PARTITION_PASS GAPS=8 CUTLETS=6\nSTAGE55_SOURCE_NAMES_PASS CUTLETS=6 MONTHS=45 INDICES=51 CUTLET_RANK=7851263 MONTH_RANK=47595793958504905307317451810724820201647031065686669524994\nSTAGE55_SOURCE_CUTLET_NAMES_NATIVE_PASS YEAR=5000 CUTLETS=6 MONTHS=45 NAME_INDICES=51 SMALL_CASES=60\nSTAGE55_INDEPENDENT_CUTLET_DAY_LENGTHS_NOT_VERIFIED\nSTAGE55_MIDDLE_WEAVE_FIVE_FIELD_ORACLE_NOT_VERIFIED\nSTAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\nSTAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n"
+    },
+    "source_cutlet_day_lengths": {
+      "workflow_run_id": 41121273668,
+      "job_id": 124287804533,
+      "head_sha": "fa1a550520c48808bd55666b0a7c24e585031b25",
+      "workflow_name": "Stage55 MATLAB Polish Source Cutlet Day Lengths Native",
+      "job_name": "native-source-cutlet-day-lengths",
+      "run_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/41121273668",
+      "artifact_id": 13008523821,
+      "artifact_name": "stage55-source-cutlet-day-lengths-native",
+      "artifact_size_bytes": 411,
+      "log_filename": "STAGE55_SOURCE_CUTLET_DAYS_NATIVE.log",
+      "status": "completed",
+      "conclusion": "success",
+      "job_status": "completed",
+      "job_conclusion": "success",
+      "artifact_expired": false,
+      "artifact_zip_sha256": "855f532a20c57b0f2427af110b41c3007fc9345adbe44527b57044abc741f256",
+      "artifact_zip_bytes": 411,
+      "log_sha256": "52e8f692db9138cd74a84e21477885fe8c150f0c1eef2909ba8cf8a1d408e515",
+      "log_text": "STAGE55_SOURCE_CUTLET_DAYS_BEGIN\nSTAGE55_SIGNED_GATE_NATIVE_PASS QUESTIONS=8 NEGATIVE=4 POSITIVE=4 GAPS=[759 329 441 503 345 818 831 218]\nSTAGE55_SOURCE_CUTLET_DAY_LENGTHS_NATIVE_PASS YEAR=5000 CUTLETS=6 DAYS=4244 VALUES=[759 770 503 1163 831 218]\nSTAGE55_GATE_ENGINE_INDEPENDENT_ORACLE_NOT_VERIFIED\nSTAGE55_MIDDLE_WEAVE_FIVE_FIELD_ORACLE_NOT_VERIFIED\nSTAGE55_CROSS_ENGINE_SOAK_NOT_VERIFIED\nSTAGE55_FINAL_STAGE_PASS_NOT_VERIFIED\n"
+    }
+  }
+}

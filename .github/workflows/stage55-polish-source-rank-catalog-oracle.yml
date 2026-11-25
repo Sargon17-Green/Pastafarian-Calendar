@@ -1,0 +1,87 @@
+name: Stage55 Polish source-rank / cutlet / canonical-name oracle
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_polish_source_rank_catalog_oracle.py'
+      - 'tests/fixtures/stage55_polish_source_native_evidence.json'
+      - 'docs/stage55-polish-source-rank-catalog-oracle-contract.md'
+      - '.github/workflows/stage55-polish-source-rank-catalog-oracle.yml'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+      - 'tools/stage55_polish_month_length_rank_certificate.py'
+      - 'tools/run_stage55_source_month_rank_native.m'
+      - 'tools/run_stage55_source_cutlet_names_native.m'
+      - 'tools/run_stage55_source_cutlet_day_lengths_native.m'
+      - 'src/+pastafari/sourceLanguageCatalog.m'
+      - 'docs/SOURCE_LANGUAGE_CATALOG.md'
+      - 'src/+pastafari/sauceWithCurrentScars.m'
+      - 'src/+pastafari/AnswerRingStreamFactory.m'
+      - 'src/+pastafari/GeneralSelectionCompatibilityRoute.m'
+      - 'src/+pastafari/WideSelectionDetourPatch.m'
+      - 'src/+pastafari/SmallPickCompatibilityRoute.m'
+      - 'src/+pastafari/AnswerRingRejectionPatch.m'
+      - 'src/+pastafari/LegacyBiasedPick.m'
+      - 'src/+pastafari/LatchedSuccessorPatch.m'
+      - 'src/+pastafari/CutletPartitionCompatibilityRoute.m'
+      - 'src/+pastafari/FilteredLegacyCutletPartitionFamily.m'
+      - 'src/+pastafari/LegacyAllPositiveCutletPartitionFamily.m'
+      - 'src/+pastafari/CutletNameCompatibilityRoute.m'
+      - 'src/+pastafari/RepeatedNamePatchWrapper.m'
+      - 'src/+pastafari/partialPermutationNameRowCount.m'
+      - 'src/+pastafari/partialPermutationNameRowUnrank.m'
+      - 'src/+pastafari/GateQuestionEngine.m'
+      - 'src/+pastafari/GateGapCompatibilityRoute.m'
+      - 'src/+pastafari/SignedGateQuestionPatch.m'
+      - 'src/+pastafari/LegacyPositiveOnlyGateQuestion.m'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage55-polish-source-rank-catalog-oracle-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  independent-source-bridge:
+    name: Two-count unrank / six-partition enumeration / Polish catalog parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact branch commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify exact checkout and run independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p evidence
+          python3 -m py_compile tools/stage55_polish_source_rank_catalog_oracle.py
+          python3 tools/stage55_polish_source_rank_catalog_oracle.py \
+            --repo-root . \
+            --evidence tests/fixtures/stage55_polish_source_native_evidence.json \
+            --fixture tests/fixtures/stage55_year5000_appendix_a_metadata.json \
+            --out evidence/stage55-source-rank-catalog-oracle \
+            > evidence/console.log 2>&1
+          grep -q '^STAGE55_SOURCE_RANK_CATALOG_ORACLE_PASS$' evidence/stage55-source-rank-catalog-oracle/run.log
+          grep -q '^MONTH_LENGTHS_FROM_SOURCE_RANK_PASS ' evidence/stage55-source-rank-catalog-oracle/run.log
+          grep -q '^CUTLET_PARTITION_ORACLE_PASS ' evidence/stage55-source-rank-catalog-oracle/run.log
+          grep -q '^POLISH_NAME_UNRANK_PASS ' evidence/stage55-source-rank-catalog-oracle/run.log
+
+      - name: Retain exact source snapshot, report and logs on PASS or FAIL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-polish-source-rank-catalog-oracle-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
