@@ -899,3 +899,29 @@ jobs:
           name: dart-hebrew-stage7-format-drift
           path: out/dart-hebrew-stage7-format-drift/
           if-no-files-found: warn
+
+  
+  dart-hebrew-stage8-cost-attribution:
+    if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[stage8-cost-only]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Dart SDK 3.13.2
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Verify Stage8 Python runner syntax
+        run: python3 -m py_compile tool/dart_hebrew_stage8_cost_attribution.py
+      - name: Run source-locked baseline versus instrumented §V attribution
+        run: python3 tool/dart_hebrew_stage8_cost_attribution.py
+      - name: Upload Stage8 raw attribution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-stage8-cost-attribution
+          path: out/dart-hebrew-stage8-cost-attribution/
+          if-no-files-found: error
