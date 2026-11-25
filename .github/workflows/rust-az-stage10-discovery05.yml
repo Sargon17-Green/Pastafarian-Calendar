@@ -110,7 +110,7 @@ jobs:
           python3 tools/stage09_patch04_stone_oracle.py evidence/stdout.txt | tee evidence/stage09_distance_oracle.txt
           grep -Fxq 'STAGE09_PATCH04_ORACLE=PASS CORRECTED=230/230 GARBAGE=225 RED=180 MATCH=45 LEGACY=225 RED=224 MATCH=1' evidence/stage09_distance_oracle.txt
           set +e
-          timeout --signal=TERM --kill-after=5s 120s cargo test --test stage10_strict_red stage10_strict_red_k1_must_not_match -- --exact --nocapture > evidence/stage10_strict_red.txt 2>&1
+          timeout --signal=TERM --kill-after=5s 120s CARGO_TERM_COLOR=never cargo test --test stage10_strict_red stage10_strict_red_k1_must_not_match -- --exact --nocapture --ignored > evidence/stage10_strict_red.txt 2>&1
           strict_code=$?
           set -e
           printf '%s\n' "$strict_code" > evidence/stage10_strict_red_exit.txt
