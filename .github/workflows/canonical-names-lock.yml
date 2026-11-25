@@ -800,7 +800,7 @@ jobs:
         run: dart run bin/stage7_weave_hotpath_profile.dart
 
   dart-hebrew-stage7-ab-qa-only:
-    if: github.ref == 'refs/heads/Dart+עברית' && !contains(github.event.head_commit.message, '[stage7-target-only]') && !contains(github.event.head_commit.message, '[stage7-restoration-only]') && !contains(github.event.head_commit.message, '[stage7-format-only]') && !contains(github.event.head_commit.message, '[stage7-r2-only]')
+    if: github.ref == 'refs/heads/Dart+עברית' && !contains(github.event.head_commit.message, '[stage7-target-only]') && !contains(github.event.head_commit.message, '[stage7-restoration-only]') && !contains(github.event.head_commit.message, '[stage7-format-only]') && !contains(github.event.head_commit.message, '[stage7-r2-only]') && !contains(github.event.head_commit.message, '[stage8-cost-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -914,10 +914,25 @@ jobs:
         uses: dart-lang/setup-dart@v1
         with:
           sdk: '3.13.2'
-      - name: Verify Stage8 Dart QA source formatting
-        run: dart format --output=none --set-exit-if-changed bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart
+      - name: Resolve packages before Stage8 format check
+        run: dart pub get
+      - name: Verify Stage8 Dart QA source formatting and capture exact failure bytes
+        run: |
+          set -euo pipefail
+          mkdir -p out/dart-hebrew-stage8-cost-attribution
+          if ! dart format --output=none --set-exit-if-changed bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart; then
+            dart format --output=write bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart
+            for file in bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart; do
+              echo "DART_CAPTURE_BEGIN:$file"
+              base64 -w0 "$file"
+              printf '\n'
+              echo "DART_CAPTURE_END:$file"
+              cp "$file" "out/dart-hebrew-stage8-cost-attribution/$(basename "$file").formatted"
+            done
+            exit 1
+          fi
       - name: Analyze Stage8 Dart QA source
-        run: dart analyze bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart
+        run: dart analyze
       - name: Verify Stage8 Python runner syntax
         run: python3 -m py_compile tool/dart_hebrew_stage8_cost_attribution.py
       - name: Run source-locked baseline versus instrumented §V attribution

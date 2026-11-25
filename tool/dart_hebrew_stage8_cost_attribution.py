@@ -15,7 +15,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ID = "PC-BRANCH-DART-HEBREW"
 BRANCH = "Dart+עברית"
-EXPECTED_HEAD = "e9c5797f75fa01dd37eb8d628acc5004260db298"
+EXPECTED_HEAD = "f35fc7fefc70763e62c192c3e63b5596d8ec0e04"
 
 EXPECTED_SOURCE_BLOBS = {
     "lib/src/monster_base.dart": "03bc54a3972fc48afd62c3b020199cb448769778",
@@ -98,8 +98,6 @@ def verify_source_locks() -> str:
 
     expected_paths = {
         ".github/workflows/canonical-names-lock.yml",
-        "bin/stage8_cost_attribution_profile.dart",
-        "docs/DART_HEBREW_STAGE_08_DISCOVERY_06_COST_ATTRIBUTION_CONTRACT.md",
         "tool/dart_hebrew_stage8_cost_attribution.py",
         "tool/stage8_cost_attribution_metrics.dart",
     }
@@ -119,7 +117,7 @@ def verify_source_locks() -> str:
 
     print(
         f"STAGE8_SOURCE_LOCK_PASS; head={head}; parent={parent}; "
-        f"production_files={len(EXPECTED_SOURCE_BLOBS)}; changed_paths=4"
+        f"production_files={len(EXPECTED_SOURCE_BLOBS)}; changed_paths={len(changed)}"
     )
     return head
 

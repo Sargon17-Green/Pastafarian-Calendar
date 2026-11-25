@@ -50,10 +50,9 @@ final class Stage8CostAttributionMetrics {
   static void beginActiveChildren(List<int> counts, BigInt base) {
     _activeChildrenCalls++;
     final days = counts.fold<int>(0, (sum, value) => sum + value);
-    _increment(
-      _activeChildrenStates,
-      'colors=' + counts.length.toString() + ';remainingDays=' + days.toString(),
-    );
+    final colors = counts.length;
+    final key = 'colors=$colors;remainingDays=$days';
+    _increment(_activeChildrenStates, key);
     _increment(_activeBaseBits, base.bitLength.toString());
   }
 
@@ -71,12 +70,10 @@ final class Stage8CostAttributionMetrics {
   ) {
     _unopenedFactorCalls++;
     _unopenedFactorDepth++;
-    _increment(
-      _unopenedFactorStates,
-      'opened=' + opened.toString() +
-          ';nextActiveLength=' + nextActiveLength.toString() +
-          ';months=' + remaining.length.toString(),
-    );
+    final months = remaining.length;
+    final key = 'opened=$opened;nextActiveLength=$nextActiveLength;'
+        'months=$months';
+    _increment(_unopenedFactorStates, key);
   }
 
   static void endUnopenedFactor(BigInt result, int elapsedMicroseconds) {
@@ -93,20 +90,17 @@ final class Stage8CostAttributionMetrics {
     _countCompletionsCalls++;
     final days = remaining.fold<int>(0, (sum, value) => sum + value);
     final fromUnopenedFactor = _unopenedFactorDepth > 0;
-    final origin = fromUnopenedFactor ? 'unopenedFactor' : 'outsideUnopenedFactor';
+    final origin =
+        fromUnopenedFactor ? 'unopenedFactor' : 'outsideUnopenedFactor';
     if (fromUnopenedFactor) {
       _countCompletionsFromUnopenedFactor++;
     } else {
       _countCompletionsOutsideUnopenedFactor++;
     }
-    _increment(
-      _countCompletionsStates,
-      'origin=' + origin +
-          ';opened=' + openedUpTo.toString() +
-          ';closed=' + closedUpTo.toString() +
-          ';months=' + remaining.length.toString() +
-          ';days=' + days.toString(),
-    );
+    final months = remaining.length;
+    final key = 'origin=$origin;opened=$openedUpTo;closed=$closedUpTo;'
+        'months=$months;days=$days';
+    _increment(_countCompletionsStates, key);
   }
 
   static void endCountCompletions(BigInt result, int elapsedMicroseconds) {
@@ -114,31 +108,33 @@ final class Stage8CostAttributionMetrics {
     _increment(_countCompletionsBits, result.bitLength.toString());
   }
 
-  static Map<String, Object> snapshot() => <String, Object>{
-        'callCounts': <String, int>{
-          'activeChildren': _activeChildrenCalls,
-          'unopenedFactor': _unopenedFactorCalls,
-          'countCompletions': _countCompletionsCalls,
-          'countCompletionsFromUnopenedFactor':
-              _countCompletionsFromUnopenedFactor,
-          'countCompletionsOutsideUnopenedFactor':
-              _countCompletionsOutsideUnopenedFactor,
-        },
-        'elapsedMicroseconds': <String, int>{
-          'activeChildren': _activeChildrenMicroseconds,
-          'unopenedFactor': _unopenedFactorMicroseconds,
-          'countCompletions': _countCompletionsMicroseconds,
-        },
-        'stateHistograms': <String, Map<String, int>>{
-          'activeChildren': _sorted(_activeChildrenStates),
-          'unopenedFactor': _sorted(_unopenedFactorStates),
-          'countCompletions': _sorted(_countCompletionsStates),
-        },
-        'bigIntBitLengthHistograms': <String, Map<String, int>>{
-          'activeBase': _sorted(_activeBaseBits),
-          'activeChild': _sorted(_activeChildBits),
-          'unopenedFactor': _sorted(_unopenedFactorBits),
-          'countCompletions': _sorted(_countCompletionsBits),
-        },
-      };
+  static Map<String, Object> snapshot() {
+    return <String, Object>{
+      'callCounts': <String, int>{
+        'activeChildren': _activeChildrenCalls,
+        'unopenedFactor': _unopenedFactorCalls,
+        'countCompletions': _countCompletionsCalls,
+        'countCompletionsFromUnopenedFactor':
+            _countCompletionsFromUnopenedFactor,
+        'countCompletionsOutsideUnopenedFactor':
+            _countCompletionsOutsideUnopenedFactor,
+      },
+      'elapsedMicroseconds': <String, int>{
+        'activeChildren': _activeChildrenMicroseconds,
+        'unopenedFactor': _unopenedFactorMicroseconds,
+        'countCompletions': _countCompletionsMicroseconds,
+      },
+      'stateHistograms': <String, Map<String, int>>{
+        'activeChildren': _sorted(_activeChildrenStates),
+        'unopenedFactor': _sorted(_unopenedFactorStates),
+        'countCompletions': _sorted(_countCompletionsStates),
+      },
+      'bigIntBitLengthHistograms': <String, Map<String, int>>{
+        'activeBase': _sorted(_activeBaseBits),
+        'activeChild': _sorted(_activeChildBits),
+        'unopenedFactor': _sorted(_unopenedFactorBits),
+        'countCompletions': _sorted(_countCompletionsBits),
+      },
+    };
+  }
 }
