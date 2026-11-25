@@ -98,7 +98,7 @@ def main():
             write_symbol(boy, "wPairTargetOffset", signed32_bytes(target_offset))
             write_symbol(boy, "wNative393Mode", bytes((mode,)))
             write_symbol(boy, "wCalendarAnswerNativeResults", bytes(18 * 35))
-            write_symbol(boy, "wNative393ResultCount", b"\\x00")
+            write_symbol(boy, "wNative393ResultCount", bytes((0,)))
             result, case, status, frames = wait_for_completion(
                 boy, max_frames=120000, high_byte_address=high
             )
