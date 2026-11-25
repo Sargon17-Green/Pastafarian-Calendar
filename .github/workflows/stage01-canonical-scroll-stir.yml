@@ -187,7 +187,7 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll full-date context differential (9 cases)
+    name: Independent Hebrew Scroll wide-context full-date differential (9 cases)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -245,7 +245,7 @@ jobs:
           python3 -m py_compile test/stage01_scroll_full_date_diff.py
           python3 -u test/stage01_scroll_full_date_diff.py --self-test | tee build/stage01-scroll-full-date-selftest.log
           grep -Eq '^STAGE01_SCROLL_FULL_DATE_ORACLE_SELFTEST=[0-9]+/[0-9]+$' build/stage01-scroll-full-date-selftest.log
-      - name: Differential adjacent targets, calculation contexts, and year boundaries
+      - name: Differential wide calculation contexts (including ±8192 and year crossings)
         shell: bash
         run: |
           set -euo pipefail
@@ -253,7 +253,8 @@ jobs:
           (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-full-date-resource.log \
             timeout --signal=TERM --kill-after=5s 700s python3 -u test/stage01_scroll_full_date_diff.py \
               --fortran-exe build/stage01_scroll_full_date_probe \
-              --output build/stage01-scroll-full-date.json \
+              --suite wide \
+              --output build/stage01-scroll-full-date-wide.json \
               --max-seconds 180 --max-states 150000 --fortran-timeout 120) \
             > build/stage01-scroll-full-date.log 2>&1
           rc=$?
@@ -267,12 +268,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fortran-stage01-scroll-full-date-context-diff
+          name: fortran-stage01-scroll-full-date-wide-context-diff
           path: |
             build/stage01-scroll-full-date-selftest.log
             build/stage01-scroll-full-date-resource.log
             build/stage01-scroll-full-date.log
-            build/stage01-scroll-full-date.json
+            build/stage01-scroll-full-date-wide.json
           if-no-files-found: warn
           retention-days: 30
 

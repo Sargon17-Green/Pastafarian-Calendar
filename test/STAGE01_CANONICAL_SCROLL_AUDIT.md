@@ -87,4 +87,16 @@ The next acceptance-quality step is a complete independent implementation derive
   - calculation offset 0, target offsets -1, 0, +1;
   - calculation offsets -1 and +1, target offset 0.
 - Artifact: [fortran-stage01-scroll-full-date-context-diff](https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45673365685/artifacts/15049779556), artifact ID `15049779556`, 2,405 bytes.
-- This is bounded QA evidence only; it does not accept Stage 1. Next: add the four existing boundary-neighbor cases (years 4999/5001), then broaden the calculation-context set.
+- This is bounded QA evidence only; it does not accept Stage 1. Next: run the independent wide-context suite, covering the remaining distant calculation-day offsets and additional year crossings.
+
+ 
+## 2026-11-25 — Independent Scroll year-boundary differential
+
+- Tested commit: `56699815137a28aa26887ade86b34e8690b5bf82`.
+- GitHub Actions run: `45674348982`; job: `139418351498`; completed SUCCESS.
+- Source pins: 8/8; independent oracle self-test: 14/14.
+- Differential: 9/9 cases and 45/45 exact fields.
+- Cases covered target offsets -1/0/+1; calculation offsets -1/+1; and four year-boundary targets in years 4999/5001 (-2033, -2031, 2212, 2214).
+- Artifact ID `15051426902`, 3,018 bytes; ZIP SHA-256 `fee86d82941fa7dcbb396866f6c834a8e8a6a60a07b40e8f4a92281e93717b1b`.
+- Artifact URL: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45674348982/artifacts/15051426902
+- This remains bounded QA, not Stage 1 acceptance. Next suite covers nine wider calculation contexts, including ±8192 and year crossings.
