@@ -115,15 +115,7 @@ def check_evidence(root:Path, sha:str):
             "live_completed_ci_checked_by_this_script":False,
             "closure_candidate":True,"stage04_closure":"ACCEPTED"}
 
-def verify_repo(repo:Path,sha:str):
-    def git(*args):
-        p=subprocess.run(["git","-C",str(repo),*args],capture_output=True,text=True,timeout=15)
-        require(p.returncode==0,"Git object unavailable: "+" ".join(args[:2]))
-        return p.stdout.strip()
-    require(git("rev-parse","HEAD")==sha,"checkout is not exact SHA")
-    for path,blob in (APPROVAL,PRIOR_QA,HISTORICAL):
-        require(git("rev-parse","HEAD:"+path)==blob,"pinned audit/source blob changed: "+path)
-    s=(repo/"DEVELOPMENT_STAGE.md").read_text(encoding="utf-8").splitlines()
+def supported_stage_state(s):
     stage04_accepted = ("CURRENT_STAGE=4" in s
                         and "LAST_COMPLETED_STAGE=4" in s
                         and "CURRENT_KIND=DISCOVERY02" in s
@@ -139,17 +131,39 @@ def verify_repo(repo:Path,sha:str):
                         and "CURRENT_PATCH=PATCH02" in s
                         and "EXPECTED_REPOSITORY_STATE=PATCH02_STAGE05_ACCEPTED_READY_STAGE06" in s)
     stage06_started = ("CURRENT_STAGE=6" in s
-                        and "LAST_COMPLETED_STAGE=5" in s
-                        and "CURRENT_KIND=DISCOVERY03" in s
-                        and "CURRENT_PATCH=PATCH02" in s
-                        and "EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE" in s)
+                       and "LAST_COMPLETED_STAGE=5" in s
+                       and "CURRENT_KIND=DISCOVERY03" in s
+                       and "CURRENT_PATCH=PATCH02" in s
+                       and "EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_PENDING_NATIVE" in s)
     stage06_accepted = ("CURRENT_STAGE=6" in s
                         and "LAST_COMPLETED_STAGE=6" in s
                         and "CURRENT_KIND=DISCOVERY03" in s
                         and "CURRENT_PATCH=PATCH02" in s
                         and "EXPECTED_REPOSITORY_STATE=DISCOVERY03_STAGE06_ACCEPTED_HOLD_NO_STAGE07" in s)
-    require(stage04_accepted or stage05_started or stage05_accepted
-            or stage06_started or stage06_accepted,
+    stage07_started = ("CURRENT_STAGE=7" in s
+                       and "LAST_COMPLETED_STAGE=6" in s
+                       and "CURRENT_KIND=PATCH03" in s
+                       and "CURRENT_PATCH=PATCH03" in s
+                       and "EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_PENDING_NATIVE" in s)
+    stage07_accepted = ("CURRENT_STAGE=7" in s
+                        and "LAST_COMPLETED_STAGE=7" in s
+                        and "CURRENT_KIND=PATCH03" in s
+                        and "CURRENT_PATCH=PATCH03" in s
+                        and "EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_ACCEPTED_HOLD_NO_STAGE08" in s)
+    return (stage04_accepted or stage05_started or stage05_accepted
+            or stage06_started or stage06_accepted
+            or stage07_started or stage07_accepted)
+
+def verify_repo(repo:Path,sha:str):
+    def git(*args):
+        p=subprocess.run(["git","-C",str(repo),*args],capture_output=True,text=True,timeout=15)
+        require(p.returncode==0,"Git object unavailable: "+" ".join(args[:2]))
+        return p.stdout.strip()
+    require(git("rev-parse","HEAD")==sha,"checkout is not exact SHA")
+    for path,blob in (APPROVAL,PRIOR_QA,HISTORICAL):
+        require(git("rev-parse","HEAD:"+path)==blob,"pinned audit/source blob changed: "+path)
+    s=(repo/"DEVELOPMENT_STAGE.md").read_text(encoding="utf-8").splitlines()
+    require(supported_stage_state(s),
             "Stage04 provenance or enumerated successor state invalid")
     record=(repo/"audit/STAGE_04_RUST_FINAL_ACCEPTANCE_2026-11-22.md").read_text(encoding="utf-8")
     for pin in ("STAGE04_FINAL_DISPOSITION=ACCEPTED", "SOURCE_CI_SHA=fd0d125a2621c99fb9b356a845d40ebb91aa3e53",
@@ -185,6 +199,21 @@ class UnitTests(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as x:
             with self.assertRaises(FileNotFoundError):check_evidence(Path(x),"0"*40)
+    def test_stage07_pending_is_supported_successor(self):
+        self.assertTrue(supported_stage_state([
+            "CURRENT_STAGE=7", "LAST_COMPLETED_STAGE=6",
+            "CURRENT_KIND=PATCH03", "CURRENT_PATCH=PATCH03",
+            "EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_PENDING_NATIVE"]))
+    def test_stage07_accepted_is_supported_successor(self):
+        self.assertTrue(supported_stage_state([
+            "CURRENT_STAGE=7", "LAST_COMPLETED_STAGE=7",
+            "CURRENT_KIND=PATCH03", "CURRENT_PATCH=PATCH03",
+            "EXPECTED_REPOSITORY_STATE=PATCH03_STAGE07_ACCEPTED_HOLD_NO_STAGE08"]))
+    def test_unknown_successor_state_fails_closed(self):
+        self.assertFalse(supported_stage_state([
+            "CURRENT_STAGE=8", "LAST_COMPLETED_STAGE=7",
+            "CURRENT_KIND=UNKNOWN", "CURRENT_PATCH=UNKNOWN",
+            "EXPECTED_REPOSITORY_STATE=UNRECOGNIZED"]))
 
 def main():
     p=argparse.ArgumentParser()
