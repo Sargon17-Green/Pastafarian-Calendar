@@ -613,12 +613,12 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
    z;b:d;a;!e;a;!b;9h;!!d:
    z;b:d;a;!f;a;!b;9h;!!d:
    z;b:d;a;!t;a;!b;9h;!!d:
+   z;b:d;a;!n;a;!b;9h;!!d:
    z;b:p;a;!b;20h;!!v:
    z;b:v;a;!v;a;!b;14h;!!v:
    z;b:i;a;!b;20h;!!n:
    z;b:v;a;!n;a;!b;9h;!!v:
    z;b:d;a;!v;a;!b;9h;!!d:
-   z;b:d;a;!n;a;!b;9h;!!d:
    z;b:d;a;!b;25h;!!d:
    { Reverse linked list; flatten after all six values are complete. }
    z;r:d;a;!q;a;!r;q:
