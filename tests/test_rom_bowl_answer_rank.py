@@ -7,7 +7,14 @@ from test_rom import SUCCESS, UNIMPLEMENTED, check_header, discover_case_high_by
 M = (1 << 127) - 1
 
 def discover_source_symbols(symbol_path: Path) -> dict[str, int]:
-    wanted = {"wCalendarPostStirSavedBowls", "wCalendarBowlOrderScratch"}
+    wanted = {
+        "wCalendarPostStirSavedBowls", "wCalendarBowlOrderScratch",
+        "wCalendarAnswerSavedByte", "wCalendarAnswerInputBowl", "wCalendarAnswerInputSeal",
+        "wCalendarSelectCount", "wCalendarAnswerA0", "wCalendarAnswerDirection",
+        "wCalendarSelectRank", "wCalendarAnswerAccepted", "wCalendarStatus", "wCalendarActive",
+        "wCalendarSelectValue", "wCalendarSelectDirection", "wCalendarOrdinalSign",
+        "wCalendarOrdinalLength",
+    }
     found: dict[str, int] = {}
     for line in symbol_path.read_text(encoding="utf-8").splitlines():
         fields = line.strip().split()
@@ -54,6 +61,22 @@ def main():
         result,case,status,frames=wait_for_completion(boy,max_frames=120000,high_byte_address=high)
         print(f"ROM_BOWL_ANSWER_RANK_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} "
               f"DISPATCH_STATUS={status:02X} FRAMES={frames}",flush=True)
+        def read_symbol(name, size):
+            return bytes(int(boy.memory[source_symbols[name] + i]) for i in range(size))
+        if (result,case,status)!=(SUCCESS,393,UNIMPLEMENTED):
+            count_bytes = read_symbol("wCalendarSelectCount", 2)
+            print(f"NATIVE393_DIAG_RESULT={result:02X} CASE={case} STATUS={status:02X} FRAMES={frames}", flush=True)
+            print(f"NATIVE393_DIAG_REMAINING_SOURCE_CASES={read_symbol('wCalendarAnswerSavedByte',1)[0]}", flush=True)
+            print(f"NATIVE393_DIAG_INPUT_BOWL_SEAL_COUNT={read_symbol('wCalendarAnswerInputBowl',1)[0]},{read_symbol('wCalendarAnswerInputSeal',1)[0]},{int.from_bytes(count_bytes,'little')}", flush=True)
+            print(f"NATIVE393_DIAG_A0={read_symbol('wCalendarAnswerA0',16).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_SELECT_VALUE={read_symbol('wCalendarSelectValue',16).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_DIRECTION={read_symbol('wCalendarAnswerDirection',1)[0]:02x}/{read_symbol('wCalendarSelectDirection',1)[0]:02x}", flush=True)
+            print(f"NATIVE393_DIAG_RANK={read_symbol('wCalendarSelectRank',2).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_AK={read_symbol('wCalendarAnswerAccepted',16).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_STATUS_ACTIVE={read_symbol('wCalendarStatus',1)[0]:02x}/{read_symbol('wCalendarActive',1)[0]:02x}", flush=True)
+            print(f"NATIVE393_DIAG_ORDINAL={read_symbol('wCalendarOrdinalSign',1)[0]:02x}/{read_symbol('wCalendarOrdinalLength',3).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_Q={read_symbol('wCalendarPostStirSavedBowls',96).hex()}", flush=True)
+            print(f"NATIVE393_DIAG_ORDER={read_symbol('wCalendarBowlOrderScratch',6).hex()}", flush=True)
         assert (result,case,status)==(SUCCESS,393,UNIMPLEMENTED)
         q_bytes = bytes(int(boy.memory[source_symbols["wCalendarPostStirSavedBowls"] + i]) for i in range(96))
         order_bytes = bytes(int(boy.memory[source_symbols["wCalendarBowlOrderScratch"] + i]) for i in range(6))
