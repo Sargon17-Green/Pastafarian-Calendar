@@ -187,7 +187,7 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll boundary + wide-context full-date differential (18 cases)
+    name: Independent Hebrew Scroll full-date differential (28 cases: boundary, wide, legacy pairs)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -284,6 +284,26 @@ jobs:
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=9/9 CASES; 45/45 EXACT FIELDS' build/stage01-scroll-full-date-boundary.log
 
+      - name: Differential exact legacy normative and expanded target pairs at calculation offset zero
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-full-date-legacy-resource.log \
+            timeout --signal=TERM --kill-after=5s 700s python3 -u test/stage01_scroll_full_date_diff.py \
+              --fortran-exe build/stage01_scroll_full_date_probe \
+              --suite legacy-offset-zero \
+              --output build/stage01-scroll-full-date-legacy-offset-zero.json \
+              --max-seconds 180 --max-states 150000 --fortran-timeout 120) \
+            > build/stage01-scroll-full-date-legacy-offset-zero.log 2>&1
+          rc=$?
+          set -e
+          cat build/stage01-scroll-full-date-legacy-offset-zero.log
+          echo "STAGE01_SCROLL_FULL_DATE_LEGACY_EXIT=$rc TIME_LIMIT=700 MEMORY_KIB=1048576"
+          if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=10/10 CASES; 50/50 EXACT FIELDS' build/stage01-scroll-full-date-legacy-offset-zero.log
+          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-full-date-legacy-offset-zero.log
+
       - name: Preserve independent full-date evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -297,13 +317,16 @@ jobs:
             build/stage01-scroll-full-date-boundary-resource.log
             build/stage01-scroll-full-date-boundary.log
             build/stage01-scroll-full-date-boundary.json
+            build/stage01-scroll-full-date-legacy-resource.log
+            build/stage01-scroll-full-date-legacy-offset-zero.log
+            build/stage01-scroll-full-date-legacy-offset-zero.json
           if-no-files-found: warn
           retention-days: 30
 
 
 
   scroll-cache-sequence-diff:
-    name: Independent Hebrew Scroll same-process cache sequence differential (48 calls)
+    name: Independent Hebrew Scroll same-process cache sequence differential (48 calls; two 24-call processes)
     needs: scroll-full-date-context-diff
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -342,7 +365,7 @@ jobs:
           set -euo pipefail
           set +e
           (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-cache-sequence-resource.log \
-            timeout --signal=TERM --kill-after=5s 1000s python3 -u test/stage01_scroll_cache_sequence_diff.py \
+            timeout --signal=TERM --kill-after=5s 1100s python3 -u test/stage01_scroll_cache_sequence_diff.py \
               --sequence-exe build/stage01_scroll_cache_sequence_probe \
               --output build/stage01-scroll-cache-sequences.json \
               --max-seconds 180 --max-states 150000 --fortran-timeout 800) \
@@ -350,7 +373,7 @@ jobs:
           rc=$?
           set -e
           cat build/stage01-scroll-cache-sequence.log
-          echo "STAGE01_SCROLL_CACHE_SEQUENCE_EXIT=$rc TIME_LIMIT=1000 MEMORY_KIB=1048576"
+          echo "STAGE01_SCROLL_CACHE_SEQUENCE_EXIT=$rc TIME_LIMIT=1100 MEMORY_KIB=1048576"
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
           grep -Fxq 'STAGE01_SCROLL_CACHE_SEQUENCE_DIFFERENTIAL=2/2 MODES; 48/48 CALLS; 240/240 EXACT FIELDS' build/stage01-scroll-cache-sequence.log
           grep -Fxq 'STAGE01_SCROLL_CACHE_SEQUENCE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-cache-sequence.log

@@ -72,24 +72,39 @@ def self_test():
     return checks
 
 
-def run_sequence(executable: Path, calls, timeout_seconds: int):
+def run_sequence_process(executable: Path, calls, timeout_seconds: int):
     input_lines = [str(len(calls))]
     input_lines.extend(
         f"{calculation_offset} {target_offset} {reset_before}"
         for _, _, _, calculation_offset, target_offset, reset_before in calls
     )
-    process = subprocess.run(
-        [str(executable.resolve())],
-        input="\n".join(input_lines) + "\n",
-        capture_output=True,
-        text=True,
-        timeout=timeout_seconds,
-        check=False,
-        preexec_fn=memory_limiter(1024),
-    )
+    try:
+        process = subprocess.run(
+            [str(executable.resolve())],
+            input="\n".join(input_lines) + "\n",
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+            preexec_fn=memory_limiter(1024),
+        )
+    except subprocess.TimeoutExpired as exc:
+        def tail(value):
+            if value is None:
+                return ""
+            if isinstance(value, bytes):
+                value = value.decode("utf-8", "replace")
+            return str(value)[-2000:]
+        partial = tail(exc.stdout)
+        partial_records = sum(line.startswith(PREFIX) for line in partial.splitlines())
+        raise TimeoutError(
+            f"Fortran {calls[0][0]} sequence timed out after {timeout_seconds}s; "
+            f"partial_records_in_tail={partial_records}/{len(calls)}; "
+            f"stdout_tail={partial}; stderr_tail={tail(exc.stderr)}"
+        ) from exc
     if process.returncode != 0:
         raise RuntimeError(
-            f"Fortran sequence exit={process.returncode}; "
+            f"Fortran {calls[0][0]} sequence exit={process.returncode}; "
             f"stdout={process.stdout[-2000:]}; stderr={process.stderr[-2000:]}"
         )
     records = [
@@ -99,7 +114,7 @@ def run_sequence(executable: Path, calls, timeout_seconds: int):
     ]
     if len(records) != len(calls):
         raise ValueError(
-            f"expected {len(calls)} sequence records, got {len(records)}; "
+            f"{calls[0][0]} sequence expected {len(calls)} records, got {len(records)}; "
             f"stdout={process.stdout[-2000:]}; stderr={process.stderr[-2000:]}"
         )
     count_lines = [
@@ -107,14 +122,41 @@ def run_sequence(executable: Path, calls, timeout_seconds: int):
         if line.startswith("STAGE01_SCROLL_SEQUENCE_COUNT=")
     ]
     if count_lines != [f"STAGE01_SCROLL_SEQUENCE_COUNT={len(calls)}"]:
-        raise ValueError("Fortran sequence count footer missing or incorrect")
+        raise ValueError(f"{calls[0][0]} sequence count footer missing or incorrect")
     parsed = []
-    for record in records:
+    for local_index, record in enumerate(records, start=1):
         parts = record.split(",")
         if len(parts) != 8:
             raise ValueError("malformed Fortran sequence record: " + record)
+        if int(parts[0]) != local_index:
+            raise ValueError(
+                f"{calls[0][0]} process record index {parts[0]} != {local_index}"
+            )
         parsed.append(tuple(parts))
     return parsed, process.stdout, process.stderr
+
+
+def run_sequence(executable: Path, calls, timeout_seconds: int):
+    parsed_all = []
+    stdout_parts = []
+    stderr_parts = []
+    for mode in ("warm", "reset-each"):
+        mode_calls = [call for call in calls if call[0] == mode]
+        if len(mode_calls) != 24:
+            raise ValueError(f"expected 24 {mode} calls, got {len(mode_calls)}")
+        parsed, stdout, stderr = run_sequence_process(
+            executable, mode_calls, timeout_seconds
+        )
+        stdout_parts.append(f"STAGE01_CACHE_PROCESS_MODE={mode}\n{stdout}")
+        if stderr:
+            stderr_parts.append(f"STAGE01_CACHE_PROCESS_MODE={mode}\n{stderr}")
+        for record in parsed:
+            parts = list(record)
+            parts[0] = str(len(parsed_all) + 1)
+            parsed_all.append(tuple(parts))
+    if len(parsed_all) != len(calls):
+        raise ValueError(f"combined cache process count mismatch: {len(parsed_all)}/{len(calls)}")
+    return parsed_all, "\n".join(stdout_parts), "\n".join(stderr_parts)
 
 
 def main():

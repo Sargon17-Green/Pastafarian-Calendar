@@ -65,6 +65,19 @@ WIDE_CONTEXT_CASES = (
     ("wide-calc-minus-one-target-minus-2032", -1, -2032),
     ("wide-calc-plus-one-target-plus-2213", 1, 2213),
 )
+LEGACY_OFFSET_ZERO_CASES = (
+    ("old-normative-minus-2032", 0, -2032),
+    ("old-normative-minus-2031", 0, -2031),
+    ("old-normative-minus-one", 0, -1),
+    ("old-normative-foundation", 0, 0),
+    ("old-normative-plus-one", 0, 1),
+    ("old-normative-plus-2212", 0, 2212),
+    ("old-normative-plus-2213", 0, 2213),
+    ("old-expanded-minus-2169", 0, -2169),
+    ("old-expanded-plus-271", 0, 271),
+    ("old-expanded-plus-2350", 0, 2350),
+)
+
 _STRUCTURE_CACHE: dict[tuple[int, int, int, int], dict] = {}
 
 
@@ -356,19 +369,26 @@ def self_test():
         candidate = find_year(calculation, 0, pairs)
         verify(candidate["open_day"] < 0 <= candidate["close_day"], "Foundation target containment")
     verify(len(CUTLET_NAMES) == 17 and len(MONTH_NAMES) == 47, "canonical name catalog sizes")
+    verify(len(LEGACY_OFFSET_ZERO_CASES) == 10 and all(calc == 0 for _, calc, _ in LEGACY_OFFSET_ZERO_CASES), "ten exact legacy pairs use calculation offset zero")
+    verify(tuple(target for _, _, target in LEGACY_OFFSET_ZERO_CASES) == (-2032, -2031, -1, 0, 1, 2212, 2213, -2169, 271, 2350), "legacy target offsets")
     return checks
 
 
 def compare(args):
+    suites = {
+        "boundary": BOUNDARY_CASES,
+        "wide": WIDE_CONTEXT_CASES,
+        "legacy-offset-zero": LEGACY_OFFSET_ZERO_CASES,
+    }
+    cases = suites[args.suite]
     report = {
         "project_id": PROJECT_ID, "source_snapshot": SCROLL_NAME,
         "source_sha256": SOURCE_SHA256, "source_bytes_verified": args.scroll_file is not None,
         "oracle": "independent Hebrew Scroll component composition; no pinned Python imports",
         "suite": args.suite,
-        "scope": "nine independent Hebrew Scroll full-date differentials in the selected suite",
+        "scope": f"{len(cases)} independent Hebrew Scroll full-date differentials in the selected suite",
         "full_stage1_accepted": False, "cases": [],
     }
-    cases = BOUNDARY_CASES if args.suite == "boundary" else WIDE_CONTEXT_CASES
     matched_cases = matched_fields = 0
     for index, (label, calculation_offset, target_offset) in enumerate(cases, start=1):
         expected = full_date(calculation_offset, target_offset, args.max_seconds, args.max_states)
@@ -411,7 +431,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--fortran-exe", type=Path)
-    parser.add_argument("--suite", choices=("boundary", "wide"), default="boundary")
+    parser.add_argument("--suite", choices=("boundary", "wide", "legacy-offset-zero"), default="boundary")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--scroll-file", type=Path)
     parser.add_argument("--max-seconds", type=float, default=180)
