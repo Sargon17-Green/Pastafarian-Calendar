@@ -78,6 +78,8 @@ on:
       - '!tests/run_stage55_all_frontier_inverse_tests.m'
       - 'DEVELOPMENT_STAGE.md'
       - 'docs/STAGE_55_FINAL_AUDIT.md'
+      - 'README.md'
+      - '.github/workflows/matlab-stage55-native.yml'
   workflow_dispatch:
 
 permissions:
