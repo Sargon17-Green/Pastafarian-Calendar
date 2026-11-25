@@ -1,9 +1,9 @@
-use num_bigint::BigInt;
 use crate::discovery03_stone_probe::Stone;
 use crate::patch01_save::normative_save;
 use crate::patch02_work_counts::{LegacyTagDistanceDiscovery03, WorkCountsPatch02};
 use crate::patch03_distance::Patch03DistanceCorrection;
 use crate::{MonsterContext, MonsterError, MonsterErrorCode, MonsterManager, PhaseHandler};
+use num_bigint::BigInt;
 
 const LAST_ROW: usize = 46;
 
@@ -114,11 +114,15 @@ pub fn calendar_stones_spaghetti(
 ) -> Result<Discovery04Observation, MonsterError> {
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(WorkCountsPatch02);
-    manager.dispatcher_mut().register(LegacyTagDistanceDiscovery03);
+    manager
+        .dispatcher_mut()
+        .register(LegacyTagDistanceDiscovery03);
     manager.dispatcher_mut().register(Patch03DistanceCorrection);
     manager.dispatcher_mut().register(LegacyStoneDiscovery04);
     let context = manager.execute_bootstrap_shell(calculation_day, target_day)?;
-    let rows = context.discovery04_stone_observation.as_ref()
+    let rows = context
+        .discovery04_stone_observation
+        .as_ref()
         .map(|observation| observation.rows.clone())
         .ok_or_else(|| MonsterError {
             code: MonsterErrorCode::InvalidState,

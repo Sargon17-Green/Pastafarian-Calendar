@@ -47,11 +47,22 @@ fn stage08_discovery04_keeps_sequential_bug_visible_as_expected_red() {
     assert_eq!(observed.rows.len(), 46);
     assert_eq!(expected.len(), 46);
     assert_eq!(observed.rows[0], [17, 29, 43, 71, 101].map(BigInt::from));
-    assert_eq!(observed.rows[1], [378, 1434, 3780, 9932, 25047].map(BigInt::from));
-    assert_eq!(expected[1], [378, 1073, 2375, 6195, 10493].map(BigInt::from));
+    assert_eq!(
+        observed.rows[1],
+        [378, 1434, 3780, 9932, 25047].map(BigInt::from)
+    );
+    assert_eq!(
+        expected[1],
+        [378, 1073, 2375, 6195, 10493].map(BigInt::from)
+    );
 
     let maximum = (BigInt::one() << 127usize) - BigInt::one();
-    for value in observed.rows.iter().flatten().chain(expected.iter().flatten()) {
+    for value in observed
+        .rows
+        .iter()
+        .flatten()
+        .chain(expected.iter().flatten())
+    {
         assert!(value >= &BigInt::one() && value <= &maximum);
     }
 
@@ -71,17 +82,27 @@ fn stage08_discovery04_keeps_sequential_bug_visible_as_expected_red() {
             };
             println!(
                 "STAGE08_STONE_CELL row={} field={} legacy={} expected={} class={}",
-                row + 1, fields[column], legacy, snapshot, class
+                row + 1,
+                fields[column],
+                legacy,
+                snapshot,
+                class
             );
         }
     }
     assert_eq!(red, 224);
     assert_eq!(matches, 1);
     assert_eq!(observed.context.metrics.get("patch02.work_counts.calls"), 1);
-    assert_eq!(observed.context.metrics.get("discovery03.distance.calls"), 1);
+    assert_eq!(
+        observed.context.metrics.get("discovery03.distance.calls"),
+        1
+    );
     assert_eq!(observed.context.metrics.get("patch03.distance.calls"), 1);
     assert_eq!(observed.context.metrics.get("discovery04.stones.calls"), 1);
-    assert_eq!(observed.context.metrics.get("dispatcher.handler.completed"), 4);
+    assert_eq!(
+        observed.context.metrics.get("dispatcher.handler.completed"),
+        4
+    );
     assert_eq!(
         observed.context.branch_trace,
         vec![
@@ -91,7 +112,11 @@ fn stage08_discovery04_keeps_sequential_bug_visible_as_expected_red() {
             "DISCOVERY04:LEGACY-SEQUENTIAL-STONES".to_owned(),
         ]
     );
-    let stored = observed.context.discovery04_stone_observation.as_ref().unwrap();
+    let stored = observed
+        .context
+        .discovery04_stone_observation
+        .as_ref()
+        .unwrap();
     assert_eq!(stored.row_count, 46);
     assert_eq!(stored.component_count, 230);
     assert_eq!(stored.rows, observed.rows);
@@ -113,7 +138,9 @@ fn stage08_discovery04_keeps_sequential_bug_visible_as_expected_red() {
 
     let mut missing_stage07 = MonsterContext::new(foundation.clone(), foundation.clone());
     let before_missing = missing_stage07.clone();
-    let missing_error = LegacyStoneDiscovery04.handle(&mut missing_stage07).unwrap_err();
+    let missing_error = LegacyStoneDiscovery04
+        .handle(&mut missing_stage07)
+        .unwrap_err();
     assert_eq!(missing_error.code, MonsterErrorCode::InvalidState);
     assert_eq!(missing_stage07, before_missing);
     guards += 1;
