@@ -151,6 +151,40 @@ if j<=closed or j>opened or r==months[j] then return nil end
 if r==1 and j~=closed+1 then return nil end
 return opened,closed+(r==1 and 1 or 0)
 end
+-- For an active label j with r_j remaining, S_i is the cumulative
+-- remaining multiplicity through active label i. A decrement of j changes
+-- C(S_j-1,r_j-1) by (r_j-1)/(S_j-1), and each later factor
+-- C(S_i-1,r_i-1) by (S_i-r_i)/(S_i-1). For a closing first
+-- active label of size 1 its factor is 1 and disappears. Each ratio is
+-- individually exact after multiplication, since the corresponding old
+-- binomial factor is present. Traverse backward to share the later ratios.
+local function active_blocks(rem,opened,closed,rows,p,step)
+local q=0
+local ways=ONE
+local sums={}
+for i=closed+1,opened do
+q=q+rem[i];sums[i]=q
+ways=mul(ways,choose_small(q-1,rem[i]-1))
+end
+assert(q==p[opened]-step,'active block sum mismatch')
+local blocks={}
+if q==0 then return blocks end
+local base=assert(rows[opened][q-1],'active block base missing')
+local tail=mul(ways,base)
+for i=opened,closed+1,-1 do
+local r,s=rem[i],sums[i]
+if r>1 then
+blocks[i]=divsmall(mulsmall(tail,r-1),s-1,true)
+elseif i==closed+1 then
+assert(s==1,'closing factor mismatch');blocks[i]=tail
+end
+if i>closed+1 then
+assert(s>r,'later factor requires earlier active label')
+tail=divsmall(mulsmall(tail,s-r),s-1,true)
+end
+end
+return blocks
+end
 local function unrank(months,p,rows,rank,limit)
 assert(type(limit)=='number' and limit==math.floor(limit) and limit>=0 and limit<=p[#months], 'invalid prefix limit')
 assert(type(rank)=='table' and cmp(rank,ZERO)>0,'rank must be positive BigInt')
@@ -191,14 +225,20 @@ rank=extreme_first and ONE or picked[4]
 evaluations=evaluations+1
 else
 local current=suffix(rem,opened,closed,rows,p,step)
+local blocks=active_blocks(rem,opened,closed,rows,p,step)
 local sum=ZERO
 local selected,rrank
 for j=closed+1,math.min(opened+1,#months) do
 local op,cl=candidate(rem,months,opened,closed,j)
 if op then
+local block
+if j<=opened then
+block=assert(blocks[j],'active candidate missing')
+else
 rem[j]=rem[j]-1
-local block=suffix(rem,op,cl,rows,p,step+1)
+block=suffix(rem,op,cl,rows,p,step+1)
 rem[j]=rem[j]+1
+end
 evaluations=evaluations+1
 assert(evaluations<=15000,'QA branch-evaluation cap')
 sum=add(sum,block)
@@ -247,13 +287,47 @@ end
 visit(1)
 return out
 end
+local function active_block_selftest(months,p,rows,words)
+local seen={}
+local checked=0
+for _,word in ipairs(words) do
+local seq={}
+for label in word:gmatch('[^,]+') do seq[#seq+1]=tonumber(label)+1 end
+local rem=copy(months)
+local opened,closed=0,0
+local key=''
+for step=0,#seq-1 do
+if not seen[key] then
+seen[key]=true
+local blocks=active_blocks(rem,opened,closed,rows,p,step)
+for j=closed+1,opened do
+local op,cl=candidate(rem,months,opened,closed,j)
+if op then
+rem[j]=rem[j]-1
+local direct=suffix(rem,op,cl,rows,p,step+1)
+rem[j]=rem[j]+1
+assert(cmp(assert(blocks[j]),direct)==0,'active ratio differs from direct cardinality')
+checked=checked+1
+else assert(blocks[j]==nil,'illegal branch received cardinality') end
+end
+end
+local j=seq[step+1]
+local op,cl=candidate(rem,months,opened,closed,j)
+assert(op,'oracle prefix illegal')
+rem[j]=rem[j]-1;opened,closed=op,cl
+key=key..','..j
+end
+end
+return checked
+end
 local function small_tests()
 local tiny={{2,2},{3,2},{2,2,2},{2,3,2},{3,3},{2,2,2,2}}
-local ranks=0
+local ranks,ratio_checks=0,0
 for _,v in ipairs(tiny) do
 local p=source_vector(v)
 local rows=make_rows(v,p,p[#v])
 local words=exhaustive_words(v)
+ratio_checks=ratio_checks+active_block_selftest(v,p,rows,words)
 assert(cmp(rows[0][0],{#words})==0,'small domain total mismatch')
 for k,w in ipairs(words) do
 local got,res,suffixval=unrank(v,p,rows,{k},p[#v])
@@ -267,6 +341,7 @@ end
 for _,v in ipairs({{}, {1}, {2,1}, {2,2.5}}) do
 assert(not pcall(source_vector,v),'invalid vector accepted')
 end
+print('ACTIVE_RATIO_DIRECT=PASS checks='..ratio_checks)
 print('SMALL_EXHAUSTIVE=PASS domains='..#tiny..' ranks='..ranks..' invalid_vectors=4 rank_rejects=18')
 end
 local mode=(arg and arg[1]) or 'selftest'

@@ -32,7 +32,7 @@ jobs:
           COUNT_SRC=test/lua_haitian_real_polynomial_count_qa.lua
           mkdir -p "$E"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git hash-object "$SRC")" = 8c59ff3f7f41dbc6f2fa4c9305314f1a9e31e92c
+          test "$(git hash-object "$SRC")" = 4a90d4eaa26d53c6a4954a88f7a343f489a731cb
           test "$(git hash-object "$VERIFY")" = 54efb6ee61f1fe0b2987b8255fad17134db98aba
           test "$(git hash-object "$FIXTURE")" = 96cdc8a766220b05bea2f34b5977aedd821b1985
           test "$(git hash-object "$COUNT_SRC")" = df7a6d31714d111a93aced5ccb74a55c09fd78b1
@@ -53,17 +53,18 @@ jobs:
           printf '%s\n' "$rc" > "$E/exit_code.txt"
           test "$rc" -eq 0
           test ! -s "$E/stderr.txt"
-          python3 "$VERIFY" "$FIXTURE" "$E/real96.tsv" "$SRC" > "$E/verify.txt"
-          python3 - "$E" <<'PY'
+          python3 -I "$VERIFY" "$FIXTURE" "$E/real96.tsv" "$SRC" > "$E/verify.txt"
+          python3 -I - "$E" <<'PY'
           import pathlib, sys
           e=pathlib.Path(sys.argv[1])
           lines=(e/'stdout.txt').read_text(encoding='utf-8').splitlines()
-          assert len(lines)==6, lines
-          assert lines[0]=='SMALL_EXHAUSTIVE=PASS domains=6 ranks=41 invalid_vectors=4 rank_rejects=18'
-          for line,tag in zip(lines[1:4],('FIRST','MIDDLE','LAST')):
+          assert len(lines)==7, lines
+          assert lines[0]=='ACTIVE_RATIO_DIRECT=PASS checks=122'
+          assert lines[1]=='SMALL_EXHAUSTIVE=PASS domains=6 ranks=41 invalid_vectors=4 rank_rejects=18'
+          for line,tag in zip(lines[2:5],('FIRST','MIDDLE','LAST')):
               assert line.startswith('REAL96='+tag+' labels=96 '),line
-          assert lines[4].startswith('REAL96_LUA53=COMPUTED witnesses=3 cpu_seconds='),lines[4]
-          assert lines[5]=='QA_ONLY=PASS FULL_DATE_NOT_RUN=1 NORMATIVE_WEAVING_NOT_RUN=1'
+          assert lines[5].startswith('REAL96_LUA53=COMPUTED witnesses=3 cpu_seconds='),lines[5]
+          assert lines[6]=='QA_ONLY=PASS FULL_DATE_NOT_RUN=1 NORMATIVE_WEAVING_NOT_RUN=1'
           v=(e/'verify.txt').read_text()
           assert 'FROZEN_REAL96_LUA53_DIFFERENTIAL=PASS 3/3' in v
           assert 'MUTATION_REJECTS=PASS 4/4' in v
