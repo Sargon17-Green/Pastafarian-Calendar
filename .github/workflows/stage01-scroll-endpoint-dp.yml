@@ -130,6 +130,9 @@ jobs:
           j=json.load(open('build/stage01-reverse-endpoint-full.json'))
           assert j['project_id']=='PC-BRANCH-FORTRAN-ENGLISH'
           assert j['source_commit']==os.environ['GITHUB_SHA']
+          assert j['source_snapshot']=='Megilat_HaItim_Yehuda_FINAL_2026-09-18.md'
+          assert j['source_sha256']=='7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b'
+          assert j['source_bytes_verified'] is False
           assert j['days']==4399 and j['months']==44
           assert len(j['weaving'])==4399
           assert j['matched_month_ids']==4399 and j['matched_foundation_fields']==5

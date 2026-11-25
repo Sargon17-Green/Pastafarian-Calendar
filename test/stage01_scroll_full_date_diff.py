@@ -362,7 +362,7 @@ def self_test():
 def compare(args):
     report = {
         "project_id": PROJECT_ID, "source_snapshot": SCROLL_NAME,
-        "source_sha256": SOURCE_SHA256, "source_bytes_verified": False,
+        "source_sha256": SOURCE_SHA256, "source_bytes_verified": args.scroll_file is not None,
         "oracle": "independent Hebrew Scroll component composition; no pinned Python imports",
         "suite": args.suite,
         "scope": "nine independent Hebrew Scroll full-date differentials in the selected suite",

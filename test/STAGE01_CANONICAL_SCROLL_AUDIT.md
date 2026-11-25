@@ -119,3 +119,55 @@ The next acceptance-quality step is a complete independent implementation derive
 - Artifact URL: https://github.com/Sargon17-Green/Pastafarian-Calendar/actions/runs/45675704650/artifacts/15051049683
 - Combined with the prior boundary suite: 18/18 independent full-date cases and 90/90 exact fields, including all 14 original calculation contexts and four extra year-boundary neighbors.
 - This remains bounded QA, not full Stage 1 acceptance. Next: same-process cache sequence testing, with warm-cache and reset-before-each modes, against the same independent Scroll oracle.
+
+
+## 2026-11-25 — Exact Scroll snapshot recovered and byte-verified
+
+This section supersedes the earlier statement that the canonical Scroll snapshot was unavailable. An exact-name search located the source in the user's Library; the raw file bytes were materialized and hashed without text normalization.
+
+- File: `Megilat_HaItim_Yehuda_FINAL_2026-09-18.md`
+- Size: 82,877 bytes
+- Modified date: 2026-09-18
+- Raw-byte SHA-256: `7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b`
+- Result: exact match to the source hash pinned in the independent oracle.
+- The source file was not copied into this public repository. Only its name, digest and audit crosswalk are recorded here.
+
+### Source-to-oracle crosswalk
+
+The independently authored components were reviewed against the corresponding Hebrew source tables:
+
+| Source section | Lines | Independent implementation |
+|---|---:|---|
+| Day numbering, question/distance/direction, arithmetic and SAVE | 31–268 | `stage01_scroll_gate_independent.py` |
+| Stones, hidden drops, 46 visible drops, bowl initialization, permutations and pouring/stirring | 269–830 | `stage01_scroll_gate_independent.py` |
+| Twelve post-stirs | 831–894 | `stage01_scroll_stir_reference.py` and gate oracle |
+| Bowl answers and unbiased selection, including wide ranks | 895–1164 | `stage01_scroll_gate_independent.py` |
+| Gates and year 5000 / adjacent-year selection | 1165–1376 | `stage01_scroll_gate_independent.py` |
+| Cutlet partition and cutlet-name selection | 1377–1508 | `stage01_scroll_cutlets_independent.py` |
+| Month count, month lengths and first/last-occurrence weaving | 1509–1660 | `stage01_scroll_months_independent.py` and `stage01_scroll_weaving_reverse_endpoint.py` |
+| Canonical month-name selection | 1661–1805 | `stage01_scroll_month_names_independent.py` |
+| Five-field date projection | 1806–1885 | `stage01_scroll_full_date_diff.py` |
+
+The source's twelve-post-stir table (831–885) was checked line-by-line: the saved value selects the permutation; the update subtotal uses the raw six-bowl sum; every bowl update reads the same pre-stir vector; and all six new values are installed together. No further Fortran correction was indicated by this source check.
+
+The source-byte verification is an out-of-band Library verification, not a GitHub Actions result. The full-date and reverse-endpoint scripts now report `source_bytes_verified` truthfully: true only when `--scroll-file` is supplied. The GitHub runners do not possess the Library file, so their artifacts correctly remain false for that field. The workflow's source-pin count checks literal SHA pins, not raw source bytes.
+
+### Legacy Python-reference failures are non-canonical
+
+Run `45551382647` contained eight failed diagnostics: `stage01-mixed-cache`, `stage01-expanded-real-date-diff`, `normative-real-date`, `stage01-actual-weave-diff`, `stage01-calculation-context-diff`, `stage01-boundary-neighbor-diff`, `stage01-cache-reset`, and `stage01-actual-45-full-year`. All eight jobs are explicitly named `LEGACY diagnostic only` and have `continue-on-error: true`. They compare against the old pinned Python Git blob `d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53`, which shares the pre-correction post-stir defect; the 45/4,244 full-year diagnostic also hard-codes that obsolete year structure. These red diagnostics are retained as historical evidence, not treated as canonical failures or silently converted to passes. The source-based Hebrew Scroll differential is the canonical replacement.
+
+### Exact-HEAD evidence before this audit commit
+
+- Branch HEAD: `0840528966cefecc963c1917e941a1d30e91d49c`.
+- Run `45677479740`, exact HEAD SHA, completed successfully:
+  - job `139428783100`: component/stir/gate/cutlet/month/name and component-differential gates passed, including `37/37` exact component comparisons and `304` suffix shapes / `4,770` ranks (conditional suffix only).
+  - job `139429303310`: wide full-date differential `9/9`, `45/45` exact fields; resource log `299.41s`, peak `690,900 KiB).
+  - job `139432593578`: same-process cache differential `48/48` calls, `240/240` exact fields; resource log `756.22s`, peak `690,372 KiB).
+- Artifacts `15051723545`, `15053211658`, `15054435545` were downloaded; ZIP CRC and embedded JSON were checked against the run/job/SHA.
+- The boundary suite `9/9` previously passed on SHA `56699815137a28aa26887ade86b34e8690b5bf82`, not on this HEAD. The unrestricted `44)-month/`4,399)-day seal32 full unrank previously passed `4,399/4,399` IDs and `5/5` Foundation fields on an older SHA, not on this HEAD.
+
+### Next gates
+
+This commit adds the missing reverse-endpoint source pin and schedules both boundary and wide full-date suites on one exact HEAD; changing the reverse-endpoint oracle also triggers the unrestricted 4,399-ID full-unrank workflow on that same HEAD. Until those completed run/job/log/artifact results are inspected, Stage 1 remains open.
+
+**Acceptance flag:** `full_stage1_accepted = false`.

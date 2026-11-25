@@ -27,6 +27,8 @@ import time
 from pathlib import Path
 
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
+SOURCE_NAME = "Megilat_HaItim_Yehuda_FINAL_2026-09-18.md"
+SOURCE_SHA256 = "7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b"
 FOUNDATION_LENGTHS = (114,117,99,66,103,83,96,65,80,122,77,101,113,103,118,63,
     109,119,120,118,104,100,103,43,95,58,82,113,100,88,122,113,73,112,
     100,122,122,117,106,100,115,118,99,108)
@@ -220,6 +222,9 @@ def foundation(budget,candidate_path):
         names[month_id-1],sum(x==month_id for x in word[:day_index+1]))
     report = {
         "project_id":PROJECT_ID,
+        "source_snapshot":SOURCE_NAME,
+        "source_sha256":SOURCE_SHA256,
+        "source_bytes_verified":False,
         "scope":"INDEPENDENT_SEAL32_FULL_UNRANK_DIFFERENTIAL_NOT_FULL_STAGE1_ACCEPTANCE",
         "full_stage1_accepted":False,
         "source_commit":None,
@@ -275,9 +280,17 @@ def main():
     ap.add_argument("--rank",type=int,default=0)
     ap.add_argument("--max-seconds",type=float,default=180)
     ap.add_argument("--max-states",type=int,default=150000)
+    ap.add_argument("--scroll-file",type=Path)
     args = ap.parse_args()
     if hasattr(sys,"set_int_max_str_digits"):
         sys.set_int_max_str_digits(20000)
+    source_bytes_verified = False
+    if args.scroll_file is not None:
+        actual_source_sha = hashlib.sha256(args.scroll_file.read_bytes()).hexdigest()
+        if actual_source_sha != SOURCE_SHA256:
+            raise SystemExit("Hebrew Scroll source SHA-256 mismatch: " + actual_source_sha)
+        source_bytes_verified = True
+        print("STAGE01_SCROLL_SOURCE_BYTES_SHA256=VERIFIED")
     budget = Budget(args.max_seconds,args.max_states)
     if args.self_test:
         shapes,ranks = self_test()
@@ -286,6 +299,7 @@ def main():
         print("STAGE01_REVERSE_ENDPOINT_BRUTE=PASS")
     if args.foundation:
         report = foundation(budget,args.candidate_json)
+        report["source_bytes_verified"] = source_bytes_verified
         if args.output:
             target = Path(args.output)
             target.parent.mkdir(parents=True,exist_ok=True)

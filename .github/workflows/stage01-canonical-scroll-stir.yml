@@ -187,10 +187,10 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll wide-context full-date differential (9 cases)
+    name: Independent Hebrew Scroll boundary + wide-context full-date differential (18 cases)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install GNU Fortran
@@ -212,6 +212,7 @@ jobs:
               "test/stage01_scroll_months_independent.py",
               "test/stage01_scroll_month_names_independent.py",
               "test/stage01_scroll_weaving_endpoint_dp.py",
+              "test/stage01_scroll_weaving_reverse_endpoint.py",
               "test/stage01_scroll_stir_reference.py",
               "test/stage01_scroll_full_date_diff.py",
           )
@@ -220,7 +221,7 @@ jobs:
               values = re.findall(r"7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b?", data)
               if not values or any(value != expected for value in values):
                   raise SystemExit("invalid Scroll SHA pin in " + name)
-          print("STAGE01_SCROLL_SOURCE_SHA256_PINS=8/8")
+          print("STAGE01_SCROLL_SOURCE_SHA256_PINS=9/9 (literal pins; raw source bytes verified separately)")
           PY
       - name: Compile original normative date probe
         shell: bash
@@ -264,16 +265,38 @@ jobs:
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=9/9 CASES; 45/45 EXACT FIELDS' build/stage01-scroll-full-date.log
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-full-date.log
+      - name: Differential boundary contexts (year edges and one-day neighbors)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-full-date-boundary-resource.log \
+            timeout --signal=TERM --kill-after=5s 700s python3 -u test/stage01_scroll_full_date_diff.py \
+              --fortran-exe build/stage01_scroll_full_date_probe \
+              --suite boundary \
+              --output build/stage01-scroll-full-date-boundary.json \
+              --max-seconds 180 --max-states 150000 --fortran-timeout 120) \
+            > build/stage01-scroll-full-date-boundary.log 2>&1
+          rc=$?
+          set -e
+          cat build/stage01-scroll-full-date-boundary.log
+          echo "STAGE01_SCROLL_FULL_DATE_BOUNDARY_EXIT=$rc TIME_LIMIT=700 MEMORY_KIB=1048576"
+          if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=9/9 CASES; 45/45 EXACT FIELDS' build/stage01-scroll-full-date-boundary.log
+
       - name: Preserve independent full-date evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: fortran-stage01-scroll-full-date-wide-context-diff
+          name: fortran-stage01-scroll-full-date-boundary-and-wide-diff
           path: |
             build/stage01-scroll-full-date-selftest.log
             build/stage01-scroll-full-date-resource.log
             build/stage01-scroll-full-date.log
             build/stage01-scroll-full-date-wide.json
+            build/stage01-scroll-full-date-boundary-resource.log
+            build/stage01-scroll-full-date-boundary.log
+            build/stage01-scroll-full-date-boundary.json
           if-no-files-found: warn
           retention-days: 30
 
