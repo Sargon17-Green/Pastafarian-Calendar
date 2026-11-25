@@ -92,7 +92,7 @@ class BoundedUnrankWitnessTests(unittest.TestCase):
         self.assertFalse(r["production_source_modified"])
         self.assertIn("NOT_STAGE01", r["marker_token"])
         self.assertNotIn("STAGE01_NATIVE_PASS", r["marker_token"])
-        lines, pos, match, programs = witness._decode_chunked_candidate(self.candidate)
+        lines, pos, match, programs = witness._decode_chunked_candidate(self.candidate, expected_program_count=26, expected_outer_sha256=self.receipt["outer_lx_sha256"])
         self.assertEqual(len(programs), 26)
         self.assertFalse(any("RunStage01Tests" in p for p in programs[23:]))
         self.assertFalse(any(STAGE01_MARKER in p for p in programs[23:]))

@@ -191,7 +191,11 @@ def instrument_bounded_unrank(block: dict) -> tuple[list[str], dict]:
     return trace, metadata
 
 
-def _decode_chunked_candidate(data: bytes):
+def _decode_chunked_candidate(
+    data: bytes,
+    expected_program_count: int | None = None,
+    expected_outer_sha256: str | None = None,
+):
     lines = data.decode("cp1252").splitlines(keepends=True)
     found = []
     for index, line in enumerate(lines):
@@ -201,14 +205,20 @@ def _decode_chunked_candidate(data: bytes):
         outer = (match["serialized"]
                  .replace("{diamond}", "⋄")
                  .replace("{quad}", "⎕"))
-        if outer.count("⎕EC ⎕UCS ") == 24:
-            found.append((index, match, outer))
+        if (expected_outer_sha256 is not None
+                and hashlib.sha256(outer.encode("utf-8")).hexdigest() != expected_outer_sha256):
+            continue
+        units = outer.split(" ⋄ ")
+        if expected_program_count is not None and len(units) != expected_program_count:
+            continue
+        if expected_program_count is None and expected_outer_sha256 is None and len(units) not in (24, 26):
+            continue
+        if any(not u.startswith("⎕EC ⎕UCS ") for u in units):
+            continue
+        found.append((index, match, outer, units))
     if len(found) != 1:
         raise ValueError("LOCKED_95_FX_LX_ENTRY_NOT_UNIQUE")
-    pos, match, outer = found[0]
-    units = outer.split(" ⋄ ")
-    if len(units) != 24 or any(not u.startswith("⎕EC ⎕UCS ") for u in units):
-        raise ValueError("LOCKED_95_FX_PROGRAM_COUNT_INVALID")
+    pos, match, outer, units = found[0]
     programs = [
         "".join(chr(int(n)) for n in unit[len("⎕EC ⎕UCS "):].split())
         for unit in units
@@ -228,7 +238,7 @@ def build_bounded_unrank_witness(
             or base_receipt["final_expression"] != "SAME_EC_AFTER_TEST"):
         raise ValueError("LOCKED_95_FX_BASE_INVALID")
 
-    lines, pos, match, old_programs = _decode_chunked_candidate(base)
+    lines, pos, match, old_programs = _decode_chunked_candidate(base, expected_program_count=24, expected_outer_sha256=base_receipt["outer_lx_sha256"])
     for index, chunk in enumerate(base_receipt["chunk_records"]):
         if hashlib.sha256(old_programs[index].encode("utf-8")).hexdigest() != chunk["inner_sha256"]:
             raise ValueError("LOCKED_95_FX_CHUNK_PROGRAM_HASH_MISMATCH")
@@ -430,6 +440,7 @@ def build_bounded_unrank_witness(
         },
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
         "outer_lx_characters": len(outer),
+        "outer_lx_sha256": hashlib.sha256(outer.encode("utf-8")).hexdigest(),
     }
     return candidate, receipt
 
