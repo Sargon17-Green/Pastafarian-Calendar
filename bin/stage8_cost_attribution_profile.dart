@@ -5,7 +5,7 @@ import '../lib/src/monster_month_lengths.dart';
 import '../lib/src/monster_month_weave_counter.dart';
 import '../lib/src/monster_month_weave_planner.dart';
 import '../lib/src/monster_year_traversal.dart';
-import '../lib/src/stage8_cost_attribution_metrics.dart';
+import '../tool/stage8_cost_attribution_metrics.dart';
 
 Map<String, Object?> measure<T>(T Function() operation) {
   Stage8CostAttributionMetrics.reset();

@@ -914,6 +914,10 @@ jobs:
         uses: dart-lang/setup-dart@v1
         with:
           sdk: '3.13.2'
+      - name: Verify Stage8 Dart QA source formatting
+        run: dart format --output=none --set-exit-if-changed bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart
+      - name: Analyze Stage8 Dart QA source
+        run: dart analyze bin/stage8_cost_attribution_profile.dart tool/stage8_cost_attribution_metrics.dart
       - name: Verify Stage8 Python runner syntax
         run: python3 -m py_compile tool/dart_hebrew_stage8_cost_attribution.py
       - name: Run source-locked baseline versus instrumented §V attribution

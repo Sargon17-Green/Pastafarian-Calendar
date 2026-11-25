@@ -27,8 +27,9 @@ receives wrappers around only these existing functions:
 
 The wrappers time the original function bodies, count calls, and record
 input-state and BigInt bit-length histograms. Nested countCompletions calls
-are attributed to _unopenedFactor. The instrumentation is never committed
-into lib/, and no memoization or recurrence change is attempted.
+are attributed to _unopenedFactor. The metrics helper is kept under tool/ as QA support. Instrumentation wrappers
+are generated only in temporary source copies; no instrumented lib/ source is
+committed. No memoization or recurrence change is attempted.
 
 ## Input and measured phases
 
