@@ -1,0 +1,58 @@
+name: Befunge Bootstrap geometry and live ownership
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - '.github/workflows/befunge-stage1-live-geometry.yml'
+      - 'qa/stage1_live_geometry*.py'
+      - 'qa/stage1_bootstrap*.py'
+      - 'src/*.b98'
+      - 'reference/**'
+      - 'fixtures/**'
+permissions:
+  contents: read
+jobs:
+  build-real-route-maps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin interpreter and create the reproducible Bootstrap source distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/bootstrap-routes"
+          mkdir -p "$out/results"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$out/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $out/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          python3 qa/stage1_bootstrap_archive.py "$out/bootstrap-source.zip" --commit "$GITHUB_SHA" --engine "$out/PyFunge-0.5-rc2.tar.gz"
+      - name: Retain the exact Bootstrap source and bundled interpreter
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-stage1-bootstrap-source
+          path: ${{ runner.temp }}/bootstrap-routes/bootstrap-source.zip
+          retention-days: 60
+      - name: Collect physical paths, test concurrent ownership and replay the reference domain edges
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/bootstrap-routes"
+          # Run against the delivered source distribution, including its bundled interpreter.
+          mkdir -p "$out/tree"
+          unzip -q "$out/bootstrap-source.zip" -d "$out/tree"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$out/tree:/work:ro" \
+            -v "$out/results:/results" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir --no-index --no-deps /work/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 360s python -u qa/stage1_live_geometry.py /results
+              timeout --kill-after=5s 260s python -u qa/stage1_bootstrap_replay.py /results/reference.json
+            '
+          cd "$out/tree"
+          timeout 100s python3 qa/stage1_live_geometry_audit.py "$out/results"
+      - name: Keep source maps, directed edge counts and original native observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-stage1-live-geometry-and-ownership
+          path: ${{ runner.temp }}/bootstrap-routes/results/
+          retention-days: 60
