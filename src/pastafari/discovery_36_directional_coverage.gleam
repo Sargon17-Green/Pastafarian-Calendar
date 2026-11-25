@@ -126,13 +126,14 @@ pub fn dispatch_discovery_36(
             && relations
           {
             False -> Error(discovery_19_interval_value.InvalidStream)
-            True -> Ok(DirectionalWindowCoverage(
-              previous: previous,
-              left_coverage_numerator: lp,
-              left_coverage_denominator: lq,
-              right_coverage_numerator: rp,
-              right_coverage_denominator: rq,
-            ))
+            True ->
+              Ok(DirectionalWindowCoverage(
+                previous: previous,
+                left_coverage_numerator: lp,
+                left_coverage_denominator: lq,
+                right_coverage_numerator: rp,
+                right_coverage_denominator: rq,
+              ))
           }
         }
       }
