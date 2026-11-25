@@ -106,16 +106,18 @@ jobs:
             throw 'QA_COPY_NATIVE_NOT_VERIFIED'
           }
           if($b.probe_count -ne $a.statement_receipts.Count -or
-             $b.instrumentation_mode -cne 'loops196_201_plus_statements202_207_after_v18_188_195' -or
+             $b.instrumentation_mode -cne 'statements208_210_215_217_after_v19_196_207' -or
              $b.program_count -ne 28 -or $b.original_entrypoint_invoked -ne $false -or
              $b.source_statements_preserved -ne $false -or (($b.qa_only_patches.source_line -join ',') -cne '180,181') -or $b.prior_line181_witness_run -ne 45551684196 -or
              $b.prior_v17_run -ne 45658001179 -or
              $b.prior_v17_artifact_sha256 -cne 'ea8b494fac8ea7d4813301df22edd48b60343210afbaa824ec3c5ed5808e7c5e' -or
-             $b.prior_residual_run -ne 45671179161 -or
-             $b.prior_residual_artifact_sha256 -cne '26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
+             $b.prior_v18_run -ne 45671179161 -or
+             $b.prior_v18_artifact_sha256 -cne '26fdd18a8a1a2ac32a3f979a966556f98c938edc68c438edd7e6e7593b36ef89' -or
+             $b.prior_residual_run -ne 45671767802 -or
+             $b.prior_residual_artifact_sha256 -cne 'a268f6e439d8023de8261036b814642f11b54ed08556cb565e5fe6c2ce68faf5'){throw 'RESIDUAL_PROBE_CONTRACT_MISMATCH'}
           if($a.prior_line181_witness_run -ne 45551684196){throw 'PRIOR_WITNESS_REFERENCE_MISSING'}
-          if($a.statement_receipts[0].first_line -ne 196 -or $a.statement_receipts[0].start_exact -ne $true -or
-             $a.statement_receipts[7].first_line -ne 207){throw 'V19_RESIDUAL_FOCUS_NOT_PROVEN'}
+          if($a.statement_receipts[0].first_line -ne 208 -or $a.statement_receipts[0].start_exact -ne $true -or
+             $a.statement_receipts[7].first_line -ne 217){throw 'V20_RESIDUAL_FOCUS_NOT_PROVEN'}
           Write-Output ('RESIDUAL_STATEMENT_DIAGNOSTIC_ONLY|SUITE_EC_FIRST='+$a.suite_ec_first)
           Write-Output ('FIRST_INCOMPLETE_STATEMENT='+($a.first_incomplete|ConvertTo-Json -Compress))
           Write-Output 'STAGE01_NOT_ACCEPTED_ORIGINAL_UNMODIFIED_RUN_NOT_PROVEN'
@@ -131,7 +133,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: apl-german-stage01-residual-v19
+          name: apl-german-stage01-residual-v20
           path: |
             residual_evidence/
             residual_font_evidence/
