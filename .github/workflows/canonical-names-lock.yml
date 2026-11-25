@@ -2830,52 +2830,51 @@ jobs:
           path: build/stage54-native.log
           if-no-files-found: warn
           retention-days: 30
-stage55-five-live-exhaustive-release-orders-discovery-native:
-    if: github.ref == 'refs/heads/COBOL+简体中文'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Install GnuCOBOL 3
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends gnucobol3
-          cobc --version
-      - name: Stage55 strict Native and independent 120-permutation oracle
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p build
-          printf '%s\\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage55-native.log
-          node test/stage55_planning_oracle.mjs 2>&1 | tee -a build/stage55-native.log
-          compile_sources=(
-            test/stage55_discovery_tests.cob
-            src/big_integer.cob
-            src/monster_distance.cob
-            src/legacy_distance.cob
-            src/patched_day_tag.cob
-            src/patched_distance.cob
-          )
-          timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage55-five-live-release-orders "${compile_sources[@]}" 2>&1 | tee -a build/stage55-native.log
-          timeout --signal=TERM --kill-after=10s 120s ./build/stage55-five-live-release-orders 2>&1 | tee -a build/stage55-native.log
-          node -e 'const a=JSON.parse(require("fs").readFileSync("build/stage55-native.log","utf8").split("\\n").find(x=>x.startsWith("{"))); for(const [k,v] of Object.entries({cases:120,permutations:120,arithmetic:600,chunkComparisons:546600,plannedNativeOwnerChecks:6000,plannedNativeChunkChecks:5466000,plannedNativeDistinctChecks:2400,plannedNativeHeapSamples:2400,plannedNativeHeapZero:240,staticGate:"PASS",gate:"PASS_NOT_NATIVE"})) if(a[k]!==v) throw Error(k)'
-          grep -Fxq 'STAGE55_HEAP_MEASURED=YES' build/stage55-native.log
-          grep -Fxq 'RESULT=PASS_STAGE55_FIVE_LIVE_EXHAUSTIVE_RELEASE_ORDERS_NATIVE' build/stage55-native.log
-          for pair in 'PERMUTATIONS 120' 'CASES 120' 'PASS 120' 'FIRST_PERMUTATION 12345' 'LAST_PERMUTATION 54321' 'INITIAL_OWNERS 600' 'REBUILD_OWNERS 600' 'RELEASE_STEPS 1200' 'OWNER_WALKS 6000' 'CHUNK_CHECKS 5466000' 'DISTINCT_CHECKS 2400' 'HEAP_SAMPLES 2400' 'HEAP_ZERO 240' 'ORIENTATION_0 30' 'ORIENTATION_1 30' 'ORIENTATION_2 30' 'ORIENTATION_3 30' 'UNEXPECTED_FAILURES 0'; do
-            read -r key value <<<"$pair"
-            grep -Eq "^STAGE55_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage55-native.log
-          done
-          echo 'STAGE55_NATIVE_GATE=PASS' | tee -a build/stage55-native.log
-      - name: Preserve Stage55 evidence including failures
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cobol-stage55-five-live-exhaustive-release-orders-evidence
-          path: build/stage55-native.log
-          if-no-files-found: warn
-          retention-days: 30
-
+  stage55-five-live-exhaustive-release-orders-discovery-native:
+      if: github.ref == 'refs/heads/COBOL+简体中文'
+      runs-on: ubuntu-24.04
+      timeout-minutes: 20
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            persist-credentials: false
+        - name: Install GnuCOBOL 3
+          shell: bash
+          run: |
+            set -euo pipefail
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends gnucobol3
+            cobc --version
+        - name: Stage55 strict Native and independent 120-permutation oracle
+          shell: bash
+          run: |
+            set -euo pipefail
+            mkdir -p build
+            printf '%s\n' 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE' "HEAD=$GITHUB_SHA" >build/stage55-native.log
+            node test/stage55_planning_oracle.mjs 2>&1 | tee -a build/stage55-native.log
+            compile_sources=(
+              test/stage55_discovery_tests.cob
+              src/big_integer.cob
+              src/monster_distance.cob
+              src/legacy_distance.cob
+              src/patched_day_tag.cob
+              src/patched_distance.cob
+            )
+            timeout --signal=TERM --kill-after=10s 300s cobc -std=default -free -Wall -Wextra -Wno-terminator -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o build/stage55-five-live-release-orders "${compile_sources[@]}" 2>&1 | tee -a build/stage55-native.log
+            timeout --signal=TERM --kill-after=10s 120s ./build/stage55-five-live-release-orders 2>&1 | tee -a build/stage55-native.log
+            node -e 'const a=JSON.parse(require("fs").readFileSync("build/stage55-native.log","utf8").split("\n").find(x=>x.startsWith("{"))); for(const [k,v] of Object.entries({cases:120,permutations:120,arithmetic:600,chunkComparisons:546600,plannedNativeOwnerChecks:6000,plannedNativeChunkChecks:5466000,plannedNativeDistinctChecks:2400,plannedNativeHeapSamples:2400,plannedNativeHeapZero:240,staticGate:"PASS",gate:"PASS_NOT_NATIVE"})) if(a[k]!==v) throw Error(k)'
+            grep -Fxq 'STAGE55_HEAP_MEASURED=YES' build/stage55-native.log
+            grep -Fxq 'RESULT=PASS_STAGE55_FIVE_LIVE_EXHAUSTIVE_RELEASE_ORDERS_NATIVE' build/stage55-native.log
+            for pair in 'PERMUTATIONS 120' 'CASES 120' 'PASS 120' 'FIRST_PERMUTATION 12345' 'LAST_PERMUTATION 54321' 'INITIAL_OWNERS 600' 'REBUILD_OWNERS 600' 'RELEASE_STEPS 1200' 'OWNER_WALKS 6000' 'CHUNK_CHECKS 5466000' 'DISTINCT_CHECKS 2400' 'HEAP_SAMPLES 2400' 'HEAP_ZERO 240' 'ORIENTATION_0 30' 'ORIENTATION_1 30' 'ORIENTATION_2 30' 'ORIENTATION_3 30' 'UNEXPECTED_FAILURES 0'; do
+              read -r key value <<<"$pair"
+              grep -Eq "^STAGE55_${key}=[[:space:]]*0*${value}[[:space:]]*$" build/stage55-native.log
+            done
+            echo 'STAGE55_NATIVE_GATE=PASS' | tee -a build/stage55-native.log
+        - name: Preserve Stage55 evidence including failures
+          if: always()
+          uses: actions/upload-artifact@v4
+          with:
+            name: cobol-stage55-five-live-exhaustive-release-orders-evidence
+            path: build/stage55-native.log
+            if-no-files-found: warn
+            retention-days: 30

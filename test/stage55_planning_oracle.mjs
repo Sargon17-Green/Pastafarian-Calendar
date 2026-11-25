@@ -195,7 +195,21 @@ function stage55Planning() {
     .filter(name => name !== "VARYING" && name !== "UNTIL");
   const missingParagraphs = [...new Set(performed)]
     .filter(name => !paragraphSet.has(name));
-  const maxLineLength = Math.max(...cobol.split(/\r?\n/).map(line => line.length));
+  const requiredFields = [
+    "CHUNK-COUNT", "NODE-NUM", "POS-NUM", "PIECE-LEN",
+    "CNT-ORIENTATION-0", "CNT-ORIENTATION-1",
+    "CNT-ORIENTATION-2", "CNT-ORIENTATION-3"
+  ];
+  const missingFields = requiredFields.filter(name =>
+    !new RegExp("^01\\\\s+" + name + "\\\\b", "m").test(cobol));
+  const orientationUpdates = new Set(
+    [...cobol.matchAll(/ADD 1 TO CNT-ORIENTATION-([0-3])/g)]
+      .map(match => match[1]));
+  requireCheck(missingFields.length === 0,
+    `missing COBOL fields: ${missingFields.join(",")}`);
+  requireCheck(orientationUpdates.size === 4,
+    "orientation counters are not all updated");
+  const maxLineLength = Math.max(...cobol.split(/\\r?\\n/).map(line => line.length));
   requireCheck(paragraphNames.length >= 15, "paragraph inventory");
   requireCheck(missingParagraphs.length === 0,
     `missing PERFORM targets: ${missingParagraphs.join(",")}`);
@@ -214,6 +228,8 @@ function stage55Planning() {
     plannedNativeHeapZero: stats.heapZero,
     staticParagraphs: paragraphNames.length,
     staticPerformTargets: new Set(performed).size,
+    staticRequiredFields: requiredFields.length,
+    staticOrientationUpdates: orientationUpdates.size,
     staticMaxLineLength: maxLineLength,
     staticGate: "PASS",
     gate: "PASS_NOT_NATIVE"
