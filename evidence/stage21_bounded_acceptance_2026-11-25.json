@@ -1,0 +1,350 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 21,
+  "state": "ACCEPTED_BOUNDED",
+  "branch": "FALSE+العربية",
+  "audit_date": "2026-11-25",
+  "audit_method": "Independent Python 3 standard-library recomputation; no imports from production code, native diagnostic/acceptance harnesses, Node oracle, or other language branches. Equivalent independent Python audit used; repository auditor was not executed directly.",
+  "source": {
+    "source_pin": "2753a30eaa95c4f5c1061ffec5f17d12a9c3e165",
+    "branch_head_verified": true,
+    "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+    "source_sha256_verified": "11/11",
+    "source_sha256": {
+      ".github/workflows/canonical-names-lock.yml": "729e15bed133068b9591a26edc8c14972428a90516354c4471e84db3787daaa4",
+      ".github/workflows/false-arabic-stage21-acceptance.yml": "ec796f5dc2f28bb13899690cc53df5e273143ee8e84f6c5b8ccc64ecc52c736b",
+      ".github/workflows/false-arabic-stage21-diagnostic.yml": "6438d178982970f766998fbb872dcf61575b266bfe1d0bc3b32539ec1fa33aa5",
+      "RUN_STAGE21.md": "a980d5c966e194902f16831f4470d63233269ee228c6fc918fb19c36f82923c9",
+      "evidence/stage21_corrected_neighbor_math_qa_2026-11-25.json": "ff4697114145dce1bf8b1fe5f3721c8ef44d30fd699146edd7a8c3a366f87927",
+      "evidence/stage21_measurement_offline_audit_2026-11-25.json": "63dabcf18581b9af20e99261616bf5a4e1e7e011fce367b697b682d77e27fc72",
+      "src/bigint.false": "2a67528b19ea8cb0f8db907f8c13fabf95480bed2b4c88c1e8c82e49c3d084d0",
+      "src/monster_bootstrap.false": "99eb5ed7bc4d2d63c7a1278992b535c60ac260ade4d20ae245f7975db1bb0902",
+      "tools/stage21_corrected_neighbor_oracle.mjs": "a2e913ccc9c31b9517fd8f6c8b0e766d5298669fc6401ae18996646a7f262de4",
+      "tools/stage21_native_acceptance.py": "b8e75180f0d4db35de23cbf80135ca5cd86a93ea01779131571c5d06465faff6",
+      "tools/stage21_native_diagnostic.py": "f6ffaa588bbca5c23b2a7f696cc31b61061803b3f5444b6f8c8e326c8a3ad088"
+    },
+    "github_git_blob_sha1": {
+      ".github/workflows/canonical-names-lock.yml": "bf70d2e3c0e766c6e8d1e81b014c2024bb6a2224",
+      ".github/workflows/false-arabic-stage21-acceptance.yml": "72c8a4332e944e26165d847ede676f00d68beb65",
+      ".github/workflows/false-arabic-stage21-diagnostic.yml": "c65432890bd9ee8eb6ef7419afd4dfb2dbd3d217",
+      "RUN_STAGE21.md": "2af1179db2b893e3129cb49003005deb37054458",
+      "evidence/stage21_corrected_neighbor_math_qa_2026-11-25.json": "ba0cde978a2b786e4c315f1508f53ebdf893d54d",
+      "evidence/stage21_measurement_offline_audit_2026-11-25.json": "03d8c482f5252c5bd5ec218e5db9924924d30575",
+      "src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+      "src/monster_bootstrap.false": "e9cf5c3d6933aabf23176ea208baf2a1291a7dfd",
+      "tools/stage21_corrected_neighbor_oracle.mjs": "366b2e3ed628d090f57f4e0e8fc0e10c25650ab3",
+      "tools/stage21_native_acceptance.py": "b3fdd9da9cc19e7a260f3d8d8abd92c53dd54816",
+      "tools/stage21_native_diagnostic.py": "d5002c6d0e325314dd838b2fda35c76826021911"
+    },
+    "normative_reference": {
+      "operation": 55,
+      "blob_sha1": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+      "lines": "383-423"
+    },
+    "append_only_from_stage20": {
+      "verified": true,
+      "stage20_source_commit": "7a673e6ec97dd762af32132614623046868f2ca0",
+      "stage20_bootstrap_blob_sha1": "871d432e54ad7f8c04fe575722060ea0e61965e6",
+      "stage21_bootstrap_blob_sha1": "e9cf5c3d6933aabf23176ea208baf2a1291a7dfd",
+      "stage20_bootstrap_is_exact_prefix_of_stage21": true,
+      "bigint_blob_unchanged": "1e8de1147ba46cd0eb75a47f24673bbd9783946f"
+    },
+    "production_prefix_sha256": "6033d232efee97b0d66f1595800df653f364ea2f3756d3307989102743bd4653",
+    "instrumented_prefix_sha256": {
+      "steps_2": "cf4adf46bfe9b0b79ea7c8f29281314f33f8341010003099c8789cb8d63ecc8d",
+      "steps_23": "65e14586e5ca219af152e4ea513bde0ede1021b8243ffdaff233d2f04a16acc8",
+      "steps_45": "14c6f2d132a3274c0f7e35ede330ff76012e8d5133eabd644b255d6636dcdbcf"
+    }
+  },
+  "current_native": {
+    "run_id": 45657718780,
+    "run_status": "completed",
+    "run_conclusion": "success",
+    "verify_job": {
+      "id": 139358804692,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "acceptance_job": {
+      "id": 139358805461,
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "log_markers": [
+      "STAGE21_ACCEPTANCE_FIXTURE_SELF_CHECK_PASS",
+      "STAGE21_BOUNDED_NATIVE_GATE_PASS"
+    ],
+    "artifact": {
+      "id": 15043602789,
+      "name": "false-arabic-stage21-bounded-native-acceptance",
+      "size_bytes": 430096,
+      "entries": 150,
+      "zip_crc": "PASS_150_OF_150",
+      "sha256": "17283178e14fe8910f9f21491d4986262ab62b4ca95cdc95e0cb0680f1a63803"
+    },
+    "source_observed": "2753a30eaa95c4f5c1061ffec5f17d12a9c3e165",
+    "runtime_observed": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+    "compiler": "gcc 15.2.0",
+    "compiler_exit_code": 0,
+    "node": "v24.22.3",
+    "unicode_pick_preflight": "PASS",
+    "positive": {
+      "cases": [
+        {
+          "name": "full_boundary",
+          "steps": 46,
+          "instrumented": false,
+          "assertions": 3400,
+          "seconds": 97.048
+        },
+        {
+          "name": "full_reverse",
+          "steps": 46,
+          "instrumented": false,
+          "assertions": 1380,
+          "seconds": 62.152
+        },
+        {
+          "name": "replay_reverse",
+          "steps": 46,
+          "instrumented": false,
+          "assertions": 1380,
+          "seconds": 62.004
+        },
+        {
+          "name": "step02_reverse",
+          "steps": 2,
+          "instrumented": true,
+          "assertions": 1319,
+          "seconds": 0.482
+        },
+        {
+          "name": "step23_boundary",
+          "steps": 23,
+          "instrumented": true,
+          "assertions": 3402,
+          "seconds": 47.12
+        },
+        {
+          "name": "step45_reverse",
+          "steps": 45,
+          "instrumented": true,
+          "assertions": 1381,
+          "seconds": 59.497
+        }
+      ],
+      "full_46_drop_paths": 3,
+      "instrumented_paths": 3,
+      "assertions_total": 12262,
+      "all_exit_0": true,
+      "all_stderr_empty": true,
+      "independently_recomputed": true,
+      "max_elapsed_seconds": 97.048,
+      "peak_child_rss_kib_cumulative": 518220,
+      "address_space_limit_bytes": 2147483648
+    },
+    "replay": {
+      "full_reverse_equals_replay_reverse": true,
+      "byte_identical_files": [
+        ".false",
+        ".fixture.json",
+        ".stdout.txt",
+        ".stderr.txt",
+        ".exit_code.txt"
+      ]
+    },
+    "invalid": {
+      "cases": {
+        "invalid_bowls5": "E_BOWL_UPDATE_BOWLS_LENGTH",
+        "invalid_bowls7": "E_BOWL_UPDATE_BOWLS_LENGTH",
+        "invalid_digit512": "E_BOWL_UPDATE_BIG_DIGIT",
+        "invalid_digit_negative": "E_BOWL_UPDATE_BIG_DIGIT",
+        "invalid_length0": "E_BOWL_UPDATE_BIG_LENGTH",
+        "invalid_length16": "E_BOWL_UPDATE_BIG_LENGTH",
+        "invalid_negative_sign": "E_BOWL_UPDATE_BIG_SIGN",
+        "invalid_zero_sign": "E_BOWL_UPDATE_BIG_SIGN",
+        "invalid_overflow": "E_BOWL_UPDATE_BIG_RANGE",
+        "invalid_row4": "E_BOWL_UPDATE_ROW_LENGTH",
+        "invalid_row6": "E_BOWL_UPDATE_ROW_LENGTH",
+        "invalid_stones45": "E_BOWL_UPDATE_STONES_LENGTH",
+        "invalid_stones47": "E_BOWL_UPDATE_STONES_LENGTH",
+        "invalid_top_zero": "E_BOWL_UPDATE_BIG_TOP",
+        "invalid_visible45": "E_BOWL_UPDATE_VISIBLE_LENGTH",
+        "invalid_visible47": "E_BOWL_UPDATE_VISIBLE_LENGTH"
+      },
+      "all_expected_exit_1": true,
+      "all_exact_domain_markers": true,
+      "all_controlled_abort_stderr": true,
+      "stderr_note": "The interpreter emits the deliberate `error: divide by zero` abort after the exact domain marker; this is the harness's explicit fail-fast sentinel, not a parser/timeout failure."
+    },
+    "mutants": {
+      "cases": 5,
+      "all_expected_exit_1": true,
+      "all_actual_source_substitutions": true,
+      "all_first_numeric_limb_failures_independently_predicted": true,
+      "all_controlled_abort_stderr": true,
+      "details": [
+        {
+          "name": "mutant_aux_offset",
+          "marker": "STAGE21_OUT_BOWL_4_CELL_2_FAIL",
+          "expected": 363,
+          "observed": 364
+        },
+        {
+          "name": "mutant_aux_stone",
+          "marker": "STAGE21_OUT_BOWL_4_CELL_2_FAIL",
+          "expected": 363,
+          "observed": 377
+        },
+        {
+          "name": "mutant_cross_weight",
+          "marker": "STAGE21_OUT_BOWL_1_CELL_2_FAIL",
+          "expected": 462,
+          "observed": 423
+        },
+        {
+          "name": "mutant_old_neighbors",
+          "marker": "STAGE21_OUT_BOWL_1_CELL_2_FAIL",
+          "expected": 462,
+          "observed": 360
+        },
+        {
+          "name": "mutant_swap_neighbors",
+          "marker": "STAGE21_OUT_BOWL_1_CELL_2_FAIL",
+          "expected": 462,
+          "observed": 452
+        }
+      ]
+    }
+  },
+  "independent_mathematics": {
+    "cases": 397,
+    "anchors": 13,
+    "seeded_cases": 384,
+    "transitions": 18262,
+    "numeric_comparisons": 109572,
+    "range_checks": 109572,
+    "base512_roundtrips": 109572,
+    "immutable_input_checks": 397,
+    "factoradic_rank_checks": 720,
+    "full_replay_count": 1,
+    "six_numeric_mutants_recomputed": true,
+    "rolling_digest": "0x945a235052e22203",
+    "corrected_oracle_json_sha256": "ff4697114145dce1bf8b1fe5f3721c8ef44d30fd699146edd7a8c3a366f87927",
+    "counterexample": {
+      "input_bowls": [
+        "2",
+        "3",
+        "5",
+        "7",
+        "11",
+        "13"
+      ],
+      "visible_drop": "720",
+      "stones": [
+        "2",
+        "3",
+        "5",
+        "7",
+        "11"
+      ],
+      "order": [
+        6,
+        5,
+        4,
+        3,
+        2,
+        1
+      ],
+      "correct_first_transition": [
+        "974",
+        "813",
+        "886",
+        "519531",
+        "519786",
+        "519468"
+      ],
+      "old_neighbor_mapping_result": [
+        "872",
+        "1255",
+        "1076",
+        "519351",
+        "519353",
+        "519551"
+      ]
+    },
+    "independent_python_replay_identical": true,
+    "six_mutants_match_corrected_report": true
+  },
+  "historical_full_ones": {
+    "run_id": 45511710172,
+    "job_id": 138860799111,
+    "run_status": "completed",
+    "run_conclusion": "success",
+    "source_pin": "bb86f0d01825b54417f9ad965d99eb122b83de74",
+    "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+    "source_observed": "bb86f0d01825b54417f9ad965d99eb122b83de74",
+    "runtime_observed": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+    "artifact": {
+      "id": 14975561849,
+      "size_bytes": 67908,
+      "entries": 30,
+      "zip_crc": "PASS_30_OF_30",
+      "sha256": "845380310c7f92309bd737c4e94be19339ec4d97690527671dc8879b74f64857"
+    },
+    "source_sha256_verified": "7/7 match current exact GitHub file bytes",
+    "native_cases": [
+      {
+        "name": "short_ones",
+        "steps": 1,
+        "instrumented": true,
+        "assertions": 1253,
+        "seconds": 0.271,
+        "exit": 0,
+        "stderr_empty": true,
+        "independent_math_match": true
+      },
+      {
+        "name": "short_reverse",
+        "steps": 1,
+        "instrumented": true,
+        "assertions": 1308,
+        "seconds": 0.275,
+        "exit": 0,
+        "stderr_empty": true,
+        "independent_math_match": true
+      },
+      {
+        "name": "full_ones",
+        "steps": 46,
+        "instrumented": false,
+        "assertions": 1334,
+        "seconds": 68.087,
+        "exit": 0,
+        "stderr_empty": true,
+        "independent_math_match": true
+      }
+    ],
+    "peak_child_rss_kib_cumulative": 317520,
+    "address_space_limit_bytes": 2147483648
+  },
+  "corruption_controls": {
+    "corrupted_numeric_expectation_rejected": true,
+    "corrupted_stdout_marker_rejected": true,
+    "passed": "2/2"
+  },
+  "scope": {
+    "accepted": "Bounded Stage21 op38 contract for fully allocated direct records and canonical BigInts in 1..(2^127-1).",
+    "physical_pointer_safety_assessed": false,
+    "excluded": [
+      "unallocated/invalid physical pointers",
+      "truncated allocations",
+      "corrupt heap",
+      "memory-unsafe aliasing",
+      "Windows Native/console",
+      "main/merge/release"
+    ]
+  },
+  "final_decision": "STAGE21_ACCEPTED_BOUNDED",
+  "next": "Stage21 closed. Next work item: inspect normative operation 56 and draft the Stage22 contract. No Stage22 implementation or merge was started."
+}

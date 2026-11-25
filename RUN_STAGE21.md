@@ -2,7 +2,7 @@
 
 PROJECT_ID: `PC-BRANCH-FALSE-ARABIC` · BRANCH: `FALSE+العربية` · 2026-11-23
 
-**Current status (2026-11-25): CORRECTED_OP38_CANDIDATE; NOT_ACCEPTED.** Stage20 remains the last accepted stage (`ACCEPTED_BOUNDED`). Original-runtime Stage21 measurement is prepared; no Native result or acceptance is claimed. Historical design and QA entries below are preserved as history; the neighbor correction supersedes the original formula.
+**Current status (2026-11-25): ACCEPTED_BOUNDED.** Stage21 operation 38 is accepted for the bounded allocated-record contract documented below. Stage20 remains accepted; Stage21 is now the last accepted stage. This acceptance does not cover invalid/unallocated physical pointers, truncated allocations, corrupt heaps, or memory-unsafe aliasing. Historical design and QA entries below are preserved as history; the neighbor correction supersedes the original formula.
 
 ## Normative evidence and adaptation
 
@@ -82,4 +82,38 @@ Append-only op38 candidate commit `b7a909b4ac323c5f7e46fba1b6be81d2ba54c4ff` was
 
 The diagnostic harness `tools/stage21_native_diagnostic.py` (commit `4dd600de607e8c858d23dd6189789ba69c69377e`) generates complete allocated Python-integer fixtures for identity, reverse and boundary inputs, exact output and input-cell assertions, and prepares invalid-record fixture construction. The first measurement uses an explicitly instrumented one-drop prefix and then an unmodified full 46-drop identity-input program, each in a separate bounded original-interpreter process. Caps: 2 GiB address space, 180 s per short case, 600 s for the full case; these are conservative diagnostic limits, not measured acceptance thresholds. If any diagnostic fails, preserve its logs and stop the sequence. Run short and full measurement in a separate source-pinned CI diagnostic because local original-interpreter execution was not available in this session. No stage acceptance, no full Native gate, no claims of physical invalid-pointer safety, no merge/main.
 
-NEXT: inspect the diagnostic run only after completion (job/log/exit/artifact/source SHA), diagnose any actual failure or resource pressure, and use observed measurements to establish full Native limits and run at least three independent full paths, intermediate probes, replay, semantic invalids and genuine numeric mutations. Independent offline source/artifact/math audit remains mandatory.
+Historical NEXT (superseded by the 2026-11-25 acceptance below): inspect the diagnostic run only after completion, establish measured limits, and complete the independent offline source/artifact/math audit. These tasks were completed; no diagnostic rerun was needed.
+
+
+## 2026-11-25 — bounded Native acceptance and independent audit
+
+<badge>ACCEPTED_BOUNDED</badge>
+
+The source-locked acceptance run completed on exact source SHA `2753a30eaa95c4f5c1061ffec5f17d12a9c3e165`; original interpreter runtime remained pinned to `eb3135565a8670cced3f6bbca4dbf7b014c45634`.
+
+- Run `45657718780`; verify job `139358804692` and Stage21 acceptance job `139358805461`: both `completed/success`.
+- Artifact `15043602789`: 430,096 bytes; SHA-256 `17283178e14fe8910f9f21491d4986262ab62b4ca95cdc95e0cb0680f1a63803`; ZIP CRC `150/150` verified.
+- Compiler GCC 15.2.0, exit 0; original UTF-8 pick preflight PASS.
+- Positive Native: 6/6; three uninstrumented 46-drop paths and three instrumented intermediate paths; 12,262 assertions; exit 0 and empty stderr for every positive case. Full-path elapsed times: 97.048 s, 62.152 s, and 62.004 s.
+- Replay of `full_reverse` and `replay_reverse` was byte-identical across program, fixture, stdout, stderr, and exit-code files.
+- Semantic invalid records: 16/16 exact domain markers and exit 1. The stderr `error: divide by zero` is the deliberate fail-fast sentinel after the expected marker, not a parser or timeout fault.
+- Genuine source mutants: 5/5 actual substitutions; each failed at the independently predicted first numeric Base512 limb assertion.
+
+### Independent offline audit
+
+The independent Python standard-library audit did not import production code, either Native harness, the Node oracle, or another language branch. It independently recomputed the corrected mathematics using an ID-indexed/exact-modulo path and a position-indexed/factoradic/Mersenne-folding path.
+
+- 397 cases (13 anchors + 384 deterministic seeded cases), 18,262 transitions, 109,572 numeric comparisons, 109,572 Base512 roundtrips, 397 immutability checks, and 720 permutation-rank checks; digest `0x945a235052e22203`.
+- All six current positive fixtures and the historical full-ones fixture independently recomputed to the serialized expected values.
+- All five Native mutation witnesses independently reproduced the exact first numeric mismatch and marker.
+- Corrupted expected numeric value and corrupted stdout marker were both rejected.
+- Source hash audit: 11/11 exact Git files; the Stage20 bootstrap source is an exact prefix of the Stage21 source, and the BigInt library blob is unchanged.
+- Historical full-ones run `45511710172`, job `138860799111`, artifact `14975561849`: SHA-256 `845380310c7f92309bd737c4e94be19339ec4d97690527671dc8879b74f64857`; CRC `30/30`; 46-drop full Native case, 1,334 assertions, exit 0, 68.087 s; independently recomputed.
+
+### Acceptance scope and exclusions
+
+Stage21 is accepted only for the bounded contract: fully allocated direct records, six bowls, 46 visible drops, 46 rows of five stones, and canonical positive BigInts in `1..(2^127-1)`. The update uses one old-state snapshot for all six new bowls and returns the order for drop 46.
+
+Unallocated/invalid physical pointers, truncated allocations, corrupt heaps, and memory-unsafe aliasing remain unassessed and are not PASS claims. No Windows Native/console test, main/merge, or release was performed.
+
+**NEXT:** Stage21 is closed. Inspect normative operation 56 and draft the Stage22 contract; no Stage22 implementation is included in this acceptance commit.
