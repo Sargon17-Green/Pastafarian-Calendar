@@ -4,6 +4,10 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 $md = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $metadataLines = @($md -split '\r?\n')
 $predecessorsSealed = ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
@@ -30,6 +34,7 @@ $stage42Sealed = ($metadataLines -ccontains 'CURRENT_STAGE=42') -and
                  ($metadataLines -ccontains 'CURRENT_DISCOVERY=27') -and
                  ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=42') -and
                  ($metadataLines -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and $stage42Evidence
+$stage42Sealed = $stage42Sealed -or $stage43Allowed
 $ready = ($metadataLines -ccontains 'TOTAL_STAGES=55') -and
          $predecessorsSealed -and ($stage42Preflight -or $stage42Pending -or $stage42Sealed)
 if (-not $ready) { throw 'Stage42 requires the exact sealed Stage41 and one consistent Stage42 preflight/pending/sealed state' }

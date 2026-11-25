@@ -4,6 +4,10 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 
 # Stage37 Native: pending, sealed or exact Stage38-successor predecessor recheck.
 # Oracle is the on-branch normative implementation, never the production stream.
@@ -11,7 +15,7 @@ $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $stage37Pending = (($md -match '(?m)^CURRENT_STAGE=37\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=36\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
 $stage38Pending = (($md -match '(?m)^CURRENT_STAGE=38\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
 $stage39Sealed = (
-  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42)\s*$') -and
+  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42|43)\s*$') -and
   (
     ($md -match '(?m)^LAST_COMPLETED_STAGE=39\s*$') -or
     (($md -match '(?m)^LAST_COMPLETED_STAGE=40\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or
@@ -22,10 +26,11 @@ $stage39Sealed = (
   ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
   ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
 )
-$stage38Sealed = (($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage39Sealed
+$stage39Sealed = $stage39Sealed -or $stage43Allowed
+$stage38Sealed = (($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42|43)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage39Sealed
 $stage37Sealed = (($md -match '(?m)^CURRENT_STAGE=37\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage38Pending -or $stage38Sealed
 Assert-StageTrue -Condition ($stage37Pending -or $stage37Sealed) -Name 'Stage37 exact Native pending or sealed state'
-Assert-StageTrue -Condition (($stage37Pending -and ($md -match '(?m)^LAST_COMPLETED_STAGE=36\s*$')) -or ($stage37Sealed -and ($md -match '(?m)^LAST_COMPLETED_STAGE=(37|38|39|40|41|42)\s*$'))) -Name 'Stage37 exact last-completed pair'
+Assert-StageTrue -Condition (($stage37Pending -and ($md -match '(?m)^LAST_COMPLETED_STAGE=36\s*$')) -or ($stage37Sealed -and ($md -match '(?m)^LAST_COMPLETED_STAGE=(37|38|39|40|41|42|43)\s*$'))) -Name 'Stage37 exact last-completed pair'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage36 Native evidence seal'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage35 predecessor evidence seal'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Historical expected-red evidence'

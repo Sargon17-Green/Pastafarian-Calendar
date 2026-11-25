@@ -1,6 +1,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Lifecycle = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
 & (Join-Path $root 'tests/Stage01.Tests.ps1')
 if ($LASTEXITCODE -ne 0) { throw 'Nabigo ang Stage 1 regression suite.' }
 & (Join-Path $root 'tests/Stage23.Tests.ps1')
@@ -33,7 +36,7 @@ if ($preSeal) {
     Set-Content -Path $stageFile -Value $updatedLines -Encoding utf8
     Write-Host 'STAGE23_FINALIZED=YES'
 }
-elseif ($postSeal -or $stage42Sealed) {
+elseif ($postSeal -or $stage42Sealed -or $stage43Lifecycle) {
     Write-Host 'STAGE23_ALREADY_FINALIZED=YES'
 }
 else {

@@ -4,18 +4,16 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
 
-$md = @(Get-Content -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md'))
-$sealed42 = ($md -ccontains 'TOTAL_STAGES=55') -and
-            ($md -ccontains 'CURRENT_STAGE=42') -and
-            ($md -ccontains 'CURRENT_DISCOVERY=27') -and
-            ($md -ccontains 'LAST_COMPLETED_STAGE=42') -and
-            ($md -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
-            ($md -ccontains 'STAGE42_NATIVE_CI_RUN=44716461173') -and
-            ($md -ccontains 'STAGE42_NATIVE_ASSERTIONS_PASSED=1657') -and
-            ($md -ccontains 'STAGE42_NATIVE_ASSERTIONS_FAILED=0') -and
-            ($md -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
-if (-not $sealed42) { throw 'Stage43 research requires the sealed Stage42 predecessor; Stage43 must not be activated' }
+
+$stage43Profiles = @('RESEARCH_ONLY','PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY')
+if ($stage43Profiles -cnotcontains $stage43State.Profile) {
+    throw ('Stage43 lifecycle profile is not permitted: ' + $stage43State.Profile + '/' + $stage43State.ReasonCode)
+}
+Write-Host ('STAGE43_METADATA_PROFILE=' + $stage43State.Profile)
 
 function Require43 {
     param([bool]$Condition, [string]$Label)
@@ -148,7 +146,24 @@ if ($endpoints -ne 240 -or $targetPairs -ne 160 -or $sealPairs -ne 216 -or $scri
     Write-Host 'STAGE43_PREFLIGHT=FAIL_COUNTS'
     exit 1
 }
-Write-Host 'STAGE43_PREFLIGHT=BOUNDED_ORACLE_PASS'
-Write-Host 'STAGE43_ACTIVATION=NOT_ACTIVATED'
-Write-Host 'STAGE43_STAGE_SEAL=NOT_CLAIMED'
+switch ($stage43State.Profile) {
+    'RESEARCH_ONLY' {
+        Write-Host 'STAGE43_PREFLIGHT=BOUNDED_ORACLE_PASS'
+        Write-Host 'STAGE43_ACTIVATION=NOT_ACTIVATED'
+        Write-Host 'STAGE43_STAGE_SEAL=NOT_CLAIMED'
+    }
+    'PENDING_SHAPE_ONLY' {
+        Write-Host 'STAGE43_NATIVE_TESTS=PASS_PENDING_NO_SEAL'
+        Write-Host 'STAGE43_NATIVE_ACCEPTANCE=NOT_CLAIMED'
+        Write-Host 'STAGE43_STAGE_SEAL=NOT_CLAIMED'
+    }
+    'IMPLEMENTING_SHA_SHAPE_ONLY' {
+        Write-Host 'STAGE43_SEAL_SHA_REGRESSION=PASS'
+        Write-Host 'STAGE43_SEAL_COMMIT_NATIVE_RECHECK=PENDING_NEW_SHA'
+    }
+    'SEALED_SHAPE_ONLY' {
+        Write-Host 'STAGE43_SEALED_STATE_REGRESSION=PASS'
+        Write-Host 'STAGE43_STAGE_SEAL=CLAIM_RECORDED_NOT_REVALIDATED'
+    }
+}
 exit 0

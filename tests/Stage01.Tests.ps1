@@ -118,6 +118,7 @@ for ($id = 1; $id -le 6; $id++) {
 }
 
 . (Join-Path $root 'tests/StrictUtf8StageMetadata.Tests.ps1')
+. (Join-Path $root 'tests/StageMetadataState.Tests.ps1')
 
 $ok = Complete-StageTestRun
 if (-not $ok) { exit 1 }

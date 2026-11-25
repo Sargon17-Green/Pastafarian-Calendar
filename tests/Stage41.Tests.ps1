@@ -4,10 +4,15 @@ $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 $md = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $metadataLines = @($md -split '\r?\n')
 $stage41Pending = ($metadataLines -ccontains 'CURRENT_STAGE=41') -and ($metadataLines -ccontains 'LAST_COMPLETED_STAGE=40') -and ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0')
 $stage41Sealed = (($metadataLines -ccontains 'CURRENT_STAGE=41') -or ($metadataLines -ccontains 'CURRENT_STAGE=42')) -and (($metadataLines -ccontains 'LAST_COMPLETED_STAGE=41') -or (($metadataLines -ccontains 'LAST_COMPLETED_STAGE=42') -and ($metadataLines -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($metadataLines -ccontains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($metadataLines -ccontains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0')
+$stage41Sealed = $stage41Sealed -or $stage43Allowed
 if(-not ($stage41Pending -or $stage41Sealed)) { throw 'Stage41 requires exact PENDING_NATIVE or evidence-sealed metadata backed by completed preflight' }
 $required = @('STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')
 foreach($line in $required) { if(-not ($metadataLines -ccontains $line)) { throw "Stage41 predecessor seal missing $line" } }

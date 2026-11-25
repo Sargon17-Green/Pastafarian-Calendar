@@ -4,17 +4,22 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 
 # Stage40 / Discovery25: calculation-day gate crossings, research preflight only.
 # Each expected First/Step is obtained from an independent normative sauce call.
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$sealed=((($md -match '(?m)^CURRENT_STAGE=39\s*$') -or (($md -match '(?m)^CURRENT_STAGE=(40|41|42)\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=(PENDING_NATIVE|EVIDENCE_ONLY_CONFIRMED)\s*$'))) -and
-         ($md -match '(?m)^LAST_COMPLETED_STAGE=(39|40|41|42)\s*$') -and
+$sealed=((($md -match '(?m)^CURRENT_STAGE=39\s*$') -or (($md -match '(?m)^CURRENT_STAGE=(40|41|42|43)\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=(PENDING_NATIVE|EVIDENCE_ONLY_CONFIRMED)\s*$'))) -and
+         ($md -match '(?m)^LAST_COMPLETED_STAGE=(39|40|41|42|43)\s*$') -and
          ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
          ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
          ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
          ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
          ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
+$sealed = $sealed -or $stage43Allowed
 Assert-StageTrue -Condition $sealed -Name 'Stage39 exact evidence-sealed predecessor'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 historical red preserved'
 

@@ -3,8 +3,12 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 $metadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(29|30|31|32|33|34|35|36|37|38|39|40|41|42)\s*$') -Name 'Stage29 predecessor remains sealed'
+Assert-StageTrue -Condition ($metadata -match '(?m)^LAST_COMPLETED_STAGE=(29|30|31|32|33|34|35|36|37|38|39|40|41|42|43)\s*$') -Name 'Stage29 predecessor remains sealed'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE29_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$') -Name 'Stage29 native green retained'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE28_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage28 evidence-only status retained'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 scar retained'

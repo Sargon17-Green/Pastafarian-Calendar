@@ -4,11 +4,15 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $pending = ($md -match '(?m)^CURRENT_STAGE=35\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=34\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$')
 $stage38Pending = (($md -match '(?m)^CURRENT_STAGE=38\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))
 $stage39Sealed = (
-  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42)\s*$') -and
+  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42|43)\s*$') -and
   (
     ($md -match '(?m)^LAST_COMPLETED_STAGE=39\s*$') -or
     (($md -match '(?m)^LAST_COMPLETED_STAGE=40\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or
@@ -19,7 +23,8 @@ $stage39Sealed = (
   ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
   ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
 )
-$stage38Sealed = (($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage39Sealed
+$stage39Sealed = $stage39Sealed -or $stage43Allowed
+$stage38Sealed = (($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42|43)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage39Sealed
 $stage37Allowed = ((($md -match '(?m)^CURRENT_STAGE=37\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=36\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or (($md -match '(?m)^CURRENT_STAGE=37\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=37\s*$') -and ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$'))) -or $stage38Pending -or $stage38Sealed
 $stage36Allowed = (($md -match '(?m)^CURRENT_STAGE=36\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=35\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or (($md -match '(?m)^CURRENT_STAGE=36\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=36\s*$') -and ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage37Allowed
 $sealed = (($md -match '(?m)^CURRENT_STAGE=35\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=35\s*$') -and ($md -match '(?m)^STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and ($md -match '(?m)^STAGE34_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or $stage36Allowed

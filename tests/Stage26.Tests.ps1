@@ -4,10 +4,14 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 $meta=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=(26|27|29|30|31|32|33|34|35|36|37|38|39|40|41|42)\s*$') -Name 'Stage26 current'
+Assert-StageTrue -Condition ($meta -match '(?m)^CURRENT_STAGE=(26|27|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43)\s*$') -Name 'Stage26 current'
 $stage26Awaiting = ($meta -match '(?m)^LAST_COMPLETED_STAGE=25\s*$') -and ($meta -match '(?m)^STAGE26_RUNTIME_VERIFICATION=AWAITING\s*$')
-$stage26Sealed = ($meta -match '(?m)^LAST_COMPLETED_STAGE=(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42)\s*$') -and ($meta -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$')
+$stage26Sealed = ($meta -match '(?m)^LAST_COMPLETED_STAGE=(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43)\s*$') -and ($meta -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$')
 Assert-StageTrue -Condition ($stage26Awaiting -or $stage26Sealed) -Name 'Stage26 awaiting or Native-sealed metadata pair'
 Assert-StageTrue -Condition ($meta -match '(?m)^STAGE25_RUNTIME_VERIFICATION=GREEN_CONFIRMED\s*$') -Name 'Stage25 Native seal retained'
 $m=Get-NormM

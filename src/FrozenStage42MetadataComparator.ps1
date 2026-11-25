@@ -1,6 +1,6 @@
 Set-StrictMode -Version Latest
-# Opt-in frozen Stage42 full-map comparison only. Never writes repository files.
-# This script is NOT part of Stage43 activation, seal, or CI job wiring.
+# Read-only frozen Stage42 baseline reader/comparator. Never writes repository files.
+# The versioned Stage43 state classifier may use this reader to verify immutable predecessor provenance; it does not activate Stage43 or create a seal.
 . (Join-Path $PSScriptRoot 'StrictUtf8StageMetadata.ps1')
 
 $script:FrozenStage42Blob = 'a3f53b67e4445bdc835179cd484fe27b3e2648f7'

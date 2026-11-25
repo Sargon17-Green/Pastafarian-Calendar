@@ -4,13 +4,17 @@ $root=Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 . (Join-Path $root 'src/MonsterSkeleton.ps1')
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
+
 
 # Stage39 / Discovery24: cross-context full-seal PRE-FLIGHT ONLY.
 # Same-branch independent normative oracle, fresh production context per endpoint.
 # No mutation of DEVELOPMENT_STAGE, source, oracle, or predecessor seal.
 $md=Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
 $stage39Sealed = (
-  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42)\s*$') -and
+  ($md -match '(?m)^CURRENT_STAGE=(39|40|41|42|43)\s*$') -and
   (
     ($md -match '(?m)^LAST_COMPLETED_STAGE=39\s*$') -or
     (($md -match '(?m)^LAST_COMPLETED_STAGE=40\s*$') -and ($md -match '(?m)^STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')) -or
@@ -21,7 +25,8 @@ $stage39Sealed = (
   ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and
   ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$')
 )
-$stage38Sealed=(($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and (($md -match '(?m)^CURRENT_STAGE=38\s*$') -or ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$'))) -or $stage39Sealed
+$stage39Sealed = $stage39Sealed -or $stage43Allowed
+$stage38Sealed=(($md -match '(?m)^CURRENT_STAGE=(38|39|40|41|42|43)\s*$') -and ($md -match '(?m)^LAST_COMPLETED_STAGE=38\s*$') -and ($md -match '(?m)^STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -and (($md -match '(?m)^CURRENT_STAGE=38\s*$') -or ($md -match '(?m)^STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE\s*$'))) -or $stage39Sealed
 Assert-StageTrue -Condition $stage38Sealed -Name 'Stage38 exact sealed predecessor'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage37 predecessor evidence'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage36 predecessor evidence'

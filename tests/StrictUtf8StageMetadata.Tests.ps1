@@ -1,6 +1,7 @@
 Set-StrictMode -Version Latest
 $strictUtf8MetadataRoot = Split-Path -Parent (Split-Path -Parent $PSCommandPath)
 . (Join-Path $strictUtf8MetadataRoot 'src/StrictUtf8StageMetadata.ps1')
+. (Join-Path $strictUtf8MetadataRoot 'src/FrozenStage42MetadataComparator.ps1')
 
 function New-StrictUtf8TestBytes {
     param([string]$Text, [switch]$WithBom)
@@ -174,26 +175,38 @@ $strictMetadataResult = ConvertFrom-StrictStageMetadataBytes -Bytes $strictMetad
     'TOTAL_STAGES', 'CURRENT_STAGE', 'CURRENT_KIND', 'CURRENT_DISCOVERY',
     'LAST_COMPLETED_STAGE', 'NATURAL_LANGUAGE', 'STAGE42_RUNTIME_VERIFICATION'
 )
-Assert-StageTrue -Condition $strictMetadataResult.Success -Name 'Pinned Stage42 metadata parses'
-Assert-StageEqual -Expected 728 -Actual $strictMetadataResult.Values.Count -Name 'Pinned metadata has exactly 728 keys'
-Assert-StageEqual -Expected '55' -Actual $strictMetadataResult.Values['TOTAL_STAGES'] -Name 'Pinned total stage count'
-Assert-StageEqual -Expected '42' -Actual $strictMetadataResult.Values['CURRENT_STAGE'] -Name 'Pinned current stage'
-Assert-StageEqual -Expected 'DISCOVERY' -Actual $strictMetadataResult.Values['CURRENT_KIND'] -Name 'Pinned current kind'
-Assert-StageEqual -Expected '27' -Actual $strictMetadataResult.Values['CURRENT_DISCOVERY'] -Name 'Pinned current discovery'
-Assert-StageEqual -Expected '42' -Actual $strictMetadataResult.Values['LAST_COMPLETED_STAGE'] -Name 'Pinned completed stage'
-Assert-StageEqual -Expected 'EVIDENCE_ONLY_CONFIRMED' -Actual $strictMetadataResult.Values['STAGE42_RUNTIME_VERIFICATION'] -Name 'Pinned Stage42 state'
-Assert-StageEqual -Expected $hebrewValue -Actual $strictMetadataResult.Values['NATURAL_LANGUAGE'] -Name 'Pinned non-ASCII language value'
-$stage43Keys = @($strictMetadataResult.Values.Keys | Where-Object { $_.StartsWith('STAGE43_', [System.StringComparison]::Ordinal) })
-Assert-StageEqual -Expected 0 -Actual $stage43Keys.Count -Name 'Pinned Stage42 has no Stage43 lifecycle keys'
-# Git checkout on Windows can materialize CRLF bytes from an LF Git blob.
-# Verify the immutable blob identity from the commit, not the worktree bytes.
-# The worktree bytes were parsed and checked independently above.
-$gitBlobOutput = @(& git -C $strictUtf8MetadataRoot rev-parse 'HEAD:DEVELOPMENT_STAGE.md')
-if ($LASTEXITCODE -ne 0 -or $gitBlobOutput.Count -ne 1) {
-    throw 'Unable to resolve committed metadata blob from HEAD'
+Assert-StageTrue -Condition $strictMetadataResult.Success -Name 'Live metadata parses with strict UTF-8'
+Assert-StageTrue -Condition ($strictMetadataResult.Values.Count -ge 728) -Name 'Live metadata retains the complete Stage42 predecessor map'
+Assert-StageEqual -Expected '55' -Actual $strictMetadataResult.Values['TOTAL_STAGES'] -Name 'Live total stage count'
+Assert-StageEqual -Expected 'DISCOVERY' -Actual $strictMetadataResult.Values['CURRENT_KIND'] -Name 'Live current kind'
+Assert-StageEqual -Expected 'EVIDENCE_ONLY_CONFIRMED' -Actual $strictMetadataResult.Values['STAGE42_RUNTIME_VERIFICATION'] -Name 'Live Stage42 predecessor state'
+Assert-StageTrue -Condition (@('42','43') -ccontains $strictMetadataResult.Values['CURRENT_STAGE']) -Name 'Live current stage is Stage42 research or Stage43 lifecycle'
+Assert-StageTrue -Condition (@('27','28') -ccontains $strictMetadataResult.Values['CURRENT_DISCOVERY']) -Name 'Live discovery pointer is Stage42 or Stage43'
+Assert-StageTrue -Condition (@('42','43') -ccontains $strictMetadataResult.Values['LAST_COMPLETED_STAGE']) -Name 'Live last-completed pointer is Stage42 or Stage43'
+Assert-StageEqual -Expected $hebrewValue -Actual $strictMetadataResult.Values['NATURAL_LANGUAGE'] -Name 'Live non-ASCII language value'
+
+# The Stage42 fixture is read from its immutable Git blob, never from the live worktree.
+[byte[]]$pinnedStage42Bytes = Get-FrozenStage42BlobBytes -RepositoryRoot $strictUtf8MetadataRoot
+$pinnedStage42Result = ConvertFrom-StrictStageMetadataBytes -Bytes $pinnedStage42Bytes -RequiredKeys @(
+    'TOTAL_STAGES', 'CURRENT_STAGE', 'CURRENT_KIND', 'CURRENT_DISCOVERY',
+    'LAST_COMPLETED_STAGE', 'NATURAL_LANGUAGE', 'STAGE42_RUNTIME_VERIFICATION'
+)
+Assert-StageTrue -Condition $pinnedStage42Result.Success -Name 'Frozen Stage42 Git blob parses'
+Assert-StageEqual -Expected 728 -Actual $pinnedStage42Result.Values.Count -Name 'Frozen Stage42 fixture has exactly 728 keys'
+Assert-StageEqual -Expected '55' -Actual $pinnedStage42Result.Values['TOTAL_STAGES'] -Name 'Frozen Stage42 total stage count'
+Assert-StageEqual -Expected '42' -Actual $pinnedStage42Result.Values['CURRENT_STAGE'] -Name 'Frozen Stage42 current stage'
+Assert-StageEqual -Expected 'DISCOVERY' -Actual $pinnedStage42Result.Values['CURRENT_KIND'] -Name 'Frozen Stage42 current kind'
+Assert-StageEqual -Expected '27' -Actual $pinnedStage42Result.Values['CURRENT_DISCOVERY'] -Name 'Frozen Stage42 current discovery'
+Assert-StageEqual -Expected '42' -Actual $pinnedStage42Result.Values['LAST_COMPLETED_STAGE'] -Name 'Frozen Stage42 completed stage'
+Assert-StageEqual -Expected 'EVIDENCE_ONLY_CONFIRMED' -Actual $pinnedStage42Result.Values['STAGE42_RUNTIME_VERIFICATION'] -Name 'Frozen Stage42 state'
+Assert-StageEqual -Expected $hebrewValue -Actual $pinnedStage42Result.Values['NATURAL_LANGUAGE'] -Name 'Frozen Stage42 non-ASCII language value'
+$stage43Keys = @($pinnedStage42Result.Values.Keys | Where-Object { $_.StartsWith('STAGE43_', [System.StringComparison]::Ordinal) })
+Assert-StageEqual -Expected 0 -Actual $stage43Keys.Count -Name 'Frozen Stage42 has no Stage43 lifecycle keys'
+$gitBlobType = @(& git -C $strictUtf8MetadataRoot cat-file -t 'a3f53b67e4445bdc835179cd484fe27b3e2648f7')
+if ($LASTEXITCODE -ne 0 -or $gitBlobType.Count -ne 1) {
+    throw 'Unable to read the immutable Stage42 metadata Git blob'
 }
-$metadataGitBlob = ([string]$gitBlobOutput[0]).Trim()
-Assert-StageEqual -Expected 'a3f53b67e4445bdc835179cd484fe27b3e2648f7' -Actual $metadataGitBlob -Name 'Pinned Stage42 commit has exact metadata blob'
+Assert-StageEqual -Expected 'blob' -Actual ([string]$gitBlobType[0]).Trim() -Name 'Pinned Stage42 Git object remains a blob'
 
 $tempMetadataPath = Join-Path ([System.IO.Path]::GetTempPath()) ('strict-stage-metadata-' + [guid]::NewGuid().ToString('N') + '.bin')
 $missingMetadataPath = $tempMetadataPath + '.missing'

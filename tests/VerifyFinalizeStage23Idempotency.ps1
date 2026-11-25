@@ -4,6 +4,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
+$stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
 $expectedBranch = 'PowerShell+Tagalog'
 $expectedBaseHead = '7e895d374962dbc57a68035eef02f76a365af440'
 $finalizer = Join-Path $root 'tests/FinalizeStage23.ps1'
@@ -76,6 +79,7 @@ try {
     $stage38Sealed = (($lines -contains 'CURRENT_STAGE=38') -and ($lines -contains 'LAST_COMPLETED_STAGE=38') -and ($lines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
     $stage39Pending = (($lines -contains 'CURRENT_STAGE=39') -and ($lines -contains 'LAST_COMPLETED_STAGE=38') -and ($lines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($lines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
     $stage39Sealed = ((($lines -contains 'CURRENT_STAGE=39') -or ($lines -contains 'CURRENT_STAGE=40') -or ($lines -contains 'CURRENT_STAGE=41') -or ($lines -contains 'CURRENT_STAGE=42')) -and (($lines -contains 'LAST_COMPLETED_STAGE=39') -or (($lines -contains 'LAST_COMPLETED_STAGE=40') -and ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($lines -contains 'LAST_COMPLETED_STAGE=41') -or (($lines -contains 'LAST_COMPLETED_STAGE=42') -and ($lines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($lines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+    $stage39Sealed = $stage39Sealed -or $stage43Allowed
     # Accept Stage41 only with a sealed Stage40 predecessor and consistent status.
     $stage41Pending = (($lines -contains 'CURRENT_STAGE=41') -and
                        ($lines -contains 'LAST_COMPLETED_STAGE=40') -and
@@ -87,6 +91,7 @@ try {
                       ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
                       ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and
                       $stage39Sealed)
+    $stage41Sealed = $stage41Sealed -or $stage43Allowed
     $stage41Allowed = ($stage41Pending -or $stage41Sealed)
     if (($lines -contains 'CURRENT_STAGE=41') -and (-not $stage41Allowed)) { throw 'Stage41 pending/sealed metadata mismatch' }
     $stage37Allowed = (($lines -contains 'CURRENT_STAGE=37') -and ($lines -contains 'LAST_COMPLETED_STAGE=36') -and ($lines -contains 'STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($lines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($lines -contains 'CURRENT_STAGE=37') -and ($lines -contains 'LAST_COMPLETED_STAGE=37') -and ($lines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($lines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage38Pending -or $stage38Sealed -or $stage39Pending -or $stage39Sealed
@@ -96,9 +101,9 @@ try {
     if (($lines -contains 'CURRENT_STAGE=40') -and (-not ((((($lines -contains 'LAST_COMPLETED_STAGE=39') -and ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=PENDING_NATIVE')) -or (($lines -contains 'LAST_COMPLETED_STAGE=40') -and ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and $stage39Sealed)))) { throw 'Stage40 pending/sealed metadata mismatch' }
     # A sealed Stage23 remains sealed through later stages, including Stage38.
     # Never accept awaiting Stage23 or a predecessor LAST_COMPLETED_STAGE.
-    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25') -or ($lines -contains 'LAST_COMPLETED_STAGE=26') -or ($lines -contains 'LAST_COMPLETED_STAGE=27') -or ($lines -contains 'LAST_COMPLETED_STAGE=28') -or ($lines -contains 'LAST_COMPLETED_STAGE=29') -or (($lines -contains 'LAST_COMPLETED_STAGE=30') -or (($lines -contains 'LAST_COMPLETED_STAGE=31') -or ($lines -contains 'LAST_COMPLETED_STAGE=32') -or ($lines -contains 'LAST_COMPLETED_STAGE=33') -or ($lines -contains 'LAST_COMPLETED_STAGE=34') -or ($lines -contains 'LAST_COMPLETED_STAGE=35') -or ($lines -contains 'LAST_COMPLETED_STAGE=36') -or ($lines -contains 'LAST_COMPLETED_STAGE=37') -or (($lines -contains 'LAST_COMPLETED_STAGE=38') -or (($lines -contains 'LAST_COMPLETED_STAGE=39') -or (($lines -contains 'LAST_COMPLETED_STAGE=40') -and ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($lines -contains 'LAST_COMPLETED_STAGE=41') -or (($lines -contains 'LAST_COMPLETED_STAGE=42') -and ($lines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))))))) -and
+    if (-not ((($lines -contains 'LAST_COMPLETED_STAGE=23') -or ($lines -contains 'LAST_COMPLETED_STAGE=24') -or ($lines -contains 'LAST_COMPLETED_STAGE=25') -or ($lines -contains 'LAST_COMPLETED_STAGE=26') -or ($lines -contains 'LAST_COMPLETED_STAGE=27') -or ($lines -contains 'LAST_COMPLETED_STAGE=28') -or ($lines -contains 'LAST_COMPLETED_STAGE=29') -or (($lines -contains 'LAST_COMPLETED_STAGE=30') -or (($lines -contains 'LAST_COMPLETED_STAGE=31') -or ($lines -contains 'LAST_COMPLETED_STAGE=32') -or ($lines -contains 'LAST_COMPLETED_STAGE=33') -or ($lines -contains 'LAST_COMPLETED_STAGE=34') -or ($lines -contains 'LAST_COMPLETED_STAGE=43') -or ($lines -contains 'LAST_COMPLETED_STAGE=35') -or ($lines -contains 'LAST_COMPLETED_STAGE=36') -or ($lines -contains 'LAST_COMPLETED_STAGE=37') -or (($lines -contains 'LAST_COMPLETED_STAGE=38') -or (($lines -contains 'LAST_COMPLETED_STAGE=39') -or (($lines -contains 'LAST_COMPLETED_STAGE=40') -and ($lines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($lines -contains 'LAST_COMPLETED_STAGE=41') -or (($lines -contains 'LAST_COMPLETED_STAGE=42') -and ($lines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($lines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))))))) -and
               ($lines -contains 'STAGE23_RUNTIME_VERIFICATION=GREEN_CONFIRMED') -and
-              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25') -or ($lines -contains 'CURRENT_STAGE=26') -or ($lines -contains 'CURRENT_STAGE=27') -or ($lines -contains 'CURRENT_STAGE=29') -or (($lines -contains 'CURRENT_STAGE=30') -or (($lines -contains 'CURRENT_STAGE=31') -or ($lines -contains 'CURRENT_STAGE=32') -or (($lines -contains 'CURRENT_STAGE=33') -or ($lines -contains 'CURRENT_STAGE=34') -or $stage35Allowed -or $stage36Allowed -or $stage37Allowed -or $stage41Allowed)))))) {
+              (($lines -contains 'CURRENT_STAGE=23') -or ($lines -contains 'CURRENT_STAGE=24') -or ($lines -contains 'CURRENT_STAGE=25') -or ($lines -contains 'CURRENT_STAGE=26') -or ($lines -contains 'CURRENT_STAGE=27') -or ($lines -contains 'CURRENT_STAGE=29') -or (($lines -contains 'CURRENT_STAGE=30') -or (($lines -contains 'CURRENT_STAGE=31') -or ($lines -contains 'CURRENT_STAGE=32') -or (($lines -contains 'CURRENT_STAGE=33') -or ($lines -contains 'CURRENT_STAGE=34') -or ($lines -contains 'CURRENT_STAGE=43') -or $stage35Allowed -or $stage36Allowed -or $stage37Allowed -or $stage41Allowed)))))) {
         throw 'Stage23 is not in the expected sealed state.'
     }
     $originalHash = (Get-FileHash -LiteralPath $stageFile -Algorithm SHA256).Hash
@@ -123,6 +128,7 @@ try {
         Set-Content -LiteralPath $diffFile -Value $diff -Encoding UTF8
         Test-CleanCheckout
         if ($process.ExitCode -ne 0) { throw ("Finalizer run " + $iteration + " returned nonzero exit code.") }
+        if ($stderrFileLength -ne 0) { throw ("Finalizer run " + $iteration + " wrote stderr (" + $stderrFileLength + " bytes).") }
         if ($output -notmatch '(?m)^STAGE23_ALREADY_FINALIZED=YES\s*$') {
             throw ("Run " + $iteration + " did not report STAGE23_ALREADY_FINALIZED=YES.")
         }

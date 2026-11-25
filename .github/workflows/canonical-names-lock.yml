@@ -31,6 +31,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify native runtime and stage regression
         shell: powershell
         run: |
@@ -40,6 +42,9 @@ jobs:
           }
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($stageLines -contains 'CURRENT_STAGE=39') -or ($stageLines -contains 'CURRENT_STAGE=40') -or ($stageLines -contains 'CURRENT_STAGE=41') -or ($stageLines -contains 'CURRENT_STAGE=42')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=39') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'LAST_COMPLETED_STAGE=41') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=42') -and ($stageLines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -53,6 +58,25 @@ jobs:
             & .\tests\Stage01.Tests.ps1
             if (-not $?) { throw 'Stage 1 regression failed after Stage 23 seal' }
             Write-Host 'STAGE23_POST_SEAL_BASELINE=PASS'
+          } elseif ($stage43Allowed) {
+            $checkedOutSha = ((& git rev-parse HEAD) -join '').Trim()
+            if ($checkedOutSha -cne $env:GITHUB_SHA) { throw 'Stage43 predecessor regression checkout SHA mismatch' }
+            & .\tests\Stage24.Tests.ps1
+            if (-not $?) { throw 'Stage24 predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage25.Tests.ps1
+            if (-not $?) { throw 'Stage25 predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage26.Tests.ps1
+            if (-not $?) { throw 'Stage26 historical RED predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage27.Tests.ps1
+            if (-not $?) { throw 'Stage27 predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage28.Tests.ps1
+            if (-not $?) { throw 'Stage28 predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage29.Tests.ps1
+            if (-not $?) { throw 'Stage29 predecessor regression failed on Stage43 lifecycle state' }
+            & .\tests\Stage30.Tests.ps1
+            if (-not $?) { throw 'Stage30 predecessor regression failed on Stage43 lifecycle state' }
+            Write-Host ('STAGE43_PREDECESSOR_REGRESSION_SHA=' + $checkedOutSha)
+            Write-Host 'STAGE24_TO_STAGE30_PREDECESSOR_REGRESSION=PASS'
           } elseif ((($stageLines -contains 'CURRENT_STAGE=29') -or
               (($stageLines -contains 'CURRENT_STAGE=30') -and
                ($stageLines -contains 'LAST_COMPLETED_STAGE=30') -and
@@ -505,6 +529,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Test Stage35 896 bounded oracle assertions
         shell: powershell
         run: |
@@ -513,9 +539,13 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage35 checkout SHA mismatch' }
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage39Sealed = ((($stageLines -contains 'CURRENT_STAGE=39') -or ($stageLines -contains 'CURRENT_STAGE=40') -or ($stageLines -contains 'CURRENT_STAGE=41') -or ($stageLines -contains 'CURRENT_STAGE=42')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=39') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'LAST_COMPLETED_STAGE=41') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=42') -and ($stageLines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage39Sealed = $stage39Sealed -or $stage43Allowed
             $stage38Sealed = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending -or $stage39Sealed
             $stage37Allowed = ((($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -or $stage38Pending -or $stage38Sealed
             $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -or $stage37Allowed
@@ -560,6 +590,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify Stage36 1004 independent-oracle assertions
         shell: powershell
         run: |
@@ -568,6 +600,9 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage36 exact checkout SHA mismatch' }
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($stageLines -contains 'CURRENT_STAGE=39') -or ($stageLines -contains 'CURRENT_STAGE=40') -or ($stageLines -contains 'CURRENT_STAGE=41') -or ($stageLines -contains 'CURRENT_STAGE=42')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=39') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'LAST_COMPLETED_STAGE=41') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=42') -and ($stageLines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -577,6 +612,7 @@ jobs:
            $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
            $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
            $stage39Sealed = ((($stageLines -contains 'CURRENT_STAGE=39') -or ($stageLines -contains 'CURRENT_STAGE=40') -or ($stageLines -contains 'CURRENT_STAGE=41') -or ($stageLines -contains 'CURRENT_STAGE=42')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=39') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'LAST_COMPLETED_STAGE=41') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=42') -and ($stageLines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage39Sealed = $stage39Sealed -or $stage43Allowed
            $stage38Sealed = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending -or $stage39Sealed
            $stage37Allowed = ((($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or (($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -or $stage38Pending -or $stage38Sealed
            $stage36Allowed = ((($stageLines -contains 'CURRENT_STAGE=36') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=35') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage36Sealed) -or $stage37Allowed
@@ -619,6 +655,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify Stage37 516 independent-oracle assertions (pending or sealed)
         shell: powershell
         run: |
@@ -627,10 +665,14 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage37 Native exact checkout SHA mismatch' }
           $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage37Pending = (($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($stageLines -contains 'CURRENT_STAGE=39') -or ($stageLines -contains 'CURRENT_STAGE=40') -or ($stageLines -contains 'CURRENT_STAGE=41') -or ($stageLines -contains 'CURRENT_STAGE=42')) -and (($stageLines -contains 'LAST_COMPLETED_STAGE=39') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=40') -and ($stageLines -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($stageLines -contains 'LAST_COMPLETED_STAGE=41') -or (($stageLines -contains 'LAST_COMPLETED_STAGE=42') -and ($stageLines -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage39Sealed = $stage39Sealed -or $stage43Allowed
           $stage38Sealed = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending -or $stage39Sealed
           $stage37Sealed = ((($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -or $stage38Pending -or $stage38Sealed
           if (-not ($stage37Pending -or $stage37Sealed)) {
@@ -677,6 +719,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify 680 independent-oracle Stage38 preflight assertions
         shell: powershell
         run: |
@@ -685,9 +729,13 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage38 exact checkout SHA mismatch' }
           $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($md -contains 'CURRENT_STAGE=38') -and ($md -contains 'LAST_COMPLETED_STAGE=37') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($md -contains 'CURRENT_STAGE=39') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($md -contains 'CURRENT_STAGE=39') -or ($md -contains 'CURRENT_STAGE=40') -or ($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage39Sealed = $stage39Sealed -or $stage43Allowed
           $stage38Sealed = (($md -contains 'CURRENT_STAGE=38') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending -or $stage39Sealed
           if (-not ($stage38Pending -or $stage38Sealed)) { throw 'Stage38 requires exact pending or sealed state and Stage37 seal' }
           $stage38Mode = if ($stage38Sealed) { 'SEALED_RECHECK' } else { 'PENDING_NATIVE' }
@@ -725,6 +773,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify Stage39 379 independent-oracle assertions without activation
         shell: powershell
         run: |
@@ -733,8 +783,12 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage39 exact checkout SHA mismatch' }
           $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage39Pending = (($md -contains 'CURRENT_STAGE=39') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($md -contains 'CURRENT_STAGE=39') -or ($md -contains 'CURRENT_STAGE=40') -or ($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage39Sealed = $stage39Sealed -or $stage43Allowed
           $stage38Sealed = (($md -contains 'CURRENT_STAGE=38') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage39Pending -or $stage39Sealed
           if (-not $stage38Sealed) { throw 'Stage39 preflight requires sealed Stage38 with sealed predecessors' }
           @(
@@ -777,6 +831,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify 425 bounded independent-oracle Stage40 preflight assertions
         shell: powershell
         run: |
@@ -785,9 +841,13 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage40 preflight exact SHA mismatch' }
           $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage40Pending = (($md -contains 'CURRENT_STAGE=40') -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41Pending = (($md -contains 'CURRENT_STAGE=41') -and ($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41Sealed = ((($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage41Sealed = $stage41Sealed -or $stage43Allowed
           $stage40Sealed = ((($md -contains 'CURRENT_STAGE=40') -and ($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or $stage41Pending -or $stage41Sealed)
           if (-not $stage40Pending -and -not $stage40Sealed -and -not (($md -contains 'CURRENT_STAGE=39') -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=NOT_RUN'))) { throw 'Stage40 preflight invalid predecessor or activation metadata' }
           @(
@@ -829,6 +889,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify 481 independent-oracle Stage41 assertions (pending or sealed)
         shell: powershell
         run: |
@@ -837,8 +899,12 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage41 Native exact checkout SHA mismatch' }
           $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage41Pending = (($md -contains 'CURRENT_STAGE=41') -and ($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41Sealed = ((($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage41Sealed = $stage41Sealed -or $stage43Allowed
           if (-not ($stage41Pending -or $stage41Sealed)) { throw 'Stage41 Native requires exact PENDING_NATIVE or sealed metadata and completed preflight evidence' }
           $stage41Mode = if ($stage41Sealed) { 'SEALED_RECHECK' } else { 'PENDING_NATIVE' }
           @(
@@ -882,6 +948,8 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
       - name: Verify 1657 bounded Stage42 assertions (preflight, pending or sealed Native)
         shell: powershell
         run: |
@@ -890,10 +958,15 @@ jobs:
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage42 exact checkout SHA mismatch' }
           $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage41PriorSealed = ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_SEAL_COMMIT_NATIVE_RECHECK=PASS') -and ($md -contains 'STAGE41_SEAL_CI_RUN=44633607543') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
+          $stage41PriorSealed = $stage41PriorSealed -or $stage43Allowed
           $stage42Evidence = (($md -contains 'STAGE42_PREFLIGHT_CI_RUN=44701413210') -and ($md -contains 'STAGE42_PREFLIGHT_CI_SHA=c0d3ae0bc1578cd4cee6163eb0a4526e1f27c917') -and ($md -contains 'STAGE42_PREFLIGHT_JOBS=16_OF_16_SUCCESS') -and ($md -contains 'STAGE42_PREFLIGHT_ASSERTIONS_PASSED=1657') -and ($md -contains 'STAGE42_PREFLIGHT_ASSERTIONS_FAILED=0'))
           $stage42Activated = (($md -contains 'CURRENT_STAGE=42') -and ($md -contains 'CURRENT_DISCOVERY=27') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=PENDING_NATIVE') -and $stage42Evidence)
           $stage42Sealed = (($md -contains 'CURRENT_STAGE=42') -and ($md -contains 'CURRENT_DISCOVERY=27') -and ($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE42_NATIVE_CI_RUN=44716461173') -and ($md -contains 'STAGE42_NATIVE_CI_SHA=0aefdce42390ffe0d62391ed51deed6c7276e9b0') -and ($md -contains 'STAGE42_NATIVE_JOBS=16_OF_16_SUCCESS') -and ($md -contains 'STAGE42_NATIVE_ASSERTIONS_PASSED=1657') -and ($md -contains 'STAGE42_NATIVE_ASSERTIONS_FAILED=0') -and $stage42Evidence)
+          $stage42Sealed = $stage42Sealed -or $stage43Allowed
           if (-not ($stage41PriorSealed -and ((($md -contains 'CURRENT_STAGE=41') -and (-not $stage42Activated) -and (-not $stage42Sealed)) -or $stage42Activated -or $stage42Sealed))) { throw 'Stage42 preflight/pending/sealed predecessor-evidence gate mismatch' }
           @(
             ('STAGE42_PREFLIGHT_SHA=' + $sha),
@@ -929,18 +1002,23 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
-      - name: Verify exact-SHA Windows PowerShell 5.1 Stage43 bounded research only
+        with:
+          fetch-depth: 0 # Required for the pinned Stage42 metadata blob
+      - name: Verify exact-SHA Windows PowerShell 5.1 Stage43 lifecycle profile and bounded oracle
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Stage43 requires Windows PowerShell 5.1' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage43 exact checkout SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
-          if (-not (($md -ccontains 'CURRENT_STAGE=42') -and ($md -ccontains 'CURRENT_DISCOVERY=27') -and ($md -ccontains 'LAST_COMPLETED_STAGE=42') -and ($md -ccontains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) { throw 'Stage43 research requires sealed Stage42 without Stage43 activation' }
+          . .\src\StageMetadataState.ps1
+          $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stage43Profiles = @('RESEARCH_ONLY','PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY')
+          if ($stage43Profiles -cnotcontains $stage43State.Profile) { throw ('Stage43 profile not permitted: ' + $stage43State.Profile) }
+          Write-Host ('STAGE43_METADATA_PROFILE=' + $stage43State.Profile)
           @(
             ('PROJECT_ID=PC-BRANCH-POWERSHELL-TAGALOG'),
-            ('STAGE43_PREFLIGHT_SHA=' + $sha),
+            ('STAGE43_CHECKED_OUT_SHA=' + $sha),
             ('STAGE43_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
             'STAGE43_SCOPE=2_CONTEXTS_4_GATES_3_OFFSETS_10_SEALS',
             'STAGE43_PLANNED_ENDPOINTS=240',
@@ -948,25 +1026,43 @@ jobs:
             'STAGE43_PLANNED_SEAL_PAIRS=216',
             'STAGE43_PLANNED_STRUCTURAL_GUARDS=23',
             'STAGE43_PLANNED_ASSERTIONS=2215',
-            'STAGE43_ACTIVATION=NOT_ACTIVATED',
-            'STAGE43_STAGE_SEAL=NOT_CLAIMED'
-          ) | Set-Content stage43-preflight-metadata.txt -Encoding UTF8
-          Start-Transcript -Path stage43-preflight-transcript.txt | Out-Null
+            ('STAGE43_METADATA_PROFILE=' + $stage43State.Profile)
+          ) | Set-Content stage43-lifecycle-metadata.txt -Encoding UTF8
+          switch ($stage43State.Profile) {
+            'RESEARCH_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value @('STAGE43_RUNTIME_VERIFICATION=NOT_RUN','STAGE43_ACTIVATION=NOT_ACTIVATED','STAGE43_NATIVE_ACCEPTANCE=NOT_CLAIMED','STAGE43_STAGE_SEAL=NOT_CLAIMED') -Encoding UTF8 }
+            'PENDING_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value @('STAGE43_RUNTIME_VERIFICATION=PENDING_NATIVE','STAGE43_ACTIVATION=PENDING_NATIVE','STAGE43_NATIVE_ACCEPTANCE=NOT_CLAIMED','STAGE43_STAGE_SEAL=NOT_CLAIMED') -Encoding UTF8 }
+            'IMPLEMENTING_SHA_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value @('STAGE43_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE43_ACTIVATION=EVIDENCE_ONLY_CONFIRMED','STAGE43_NATIVE_ACCEPTANCE=IMPLEMENTING_SHA_ACCEPTED','STAGE43_STAGE_SEAL=NOT_CLAIMED','STAGE43_SEAL_COMMIT_NATIVE_RECHECK=PENDING_NEW_SHA') -Encoding UTF8 }
+            'SEALED_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value @('STAGE43_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED','STAGE43_ACTIVATION=EVIDENCE_ONLY_CONFIRMED','STAGE43_NATIVE_ACCEPTANCE=IMPLEMENTING_SHA_ACCEPTED','STAGE43_STAGE_SEAL=CLAIM_RECORDED_NOT_REVALIDATED') -Encoding UTF8 }
+          }
+          Start-Transcript -Path stage43-lifecycle-transcript.txt | Out-Null
           try {
             & .\tests\Stage43.Tests.ps1
-            if ($LASTEXITCODE -ne 0) { throw 'Stage43 bounded independent-oracle preflight failed' }
-            Add-Content -Path stage43-preflight-metadata.txt -Value 'STAGE43_PREFLIGHT_RESULT=BOUNDED_ORACLE_PASS' -Encoding UTF8
-            Write-Host ('STAGE43_PREFLIGHT_SHA=' + $sha)
+            if ($LASTEXITCODE -ne 0) { throw 'Stage43 bounded oracle or lifecycle regression failed' }
+            switch ($stage43State.Profile) {
+              'RESEARCH_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value 'STAGE43_PREFLIGHT_RESULT=BOUNDED_ORACLE_PASS' -Encoding UTF8 }
+              'PENDING_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value 'STAGE43_NATIVE_TEST_RESULT=PASS_PENDING_NO_SEAL' -Encoding UTF8 }
+              'IMPLEMENTING_SHA_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value 'STAGE43_SEAL_SHA_REGRESSION=PASS' -Encoding UTF8 }
+              'SEALED_SHAPE_ONLY' { Add-Content -Path stage43-lifecycle-metadata.txt -Value 'STAGE43_SEALED_STATE_REGRESSION=PASS' -Encoding UTF8 }
+            }
+            Write-Host ('STAGE43_CHECKED_OUT_SHA=' + $sha)
           } finally {
             Stop-Transcript | Out-Null
           }
-      - name: Retain Stage43 SHA-bound Windows native preflight evidence
+      - name: Require Stage43 lifecycle evidence files
+        if: always()
+        shell: powershell
+        run: |
+          $required = @('stage43-lifecycle-metadata.txt','stage43-lifecycle-transcript.txt','DEVELOPMENT_STAGE.md')
+          foreach ($path in $required) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw ('Required Stage43 evidence file missing: ' + $path) }
+          }
+      - name: Retain Stage43 lifecycle regression evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: powershell-tagalog-stage43-neighbor-year-preflight
+          name: powershell-tagalog-stage43-lifecycle-regression
           path: |
-            stage43-preflight-metadata.txt
-            stage43-preflight-transcript.txt
+            stage43-lifecycle-metadata.txt
+            stage43-lifecycle-transcript.txt
             DEVELOPMENT_STAGE.md
-          if-no-files-found: warn
+          if-no-files-found: error
