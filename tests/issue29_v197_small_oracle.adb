@@ -65,7 +65,6 @@ procedure Issue29_V197_Small_Oracle is
       Max_Bound : W.Natural_Array (Positive'Last - M + 1 .. Positive'Last);
       C_One, C_Offset, C_Max : G.Big_Integer;
       Expected_Count : Natural := 1;
-      Cursor : Natural := Expected'First;
       Word_Start : Natural := Expected'First;
    begin
       for P in Expected'Range loop
@@ -109,11 +108,10 @@ procedure Issue29_V197_Small_Oracle is
             Check (Encode (A_Max) = Word,
                    Label_Text & " Positive'Last lower-bound rank" & Natural'Image (Rank));
             Words := Words + 1;
+            if Rank < Expected_Count then
+               Word_Start := Separator + 1;
+            end if;
          end;
-         if Rank < Expected_Count then
-            Cursor := Separator + 1;
-            Word_Start := Cursor;
-         end if;
       end loop;
 
       Expect_Rank_CE (F_One, G.Make ("0"), Label_Text & " standard");
