@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Stage7 R2: source-rebaselined A/B differential in disposable Git worktrees.
-Historical A remains immutable; only the authorized branch B source is rebased.
+Historical A/B remain immutable; active HEAD must be restored A.
 Native clean-format, independent exhaustive leaf oracle, and blob locks are required.
 """
 from __future__ import annotations
@@ -18,6 +18,7 @@ PLANNER = "lib/src/monster_month_weave_planner.dart"
 SOURCE_A = "1d98a83db7446ceb4548c39e0eaf9b4441b72b9a"
 A_BLOB = "3553a7f2e3899c958d56620c5449daa35b0731e2"
 B_BLOB = "cd3e0ad955938db6f5a554fe030168ad3efd3436"
+B_REBASED_HEAD = "b974c3753b18dd3a1bfe1aacec1756836616ccb2"
 A_REBASED_BLOB = "1824e96d82e6b0ceb12da01ba33fa75a83204d2a"
 B_HISTORICAL_BLOB = "d736ca8afe3409a10474b8514284aceb154a46a9"
 B_HISTORICAL_HEAD = "12289c4ae379bde41b62df8c6d8611e4b4bffe8c"
@@ -128,7 +129,7 @@ def rebaseline_a(b: str, a: str, historical_b: str) -> str:
 
     assert git_blob(a) == A_BLOB, "Historical A source modified"
     assert git_blob(historical_b) == B_HISTORICAL_BLOB, "Historical B source modified"
-    assert apply(historical_b) == b, "Tracked B differs from captured post-pub-get formatter baseline"
+    assert apply(historical_b) == b, "Pinned B differs from captured post-pub-get formatter baseline"
     new_a = apply(a)
     assert git_blob(new_a) == A_REBASED_BLOB, "Rebased A source lock mismatch"
     # Unlike R1, the revised baseline is a new physical source snapshot.
@@ -142,14 +143,16 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     head = run("git", "rev-parse", "HEAD", cwd=root)
     assert os.environ.get("GITHUB_REF", "refs/heads/Dart+עברית") == "refs/heads/Dart+עברית"
-    assert run("git", "rev-parse", f"HEAD:{PLANNER}", cwd=root) == B_BLOB
+    assert run("git", "rev-parse", f"HEAD:{PLANNER}", cwd=root) == A_REBASED_BLOB
+    assert run("git", "rev-parse", f"{B_REBASED_HEAD}:{PLANNER}", cwd=root) == B_BLOB
     assert run("git", "rev-parse", f"{SOURCE_A}:{PLANNER}", cwd=root) == A_BLOB
     assert run("git", "rev-parse", f"{B_HISTORICAL_HEAD}:{PLANNER}", cwd=root) == B_HISTORICAL_BLOB
-    b = run("git", "show", f"HEAD:{PLANNER}", cwd=root) + "\n"
+    b = run("git", "show", f"{B_REBASED_HEAD}:{PLANNER}", cwd=root) + "\n"
     a = run("git", "show", f"{SOURCE_A}:{PLANNER}", cwd=root) + "\n"
     assert git_blob(a) == A_BLOB and git_blob(b) == B_BLOB
     historical_b = run("git", "show", f"{B_HISTORICAL_HEAD}:{PLANNER}", cwd=root) + "\n"
     restored = rebaseline_a(b, a, historical_b)
+    assert (root / PLANNER).read_bytes() == restored.encode("utf-8"), "Active A source differs from exact reconstruction"
     cases = [{"lengths": list(counts), "words": words_for(counts)} for counts in CASES]
     assert [len(c["words"]) for c in cases] == EXPECTED_COUNTS
     assert cases[1]["words"][56] == [1, 1, 2, 1, 1, 2, 2, 3, 2, 3, 3]
@@ -158,6 +161,7 @@ def main() -> None:
     (out / "oracle.json").write_text(oracle_json, encoding="utf-8")
     results = {"project_id": PROJECT, "source_head": head, "accepted_a_commit": SOURCE_A,
                "planner_b_blob": B_BLOB, "historical_planner_a_blob": A_BLOB,
+               "pinned_b_commit": B_REBASED_HEAD, "active_planner_blob": A_REBASED_BLOB,
                "rebased_a_blob": A_REBASED_BLOB,
                "historical_planner_b_blob": B_HISTORICAL_BLOB,
                "source_rebaseline": "Dart 3.13.2 post-pub-get baseline, exact call hunk, no R1 exception",
@@ -169,10 +173,10 @@ def main() -> None:
                 wd = Path(td) / label
                 run("git", "worktree", "add", "--detach", str(wd), head, cwd=root)
                 try:
-                    if label == "RESTORED_A":
-                        (wd / PLANNER).write_text(restored, encoding="utf-8")
-                        assert (wd / PLANNER).read_text(encoding="utf-8") == restored
+                    if label == "B":
+                        (wd / PLANNER).write_bytes(b.encode("utf-8"))
                     source_before_format = (wd / PLANNER).read_text(encoding="utf-8")
+                    assert (wd / PLANNER).read_bytes() == (b if label == "B" else restored).encode("utf-8"), "Variant source mismatch before format"
                     (wd / "tool" / "stage7_qa_probe.dart").write_text(PROBE, encoding="utf-8")
                     (wd / "tool" / "stage7_qa_expected.json").write_text(oracle_json, encoding="utf-8")
                     # Match the ordinary CI format gate: package language version
@@ -237,11 +241,12 @@ def main() -> None:
     )
     write_results(out, results)
     assert results["format_gate"] == "CLEAN", "R2 source-rebaseline formatter gate failed"
+    assert (root / PLANNER).read_bytes() == restored.encode("utf-8"), "Active A changed during QA"
     print(
-        "STAGE7_R2_NATIVE_REBASELINE_QA_PASS head=" + head +
+        "STAGE7_DEFAULT_A_NATIVE_DIFFERENTIAL_QA_PASS head=" + head +
         " cases=1788x2 B_format=" + results["variants"]["B"]["format_status"] +
         " A_format=" + results["variants"]["RESTORED_A"]["format_status"] +
-        " no_production_edit"
+        " default_a_restored pinned_b_experimental"
     )
 
 if __name__ == "__main__":
