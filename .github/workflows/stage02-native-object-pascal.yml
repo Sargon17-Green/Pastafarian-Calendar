@@ -4,6 +4,7 @@ on:
     branches:
       - 'Object-Pascal\+Português'
     paths:
+      - 'DEVELOPMENT_STAGE.md'
       - '.github/workflows/stage02-native-object-pascal.yml'
       # Stage02 compiles these transitive dependencies as well (FPC -B).
       # A change to any of them invalidates exact-source Stage02 evidence.
@@ -15,8 +16,11 @@ on:
       - 'test/stage02_workcounts_regression.pas'
       - 'test/stage02_context_integration.pas'
       - 'test/stage02_lifecycle_boundaries.pas'
+      - 'test/stage02_discovery01_remainder_save.pas'
       - 'test/build_and_run_stage02_workcounts.sh'
       - 'docs/stage02_workcounts_oracle.py'
+      - 'docs/stage02_discovery01_oracle.py'
+      - 'docs/STAGE02_DISCOVERY01_REMAINDER_SAVE_20261125.md'
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,14 +37,17 @@ jobs:
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fp-compiler
-      - name: Independent oracle, native compilation, differential and negative checks
+      - name: Independent oracle, native compilation, differential, expected-RED and negative checks
         shell: bash
         run: bash test/build_and_run_stage02_workcounts.sh
-      - name: Upload Stage02 evidence log
+      - name: Upload Stage02 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage02-native-fpc-log
-          path: evidence/stage02-native-fpc.log
+          name: stage02-native-fpc-evidence
+          path: |
+            evidence/stage02-native-fpc.log
+            build/stage02_workcounts_vectors.tsv
+            build/stage02_discovery01_vectors.tsv
           if-no-files-found: warn
           retention-days: 30
