@@ -325,9 +325,10 @@ $bad = New-Stage43MetadataStateFixture -Profile 'Sealed'
 $bad['STAGE43_SEAL_CI_RUN'] = $bad['STAGE43_PREFLIGHT_CI_RUN']
 Assert-StageMetadataStateReject -Name 'N31-seal-run-reuses-preflight-run' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'SEAL_NOT_DISTINCT_FROM_PRIOR_SHA'
 
-if ($script:StageMetadataStateCases -ne 38)
+if ($script:StageMetadataStateCases -ne 38) {
     throw ('StageMetadataState case count mismatch: ' + $script:StageMetadataStateCases)
 }
 Write-Output ('STAGE_METADATA_STATE_CASES_PASSED=' + $script:StageMetadataStateCases)
 Write-Output 'STAGE_METADATA_STATE_RESULT=PASS'
 Write-Output 'STAGE43_ACCEPTANCE=NOT_CLAIMED_BY_SHAPE_TESTS'
+
