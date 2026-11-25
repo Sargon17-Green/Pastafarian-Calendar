@@ -1,0 +1,150 @@
+name: SQL Tamil Slice25 direct cutlet boundary
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - '.github/workflows/sql-tamil-stage02-slice25-direct-cutlet-boundary.yml'
+permissions:
+  contents: read
+jobs:
+  direct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case_id: [anchor_cutlet_boundary_minus, anchor_cutlet_boundary, anchor_cutlet_boundary_plus]
+    env:
+      CASE_ID: ${{ matrix.case_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact branch, unchanged production and archived oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          mkdir -p qa-evidence
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nHEAD=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > qa-evidence/versions.txt
+          while read -r expected file; do
+            actual="$(git hash-object "$file")"
+            printf '%s %s\n' "$actual" "$file" >> qa-evidence/locks.txt
+            test "$expected" = "$actual"
+          done <<'LOCKS'
+          9ca6f6ea5b3932facbe92aee6a2b38f6557cedd5 sql/00_schema.sql
+          b28730931e26ee65eaf9108621320d73f458ba07 sql/01_source_language_catalog.sql
+          3367fe9c34e830b0bd99049ebef64398d150cd79 sql/02_monster_bootstrap.sql
+          72ae68d3ec009f65f081a099c8bf06e0dd3ed9d6 sql/03_stage02_production_core.sql
+          caed82dc41d7a259953dc817d5e0722038821310 sql/04_stage02_stone_states.sql
+          f465b466d4a00e24baa689561725a12e5478bf55 sql/05_stage02_hidden_drop.sql
+          2cc67c27b1f5e0c2f22537e479e42956a5711b9e sql/06_stage02_visible_drops.sql
+          0ad25cc4054f46fba66c10dfeffcd81d49f32399 sql/07_stage02_bowls.sql
+          68a7d99c7cddd1a5b47ef4ef9dc189ab08c53da6 sql/08_stage02_bowl_round.sql
+          2f2f2e19e8851b3130f3c3d5edafd5dfbc6923f9 sql/09_stage02_post_stir_round.sql
+          c5c6be7c02c255382ae7c317bfbf17138a12788c sql/10_stage02_sauce.sql
+          b9339560c58cd7a6ab13871ad144257e01c26b84 sql/11_stage02_answer_stream.sql
+          bde130055cead8d3e5677acac516af7329819748 sql/12_stage02_choose_rank.sql
+          d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
+          be1d5450f37e3448f7683aea2a0cabdd4620a6c0 sql/14_stage02_gate_day_selector.sql
+          4d0ad4326b2488e8d2260ffff37f0a93ce49e4f9 sql/15_stage02_year5000_gate_candidates.sql
+          b2fd62c17b133c639f8751fe2eaa03e93ae167f5 sql/16_stage02_year5000.sql
+          116e330d0215f58e23e94b4b573071ad24d44664 sql/17_stage02_adjacent_year_navigation.sql
+          c204a314972b22a4a38f06a02c2fe1bd5bde7acf sql/18_stage02_target_year_navigation.sql
+          d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
+          42acfb80e9eabfd9d091176643763ee7d7bca9ee sql/20_stage02_cutlet_partition.sql
+          5d32a391e1b5609ef790d6a6731ae6713db85a28 sql/21_stage02_cutlet_names.sql
+          3a23c9a1b5ccae667e3e8990005f4b37480df7e4 sql/22_stage02_month_count.sql
+          0fdcaaa03121692ea9762f79cd08e9aedb0ca24c sql/23_stage02_month_lengths.sql
+          a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c sql/24_stage02_month_weaving.sql
+          43c2a6f1071f3e2c9b3ca0225154e42dd2a0de53 sql/25_stage02_month_names.sql
+          faac634a06aee59354de207eb088e4e9996034fa sql/26_stage02_year_structure.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          21f38cd280498070b08b6c3074780f1742c36957 sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl
+          LOCKS
+          python3 - <<'PY' | tee qa-evidence/static.txt
+          import json, os, pathlib
+          rows=[json.loads(s) for s in pathlib.Path('sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl').read_text().splitlines() if s.strip()]
+          case_id=os.environ['CASE_ID']
+          allowed={'anchor_cutlet_boundary_minus':-15055672,'anchor_cutlet_boundary':-15055671,'anchor_cutlet_boundary_plus':-15055670}
+          assert len(rows)==29 and len({r['case_id'] for r in rows})==29
+          selected=[r for r in rows if r['case_id']==case_id]
+          assert len(selected)==1
+          r=selected[0]
+          assert r['calculation_day']==-15055671 and r['target_day']==allowed[case_id]
+          assert r['original_zip_artifact_id']==14613743791
+          assert r['source_sha']=='1ddaef9a315f83402ececaf4dc31f96dbdd051bd'
+          e=r['expected']
+          fields=('year_number','cutlet_name','day_in_cutlet','month_name','day_in_month')
+          assert set(e)==set(fields)
+          assert all(type(e[k]) is int and e[k]>0 for k in (fields[0],fields[2],fields[4]))
+          assert all(type(e[k]) is str and e[k] for k in (fields[1],fields[3]))
+          def sql_text(s):
+              return "'" + s.replace("'", "''") + "'::text"
+          expected=','.join(str(e[k])+'::numeric' if type(e[k]) is int else sql_text(e[k]) for k in fields)
+          probe=(
+              "\\set ON_ERROR_STOP on\n"
+              "SET statement_timeout = '720s';\n"
+              "\\echo S25_DIRECT_ENTER=calendar_date CASE="+case_id+"\n"
+              "\\timing on\n"
+              "CREATE TEMP TABLE qa_direct_actual AS\n"
+              f"SELECT pastafari_sql_tamil.calendar_date({r['calculation_day']}::numeric,{r['target_day']}::numeric) AS result;\n"
+              "RESET statement_timeout;\n"
+              "\\echo S25_DIRECT_EXIT=calendar_date\n"
+              "SELECT (result).* FROM qa_direct_actual;\n"
+              "DO $qa$\nDECLARE actual pastafari_sql_tamil.calendar_result_text;\nBEGIN\n"
+              " SELECT (result).* INTO STRICT actual FROM qa_direct_actual;\n"
+              f" IF actual IS DISTINCT FROM ROW({expected})::pastafari_sql_tamil.calendar_result_text THEN\n"
+              " RAISE EXCEPTION 'S25_DIRECT_MISMATCH: actual=%',actual;\n END IF;\n"
+              f" RAISE NOTICE 'S25_DIRECT_ARCHIVED_ORACLE=PASS; CASE={case_id}; FIELDS=5/5';\n"
+              " RAISE NOTICE 'S25_FULL_SLICE=NOT_ACCEPTED';\nEND\n$qa$;\n"
+          )
+          assert probe.count('pastafari_sql_tamil.calendar_date(')==1
+          pathlib.Path('qa-evidence/probe.sql').write_text(probe,encoding='utf-8')
+          pathlib.Path('qa-evidence/oracle.json').write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('S25_DIRECT_SOURCE_LOCK=29/29; CASE='+case_id+'; NATIVE=NOT_YET_EXECUTED')
+          PY
+          sha256sum qa-evidence/probe.sql qa-evidence/oracle.json > qa-evidence/sha256.txt
+      - name: Start isolated PostgreSQL 17.12 and load production only
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name tamil-direct --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          for i in $(seq 1 60); do
+            if docker exec -u postgres tamil-direct pg_isready -q -U postgres; then break; fi
+            sleep 2
+          done
+          docker exec -u postgres tamil-direct pg_isready -q -U postgres
+          docker exec -u postgres tamil-direct postgres --version | tee -a qa-evidence/versions.txt
+          args=()
+          for i in $(seq -w 0 27); do
+            mapfile -t found < <(find sql -maxdepth 1 -type f -name "$i"'_*.sql')
+            test "${#found[@]}" -eq 1
+            args+=(-f "/work/${found[0]}")
+          done
+          docker exec -u postgres tamil-direct psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > qa-evidence/load.log 2>&1
+      - name: Direct unchanged calendar_date single case
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'START_UTC=%s\n' "$(date -u +%FT%TZ)" > qa-evidence/exit.txt
+          if timeout --kill-after=10s 750s docker exec -u postgres tamil-direct psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/qa-evidence/probe.sql > qa-evidence/probe.log 2>&1; then
+            code=0
+          else
+            code=$?
+          fi
+          printf 'PSQL_EXIT=%s\nEND_UTC=%s\n' "$code" "$(date -u +%FT%TZ)" >> qa-evidence/exit.txt
+          cat qa-evidence/probe.log
+          test "$code" -eq 0
+          grep -Fq "S25_DIRECT_ARCHIVED_ORACLE=PASS; CASE=$CASE_ID; FIELDS=5/5" qa-evidence/probe.log
+          grep -q 'S25_FULL_SLICE=NOT_ACCEPTED' qa-evidence/probe.log
+      - name: Preserve original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-tamil-direct-${{ matrix.case_id }}
+          path: qa-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Cleanup
+        if: always()
+        run: docker rm -f tamil-direct 2>/dev/null || true
