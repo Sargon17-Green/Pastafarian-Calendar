@@ -107,4 +107,12 @@ Production operation `39` is appended after accepted operation `38`. It validate
 - Stage22 acceptance: NO.
 - Main/merge/release: not authorized and not performed.
 
-**NEXT:** add source/runtime-pinned Native QA for three full inputs, 1/6/12-batch probes, exact replay, 16 allocated semantic invalids, five actual numeric source mutants, and an independent offline audit. No main/merge.
+**Native QA prepared (2026-11-25):** `tools/stage22_native_diagnostic.py` builds allocated direct-record fixtures and probes; `tools/stage22_native_acceptance.py` pins the source/runtime, executes three full 12-batch paths, six 1/6-batch probes, a byte-identical replay, 16 semantic invalids and five actual arithmetic/order source substitutions; `tools/stage22_offline_audit.py` independently recomputes with factoradic unranking and Mersenne folding, checks all Native logs, source snapshots, corruption controls, and a CRC-verified evidence bundle. The reusable workflow is wired through `canonical-names-lock.yml` and runs only on the explicit Stage22 acceptance commit marker.
+
+- Operation 39: source committed at parent `609a1645af71dad6e3bb19ce02c0ba1e76c0748c`.
+- Native/CI: not yet completed; no PASS claimed.
+- Independent offline audit: prepared, not yet executed.
+- Stage22 acceptance: NO.
+- Main/merge/release: not authorized and not performed.
+
+**NEXT:** inspect the completed Stage22 run, job logs, exact source/runtime pins, artifact SHA-256/ZIP CRC, and offline audit; only then decide bounded acceptance. No main/merge.

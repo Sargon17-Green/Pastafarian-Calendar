@@ -231,3 +231,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage21-acceptance.yml
     permissions:
       contents: read
+
+  false-arabic-stage22-acceptance:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-stage22-acceptance]')
+    uses: ./.github/workflows/false-arabic-stage22-acceptance.yml
+    permissions:
+      contents: read

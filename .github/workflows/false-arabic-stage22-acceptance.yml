@@ -1,0 +1,81 @@
+name: FALSE Arabic Stage22 source-locked bounded Native gate
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  stage22-acceptance:
+    if: contains(github.event.head_commit.message, '[false-arabic-stage22-acceptance]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 95
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PROJECT_ID: PC-BRANCH-FALSE-ARABIC
+      SOURCE_PIN: \${{ github.sha }}
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify exact source and original FALSE interpreter commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage22_acceptance upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git cat-file -e "$SOURCE_PIN^{commit}"
+          git rev-parse "$SOURCE_PIN" > evidence/stage22_acceptance/source_observed.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage22_acceptance/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage22_acceptance/runtime_observed.txt
+          test "$(cat evidence/stage22_acceptance/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+      - name: Build original interpreter and prove UTF-8 pick parsing
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          gcc --version > evidence/stage22_acceptance/compiler_version.txt
+          set +e
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src \
+            upstream/interpreter.c upstream/src/false.c upstream/utils/file.c \
+            upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c \
+            upstream/src/token.c -o upstream/false_int \
+            > evidence/stage22_acceptance/compiler_stdout.txt \
+            2> evidence/stage22_acceptance/compiler_stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/stage22_acceptance/compiler_exit_code.txt
+          test "$code" -eq 0 && test -x upstream/false_int
+          printf '%s' '4 7 1ø.%%' > evidence/stage22_acceptance/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage22_acceptance/unicode_pick.false \
+            > evidence/stage22_acceptance/unicode_pick.stdout.txt \
+            2> evidence/stage22_acceptance/unicode_pick.stderr.txt
+          test "$(cat evidence/stage22_acceptance/unicode_pick.stdout.txt)" = '4'
+          echo ORIGINAL_UNICODE_PICK_PREFLIGHT_PASS > evidence/stage22_acceptance/preflight.txt
+      - name: Recompute design oracle, compile fixtures and run source-locked Native QA
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage22_batch_bowls_design_oracle.py > evidence/stage22_acceptance/design_oracle.json
+          cmp evidence/stage22_acceptance/design_oracle.json evidence/stage22_design_oracle_2026-11-25.json
+          python3 -m py_compile tools/stage22_native_diagnostic.py tools/stage22_native_acceptance.py tools/stage22_offline_audit.py
+          python3 tools/stage22_native_acceptance.py --self-check > evidence/stage22_acceptance/fixture_self_check.log
+          python3 tools/stage22_native_acceptance.py
+      - name: Independent offline audit and evidence bundle integrity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 tools/stage22_offline_audit.py
+      - name: Preserve source-pinned Native programs, byte-exact logs, audit and bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage22-bounded-native-acceptance
+          path: |
+            evidence/stage22_acceptance/
+          if-no-files-found: error
+          retention-days: 30
