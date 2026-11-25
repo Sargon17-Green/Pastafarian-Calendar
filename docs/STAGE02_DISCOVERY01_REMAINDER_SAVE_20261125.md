@@ -2,7 +2,7 @@
 
 PROJECT_ID: PC-BRANCH-OBJECT-PASCAL-PORTUGUESE  
 Branch: Object-Pascal+Português  
-Contract status: defined and implemented as a discovery test; Native result pending on the new commit SHA.  
+Contract status: ACCEPTED on exact tested code SHA c9bd7243924efee710cb9437bacc5971027d190d. Stage03 PATCH 01 is next and has not started.  
 Production algorithm status: unchanged. Stage 03 PATCH 01 has not started.
 
 ## 1. Normative sources
@@ -16,7 +16,7 @@ Production algorithm status: unchanged. Stage 03 PATCH 01 has not started.
 
    It explicitly gives SAVE(M)=M, SAVE(2M)=M, SAVE(M+1)=1 and SAVE(0)=M. The complete specification is in that pinned README; no separate Appendix A file is tracked in the Object Pascal branch tree.
 2. The machine-readable 55-stage plan is docs/CALENDAR_55_STAGES.csv at commit 0c2bad7393f4d66b77f884520f8ab6f5025feedd on the shared SystemVerilog+Kalaallisut design branch. Its Stage 2 row is DISCOVERY / 01_REMAINDER_SAVE / EXPECTED_RED_AND_LIVE_LEGACY_PATH. Stage 3 is PATCH / 01_REMAINDER_SAVE / LEGACY_RETAINED_AND_FULL_REGRESSION_GREEN. The common plan is also described in master handoff issue #19.
-3. Stage 1 acceptance remains limited to the user-approved exact SHA 50db302e2588dcdbbae7ac5dad2ebfc0a9e8d2d4, as recorded in issue #37. The Stage 1 regression workflow subsequently completed successfully on the previous current HEAD 1afc1b5c287bc59d865b05a19eefb11ddebf3563 (run 45551741751, job 138994262631). This does not widen the historical provenance exception to any other SHA.
+3. Stage 1 acceptance remains limited to the user-approved exact SHA 50db302e2588dcdbbae7ac5dad2ebfc0a9e8d2d4, as recorded in issue #37. The Stage 1 regression workflow also completed successfully on the exact Stage02 tested code SHA c9bd7243924efee710cb9437bacc5971027d190d (run 45673284058, job 139414000630). This does not widen the historical provenance exception to any other SHA.
 
 Links:
 - Normative specification: https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/56bc4173aae4975ded019ef5ab5a36249f1424df/README.md
@@ -77,15 +77,15 @@ The Pascal test consumes that TSV and calls the production BigRegularModPositive
 
 ## 5. Native acceptance gate
 
-The expanded Stage02 workflow must run on the new exact commit SHA and require:
-- FPC 3.2.2 and successful compilation of all four Pascal suites.
-- The existing 6,833 supporting checks still pass on the new SHA.
-- Discovery01 reports CASES=4, EXPECTED_RED_COUNT=3, MATCH_COUNT=1, CHECKS_PASSED=41, CHECKS_FAILED=0, RESULT=EXPECTED_RED_CONFIRMED.
-- STAGE02_EXIT=0.
-- Names Lock completes successfully on the same SHA.
-- The uploaded evidence artifact contains the Native log and both independently generated TSVs; verify its digest, ZIP integrity and UTF-8 before acceptance.
+The Stage02 acceptance gate was met on exact tested code SHA c9bd7243924efee710cb9437bacc5971027d190d:
+- Native run 45673284010, job 139414000590, completed/success; FPC 3.2.2.
+- WorkCounts 1,449/1,449; Context 1,730/1,730; Lifecycle 3,654/3,654.
+- Discovery01: 41/41 assertions; four cases; three EXPECTED_RED and one MATCH; zero unexpected failures; STAGE02_EXIT=0.
+- Names Lock run 45673284053, job 139414001154, completed/success on the same SHA.
+- Stage01 regression run 45673284058, job 139414000630, completed/success on the same SHA; STAGE01_EXIT=0, static UTF-8 7/7 and dynamic UTF-8 12/12.
+- Stage02 artifact 15050083370, 4,511 bytes, SHA-256 8ba1c24da6364b4b58ec3694c505afd8f40932b6211080269fcc849156de36cf. Local ZIP test passed; all three members decoded as strict UTF-8. Discovery TSV SHA-256 1434ebaab9a2f3bc92e74f11192b99e1ce53e4cad39ceacea767a0f1583b9fed; WorkCounts TSV SHA-256 1a25f13aacd70d3cf23458d331c7a9148c5d749994099c2c9c9c4849ce674d12.
 
-The previous accepted runs on 1afc1b5c are not substitutes for the new SHA. Queued or in-progress runs are not acceptance evidence. No duplicate dispatch is needed: the branch push triggers the existing workflow.
+The branch's current HEAD after this follow-up is a documentation-only status commit whose parent is the tested code SHA above; no production, test, oracle, runner or workflow file changes in the follow-up. CI is intentionally skipped for this documentation-only update; the acceptance evidence remains pinned to the exact tested code SHA.
 
 ## 6. Explicit limits
 
