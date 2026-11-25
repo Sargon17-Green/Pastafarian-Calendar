@@ -1,0 +1,102 @@
+name: MATLAB Stage55 Polynomial Full-Year Middle-Rank Unrank (QA)
+on:
+  push:
+    branches:
+      - qa/matlab-stage55-polynomial-middle-rank-20261125
+    paths:
+      - .github/workflows/matlab-stage55-polynomial-middle-rank.yml
+      - tests/run_stage55_polynomial_real_year_middle_rank.m
+
+permissions:
+  contents: read
+
+jobs:
+  polynomial-middle-rank:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact QA branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact source, fixtures, independent certificates and QA-only diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/matlab-stage55-polynomial-middle-rank-20261125"
+          test "$(git rev-parse HEAD^)" = "de4ba7748c148d398cb50dc99b9454952d3d69b8"
+          test "$(git rev-parse HEAD:src)" = "d04d76694bb1246be5943f1dadd6e9d285e5ce97"
+          test "$(git rev-parse HEAD:src/+pastafari/WholeMonthWeavingFamilyPolynomial.m)" = "d365ef6a03f2fccc8f42da3cd866abd66345bbde"
+          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingSuffixByFirstEndpoint.m)" = "48f8b148edb621e1a789385456def77f3dfd8d28"
+          test "$(git rev-parse HEAD:src/+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m)" = "1302f173b77c31cd7cc886989c0155943747525f"
+          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m)" = "229352c3627de7b807436dbe7d3f7698b1cebb2b"
+          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingSuffixByEndpoints.m)" = "a8ba85b28067cdf1b76ee6ab5dbe7f20a6e9cb94"
+          test "$(git rev-parse HEAD:src/+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m)" = "ec815257fd5302b591b94c6c70842d26773dc87f"
+          test "$(git rev-parse HEAD:src/+pastafari/BigInt.m)" = "86581532df7492a236283c5ee9410ca281e2e6f5"
+          test "$(git rev-parse HEAD:src/+pastafari/ValidationManager.m)" = "8be154aa7b8a36f1a282515c81f29742719af3a6"
+          test "$(git rev-parse HEAD:src/+pastafari/MonthWeavingCompatibilityRoute.m)" = "add7a46e3b1320f8dd076a8cd144564e6394af15"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          test "$(git rev-parse HEAD:tools/stage55_full_prefix_inverse_rank.cpp)" = "542f091e308afdc5131c52b5a5006588cad8bce5"
+          python3 - <<'PY'
+          import subprocess
+          expected = sorted([
+              ".github/workflows/matlab-stage55-polynomial-middle-rank.yml",
+              "tests/run_stage55_polynomial_real_year_middle_rank.m",
+          ])
+          actual = sorted(subprocess.check_output(
+              ["git", "diff", "--name-only",
+               "de4ba7748c148d398cb50dc99b9454952d3d69b8", "HEAD"],
+              text=True,
+          ).splitlines())
+          assert actual == expected, (actual, expected)
+          source = open("tests/run_stage55_polynomial_real_year_middle_rank.m", encoding="utf-8").read()
+          assert "WholeMonthWeavingFamilyPolynomial" in source
+          assert "calendarDateSpaghetti(" not in source
+          assert "finalMonsterIntegration(" not in source
+          assert "MonthWeavingCompatibilityRoute.call" not in source
+          PY
+          git diff --exit-code de4ba7748c148d398cb50dc99b9454952d3d69b8 HEAD -- src
+          mkdir -p evidence
+          {
+            echo "HEAD=$(git rev-parse HEAD)"
+            echo "SRC_TREE=$(git rev-parse HEAD:src)"
+            echo "REFERENCE_CXX_INVERSE_RUN=45686680226"
+            echo "SOURCE_RANK_CATALOG_ORACLE_RUN=45691066424"
+            echo "PROJECTION_SOAK_RUN=45655790072"
+            echo "REFERENCE_ROOT_COUNT_SHA256=c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
+            echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
+          } > evidence/source-lock.txt
+
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+
+      - name: Run exact full-year polynomial middle-rank unrank
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            mkdir('evidence');
+            diary('evidence/STAGE55_POLYNOMIAL_MIDDLE_RANK_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              addpath('tests');
+              run_stage55_polynomial_real_year_middle_rank();
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              fprintf('STAGE55_POLYNOMIAL_MIDDLE_RANK_FAIL\n');
+              diary off;
+              rethrow(ME);
+            end
+
+      - name: Upload evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-polynomial-middle-rank-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
