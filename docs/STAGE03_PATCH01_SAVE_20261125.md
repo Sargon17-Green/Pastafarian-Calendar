@@ -4,7 +4,7 @@ PROJECT_ID: PC-BRANCH-OBJECT-PASCAL-PORTUGUESE
 Branch: Object-Pascal+Português  
 Base HEAD: 7159dda6a874ebc2e9b00fe6e3ce696290452c0d  
 Previous accepted stage: Stage02 DISCOVERY01 on exact tested code SHA c9bd7243924efee710cb9437bacc5971027d190d.  
-Contract status: implementation committed; Native and full-regression evidence pending on the new exact SHA.
+Contract status: ACCEPTED on exact tested code SHA 43add99d816cc0a8b5feb17df3e76935957e5a90. Stage01, Stage02, Stage03 Native, and Canonical Names Lock all completed successfully on that exact SHA.
 
 ## 1. Normative contract
 
@@ -94,4 +94,22 @@ The new Stage03 workflow runs the independent Python oracle and Native Pascal su
 
 Acceptance requires completed/success runs and jobs on the exact new commit SHA, inspectable logs with zero exit codes, and the Stage03 artifact with matching SHA-256 and valid ZIP contents. A queued or in-progress run is not a PASS. No manual duplicate dispatch is authorized.
 
-Stage03 remains unaccepted until those exact-SHA gates are audited. No Stage04, main, merge, PR, or release is part of this patch.
+## 6. Exact-SHA acceptance record
+
+Accepted code SHA: 43add99d816cc0a8b5feb17df3e76935957e5a90.
+
+| Gate | Run / job | Result |
+|---|---|---|
+| Stage03 Native FPC 3.2.2 | 45683447859 / 139449698044 | SUCCESS; 128 cases; 1,541/1,541 assertions; 17 EXPECTED_RED; 111 MATCH; zero failures |
+| Stage02 full regression | 45683447847 / 139449697992 | SUCCESS; WorkCounts 1,449/1,449; Context 1,730/1,730; Lifecycle 3,654/3,654; Discovery01 41/41 |
+| Stage01 full regression | 45683447750 / 139449698038 | SUCCESS; all 30 exit markers zero; static UTF-8 7/7; dynamic UTF-8 12/12 |
+| Canonical Names Lock | 45683447790 / 139449698294 | SUCCESS |
+
+Verified artifacts:
+- Stage03 artifact 15055372564; ZIP SHA-256 4be24f78f0c0fb84df848800485c652e9bdc39c774bb2496aeeaa3c96902e0a9. Embedded TSV SHA-256 f011be78e4e6fe8489f8ae4f1e5040c0c161e6376db8b4d7c38e15d86b5b0017.
+- Stage02 artifact 15054094276; ZIP SHA-256 836173370a9758fe1d9bde8a4507ac7af0a260dedd2ba9cedd265760f1f95c42.
+- Stage01 artifact 15053698862; ZIP SHA-256 2fd7a6b240401c15a31f1783d78df3f524c8c218d16fdeaa24ffce78cff942e3.
+
+All three ZIP archives passed integrity checks. Their embedded logs identify the accepted code SHA exactly. The preliminary commit a2c8c8fa3fb0605fef07d3f9c945548d7becd02b failed Native compilation because the BigSave body was placed in the interface section; that attempt was superseded and none of its results were reused. The correction moved the body into the implementation section while preserving the BigRegularModPositive body byte-for-byte. All acceptance gates above belong only to 43add99d816cc0a8b5feb17df3e76935957e5a90.
+
+Stage03 is accepted. Stage04 DISCOVERY02 (FOUNDATION_DAY_TAG) is the next planned stage and remains NOT_STARTED. No Stage04 implementation, main, merge, PR, or release is part of this patch.
