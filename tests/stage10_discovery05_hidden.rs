@@ -1,7 +1,6 @@
 mod support;
 
 use num_bigint::BigInt;
-use num_traits::One;
 
 use pastafarian_calendar_rust_az::discovery05_hidden_probe::{
     calendar_hidden_by_nearness, calendar_hidden_spaghetti, observe_legacy_hidden_drop,
@@ -53,18 +52,39 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
             red += 1;
             "RED"
         };
-        println!(
-            "STAGE10_HIDDEN_CELL case=0 k={} actual={} expected={} class={}",
-            k, actual, expected[k], class
-        );
-    }
-    for slot in 0..8 {
-        println!(
-            "STAGE10_STORAGE_SLOT case=0 slot={} value={}",
-            slot, observed.backward_storage[slot]
-        );
     }
     assert_eq!((red, matched), (6, 1));
+
+    let pairs = [
+        (0i64, 0i64),
+        (-10, 11),
+        (34, -19),
+        (-90_001, -90_001),
+        (123_456_789, -987_654_321),
+    ];
+    for (case, (calculation_offset, target_offset)) in pairs.into_iter().enumerate() {
+        let calculation = &foundation + BigInt::from(calculation_offset);
+        let target = &foundation + BigInt::from(target_offset);
+        let expected_case = independent_hidden_values(&calculation, &target, &stones);
+        let case_observation =
+            observe_legacy_hidden_drop(calculation, target, 1).unwrap();
+        for k in 1..=7 {
+            let actual = calendar_hidden_by_nearness(&case_observation.backward_storage, k).unwrap();
+            let class = if actual == expected_case[k] { "MATCH" } else { "RED" };
+            println!(
+                "STAGE10_HIDDEN_CELL case={} k={} actual={} expected={} class={}",
+                case, k, actual, expected_case[k], class
+            );
+        }
+        if case == 0 {
+            for slot in 0..8 {
+                println!(
+                    "STAGE10_STORAGE_SLOT case=0 slot={} value={}",
+                    slot, case_observation.backward_storage[slot]
+                );
+            }
+        }
+    }
     assert_eq!(expected[1].to_string(), "119390830530032782664128530203002080344");
     assert_eq!(expected[2].to_string(), "11877236279154673426874867061566696749");
     assert_eq!(expected[3].to_string(), "24217814924229232987463457533828175476");
