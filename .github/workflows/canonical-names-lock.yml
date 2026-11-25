@@ -1520,3 +1520,33 @@ jobs:
           path: observer-evidence/
           if-no-files-found: error
           retention-days: 14
+  post55-observer-trace-parser-synthetic:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Welsh Kotlin branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'Kotlin+Cymraeg'
+          persist-credentials: false
+      - name: Run bounded B parser synthetic controls only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p observer-parser-evidence
+          git rev-parse HEAD | tee observer-parser-evidence/source-sha.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 --version | tee observer-parser-evidence/python-version.txt
+          sha256sum soak/post55_observer_trace.py | tee observer-parser-evidence/parser-sha256.txt
+          python3 -m py_compile soak/post55_observer_trace.py
+          timeout 120s python3 soak/post55_observer_trace.py --self-test 2>&1 | tee observer-parser-evidence/synthetic-tests.log
+          printf 'SYNTHETIC_ONLY; NO_PROVIDER_AUTH; NO_PRODUCER; NO_JAVA; NO_OS_ATTESTATION; NO_CERTIFICATION\n' | tee observer-parser-evidence/scope.txt
+      - name: Preserve B parser synthetic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-observer-trace-parser-${{ github.run_id }}-${{ github.run_attempt }}
+          path: observer-parser-evidence/
+          if-no-files-found: error
+          retention-days: 14
