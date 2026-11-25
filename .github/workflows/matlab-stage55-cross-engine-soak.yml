@@ -1,0 +1,65 @@
+name: MATLAB Stage55 Cross-Engine Projection Soak
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tools/stage55_cross_engine_soak.py'
+      - 'tools/run_stage55_year5000_soak_native.m'
+      - '.github/workflows/matlab-stage55-cross-engine-soak.yml'
+permissions:
+  contents: read
+concurrency:
+  group: stage55-soak-MATLAB-Polski
+  cancel-in-progress: false
+jobs:
+  soak:
+    if: github.ref == 'refs/heads/MATLAB+Polski'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Source locks and independent Python preparation
+        shell: bash
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD:src)" = "d04d76694bb1246be5943f1dadd6e9d285e5ce97"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          test "$(git rev-parse HEAD:tools/stage55_full_year_projection_oracle.py)" = "e4f8d1b043467af8cc7baadbbe6e465cc2a27adb"
+          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          mkdir -p logs/stage55_soak
+          git rev-parse HEAD HEAD:src HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json HEAD:tools/stage55_full_year_projection_oracle.py HEAD:tests/fixtures/stage55_year5000_middle_word.json > logs/stage55_soak/source_lock.txt
+          python3 -m py_compile tools/stage55_cross_engine_soak.py
+          timeout 60s python3 tools/stage55_cross_engine_soak.py prepare | tee logs/stage55_soak/python.log
+      - uses: matlab-actions/setup-matlab@v3
+        timeout-minutes: 15
+        with:
+          release: R2026a
+      - name: Native cold process 1, mixed warm cases
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 5
+        with:
+          command: addpath('tools'); run_stage55_year5000_soak_native(1)
+      - name: Native cold process 2, different mixed warm cases
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 5
+        with:
+          command: addpath('tools'); run_stage55_year5000_soak_native(2)
+      - name: Strict comparison and evidence
+        shell: bash
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          timeout 60s python3 tools/stage55_cross_engine_soak.py verify | tee logs/stage55_soak/verify.log
+          (cd logs/stage55_soak && sha256sum *.csv *.json *.log source_lock.txt > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stage55-cross-engine-soak-evidence
+          path: logs/stage55_soak/
+          if-no-files-found: warn
+          retention-days: 30
