@@ -1,0 +1,82 @@
+name: Befunge QA31CT Native work_counts semantic domain
+
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - .github/workflows/befunge-qa31ct-work-counts-semantic-domain.yml
+      - qa/qa31ct_work_counts_semantic_domain.py
+      - qa/QA31CT_WORK_COUNTS_SEMANTIC_DOMAIN_2026-11-25.md
+      - src/work_counts.b98
+      - reference/work_counts.b98
+      - reference/save.b98
+
+permissions:
+  contents: read
+
+jobs:
+  native-work-counts-semantic-domain:
+    if: github.ref_name == 'qa-befunge98-stage1-order-isolation-20261008'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Pin exact production source, independent references and QA contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/work_counts.b98)" = "7418e1ec5fe88fe5c14b75710dea2d5607527f28"
+          test "$(sha256sum src/work_counts.b98 | cut -d ' ' -f1)" = "a59c1066843abfde9b059e9ec62b2c9daf0483f116095bbd78c19cf28ab59137"
+          test "$(git hash-object reference/work_counts.b98)" = "f941efc793c9eee4accf5d03873f8ed029b16725"
+          test "$(git hash-object reference/save.b98)" = "7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44"
+          test "$(git hash-object qa/qa31ct_work_counts_semantic_domain.py)" = "c0e3638eb14fcf2fdce55ebe9d50c7f5cb0e7175"
+          test "$(git hash-object qa/QA31CT_WORK_COUNTS_SEMANTIC_DOMAIN_2026-11-25.md)" = "38413c40239e00d1fc705b81d842b993bcbeb9da"
+          python3 -m py_compile qa/qa31ct_work_counts_semantic_domain.py
+          echo QA31CT_SOURCE_AND_ORACLE_IDENTITIES_PASS
+
+      - name: Download and pin Native PyFunge-98 interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/qa31ct-semantic"
+          mkdir -p "$d/bin"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$d/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $d/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          echo "PYFUNGE_TARBALL_SHA256=e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac" > "$d/identity.txt"
+          docker run -d --name befunge-qa31ct -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$d/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sleep 600
+          trap 'docker rm -f befunge-qa31ct >/dev/null 2>&1 || true' EXIT
+          docker exec befunge-qa31ct pip install --no-index --no-deps /tmp/PyFunge-0.5-rc2.tar.gz
+          printf '%s\n' '#!/bin/sh' 'exec docker exec -i befunge-qa31ct timeout -k 2 45 pyfunge "$@"' > "$d/bin/pyfunge"
+          chmod 755 "$d/bin/pyfunge"
+          set +e
+          PATH="$d/bin:$PATH" timeout -k 4 360 python3 qa/qa31ct_work_counts_semantic_domain.py "$d/qa31ct_semantic_domain.json" > "$d/native.log" 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > "$d/exit-code.txt"
+          cat "$d/native.log"
+          exit "$rc"
+
+      - name: Hash retained Native evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          d="$RUNNER_TEMP/qa31ct-semantic"
+          if [ -d "$d" ]; then
+            (cd "$d" && find . -maxdepth 2 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS.txt)
+          fi
+
+      - name: Upload Native receipts, log and identity
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31ct-semantic-domain-native
+          path: \${{ runner.temp }}/qa31ct-semantic/
+          if-no-files-found: warn
+          retention-days: 60
