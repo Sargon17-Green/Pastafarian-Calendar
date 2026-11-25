@@ -11,6 +11,7 @@ use Pastafari\Stage01\BigInt;
 final class MonthWeavingInterleaving56
 {
     private const SMALL_FACTOR_LIMIT = 999999999;
+    private static int $dpProfileSequence = 0;
     /** @var array<int, list<BigInt>> */
     private array $suffixCache = [];
     /** @var array<int, list<BigInt>> Immutable reusable absolute-stride rows. */
@@ -265,6 +266,18 @@ final class MonthWeavingInterleaving56
         // At most five absolute checkpoints (8,16,24,32,40); reserve
         // the remaining slots of the original eight-row cache for active rows.
         $activeRows = 8 - intdiv($this->monthCount - 2, 8);
+        $profilePath = getenv('STAGE56_DP_PROFILE_PATH');
+        $profileEnabled = is_string($profilePath) && $profilePath !== '';
+        $profileId = $profileEnabled ? ++self::$dpProfileSequence : 0;
+        $profileStart = $profileEnabled ? hrtime(true) : 0;
+        $plannedCells = 0;
+        if ($profileEnabled) {
+            for ($i = $start; $i <= min($stop, $this->monthCount - 2); ++$i) $plannedCells += $needed[$i];
+            self::writeDpProfile($profilePath, ['event'=>'start', 'id'=>$profileId, 'engine'=>spl_object_id($this),
+                'month_count'=>$this->monthCount, 'start'=>$start, 'stop'=>$stop, 'q_start'=>$qStart,
+                'planned_cells'=>$plannedCells, 'checkpoint_reused'=>$stop < $this->monthCount - 1,
+                'timestamp_ns'=>$profileStart]);
+        }
         $this->suffixCache = [];
         for ($index = $stop; $index >= $start; --$index) {
             $qMax = $needed[$index];
@@ -293,6 +306,23 @@ final class MonthWeavingInterleaving56
                 count($this->suffixCheckpoints[$index] ?? []) < count($current)) {
                 $this->suffixCheckpoints[$index] = $current;
             }
+            if ($profileEnabled) self::writeDpProfile($profilePath, ['event'=>'row', 'id'=>$profileId,
+                'index'=>$index, 'q_max'=>$qMax, 'cells'=>$index === $this->monthCount - 1 ? 0 : $qMax,
+                'active_rows'=>count($this->suffixCache), 'checkpoint_rows'=>count($this->suffixCheckpoints),
+                'timestamp_ns'=>hrtime(true)]);
+        }
+        if ($profileEnabled) self::writeDpProfile($profilePath, ['event'=>'end', 'id'=>$profileId,
+            'cells'=>$plannedCells, 'seconds'=>(hrtime(true)-$profileStart)/1e9, 'timestamp_ns'=>hrtime(true)]);
+    }
+
+    /** Opt-in QA only: no per-cell I/O; process allocated memory is not OS RSS. */
+    private static function writeDpProfile(string $path, array $record): void
+    {
+        $record['allocated_bytes'] = memory_get_usage(true);
+        $record['process_peak_bytes'] = memory_get_peak_usage(true);
+        $line = json_encode($record, JSON_THROW_ON_ERROR) . "\n";
+        if (file_put_contents($path, $line, FILE_APPEND | LOCK_EX) !== strlen($line)) {
+            throw new LogicException('STAGE56_DP_PROFILE_WRITE');
         }
     }
 

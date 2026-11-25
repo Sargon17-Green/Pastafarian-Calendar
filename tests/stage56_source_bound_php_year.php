@@ -173,6 +173,9 @@ function s56Main(array $args): int {
     $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE);
     $profilePath = $args[6] . '.profile.jsonl';
     @unlink($profilePath);
+    $dpProfilePath = $args[6] . '.dp.jsonl';
+    if (file_exists($dpProfilePath) && !unlink($dpProfilePath)) throw new RuntimeException('STAGE56_DP_PROFILE_RESET');
+    if (!putenv('STAGE56_DP_PROFILE_PATH=' . $dpProfilePath)) throw new RuntimeException('STAGE56_DP_PROFILE_ENV');
     $profile = static function(string $type,string $stage,array $metadata) use ($profilePath,$args):void {
         $record = [
             'project_id'=>S56_PROJECT,
