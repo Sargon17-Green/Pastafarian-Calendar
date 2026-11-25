@@ -295,9 +295,8 @@ final class MonthWeavingInterleaving56
                     if (!isset($following[$target])) throw new LogicException('STAGE56_INTERLEAVING_DP_INDEX');
                     $cumulative = $cumulative->add($weight->mul($following[$target]));
                     $current[$q] = $cumulative;
-                    [$weight, $remainder] = $weight->mulSmall($monthLength + $r - 1)
-                        ->divMod(BigInt::fromInt($r + 1));
-                    if (!$remainder->isZero()) throw new LogicException('STAGE56_INTERLEAVING_WEIGHT_NONEXACT');
+                    $weight = $weight->mulSmall($monthLength + $r - 1)
+                        ->divSmallExact($r + 1);
                 }
             }
             $following = $current;
@@ -375,8 +374,7 @@ final class MonthWeavingInterleaving56
         }
         foreach (self::packSmallFactors($numerators) as $factor) $value = $value->mulSmall($factor);
         foreach (self::packSmallFactors($denominators) as $factor) {
-            [$value, $remainder] = $value->divMod(BigInt::fromInt($factor));
-            if (!$remainder->isZero()) throw new LogicException('STAGE56_INTERLEAVING_RATIO_NONEXACT');
+            $value = $value->divSmallExact($factor);
         }
         return $value;
     }

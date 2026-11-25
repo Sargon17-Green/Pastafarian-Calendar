@@ -244,6 +244,32 @@ final class BigInt
         return new self($sign, $out);
     }
 
+    /**
+     * Divide exactly by a positive one-limb divisor without allocating a
+     * BigInt divisor or remainder. The supported range keeps the intermediate
+     * remainder * BASE + limb within a signed 64-bit PHP integer.
+     */
+    public function divSmallExact(int $divisor): self
+    {
+        if ($divisor <= 0 || $divisor >= self::BASE) {
+            throw new InvalidArgumentException('DIV_SMALL_EXACT_DIVISOR');
+        }
+        if ($this->isZero()) return self::zero();
+        if ($divisor === 1) return $this;
+
+        $out = array_fill(0, count($this->limbs), 0);
+        $remainder = 0;
+        for ($i = count($this->limbs) - 1; $i >= 0; --$i) {
+            $current = $remainder * self::BASE + $this->limbs[$i];
+            $out[$i] = intdiv($current, $divisor);
+            $remainder = $current % $divisor;
+        }
+        if ($remainder !== 0) {
+            throw new RuntimeException('DIV_SMALL_EXACT_NONEXACT');
+        }
+        return new self($this->sign, $out);
+    }
+
     public function square(): self
     {
         return $this->mul($this);
