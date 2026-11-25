@@ -6,10 +6,10 @@ pub mod discovery02_day_tag_probe;
 pub mod discovery02_work_counts_probe;
 pub mod discovery03_stone_probe;
 pub mod discovery04_stone_probe;
-pub mod patch04_stone_probe;
 pub mod patch01_save;
 pub mod patch02_work_counts;
 pub mod patch03_distance;
+pub mod patch04_stone_probe;
 #[rustfmt::skip]
 pub mod source_language_catalog;
 

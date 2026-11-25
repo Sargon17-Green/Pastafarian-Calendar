@@ -31,16 +31,21 @@ fn snapshot_next(old: &Stone, row: usize) -> Stone {
 
 fn sequential_next(previous: &Stone, row: usize) -> Stone {
     let mut current = previous.clone();
-    current[0] = independent_save(&(&current[0] * &current[0]
-        + BigInt::from(3u8) * &current[1] + BigInt::from(row)));
-    current[1] = independent_save(&(&current[1] * &current[1]
-        + BigInt::from(5u8) * &current[2] + &current[0]));
-    current[2] = independent_save(&(&current[2] * &current[2]
-        + BigInt::from(7u8) * &current[3] + &current[1]));
-    current[3] = independent_save(&(&current[3] * &current[3]
-        + BigInt::from(11u8) * &current[4] + &current[2]));
-    current[4] = independent_save(&(&current[4] * &current[4]
-        + BigInt::from(13u8) * &current[0] + &current[3]));
+    current[0] = independent_save(
+        &(&current[0] * &current[0] + BigInt::from(3u8) * &current[1] + BigInt::from(row)),
+    );
+    current[1] = independent_save(
+        &(&current[1] * &current[1] + BigInt::from(5u8) * &current[2] + &current[0]),
+    );
+    current[2] = independent_save(
+        &(&current[2] * &current[2] + BigInt::from(7u8) * &current[3] + &current[1]),
+    );
+    current[3] = independent_save(
+        &(&current[3] * &current[3] + BigInt::from(11u8) * &current[4] + &current[2]),
+    );
+    current[4] = independent_save(
+        &(&current[4] * &current[4] + BigInt::from(13u8) * &current[0] + &current[3]),
+    );
     current
 }
 
@@ -72,12 +77,24 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
     assert_eq!(observed.corrected_rows, expected);
     assert_eq!(observed.legacy_garbage_rows, expected_garbage);
     assert_eq!(observed.legacy_rows, expected_legacy);
-    assert_eq!(observed.corrected_rows[1], [378, 1073, 2375, 6195, 10493].map(BigInt::from));
-    assert_eq!(observed.legacy_garbage_rows[1], [378, 1434, 3780, 9932, 25047].map(BigInt::from));
-    assert_eq!(observed.legacy_garbage_rows[2], [146106, 1309310, 6993300, 45486748, 157489175].map(BigInt::from));
+    assert_eq!(
+        observed.corrected_rows[1],
+        [378, 1073, 2375, 6195, 10493].map(BigInt::from)
+    );
+    assert_eq!(
+        observed.legacy_garbage_rows[1],
+        [378, 1434, 3780, 9932, 25047].map(BigInt::from)
+    );
+    assert_eq!(
+        observed.legacy_garbage_rows[2],
+        [146106, 1309310, 6993300, 45486748, 157489175].map(BigInt::from)
+    );
 
     let maximum = (BigInt::one() << 127usize) - BigInt::one();
-    for value in observed.corrected_rows.iter().flatten()
+    for value in observed
+        .corrected_rows
+        .iter()
+        .flatten()
         .chain(observed.legacy_garbage_rows.iter().flatten())
         .chain(observed.legacy_rows.iter().flatten())
     {
@@ -92,7 +109,10 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
             corrected_green += 1;
             println!(
                 "STAGE09_CORRECTED_CELL row={} field={} value={} expected={} class=GREEN",
-                row + 1, fields[col], observed.corrected_rows[row][col], expected[row][col]
+                row + 1,
+                fields[col],
+                observed.corrected_rows[row][col],
+                expected[row][col]
             );
         }
     }
@@ -112,8 +132,11 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
             };
             println!(
                 "STAGE09_GARBAGE_CELL row={} field={} value={} expected={} class={}",
-                row + 1, fields[col], observed.legacy_garbage_rows[row][col],
-                expected_garbage[row][col], g_class
+                row + 1,
+                fields[col],
+                observed.legacy_garbage_rows[row][col],
+                expected_garbage[row][col],
+                g_class
             );
             let l_class = if observed.legacy_rows[row][col] == expected[row][col] {
                 legacy_match += 1;
@@ -124,8 +147,11 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
             };
             println!(
                 "STAGE09_LEGACY_CELL row={} field={} value={} expected={} class={}",
-                row + 1, fields[col], observed.legacy_rows[row][col],
-                expected[row][col], l_class
+                row + 1,
+                fields[col],
+                observed.legacy_rows[row][col],
+                expected[row][col],
+                l_class
             );
         }
     }
@@ -134,12 +160,18 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
     assert_eq!((legacy_red, legacy_match), (224, 1));
 
     assert_eq!(observed.context.metrics.get("patch02.work_counts.calls"), 1);
-    assert_eq!(observed.context.metrics.get("discovery03.distance.calls"), 1);
+    assert_eq!(
+        observed.context.metrics.get("discovery03.distance.calls"),
+        1
+    );
     assert_eq!(observed.context.metrics.get("patch03.distance.calls"), 1);
     assert_eq!(observed.context.metrics.get("discovery04.stones.calls"), 1);
     assert_eq!(observed.context.metrics.get("patch04.legacy.calls"), 45);
     assert_eq!(observed.context.metrics.get("patch04.applied"), 1);
-    assert_eq!(observed.context.metrics.get("dispatcher.handler.completed"), 5);
+    assert_eq!(
+        observed.context.metrics.get("dispatcher.handler.completed"),
+        5
+    );
     assert_eq!(
         observed.context.branch_trace,
         vec![
@@ -167,7 +199,10 @@ fn stage09_patch04_corrects_snapshot_and_preserves_both_legacy_records() {
 
     let mut guards = 0usize;
     for invalid in [1usize, 47usize] {
-        assert_eq!(stone_patch(&seed, invalid).unwrap_err().code, MonsterErrorCode::InvalidState);
+        assert_eq!(
+            stone_patch(&seed, invalid).unwrap_err().code,
+            MonsterErrorCode::InvalidState
+        );
         guards += 1;
     }
 

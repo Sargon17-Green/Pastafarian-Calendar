@@ -30,7 +30,9 @@ pub fn stone_patch(previous: &Stone, row_index: usize) -> Result<StonePatchResul
     mutate_stones_wrong(row_index, &mut legacy_garbage)?;
 
     let corrected = [
-        normative_save(&(&old[0] * &old[0] + BigInt::from(3u8) * &old[1] + BigInt::from(row_index))),
+        normative_save(
+            &(&old[0] * &old[0] + BigInt::from(3u8) * &old[1] + BigInt::from(row_index)),
+        ),
         normative_save(&(&old[1] * &old[1] + BigInt::from(5u8) * &old[2] + &old[0])),
         normative_save(&(&old[2] * &old[2] + BigInt::from(7u8) * &old[3] + &old[1])),
         normative_save(&(&old[3] * &old[3] + BigInt::from(11u8) * &old[4] + &old[2])),
@@ -74,11 +76,14 @@ impl PhaseHandler for StonePatch04 {
             || context.metrics.get("patch03.distance.calls") != 1
             || context.metrics.get("discovery04.stones.calls") != 1
             || discovery.is_none()
-            || discovery.is_some_and(|x| x.row_count != 46 || x.component_count != 230 || x.rows.len() != 46)
+            || discovery.is_some_and(|x| {
+                x.row_count != 46 || x.component_count != 230 || x.rows.len() != 46
+            })
         {
             return Err(MonsterError {
                 code: MonsterErrorCode::InvalidState,
-                message: "PATCH04 requires the completed Stage08 legacy stone observation".to_owned(),
+                message: "PATCH04 requires the completed Stage08 legacy stone observation"
+                    .to_owned(),
             });
         }
 
@@ -119,8 +124,7 @@ impl PhaseHandler for StonePatch04 {
         }
         context.metrics.bump("patch04.applied");
         context.logs.push(
-            "PATCH04: 46 snapshot rows committed; 45 historical mutator calls captured."
-                .to_owned(),
+            "PATCH04: 46 snapshot rows committed; 45 historical mutator calls captured.".to_owned(),
         );
         Ok(())
     }
@@ -140,20 +144,30 @@ pub fn calendar_stones_patched_spaghetti(
 ) -> Result<Patch04Observation, MonsterError> {
     let mut manager = MonsterManager::default();
     manager.dispatcher_mut().register(WorkCountsPatch02);
-    manager.dispatcher_mut().register(LegacyTagDistanceDiscovery03);
+    manager
+        .dispatcher_mut()
+        .register(LegacyTagDistanceDiscovery03);
     manager.dispatcher_mut().register(Patch03DistanceCorrection);
     manager.dispatcher_mut().register(LegacyStoneDiscovery04);
     manager.dispatcher_mut().register(StonePatch04);
     let context = manager.execute_bootstrap_shell(calculation_day, target_day)?;
 
-    let patch = context.patch04_stone_observation.as_ref().ok_or_else(|| MonsterError {
-        code: MonsterErrorCode::InvalidState,
-        message: "PATCH04 observation is missing".to_owned(),
-    })?;
-    let legacy_rows = context.discovery04_stone_observation.as_ref().ok_or_else(|| MonsterError {
-        code: MonsterErrorCode::InvalidState,
-        message: "DISCOVERY04 legacy rows are missing".to_owned(),
-    })?.rows.clone();
+    let patch = context
+        .patch04_stone_observation
+        .as_ref()
+        .ok_or_else(|| MonsterError {
+            code: MonsterErrorCode::InvalidState,
+            message: "PATCH04 observation is missing".to_owned(),
+        })?;
+    let legacy_rows = context
+        .discovery04_stone_observation
+        .as_ref()
+        .ok_or_else(|| MonsterError {
+            code: MonsterErrorCode::InvalidState,
+            message: "DISCOVERY04 legacy rows are missing".to_owned(),
+        })?
+        .rows
+        .clone();
 
     Ok(Patch04Observation {
         corrected_rows: patch.corrected_rows.clone(),
