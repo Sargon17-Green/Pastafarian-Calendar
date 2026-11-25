@@ -6,6 +6,7 @@ pub mod discovery02_day_tag_probe;
 pub mod discovery02_work_counts_probe;
 pub mod discovery03_stone_probe;
 pub mod discovery04_stone_probe;
+pub mod discovery05_hidden_probe;
 pub mod patch01_save;
 pub mod patch02_work_counts;
 pub mod patch03_distance;
@@ -88,6 +89,13 @@ pub struct MonsterContext {
     pub patch03_distance_observation: Option<patch03_distance::Patch03DistanceObservation>,
     pub discovery04_stone_observation: Option<discovery04_stone_probe::Discovery04StoneObservation>,
     pub patch04_stone_observation: Option<patch04_stone_probe::Patch04StoneObservation>,
+    // Stage10: reversed physical hidden-drop storage and the intentionally wrong direct read.
+    pub discovery05_stone_rows: Option<Vec<discovery03_stone_probe::Stone>>,
+    pub discovery05_patch04_legacy_calls: usize,
+    pub discovery05_backward_storage: Option<Vec<BigInt>>,
+    pub discovery05_hidden_count: usize,
+    pub discovery05_requested_k: Option<usize>,
+    pub discovery05_actual: Option<BigInt>,
 }
 
 impl MonsterContext {
@@ -113,6 +121,12 @@ impl MonsterContext {
             patch03_distance_observation: None,
             discovery04_stone_observation: None,
             patch04_stone_observation: None,
+            discovery05_stone_rows: None,
+            discovery05_patch04_legacy_calls: 0,
+            discovery05_backward_storage: None,
+            discovery05_hidden_count: 0,
+            discovery05_requested_k: None,
+            discovery05_actual: None,
         }
     }
 }
