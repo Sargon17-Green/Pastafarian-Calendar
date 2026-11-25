@@ -1,0 +1,49 @@
+name: Befunge numeric digit gate
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - '.github/workflows/befunge-qa31cp-digit-dependent-gate.yml'
+      - 'qa/signed_increment_gate.patch'
+      - 'qa/qa31cp_*'
+      - 'src/interleaved_work_counts.b98'
+permissions:
+  contents: read
+jobs:
+  native-signed-increment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify the original and patched BF98 grids and all incoming arithmetic rays
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/signed-increment"
+          mkdir -p "$out/src" "$out/results"
+          cp src/interleaved_work_counts.b98 "$out/src/"
+          (cd "$out" && git apply "$GITHUB_WORKSPACE/qa/signed_increment_gate.patch")
+          python3 qa/qa31cp_signed_increment_gate.py src/interleaved_work_counts.b98 \
+            "$out/src/interleaved_work_counts.b98" "$out/results/source.json"
+      - name: Observe the rewritten opcode and force the opposite arithmetic arm
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/signed-increment"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$out/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $out/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$out/src:/candidate:ro" -v "$out/results:/results" \
+            -v "$out/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 220s python -u qa/qa31cp_native_signed_gate.py src/interleaved_work_counts.b98 /candidate/interleaved_work_counts.b98 /results/native.json
+            '
+          python3 qa/qa31cp_receipts.py "$out/results/native.json"
+      - name: Retain physical gate observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-digit-dependent-gate
+          path: ${{ runner.temp }}/signed-increment/results/
+          retention-days: 30

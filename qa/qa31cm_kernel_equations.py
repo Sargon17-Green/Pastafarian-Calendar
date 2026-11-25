@@ -312,7 +312,7 @@ def prove_payload(lines, observe=None):
     return out
 
 
-def compose(lines):
+def compose(lines, inspect_edge=None):
     scanner = Scanner(lines)
     front = scan_fresh(scanner)
     visited, targets, deltas, live = set(), set(), set(), set()
@@ -332,6 +332,8 @@ def compose(lines):
         if ip in (GATE,OUTPUT_GATE):
             live.add((ip,op))
         if previous is not None:
+            if inspect_edge is not None:
+                inspect_edge(previous, ip, delta, op)
             parents[ip].add(previous)
             children[previous].add(ip)
         previous = None if op == "@" else ip
