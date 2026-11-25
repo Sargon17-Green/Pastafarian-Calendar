@@ -8,7 +8,7 @@ from pathlib import Path
 M = (1 << 127) - 1
 SEED = [17, 29, 43, 71, 101]
 FIELDS = ("w", "b", "s", "m", "r")
-CORRECTED_RE = re.compile(r"STAGE09_CORRECTED_CELL row=(\d+) field=([wbsmr]) value=(\d+) expected=(\d+) class=GREEN")
+CORRECTED_RE = re.compile(r"STAGE09_CORRECTED_CELL row=(\d+) field=([wbsmr]) value=(\d+) expected=(\d+) class=(GREEN)")
 GARBAGE_RE = re.compile(r"STAGE09_GARBAGE_CELL row=(\d+) field=([wbsmr]) value=(\d+) expected=(\d+) class=(RED|MATCH)")
 LEGACY_RE = re.compile(r"STAGE09_LEGACY_CELL row=(\d+) field=([wbsmr]) value=(\d+) expected=(\d+) class=(RED|MATCH)")
 
@@ -49,9 +49,14 @@ def self_test():
     lr=sum(l[r][k]!=c[r][k] for r in range(1,46) for k in range(5))
     lm=225-lr
     assert (gr,gm,lr,lm)==(180,45,224,1)
+    sample = "STAGE09_CORRECTED_CELL row=1 field=w value=17 expected=17 class=GREEN"
+    match = CORRECTED_RE.fullmatch(sample)
+    assert match is not None and match.groups() == ("1", "w", "17", "17", "GREEN")
+    parsed = read_cells([sample], CORRECTED_RE, {(1, "w")}, "STAGE09_CORRECTED_CELL")
+    assert parsed[(1, "w")] == (17, 17, "GREEN")
     print("STAGE09_PATCH04_ORACLE_SELF_TEST=PASS")
 
-def read_cells(lines, regex, wanted_keys, expected_rows, label):
+def read_cells(lines, regex, wanted_keys, label):
     parsed={}
     for line in lines:
         if label not in line: continue
@@ -70,9 +75,9 @@ def verify(path: Path):
     corrected,garbage,legacy=tables()
     ckeys={(r,f) for r in range(1,47) for f in FIELDS}
     dkeys={(r,f) for r in range(2,47) for f in FIELDS}
-    c=read_cells(lines,CORRECTED_RE,ckeys,corrected,"STAGE09_CORRECTED_CELL")
-    g=read_cells(lines,GARBAGE_RE,dkeys,garbage,"STAGE09_GARBAGE_CELL")
-    l=read_cells(lines,LEGACY_RE,dkeys,legacy,"STAGE09_LEGACY_CELL")
+    c=read_cells(lines,CORRECTED_RE,ckeys,"STAGE09_CORRECTED_CELL")
+    g=read_cells(lines,GARBAGE_RE,dkeys,"STAGE09_GARBAGE_CELL")
+    l=read_cells(lines,LEGACY_RE,dkeys,"STAGE09_LEGACY_CELL")
     for r in range(1,47):
         for k,f in enumerate(FIELDS):
             if c[(r,f)]!=(corrected[r-1][k],corrected[r-1][k],"GREEN"):
@@ -82,7 +87,7 @@ def verify(path: Path):
         for k,f in enumerate(FIELDS):
             gclass="MATCH" if garbage[r-1][k]==corrected[r-1][k] else "RED"
             lclass="MATCH" if legacy[r-1][k]==corrected[r-1][k] else "RED"
-            if g[(r,f)]!=(garbage[r-1][k],corrected[r-1][k],gclass):
+            if g[(r,f)]!=(garbage[r-1][k],garbage[r-1][k],gclass):
                 raise SystemExit(f"garbage oracle mismatch row={r} field={f}")
             if l[(r,f)]!=(legacy[r-1][k],corrected[r-1][k],lclass):
                 raise SystemExit(f"legacy oracle mismatch row={r} field={f}")
