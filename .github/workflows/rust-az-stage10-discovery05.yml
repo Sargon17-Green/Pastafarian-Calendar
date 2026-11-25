@@ -49,7 +49,7 @@ jobs:
           grep -Fxq 'STAGE10_SCOPE=BACKWARD_HIDDEN_STORAGE_DISCOVERY' audit/STAGE_10_DISCOVERY05_CONTRACT_2026-11-25.md
           grep -Fxq 'STAGE09_CLOSURE=ACCEPTED' audit/STAGE_09_PATCH04_ACCEPTANCE_2026-11-25.md
           grep -Fq 'pub mod discovery05_hidden_probe;' src/lib.rs
-          grep -Fq 'pub struct LegacyHiddenDropDiscovery05;' src/discovery05_hidden_probe.rs
+          grep -Fq 'pub struct LegacyHiddenDropDiscovery05 {' src/discovery05_hidden_probe.rs
           grep -Fq 'pub fn calendar_hidden_spaghetti(' src/discovery05_hidden_probe.rs
           cargo fmt --all -- --check
       - name: Self-test independent Stage10 oracle
