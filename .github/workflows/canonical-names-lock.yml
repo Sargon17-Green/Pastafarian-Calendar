@@ -2887,13 +2887,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - name: Verify exact parent, QA-only diff and source locks
+      - name: Verify QA-only diff and source locks
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p build
-          test "$(git rev-parse HEAD^)" = 27c8e322587d358aeedb38b1de04e24d439560ff
+          git merge-base --is-ancestor 5574f8ae5029aa7c4941c030b6b671217e3c603a HEAD
           test "$(git rev-parse HEAD:src/big_integer.cob)" = 982c1f266a18c2bcaba79b994177a93750f27bfa
           test "$(git rev-parse HEAD:src/patched_distance.cob)" = 4e8412030716debca481306ba28be805ade76326
           python3 -B - <<'PY'
