@@ -1,0 +1,73 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "stage": 21,
+  "status": "NATIVE_DIAGNOSTIC_VERIFIED_NOT_ACCEPTED",
+  "run_id": 45511710172,
+  "job_id": 138860799111,
+  "source_pin": "bb86f0d01825b54417f9ad965d99eb122b83de74",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "artifact": {
+    "id": 14975561849,
+    "sha256": "845380310c7f92309bd737c4e94be19339ec4d97690527671dc8879b74f64857",
+    "crc_entries": 30
+  },
+  "offline_audit": {
+    "method": "Python stdlib, independent factoradic unranking and ID-indexed simultaneous transitions; recomputed fixture expectations, checked embedded output limb/order assertions, exact byte prefixes and raw stdout/stderr/exit hashes",
+    "verified_git_blobs": {
+      "src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+      "src/monster_bootstrap.false": "e9cf5c3d6933aabf23176ea208baf2a1291a7dfd",
+      "corrected_oracle.json": "ba0cde978a2b786e4c315f1508f53ebdf893d54d"
+    },
+    "corrupted_expectations_rejected": 3,
+    "source_mutants_executed": 0
+  },
+  "native": [
+    {
+      "case": "short_ones",
+      "steps": 1,
+      "instrumented": true,
+      "assertions": 1253,
+      "seconds": 0.271,
+      "exit": 0
+    },
+    {
+      "case": "short_reverse",
+      "steps": 1,
+      "instrumented": true,
+      "assertions": 1308,
+      "seconds": 0.275,
+      "exit": 0
+    },
+    {
+      "case": "full_ones",
+      "steps": 46,
+      "instrumented": false,
+      "assertions": 1334,
+      "seconds": 68.087,
+      "exit": 0
+    }
+  ],
+  "peak_child_rss_kib_cumulative": 317520,
+  "address_space_limit_bytes": 2147483648,
+  "stage21_accepted": false,
+  "last_accepted_stage": 20,
+  "physical_pointer_safety_assessed": false,
+  "next_gate": {
+    "full_paths": [
+      "ones (historical evidence; do not duplicate without replay justification)",
+      "reverse",
+      "boundary"
+    ],
+    "intermediate_steps": [
+      1,
+      2,
+      23,
+      45
+    ],
+    "replay": "repeat a nontrivial full path, compare exact output and immutable inputs",
+    "invalids": "allocated semantic-invalid records and canonical BigInt violations; no physical invalid pointers",
+    "mutants": "actual unique source substitutions including old neighbor mapping defect; require failing specific numerical assertion, not timeout/parser fault",
+    "limits": "per full path 600 s and 2 GiB address space; retain actual exit/stdout/stderr and measure each; CI job budget must cover aggregate timeout",
+    "audit": "verify exact source/runtime pin, ZIP SHA/CRC, independent math, raw outputs, exits, and source mutant diffs before bounded acceptance"
+  }
+}
