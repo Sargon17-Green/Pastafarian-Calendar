@@ -195,11 +195,7 @@ pub fn discovery_37_equal_cardinality_disjoint_test() {
 
 pub fn discovery_37_equal_cardinality_overlap_test() {
   let assert [g, _, _] = gaps(bootstrap.new_context(11, 21), [2, 2, 2])
-  verify(
-    [2, 2, 2],
-    [band(g, 2 * g)],
-    [band(g, g), band(2 * g, 2 * g)],
-  )
+  verify([2, 2, 2], [band(g, 2 * g)], [band(g, g), band(2 * g, 2 * g)])
   |> should.equal(#(0, 1))
 }
 
@@ -229,11 +225,10 @@ pub fn discovery_37_partial_overlap_positive_test() {
 
 pub fn discovery_37_index_multiplicity_and_duplicate_bands_test() {
   let assert [g, _, _, _] = gaps(bootstrap.new_context(11, 21), [4, 4, 4, 4])
-  verify(
-    [4, 4, 4, 4],
-    [band(g, 2 * g), band(g, 2 * g)],
-    [band(2 * g, 3 * g), band(2 * g, 3 * g)],
-  )
+  verify([4, 4, 4, 4], [band(g, 2 * g), band(g, 2 * g)], [
+    band(2 * g, 3 * g),
+    band(2 * g, 3 * g),
+  ])
   |> should.equal(#(-6, 35))
 }
 

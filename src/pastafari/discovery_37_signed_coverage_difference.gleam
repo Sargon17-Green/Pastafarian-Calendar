@@ -86,18 +86,20 @@ pub fn dispatch_discovery_37(
       let left_count = base.left_windows
       let right_count = base.right_windows
       let intersection = base.intersection_windows
-      let left_ok = valid_coverage(
-        previous.left_coverage_numerator,
-        previous.left_coverage_denominator,
-        intersection,
-        left_count,
-      )
-      let right_ok = valid_coverage(
-        previous.right_coverage_numerator,
-        previous.right_coverage_denominator,
-        intersection,
-        right_count,
-      )
+      let left_ok =
+        valid_coverage(
+          previous.left_coverage_numerator,
+          previous.left_coverage_denominator,
+          intersection,
+          left_count,
+        )
+      let right_ok =
+        valid_coverage(
+          previous.right_coverage_numerator,
+          previous.right_coverage_denominator,
+          intersection,
+          right_count,
+        )
 
       case left_ok && right_ok && left_count >= 0 && right_count >= 0 {
         False -> Error(discovery_19_interval_value.InvalidStream)
