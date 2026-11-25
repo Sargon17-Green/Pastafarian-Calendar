@@ -3,7 +3,7 @@ RGBLINK ?= rgblink
 RGBFIX ?= rgbfix
 PYTHON ?= python3
 
-.PHONY: all build test clean
+.PHONY: all build test clean test-stage1-gate-histogram
 all: build
 build: build/calendar.gb
 
@@ -217,3 +217,7 @@ build/calendar_gate_gap.o: build/calendar.o src/runtime/calendar_bowl_answer.asm
 build/calendar_gate_gap.gb: build/calendar_gate_gap.o
 	$(RGBLINK) -n build/calendar_gate_gap.sym -m build/calendar_gate_gap.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+# Independent Host-only Stage1 bounded gate-window/radix histogram design.
+test-stage1-gate-histogram:
+	$(PYTHON) tests/test_sm83_stage1_gate_histogram.py

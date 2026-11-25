@@ -24,6 +24,8 @@ jobs:
               exit 1
             fi
           done < CANONICAL_NAMES_LOCK.sha256
+      - name: Independent Stage1 bounded gate histogram oracle
+        run: python3 tests/test_sm83_stage1_gate_histogram.py
 
   dmg-native-smoke:
     runs-on: ubuntu-latest
