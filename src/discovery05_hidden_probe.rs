@@ -123,10 +123,7 @@ pub fn legacy_hidden_direct_by_assumed_nearness(
 }
 
 /// Production accessor intentionally retains the Stage10 wrong direct read.
-pub fn calendar_hidden_by_nearness(
-    backward: &[BigInt],
-    k: usize,
-) -> Result<BigInt, MonsterError> {
+pub fn calendar_hidden_by_nearness(backward: &[BigInt], k: usize) -> Result<BigInt, MonsterError> {
     legacy_hidden_direct_by_assumed_nearness(backward, k)
 }
 
@@ -156,10 +153,13 @@ impl PhaseHandler for LegacyHiddenDropDiscovery05 {
             });
         }
 
-        let work = context.work_counts_observation.as_ref().ok_or_else(|| MonsterError {
-            code: MonsterErrorCode::InvalidState,
-            message: "DISCOVERY05 requires PATCH02 work counts".to_owned(),
-        })?;
+        let work = context
+            .work_counts_observation
+            .as_ref()
+            .ok_or_else(|| MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "DISCOVERY05 requires PATCH02 work counts".to_owned(),
+            })?;
         let distance = context
             .patch03_distance_observation
             .as_ref()
@@ -168,14 +168,20 @@ impl PhaseHandler for LegacyHiddenDropDiscovery05 {
                 code: MonsterErrorCode::InvalidState,
                 message: "DISCOVERY05 requires corrected PATCH03 distance".to_owned(),
             })?;
-        let patch = context.patch04_stone_observation.as_ref().ok_or_else(|| MonsterError {
-            code: MonsterErrorCode::InvalidState,
-            message: "DISCOVERY05 requires PATCH04 corrected stones".to_owned(),
-        })?;
-        let legacy = context.discovery04_stone_observation.as_ref().ok_or_else(|| MonsterError {
-            code: MonsterErrorCode::InvalidState,
-            message: "DISCOVERY05 requires the preserved DISCOVERY04 observation".to_owned(),
-        })?;
+        let patch = context
+            .patch04_stone_observation
+            .as_ref()
+            .ok_or_else(|| MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "DISCOVERY05 requires PATCH04 corrected stones".to_owned(),
+            })?;
+        let legacy = context
+            .discovery04_stone_observation
+            .as_ref()
+            .ok_or_else(|| MonsterError {
+                code: MonsterErrorCode::InvalidState,
+                message: "DISCOVERY05 requires the preserved DISCOVERY04 observation".to_owned(),
+            })?;
 
         if context.metrics.get("patch02.work_counts.calls") != 1
             || context.metrics.get("patch02.legacy.action.calls") != 1
@@ -230,7 +236,9 @@ impl PhaseHandler for LegacyHiddenDropDiscovery05 {
             "DISCOVERY05: hidden_count=7 requested_k={} actual={} physical_order=7..1",
             self.requested_k, actual_text
         ));
-        context.diagnostics.push("DISCOVERY05_BACKWARD_HIDDEN_DIRECT_ACCESS".to_owned());
+        context
+            .diagnostics
+            .push("DISCOVERY05_BACKWARD_HIDDEN_DIRECT_ACCESS".to_owned());
         context.metrics.bump("discovery05.builds");
         context.metrics.bump("discovery05.legacy.direct.read");
         Ok(())

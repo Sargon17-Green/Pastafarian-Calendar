@@ -1,9 +1,10 @@
-mod support;
+#[path = "stage10_support/mod.rs"]
+mod stage10_support;
 
 use num_bigint::BigInt;
 
 use pastafarian_calendar_rust_az::discovery05_hidden_probe::observe_legacy_hidden_drop;
-use support::stage10_oracle::{independent_hidden_values, independent_stones, FOUNDATION};
+use stage10_support::{independent_hidden_values, independent_stones, FOUNDATION};
 
 #[test]
 fn stage10_bigint_independent_five_pairs_and_patch04_rows() {

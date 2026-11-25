@@ -1,4 +1,5 @@
-mod support;
+#[path = "stage10_support/mod.rs"]
+mod stage10_support;
 
 use num_bigint::BigInt;
 
@@ -6,8 +7,10 @@ use pastafarian_calendar_rust_az::discovery05_hidden_probe::{
     calendar_hidden_by_nearness, calendar_hidden_spaghetti, observe_legacy_hidden_drop,
     LegacyHiddenDropDiscovery05,
 };
-use pastafarian_calendar_rust_az::{calendar_date_spaghetti, MonsterContext, MonsterErrorCode, PhaseHandler};
-use support::stage10_oracle::{independent_hidden_values, independent_stones, FOUNDATION};
+use pastafarian_calendar_rust_az::{
+    calendar_date_spaghetti, MonsterContext, MonsterErrorCode, PhaseHandler,
+};
+use stage10_support::{independent_hidden_values, independent_stones, FOUNDATION};
 
 #[test]
 fn stage10_backward_storage_expected_red_and_context_guards() {
@@ -22,12 +25,37 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
     assert_eq!(observed.actual, observed.backward_storage[1]);
     assert_eq!(observed.context.discovery05_hidden_count, 7);
     assert_eq!(observed.context.discovery05_requested_k, Some(1));
-    assert_eq!(observed.context.discovery05_actual, Some(observed.actual.clone()));
+    assert_eq!(
+        observed.context.discovery05_actual,
+        Some(observed.actual.clone())
+    );
     assert_eq!(observed.context.discovery05_patch04_legacy_calls, 45);
-    assert_eq!(observed.context.discovery05_stone_rows.as_ref().unwrap().len(), 46);
-    assert_eq!(observed.context.discovery05_stone_rows.as_ref().unwrap(), &observed.context.patch04_stone_observation.as_ref().unwrap().corrected_rows);
+    assert_eq!(
+        observed
+            .context
+            .discovery05_stone_rows
+            .as_ref()
+            .unwrap()
+            .len(),
+        46
+    );
+    assert_eq!(
+        observed.context.discovery05_stone_rows.as_ref().unwrap(),
+        &observed
+            .context
+            .patch04_stone_observation
+            .as_ref()
+            .unwrap()
+            .corrected_rows
+    );
     assert_eq!(observed.context.metrics.get("discovery05.builds"), 1);
-    assert_eq!(observed.context.metrics.get("discovery05.legacy.direct.read"), 1);
+    assert_eq!(
+        observed
+            .context
+            .metrics
+            .get("discovery05.legacy.direct.read"),
+        1
+    );
     assert_eq!(
         observed.context.branch_trace,
         vec![
@@ -84,20 +112,47 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
             }
         }
     }
-    assert_eq!(expected[1].to_string(), "119390830530032782664128530203002080344");
-    assert_eq!(expected[2].to_string(), "11877236279154673426874867061566696749");
-    assert_eq!(expected[3].to_string(), "24217814924229232987463457533828175476");
-    assert_eq!(expected[4].to_string(), "166629231917547214614573522551290204247");
-    assert_eq!(expected[5].to_string(), "81202913407267092008896220686064041568");
-    assert_eq!(expected[6].to_string(), "73551520026920072430116213847585486272");
-    assert_eq!(expected[7].to_string(), "6164285870955721082771365327359496898");
+    assert_eq!(
+        expected[1].to_string(),
+        "119390830530032782664128530203002080344"
+    );
+    assert_eq!(
+        expected[2].to_string(),
+        "11877236279154673426874867061566696749"
+    );
+    assert_eq!(
+        expected[3].to_string(),
+        "24217814924229232987463457533828175476"
+    );
+    assert_eq!(
+        expected[4].to_string(),
+        "166629231917547214614573522551290204247"
+    );
+    assert_eq!(
+        expected[5].to_string(),
+        "81202913407267092008896220686064041568"
+    );
+    assert_eq!(
+        expected[6].to_string(),
+        "73551520026920072430116213847585486272"
+    );
+    assert_eq!(
+        expected[7].to_string(),
+        "6164285870955721082771365327359496898"
+    );
 
     let kotlin_subset = [1usize, 2, 4, 6, 7];
-    let kotlin_red = kotlin_subset.iter().filter(|k| observed.backward_storage[**k] != expected[**k]).count();
+    let kotlin_red = kotlin_subset
+        .iter()
+        .filter(|k| observed.backward_storage[**k] != expected[**k])
+        .count();
     let kotlin_match = kotlin_subset.len() - kotlin_red;
     assert_eq!((kotlin_red, kotlin_match), (4, 1));
     let v_subset = [1usize, 2, 3, 4, 7];
-    let v_red = v_subset.iter().filter(|k| observed.backward_storage[**k] != expected[**k]).count();
+    let v_red = v_subset
+        .iter()
+        .filter(|k| observed.backward_storage[**k] != expected[**k])
+        .count();
     let v_match = v_subset.len() - v_red;
     assert_eq!((v_red, v_match), (4, 1));
 
@@ -134,7 +189,9 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
     }
     let short_storage = vec![BigInt::from(0u8); 7];
     assert_eq!(
-        calendar_hidden_by_nearness(&short_storage, 1).unwrap_err().code,
+        calendar_hidden_by_nearness(&short_storage, 1)
+            .unwrap_err()
+            .code,
         MonsterErrorCode::InvalidState
     );
     assert_eq!(
@@ -147,12 +204,29 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
     let mut detached = observed.backward_storage.clone();
     let original_slot = observed.backward_storage[1].clone();
     detached[1] = BigInt::from(0u8);
-    assert_eq!(observed.context.discovery05_backward_storage.as_ref().unwrap()[1], original_slot);
+    assert_eq!(
+        observed
+            .context
+            .discovery05_backward_storage
+            .as_ref()
+            .unwrap()[1],
+        original_slot
+    );
     let second = calendar_hidden_spaghetti(foundation.clone(), foundation.clone()).unwrap();
     assert_eq!(second.backward_storage, observed.backward_storage);
     assert_ne!(
-        second.context.discovery05_backward_storage.as_ref().unwrap().as_ptr(),
-        observed.context.discovery05_backward_storage.as_ref().unwrap().as_ptr()
+        second
+            .context
+            .discovery05_backward_storage
+            .as_ref()
+            .unwrap()
+            .as_ptr(),
+        observed
+            .context
+            .discovery05_backward_storage
+            .as_ref()
+            .unwrap()
+            .as_ptr()
     );
 
     assert_eq!(
