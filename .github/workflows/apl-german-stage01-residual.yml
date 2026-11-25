@@ -78,7 +78,7 @@ jobs:
         run: |
           python -m unittest discover -s qa/nars-interface -p 'test_stage01_residual_probe.py' -v
           if($LASTEXITCODE -ne 0){throw 'RESIDUAL_GENERATOR_UNIT_FAILED'}
-      - name: V24.1: four QA-only shape substitutions and two local-value witnesses
+      - name: V24.1 - four QA-only shape substitutions and two local-value witnesses
         shell: pwsh
         run: ./qa/nars-interface/bounded_stage01_residual_probe.ps1 -Runtime verified_runtime -Evidence residual_evidence
       - name: Independent diagnostic receipt gate (never acceptance)
