@@ -146,11 +146,7 @@ pub fn dispatch_discovery_38(
         )
 
       case
-        left_count >= 0
-        && right_count >= 0
-        && left_ok
-        && right_ok
-        && signed_ok
+        left_count >= 0 && right_count >= 0 && left_ok && right_ok && signed_ok
       {
         False -> Error(discovery_19_interval_value.InvalidStream)
         True -> {
@@ -178,7 +174,13 @@ pub fn dispatch_discovery_38(
                   == intersection * { left_count + right_count } * denominator
               }
 
-              case valid_mean(numerator, denominator, raw_numerator, raw_denominator)
+              case
+                valid_mean(
+                  numerator,
+                  denominator,
+                  raw_numerator,
+                  raw_denominator,
+                )
                 && count_formula_ok
               {
                 False -> Error(discovery_19_interval_value.InvalidStream)
