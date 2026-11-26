@@ -155,14 +155,15 @@ fn reconstructs_coverages(
     mean_numerator
     * 2
     * asymmetry_denominator
-    + mean_numerator * asymmetry_numerator
+    + mean_numerator
+    * asymmetry_numerator
   let reconstructed_right_numerator =
     mean_numerator
     * 2
     * asymmetry_denominator
-    - mean_numerator * asymmetry_numerator
-  let reconstructed_denominator =
-    2 * mean_denominator * asymmetry_denominator
+    - mean_numerator
+    * asymmetry_numerator
+  let reconstructed_denominator = 2 * mean_denominator * asymmetry_denominator
   let left_ok =
     reconstructed_left_numerator * left_denominator
     == left_numerator * reconstructed_denominator
@@ -349,7 +350,8 @@ pub fn dispatch_discovery_40(
           case raw_denominator > 0 {
             False -> Error(discovery_19_interval_value.InvalidStream)
             True -> {
-              let divisor = greatest_common_divisor(raw_numerator, raw_denominator)
+              let divisor =
+                greatest_common_divisor(raw_numerator, raw_denominator)
               let numerator = raw_numerator / divisor
               let denominator = raw_denominator / divisor
               let fraction_ok =

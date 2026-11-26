@@ -21,8 +21,7 @@ fn sum_index_range(values: List(Int), current: Int, end: Int) -> Int {
   case current >= end {
     True -> 0
     False ->
-      value_at(values, current)
-      + sum_index_range(values, current + 1, end)
+      value_at(values, current) + sum_index_range(values, current + 1, end)
   }
 }
 
@@ -38,21 +37,12 @@ fn collect_indexed_windows(
     False ->
       case end > size {
         True ->
-          collect_indexed_windows(
-            gaps,
-            start + 1,
-            start + 2,
-            size,
-            reversed,
-          )
+          collect_indexed_windows(gaps, start + 1, start + 2, size, reversed)
         False ->
-          collect_indexed_windows(
-            gaps,
-            start,
-            end + 1,
-            size,
-            [sum_index_range(gaps, start, end), ..reversed],
-          )
+          collect_indexed_windows(gaps, start, end + 1, size, [
+            sum_index_range(gaps, start, end),
+            ..reversed
+          ])
       }
   }
 }
@@ -62,12 +52,14 @@ fn indexed_windows(gaps: List(Int)) -> List(Int) {
 }
 
 fn member(bands: List(discovery_27_sum_bands.SumBand), value: Int) -> Bool {
-  list.any(bands, fn(item) {
-    item.lower <= value && value <= item.upper
-  })
+  list.any(bands, fn(item) { item.lower <= value && value <= item.upper })
 }
 
-fn minimum_denominator(numerator: Int, denominator: Int, candidate: Int) -> Int {
+fn minimum_denominator(
+  numerator: Int,
+  denominator: Int,
+  candidate: Int,
+) -> Int {
   case numerator * candidate % denominator == 0 {
     True -> candidate
     False -> minimum_denominator(numerator, denominator, candidate + 1)
@@ -130,11 +122,7 @@ fn asymmetry_oracle(
     False, False ->
       case intersection == 0 {
         True -> #(0, 1)
-        False ->
-          fraction(
-            2 * { right_count - left_count },
-            left_count + right_count,
-          )
+        False -> fraction(2 * { right_count - left_count }, left_count + right_count)
       }
   }
 }
@@ -151,11 +139,7 @@ fn joint_oracle(
     False, False ->
       case intersection == 0 {
         True -> #(0, 1)
-        False ->
-          fraction(
-            intersection * intersection,
-            left_count * right_count,
-          )
+        False -> fraction(intersection * intersection, left_count * right_count)
       }
   }
 }
@@ -237,7 +221,9 @@ fn verify(
     True -> left_count
     False -> right_count
   }
-  let expected_overlap = case minimum_count == 0 && left_count + right_count > 0 {
+  let expected_overlap = case
+    minimum_count == 0 && left_count + right_count > 0
+  {
     True -> #(0, 1)
     False -> fraction(intersection, minimum_count)
   }
@@ -308,8 +294,11 @@ fn verify(
     mean_numerator
     * mean_numerator
     * {
-      4 * asymmetry_denominator * asymmetry_denominator
-      - asymmetry_numerator * asymmetry_numerator
+      4
+      * asymmetry_denominator
+      * asymmetry_denominator
+      - asymmetry_numerator
+      * asymmetry_numerator
     }
   let asymmetry_identity_denominator =
     4
@@ -317,12 +306,16 @@ fn verify(
     * mean_denominator
     * asymmetry_denominator
     * asymmetry_denominator
-  joint_numerator * asymmetry_identity_denominator
-  |> should.equal(asymmetry_identity_numerator * joint_denominator)
+  let asymmetry_identity_matches =
+    joint_numerator * asymmetry_identity_denominator
+    == asymmetry_identity_numerator * joint_denominator
+  asymmetry_identity_matches |> should.equal(True)
 
-  (joint_denominator > 0) |> should.equal(True)
-  (joint_numerator >= 0 && joint_numerator <= joint_denominator)
-  |> should.equal(True)
+  let joint_denominator_positive = joint_denominator > 0
+  joint_denominator_positive |> should.equal(True)
+  let joint_numerator_in_range =
+    joint_numerator >= 0 && joint_numerator <= joint_denominator
+  joint_numerator_in_range |> should.equal(True)
 
   #(left_count, right_count, joint)
 }
@@ -374,61 +367,40 @@ pub fn discovery_40_disjoint_nonempty_test() {
 
 pub fn discovery_40_equal_nonempty_test() {
   let limit = wide(70, 1)
-  verify(
-    [4, 2, 5, 1],
-    [band(0 - limit, limit)],
-    [band(0 - limit, limit)],
-  )
+  verify([4, 2, 5, 1], [band(0 - limit, limit)], [band(0 - limit, limit)])
   |> should.equal(#(10, 10, #(1, 1)))
 }
 
 pub fn discovery_40_left_subset_test() {
   let assert [gap, _, _, _] = gaps(bootstrap.new_context(11, 21), [3, 3, 3, 3])
-  verify(
-    [3, 3, 3, 3],
-    [band(2 * gap, 2 * gap)],
-    [band(gap, 2 * gap)],
-  )
+  verify([3, 3, 3, 3], [band(2 * gap, 2 * gap)], [band(gap, 2 * gap)])
   |> should.equal(#(3, 7, #(3, 7)))
 }
 
 pub fn discovery_40_right_subset_test() {
   let assert [gap, _, _, _] = gaps(bootstrap.new_context(11, 21), [3, 3, 3, 3])
-  verify(
-    [3, 3, 3, 3],
-    [band(gap, 2 * gap)],
-    [band(2 * gap, 2 * gap)],
-  )
+  verify([3, 3, 3, 3], [band(gap, 2 * gap)], [band(2 * gap, 2 * gap)])
   |> should.equal(#(7, 3, #(3, 7)))
 }
 
 pub fn discovery_40_partial_overlap_test() {
   let assert [gap, _, _] = gaps(bootstrap.new_context(11, 21), [2, 2, 2])
-  verify(
-    [2, 2, 2],
-    [band(gap, 2 * gap)],
-    [band(2 * gap, 3 * gap)],
-  )
+  verify([2, 2, 2], [band(gap, 2 * gap)], [band(2 * gap, 3 * gap)])
   |> should.equal(#(5, 3, #(4, 15)))
 }
 
 pub fn discovery_40_asymmetric_overlap_test() {
   let assert [gap, _, _, _] = gaps(bootstrap.new_context(11, 21), [4, 4, 4, 4])
-  verify(
-    [4, 4, 4, 4],
-    [band(gap, 2 * gap)],
-    [band(2 * gap, 3 * gap)],
-  )
+  verify([4, 4, 4, 4], [band(gap, 2 * gap)], [band(2 * gap, 3 * gap)])
   |> should.equal(#(7, 5, #(9, 35)))
 }
 
 pub fn discovery_40_index_multiplicity_and_duplicate_bands_test() {
   let assert [gap, _, _, _] = gaps(bootstrap.new_context(11, 21), [4, 4, 4, 4])
-  verify(
-    [4, 4, 4, 4],
-    [band(gap, 2 * gap), band(gap, 2 * gap)],
-    [band(2 * gap, 3 * gap), band(2 * gap, 3 * gap)],
-  )
+  verify([4, 4, 4, 4], [band(gap, 2 * gap), band(gap, 2 * gap)], [
+    band(2 * gap, 3 * gap),
+    band(2 * gap, 3 * gap),
+  ])
   |> should.equal(#(7, 5, #(9, 35)))
 }
 
