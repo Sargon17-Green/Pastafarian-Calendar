@@ -1,0 +1,89 @@
+name: MATLAB Stage55 Polynomial Full Middle-Rank Word (Experimental)
+
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - 'tests/run_stage55_polynomial_middle_rank_native.m'
+      - '.github/workflows/matlab-stage55-polynomial-middle-rank-native.yml'
+      - 'src/\+pastafari/WholeMonthWeavingFamilyPolynomial.m'
+      - 'src/\+pastafari/countWholeWeavingSuffixByFirstEndpoint.m'
+      - 'src/\+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m'
+      - 'src/\+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m'
+      - 'src/\+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m'
+      - 'tests/fixtures/stage55_year5000_middle_word.json'
+      - 'tests/fixtures/stage55_year5000_appendix_a_metadata.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matlab-stage55-polynomial-middle-rank-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  polynomial-middle-rank:
+    name: MATLAB R2026a / experimental 4244-day middle-rank unrank
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Pin exact fixtures and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          test "$(git hash-object tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+
+      - name: Setup native MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+
+      - name: Unrank full middle word using the experimental polynomial family
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            if exist('logs','dir')~=7, mkdir('logs'); end;
+            addpath('tests');
+            diary('logs/STAGE55_POLYNOMIAL_MIDDLE_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              run_stage55_polynomial_middle_rank_native();
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              fprintf('STAGE55_POLYNOMIAL_MIDDLE_NATIVE_FAIL\n');
+              diary off;
+              rethrow(ME);
+            end
+
+      - name: Verify exact root-count and middle-rank hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8  logs/STAGE55_POLYNOMIAL_MIDDLE_ROOT_COUNT.txt\n' | sha256sum -c -
+          printf 'cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6  logs/STAGE55_POLYNOMIAL_MIDDLE_RANK.txt\n' | sha256sum -c -
+          test -s logs/STAGE55_POLYNOMIAL_MIDDLE_NATIVE_WORD.json
+          test -s logs/STAGE55_POLYNOMIAL_MIDDLE_REPORT.json
+          grep -q '"word_matches_independent_cpp_fixture":true' logs/STAGE55_POLYNOMIAL_MIDDLE_REPORT.json
+          grep -q '"production_route_used":false' logs/STAGE55_POLYNOMIAL_MIDDLE_REPORT.json
+
+      - name: Preserve exact native evidence on PASS or FAIL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-polynomial-middle-rank-${{ github.sha }}
+          path: |
+            logs/STAGE55_POLYNOMIAL_MIDDLE_NATIVE.log
+            logs/STAGE55_POLYNOMIAL_MIDDLE_ROOT_COUNT.txt
+            logs/STAGE55_POLYNOMIAL_MIDDLE_RANK.txt
+            logs/STAGE55_POLYNOMIAL_MIDDLE_NATIVE_WORD.json
+            logs/STAGE55_POLYNOMIAL_MIDDLE_REPORT.json
+          if-no-files-found: warn
+          retention-days: 30
