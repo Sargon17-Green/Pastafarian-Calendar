@@ -122,7 +122,8 @@ fn asymmetry_oracle(
     False, False ->
       case intersection == 0 {
         True -> #(0, 1)
-        False -> fraction(2 * { right_count - left_count }, left_count + right_count)
+        False ->
+          fraction(2 * { right_count - left_count }, left_count + right_count)
       }
   }
 }
