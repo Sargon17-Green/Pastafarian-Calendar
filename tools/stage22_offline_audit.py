@@ -139,10 +139,11 @@ def check_intentional_abort(label, marker, stderr):
     lines = stderr.split(b"\n")
     assert len(lines) == 4 and lines[-1] == b"", ("diagnostic framing", label)
     header, excerpt, caret, _ = lines
-    fields = header.rsplit(b":", 3)
-    assert len(fields) == 4 and fields[0] == str(path).encode()
-    assert fields[3] == b" error: divide by zero"
-    assert fields[1].isdigit() and fields[2].isdigit()
+    suffix = b": error: divide by zero"
+    assert header.endswith(suffix), ("diagnostic type", label)
+    fields = header[:-len(suffix)].rsplit(b":", 2)
+    assert len(fields) == 3 and fields[0] == str(path).encode(), ("diagnostic path", label)
+    assert fields[1].isdigit() and fields[2].isdigit(), ("diagnostic coordinates", label)
     number, column = int(fields[1]), int(fields[2])
     program_lines = path.read_bytes().split(b"\n")
     assert 1 <= number <= len(program_lines) and column >= 1
