@@ -24,21 +24,47 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = "refs/heads/qa/matlab-stage55-polynomial-middle-rank-20261125"
-          test "$(git rev-parse HEAD^)" = "de4ba7748c148d398cb50dc99b9454952d3d69b8"
-          test "$(git rev-parse HEAD:src)" = "d04d76694bb1246be5943f1dadd6e9d285e5ce97"
-          test "$(git rev-parse HEAD:src/+pastafari/WholeMonthWeavingFamilyPolynomial.m)" = "d365ef6a03f2fccc8f42da3cd866abd66345bbde"
-          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingSuffixByFirstEndpoint.m)" = "48f8b148edb621e1a789385456def77f3dfd8d28"
-          test "$(git rev-parse HEAD:src/+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m)" = "1302f173b77c31cd7cc886989c0155943747525f"
-          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m)" = "229352c3627de7b807436dbe7d3f7698b1cebb2b"
-          test "$(git rev-parse HEAD:src/+pastafari/countWholeWeavingSuffixByEndpoints.m)" = "a8ba85b28067cdf1b76ee6ab5dbe7f20a6e9cb94"
-          test "$(git rev-parse HEAD:src/+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m)" = "ec815257fd5302b591b94c6c70842d26773dc87f"
-          test "$(git rev-parse HEAD:src/+pastafari/BigInt.m)" = "86581532df7492a236283c5ee9410ca281e2e6f5"
-          test "$(git rev-parse HEAD:src/+pastafari/ValidationManager.m)" = "8be154aa7b8a36f1a282515c81f29742719af3a6"
-          test "$(git rev-parse HEAD:src/+pastafari/MonthWeavingCompatibilityRoute.m)" = "2bfde51537b332dda6be7f9646a69613d48352c7"
-          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
-          test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
-          test "$(git rev-parse HEAD:tools/stage55_full_prefix_inverse_rank.cpp)" = "542f091e308afdc5131c52b5a5006588cad8bce5"
+          mkdir -p evidence
+          echo "GATE_BEGIN"
+          expected_ref="refs/heads/qa/matlab-stage55-polynomial-middle-rank-20261125"
+          if [[ "$GITHUB_REF" != "$expected_ref" ]]; then
+            echo "GATE_FAIL ref expected=$expected_ref actual=$GITHUB_REF"
+            exit 1
+          fi
+          echo "GATE_PASS ref"
+
+          if [[ "$(git rev-parse HEAD^)" != "de4ba7748c148d398cb50dc99b9454952d3d69b8" ]]; then
+            echo "GATE_FAIL parent actual=$(git rev-parse HEAD^)"
+            exit 1
+          fi
+          echo "GATE_PASS parent"
+
+          check_object() {
+            local path="$1"
+            local expected="$2"
+            local actual
+            actual="$(git rev-parse "HEAD:$path")"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "GATE_FAIL object path=$path expected=$expected actual=$actual"
+              exit 1
+            fi
+            echo "GATE_PASS object path=$path sha=$actual"
+          }
+
+          check_object "src" "d04d76694bb1246be5943f1dadd6e9d285e5ce97"
+          check_object "src/+pastafari/WholeMonthWeavingFamilyPolynomial.m" "d365ef6a03f2fccc8f42da3cd866abd66345bbde"
+          check_object "src/+pastafari/countWholeWeavingSuffixByFirstEndpoint.m" "48f8b148edb621e1a789385456def77f3dfd8d28"
+          check_object "src/+pastafari/unrankGeneralWeaveSuffixChunkAdjoint.m" "1302f173b77c31cd7cc886989c0155943747525f"
+          check_object "src/+pastafari/countWholeWeavingNextLetterBlocksAdjoint.m" "229352c3627de7b807436dbe7d3f7698b1cebb2b"
+          check_object "src/+pastafari/countWholeWeavingSuffixByEndpoints.m" "a8ba85b28067cdf1b76ee6ab5dbe7f20a6e9cb94"
+          check_object "src/+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m" "ec815257fd5302b591b94c6c70842d26773dc87f"
+          check_object "src/+pastafari/BigInt.m" "86581532df7492a236283c5ee9410ca281e2e6f5"
+          check_object "src/+pastafari/ValidationManager.m" "8be154aa7b8a36f1a282515c81f29742719af3a6"
+          check_object "src/+pastafari/MonthWeavingCompatibilityRoute.m" "2bfde51537b332dda6be7f9646a69613d48352c7"
+          check_object "tests/fixtures/stage55_year5000_middle_word.json" "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          check_object "tests/fixtures/stage55_year5000_appendix_a_metadata.json" "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          check_object "tools/stage55_full_prefix_inverse_rank.cpp" "542f091e308afdc5131c52b5a5006588cad8bce5"
+
           python3 - <<'PY'
           import subprocess
           expected = sorted([
@@ -50,15 +76,32 @@ jobs:
                "de4ba7748c148d398cb50dc99b9454952d3d69b8", "HEAD"],
               text=True,
           ).splitlines())
-          assert actual == expected, (actual, expected)
+          print("GATE_FILESET_EXPECTED=" + repr(expected))
+          print("GATE_FILESET_ACTUAL=" + repr(actual))
+          if actual != expected:
+              raise SystemExit("GATE_FAIL QA-only file set differs")
           source = open("tests/run_stage55_polynomial_real_year_middle_rank.m", encoding="utf-8").read()
-          assert "WholeMonthWeavingFamilyPolynomial" in source
-          assert "calendarDateSpaghetti(" not in source
-          assert "finalMonsterIntegration(" not in source
-          assert "MonthWeavingCompatibilityRoute.call" not in source
+          forbidden = [
+              "calendarDateSpaghetti(",
+              "finalMonsterIntegration(",
+              "MonthWeavingCompatibilityRoute.call",
+          ]
+          for token in forbidden:
+              if token in source:
+                  raise SystemExit("GATE_FAIL forbidden source token: " + token)
+          if "WholeMonthWeavingFamilyPolynomial" not in source:
+              raise SystemExit("GATE_FAIL polynomial candidate not referenced")
+          print("GATE_PASS test-source scope")
           PY
-          git diff --exit-code de4ba7748c148d398cb50dc99b9454952d3d69b8 HEAD -- src
-          mkdir -p evidence
+
+          if git diff --quiet de4ba7748c148d398cb50dc99b9454952d3d69b8 HEAD -- src; then
+            echo "GATE_PASS production src unchanged"
+          else
+            git diff --stat de4ba7748c148d398cb50dc99b9454952d3d69b8 HEAD -- src
+            echo "GATE_FAIL production src changed"
+            exit 1
+          fi
+
           {
             echo "HEAD=$(git rev-parse HEAD)"
             echo "SRC_TREE=$(git rev-parse HEAD:src)"
@@ -68,7 +111,7 @@ jobs:
             echo "REFERENCE_ROOT_COUNT_SHA256=c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
-
+          echo "GATE_PASS all source locks"
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
