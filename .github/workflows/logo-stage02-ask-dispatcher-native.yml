@@ -46,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD^)" = "c21646e1b06f25b3f75fb672dd432ead8e664875"
+          test "$(git rev-parse HEAD^)" = "93b048924af8bf138341d6572430696d60134484"
           test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = "ad001c6aeeb6c758f5004b206a656fec5d6fc403"
           git diff --exit-code HEAD^ HEAD -- src test
           mkdir -p "$RUNNER_TEMP/qa-bundle"
