@@ -39,8 +39,21 @@ jobs:
           mkdir -p "$out/meta" "$out/qa31cp" "$out/qa31ct"
           for id in 45635056768 45699183636 45699183338; do
             gh api "repos/$repo/actions/runs/$id" > "$out/meta/${id}_run.json"
-            gh api "repos/$repo/actions/runs/$id/jobs?per_page=100" > "$out/meta/${id}_jobs.json"
-            gh api "repos/$repo/actions/runs/$id/artifacts?per_page=100" > "$out/meta/${id}_artifacts.json"
+            gh api --paginate --slurp "repos/$repo/actions/runs/$id/jobs?filter=latest&per_page=100" > "$out/meta/${id}_jobs_pages.json"
+            gh api --paginate --slurp "repos/$repo/actions/runs/$id/artifacts?per_page=100" > "$out/meta/${id}_artifacts_pages.json"
+            for kind in jobs artifacts; do
+              jq -e --arg kind "$kind" '
+                . as $pages |
+                ($pages | map(.[$kind]) | add) as $rows |
+                if ($pages | length) > 0 and
+                   ($pages | all(.total_count == $pages[0].total_count)) and
+                   ($rows | length) == $pages[0].total_count and
+                   ($rows | map(.id) | unique | length) == ($rows | length)
+                then {total_count: $pages[0].total_count, ($kind): $rows}
+                else error("incomplete or inconsistent pagination") end
+              ' "$out/meta/${id}_${kind}_pages.json" > "$out/meta/${id}_${kind}.json"
+              jq -c --arg kind "$kind" '{total_count, observed: (.[$kind] | length)}' "$out/meta/${id}_${kind}.json"
+            done
           done
           cp "$out/meta/45635056768_run.json" "$out/meta/cp_run.json"
           cp "$out/meta/45635056768_jobs.json" "$out/meta/cp_jobs.json"
@@ -66,10 +79,14 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: befunge-qa31cu-current-entry-composition
-          path: ${{ runner.temp }}/qa31cu/qa31cu_composition.json
+          path: |
+            ${{ runner.temp }}/qa31cu/qa31cu_composition.json
+            ${{ runner.temp }}/qa31cu/meta/
           retention-days: 30
 
   native-late-digit-gate:
+    # Metadata-only repair has no new Native hypothesis; preserve accepted QA31CV.
+    if: ${{ !contains(github.event.head_commit.message, '[qa31cu-meta-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
