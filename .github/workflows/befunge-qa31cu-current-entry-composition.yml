@@ -1,0 +1,67 @@
+name: Befunge QA31CU active-entry composition
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - '.github/workflows/befunge-qa31cu-current-entry-composition.yml'
+      - 'qa/qa31cu_current_entry_composition.py'
+      - 'qa/QA31CU_CURRENT_ENTRY_COMPOSITION_2026-11-26.md'
+      - 'qa/qa31ch_results.json'
+      - 'qa/qa31cj_results.json'
+      - 'qa/qa31ck_results.json'
+      - 'qa/qa31cl_results.json'
+      - 'qa/qa31cm_results.json'
+      - 'qa/signed_increment_gate.patch'
+      - 'src/interleaved_work_counts.b98'
+      - 'src/work_counts.b98'
+      - 'reference/work_counts.b98'
+      - 'reference/save.b98'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compose-current-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Retrieve exact completed Native evidence and metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          out="$RUNNER_TEMP/qa31cu"
+          mkdir -p "$out/meta" "$out/qa31cp" "$out/qa31ct"
+          for id in 45635056768 45699183636 45699183338; do
+            gh api "repos/$repo/actions/runs/$id" > "$out/meta/${id}_run.json"
+            gh api "repos/$repo/actions/runs/$id/jobs?per_page=100" > "$out/meta/${id}_jobs.json"
+            gh api "repos/$repo/actions/runs/$id/artifacts?per_page=100" > "$out/meta/${id}_artifacts.json"
+          done
+          cp "$out/meta/45635056768_run.json" "$out/meta/cp_run.json"
+          cp "$out/meta/45635056768_jobs.json" "$out/meta/cp_jobs.json"
+          cp "$out/meta/45635056768_artifacts.json" "$out/meta/cp_artifacts.json"
+          cp "$out/meta/45699183636_run.json" "$out/meta/ct_run.json"
+          cp "$out/meta/45699183636_jobs.json" "$out/meta/ct_jobs.json"
+          cp "$out/meta/45699183636_artifacts.json" "$out/meta/ct_artifacts.json"
+          cp "$out/meta/45699183338_run.json" "$out/meta/regression_run.json"
+          cp "$out/meta/45699183338_jobs.json" "$out/meta/regression_jobs.json"
+          cp "$out/meta/45699183338_artifacts.json" "$out/meta/regression_artifacts.json"
+          gh run download 45635056768 --repo "$repo" --name "befunge-digit-dependent-gate" --dir "$out/qa31cp"
+          gh run download 45699183636 --repo "$repo" --name "befunge-qa31ct-semantic-domain-native" --dir "$out/qa31ct"
+      - name: Compose source, proof, and Native receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile qa/qa31cu_current_entry_composition.py
+          python3 qa/qa31cu_current_entry_composition.py \
+            --evidence-root "$RUNNER_TEMP/qa31cu" \
+            --output "$RUNNER_TEMP/qa31cu/qa31cu_composition.json"
+      - name: Retain composition receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31cu-current-entry-composition
+          path: ${{ runner.temp }}/qa31cu/qa31cu_composition.json
+          retention-days: 30
