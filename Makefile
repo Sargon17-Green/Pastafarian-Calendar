@@ -3,7 +3,7 @@ RGBLINK ?= rgblink
 RGBFIX ?= rgbfix
 PYTHON ?= python3
 
-.PHONY: all build test clean test-stage1-gate-histogram
+.PHONY: all build test clean test-stage1-gate-histogram test-stage1-gate-year
 all: build
 build: build/calendar.gb
 
@@ -217,6 +217,23 @@ build/calendar_gate_gap.o: build/calendar.o src/runtime/calendar_bowl_answer.asm
 build/calendar_gate_gap.gb: build/calendar_gate_gap.o
 	$(RGBLINK) -n build/calendar_gate_gap.sym -m build/calendar_gate_gap.map -o $@ $<
 	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+
+# Source-derived 1025-entry gate map; generated from the independent Host oracle.
+build/calendar_gate_year_map.inc: tools/generate_sm83_stage1_gate_map.py tests/test_sm83_stage1_year_path_oracle.py tests/test_sm83_stage1_selection_oracle.py tests/test_sm83_stage1_sauce_oracle.py
+	mkdir -p build
+	$(PYTHON) tools/generate_sm83_stage1_gate_map.py $@
+
+# Isolated Stage1 Native395; code in ROMX bank 3, read-only gate map in bank 2.
+build/calendar_gate_year.o: build/calendar.o build/calendar_gate_year_map.inc src/runtime/calendar_gate_year.asm src/runtime/calendar_bowl_answer_rank.asm src/runtime/calendar_bowl_poststirs.asm src/tests/calendar_gate_year_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_GATE_YEAR_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_gate_year.gb: build/calendar_gate_year.o
+	$(RGBLINK) -n build/calendar_gate_year.sym -m build/calendar_gate_year.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+test-stage1-gate-year: build/calendar_gate_year.gb
+	$(PYTHON) tests/test_rom_gate_year.py build/calendar_gate_year.gb
 
 # Independent Host-only Stage1 bounded gate-window/radix histogram design.
 test-stage1-gate-histogram:

@@ -919,3 +919,33 @@ jobs:
             build/calendar_gate_gap.map
             build/calendar_gate_gap.sym
           if-no-files-found: error
+
+
+  dmg-gate-year-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate the source-derived 1025-entry gate map
+        run: make build/calendar_gate_year_map.inc
+      - name: Build isolated Native395 with RGBDS v1.0.4
+        run: |
+          docker run --rm --mount type=bind,src="$PWD",dst=/work \
+            -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
+            sh -c 'make build/calendar_gate_year.gb'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyBoy
+        run: python -m pip install 'pyboy>=2,<3'
+      - name: Verify ROMX bank-2 map, Host oracle and Native395 differential
+        run: python3 tests/test_rom_gate_year.py build/calendar_gate_year.gb
+      - name: Preserve Native395 ROM, map and symbols
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sm83-native395-gate-year
+          if-no-files-found: error
+          path: |
+            build/calendar_gate_year.gb
+            build/calendar_gate_year.map
+            build/calendar_gate_year.sym

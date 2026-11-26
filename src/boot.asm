@@ -335,6 +335,10 @@ ELIF DEF(STAGE1_GATE_GAP_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
     call RunCalendarGateGapBench
+ELIF DEF(STAGE1_GATE_YEAR_NATIVE_BENCH)
+    ld a, 3
+    ld [$2000], a
+    call RunCalendarGateYearBench
 ELIF DEF(STAGE1_ANSWER_FLOW_NATIVE_BENCH)
     ld a, 1
     ld [$2000], a
@@ -601,4 +605,10 @@ IF DEF(STAGE1_GATE_GAP_NATIVE_BENCH)
 INCLUDE "src/runtime/calendar_bowl_answer_rank.asm"
 INCLUDE "src/runtime/calendar_gate_gap.asm"
 INCLUDE "src/tests/calendar_gate_gap_native_test.asm"
+ENDC
+
+IF DEF(STAGE1_GATE_YEAR_NATIVE_BENCH)
+INCLUDE "src/runtime/calendar_bowl_answer_rank.asm"
+INCLUDE "src/runtime/calendar_gate_year.asm"
+INCLUDE "src/tests/calendar_gate_year_native_test.asm"
 ENDC
