@@ -126,7 +126,7 @@ Write-Host "STAGE33_MIXED_STEP_SAME=$mixedNoFlips"
 Write-Host ("STAGE33_DISTINCT_MIXED="+$seen.Count)
 Write-Host "STAGE33_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE33_ASSERTIONS_FAILED=$script:StageTestFailed"
-if($script:StageTestPassed -ne 560){Write-Host 'STAGE33_ASSERTION_COUNT=FAIL_EXPECTED_560';exit 1}
+if($script:StageTestPassed -ne 561){Write-Host 'STAGE33_ASSERTION_COUNT=FAIL_EXPECTED_561';exit 1}
 if($script:StageTestFailed -ne 0){Write-Host 'STAGE33_DISCOVERY18=FAIL';exit 1}
 Write-Host 'STAGE33_DISCOVERY18=BOUNDED_RESEARCH_ONLY'
 exit 0

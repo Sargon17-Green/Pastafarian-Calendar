@@ -74,5 +74,6 @@ A successful run of the new workflow will establish code/compatibility regressio
 
 - The Stage43 preflight job now runs the 42-case `StageMetadataState.Tests.ps1` suite on Windows PowerShell 5.1 at the exact checked-out SHA and retains a mandatory transcript/metadata artifact. The suite tests live, pending, implementing, and sealed shapes plus negative parser, provenance, and transition cases; its final marker explicitly states that shape tests do not claim Stage43 acceptance.
 - The preflight, Native, and seal `*_JOBS` fields now require a positive complete count (`n_OF_n_SUCCESS`); partial counts and `0_OF_0_SUCCESS` reject.
+- The explicit Stage32/Stage33 own-evidence assertions are included in their fixed assertion budgets: 240 and 561 respectively.
 - Under any valid Stage43 profile, Stage32 and Stage33 tests now require their own evidence fields. A later Stage34 seal cannot stand in for either predecessor's own evidence.
 - This is classifier/gate QA only. It does not edit `DEVELOPMENT_STAGE.md`, activate Stage43, claim a Native acceptance or seal, or touch main/merge.
