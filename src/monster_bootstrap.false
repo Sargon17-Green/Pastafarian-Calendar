@@ -589,9 +589,9 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
   z;b:s;a;!v;a;!b;9h;!!t:
   z;b:t;a;!b;25h;!!t:
   { rank = 4 + EuclideanRemainder(T-4,7); }
-  z;b:4a;!b;20h;!!v:
+  z;b:4a;!b;0h;!!v:
   z;b:t;a;!v;a;!b;10h;!!n:
-  z;b:7a;!b;20h;!!v:
+  z;b:7a;!b;0h;!!v:
   z;b:n;a;!v;a;!b;16h;!!n:
   z;b:n;a;!0a;!b;3h;!!r:
   r;4+r:
@@ -616,7 +616,7 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
    z;b:d;a;!n;a;!b;9h;!!d:
    z;b:p;a;!b;0h;!!v:
    z;b:v;a;!v;a;!b;14h;!!v:
-   z;b:i;a;!b;20h;!!n:
+   z;b:i;a;!b;0h;!!n:
    z;b:v;a;!n;a;!b;9h;!!v:
    z;b:d;a;!v;a;!b;9h;!!d:
    z;b:d;a;!b;25h;!!d:
