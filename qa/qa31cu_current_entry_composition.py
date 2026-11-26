@@ -266,7 +266,10 @@ def verify_ct_artifact(ct_dir):
          "QA31CT Native log summary")
     data = read_json(ct_dir / "qa31ct_semantic_domain.json")
     need(data["project_id"] == PROJECT and data["status"] == "PASS" and
-         data["native_invocations"] == 38 and data["error"] is None, "QA31CT Native receipt")
+         # QA31CT producer emits failure-only keys only in its exception handler.
+         data["native_invocations"] == 38 and
+         not any(key in data for key in ("error", "traceback", "native_invocations_at_failure")),
+         "QA31CT Native receipt")
     ids = data["source_ids"]
     active = ids["src/work_counts.b98"]
     need(active["git_blob"] == ACTIVE and
