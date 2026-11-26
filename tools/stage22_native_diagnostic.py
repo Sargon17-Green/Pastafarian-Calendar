@@ -335,6 +335,41 @@ def limits():
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 
+def intentional_abort(program, path, marker, stderr):
+    """Only the exact original-runtime divide-by-zero diagnostic at the marker's explicit guard."""
+    token = b'"' + marker.encode("ascii") + b'"0 0/'
+    for number, line in enumerate(program.split(b"\n"), 1):
+        offset = line.find(token)
+        if offset < 0:
+            continue
+        if line.find(token, offset + 1) >= 0:
+            return False
+        column = offset + len(token)
+        expected = (
+            str(path).encode() + b":" + str(number).encode() + b":" + str(column).encode()
+            + b": error: divide by zero\n" + line + b"\n"
+            + b" " * (column - 1) + b"^\n"
+        )
+        if stderr == expected:
+            return True
+    return False
+
+
+def abort_self_check():
+    path = Path("evidence/stage22_acceptance/invalid_outer_zero.false")
+    line = b' k;1+g;!x:x;g;!1=~["E_BOWL_BATCH_RECORD_LENGTH"0 0/]?'
+    program = b"\n" * 923 + line + b"\n"
+    observed = str(path).encode() + b":924:51: error: divide by zero\n" + line + b"\n" + b" " * 50 + b"^\n"
+    marker = "E_BOWL_BATCH_RECORD_LENGTH"
+    assert intentional_abort(program, path, marker, observed)
+    assert not intentional_abort(program, path, marker, b"")
+    assert not intentional_abort(program, path, marker, observed.replace(b":51:", b":50:"))
+    assert not intentional_abort(program, path, marker, observed.replace(b"divide by zero", b"stack type mismatch"))
+    assert not intentional_abort(program, path, "E_BOWL_BATCH_BIG_SIGN", observed)
+    assert not intentional_abort(program, path, marker, observed + b"extra\n")
+    assert not intentional_abort(program, Path("wrong.false"), marker, observed)
+
+
 def execute(name, program, seconds, want=MARKER, exitcode=0):
     E.mkdir(parents=True, exist_ok=True)
     path = E / (name + ".false")
@@ -356,7 +391,8 @@ def execute(name, program, seconds, want=MARKER, exitcode=0):
     (E / (name + ".stderr.txt")).write_bytes(stderr)
     (E / (name + ".exit_code.txt")).write_text(str(code) + "\n")
     normalized = stdout.replace(b"\r", b"").replace(b"\n", b"")
-    passed = code == exitcode and normalized == want.encode() and not stderr
+    framing_ok = (not stderr) if exitcode == 0 else (exitcode == 1 and intentional_abort(program, path, want, stderr))
+    passed = code == exitcode and normalized == want.encode() and framing_ok
     return {
         "exit_code": code,
         "elapsed_seconds": round(elapsed, 3),
@@ -371,6 +407,7 @@ def execute(name, program, seconds, want=MARKER, exitcode=0):
 
 
 def self_check(source):
+    abort_self_check()
     assert len(INVALIDS) == 16 and len(MUTANTS) == 5
     assert source.count(OP) == 1
     durable_return = b"z;r:6a;!y;1+g;!a;!y;2+g;!a;!y;3+g;!a;!y;4+g;!a;!y;5+g;!a;!y;6+g;!a;!"

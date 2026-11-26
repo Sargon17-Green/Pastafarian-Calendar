@@ -132,6 +132,28 @@ def read_output(label):
     return stdout, stderr, exit_code
 
 
+def check_intentional_abort(label, marker, stderr):
+    # Independently bind the diagnostic coordinates, source excerpt and caret
+    # to the actual archived program and marker, not merely to error type.
+    path = E / (label + ".false")
+    lines = stderr.split(b"\n")
+    assert len(lines) == 4 and lines[-1] == b"", ("diagnostic framing", label)
+    header, excerpt, caret, _ = lines
+    fields = header.rsplit(b":", 3)
+    assert len(fields) == 4 and fields[0] == str(path).encode()
+    assert fields[3] == b" error: divide by zero"
+    assert fields[1].isdigit() and fields[2].isdigit()
+    number, column = int(fields[1]), int(fields[2])
+    program_lines = path.read_bytes().split(b"\n")
+    assert 1 <= number <= len(program_lines) and column >= 1
+    assert excerpt == program_lines[number - 1]
+    assert caret == b" " * (column - 1) + b"^"
+    token = b'"' + marker.encode("ascii") + b'"0 0/'
+    assert excerpt[:column].endswith(token), ("not the expected explicit abort", label)
+    assert excerpt.count(token) == 1
+    assert column <= len(excerpt)
+
+
 def check_positive(record, stdout, stderr, exit_code, recomputed):
     if record["expected_bowls"] != recomputed:
         raise AssertionError("independent mathematical expectation mismatch")
@@ -174,7 +196,9 @@ def main():
         record = item["record"]
         stdout, stderr, exit_code = read_output(label)
         assert stdout.decode() == record["expected_marker"]
-        assert stderr == b"" and exit_code == 1 and item["passed"] is True
+        assert exit_code == 1 and item["passed"] is True
+        check_intentional_abort(label, record["expected_marker"], stderr)
+        assert item["program_sha256"] == sha((E / (label + ".false")).read_bytes())
 
     for label, item in evidence["mutants"].items():
         record = item["record"]
@@ -183,7 +207,9 @@ def main():
         marker = first_numeric_marker(correct, wrong)
         stdout, stderr, exit_code = read_output(label)
         assert marker == record["expected_marker"]
-        assert stdout.decode() == marker and stderr == b"" and exit_code == 1
+        assert stdout.decode() == marker and exit_code == 1
+        check_intentional_abort(label, marker, stderr)
+        assert item["program_sha256"] == sha((E / (label + ".false")).read_bytes())
         assert item["passed"] is True
 
     for extension in (".false", ".stdout.txt", ".stderr.txt", ".exit_code.txt", ".fixture.json"):
