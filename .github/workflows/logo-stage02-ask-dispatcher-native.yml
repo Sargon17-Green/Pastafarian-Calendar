@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 ASK to dispatcher integration
+name: Logo Stage2 QA D19 isolated fourth gate profile
 on:
   push:
     branches:
@@ -61,20 +61,16 @@ jobs:
               changed += actual
           if changed != 6:
               raise SystemExit(f"expected six QA harness fixes; changed {changed}")
-          # Diagnostic only: a containing year has open < calculation <= close and length <= 5778.
-          # Therefore its endpoints are within calculation +/- 5778. Strictly monotone gate
-          # days make the first covering gates sufficient. No outer next/previous prefetch:
-          # this two-job diagnostic invokes only year5000. Frozen reference scan/sort/ASK stay intact.
+          # Exact frozen formula; insert observation only in a QA-local copy.
+          reference = Path("test/normative_reference.logo").read_text(encoding="utf-8")
+          assert reference.count("to nr.sauce :calculationDay :targetDay\n  localmake \"counts nr.work.counts :calculationDay :targetDay\n  localmake \"stones nr.stones\n  localmake \"hidden nr.hidden.build :counts :stones\n  localmake \"visible nr.visible.build :counts :stones :hidden\n  localmake \"bowls nr.initial.bowls :counts\n  localmake \"dropResult nr.apply.drops 1 :bowls :visible :stones []\n  localmake \"after item 1 :dropResult\n  localmake \"latch item 2 :dropResult\n  localmake \"final nr.post.stirs 1 :after\n  output (list :final :latch)\nend") == 1
+          assert reference.count("to nr.gate.gap :signedStep\n  localmake \"target bi.add nr.foundation :signedStep\n  localmake \"s nr.sauce nr.foundation :target\n  localmake \"stream nr.ask :s 1 1\n  localmake \"chosen nr.choose.rank :stream bi.small 922\n  output bi.add bi.small 41 :chosen\nend") == 1
           start_marker = "to ad.year5000.data :calculation\n"
           assert source.count(start_marker) == 1
           start = source.index(start_marker)
           end = source.index("\nend\n", start) + len("\nend\n")
-          original = source[start:end]
-          assert "bi.small 139" in original and "bi.small 274" in original
-          assert "nr.year5000.scan.i" in original and "nr.year.pair.sort" in original
-          replacement = "to ad.year5000.data :calculation\n  ; QA diagnostic: cover actual days, not a fixed index radius.\n  nr.gate.reset\n  localmake \"low bi.sub :calculation bi.small 5778\n  localmake \"high bi.add :calculation bi.small 5778\n  print [ASK_DISPATCH_DIAG_COVER_BEGIN]\n  while [bi.gt (nr.gate.known :NR.MIN.GATE) :low] [\n    ignore nr.gate.extend.backward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_BACKWARD] (bi.digits :NR.MIN.GATE))\n  ]\n  while [bi.lt (nr.gate.known :NR.MAX.GATE) :high] [\n    ignore nr.gate.extend.forward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD] (bi.digits :NR.MAX.GATE))\n  ]\n  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]\n  localmake \"raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation\n  localmake \"candidates nr.year.pair.sort :raw\n  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))\n  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY] stop]\n  localmake \"N bi.small count :candidates\n  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]\n  localmake \"s nr.sauce :calculation :calculation\n  localmake \"stream nr.ask :s 1 10\n  localmake \"rank nr.choose.rank :stream :N\n  localmake \"chosen item bi.to.small :rank :candidates\n  localmake \"year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)\n  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]\n  output (list :year :N)\nend\n"
-          source = source[:start] + replacement + source[end:]
-          print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
+          source = source[:start] + "to ad.year5000.data :calculation\n  ; Isolated fourth gap, no three-gate prefetch. Diagnostic, not acceptance.\n  localmake \"step bi.small 4\n  if equalp :AD.DIRECTION \"forward [make \"step bi.sub bi.zero :step]\n  print [ASK_DISPATCH_GATE_PROFILE_BEGIN]\n  print (sentence [ASK_DISPATCH_GATE_PROFILE_DIRECTION] :AD.DIRECTION)\n  localmake \"target bi.add nr.foundation :step\n  localmake \"s ad.profile.sauce nr.foundation :target\n  print [ASK_DISPATCH_GATE_PROFILE_ASK_BEGIN]\n  localmake \"stream nr.ask :s 1 1\n  print [ASK_DISPATCH_GATE_PROFILE_RANK_BEGIN]\n  localmake \"chosen nr.choose.rank :stream bi.small 922\n  localmake \"gap bi.add bi.small 41 :chosen\n  if bi.lt :gap bi.small 42 [print [ASK_DISPATCH_GATE_PROFILE_RANGE_FAILURE] bye]\n  if bi.gt :gap bi.small 963 [print [ASK_DISPATCH_GATE_PROFILE_RANGE_FAILURE] bye]\n  print (sentence [ASK_DISPATCH_GATE_PROFILE_GAP] (bi.digits :gap))\n  print [ASK_DISPATCH_GATE_PROFILE_DONE]\n  bye\nend\n" + source[end:] + "\n" + "to ad.profile.sauce :calculationDay :targetDay\n  print [ASK_DISPATCH_GATE_PROFILE_COUNTS_BEGIN]\n  localmake \"counts nr.work.counts :calculationDay :targetDay\n  print [ASK_DISPATCH_GATE_PROFILE_STONES_BEGIN]\n  localmake \"stones nr.stones\n  print [ASK_DISPATCH_GATE_PROFILE_HIDDEN_BEGIN]\n  localmake \"hidden nr.hidden.build :counts :stones\n  print [ASK_DISPATCH_GATE_PROFILE_VISIBLE_BEGIN]\n  localmake \"visible nr.visible.build :counts :stones :hidden\n  print [ASK_DISPATCH_GATE_PROFILE_BOWLS_BEGIN]\n  localmake \"bowls nr.initial.bowls :counts\n  print [ASK_DISPATCH_GATE_PROFILE_DROPS_BEGIN]\n  localmake \"dropResult nr.apply.drops 1 :bowls :visible :stones []\n  print [ASK_DISPATCH_GATE_PROFILE_AFTER_BEGIN]\n  localmake \"after item 1 :dropResult\n  print [ASK_DISPATCH_GATE_PROFILE_LATCH_BEGIN]\n  localmake \"latch item 2 :dropResult\n  print [ASK_DISPATCH_GATE_PROFILE_STIRS_BEGIN]\n  localmake \"final nr.post.stirs 1 :after\n  output (list :final :latch)\nend\n"
+          print("ASK_DISPATCH_GATE_PROFILE_CONTRACT=READY isolated signed step +/-4")
           path.write_text(source, encoding="utf-8")
           print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
           PY
@@ -101,7 +97,7 @@ jobs:
           make -j2
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
-      - name: Run bounded Native selector group
+      - name: Run bounded fourth-gate phase diagnostic
         shell: bash
         env:
           GROUP: ${{ matrix.group }}
@@ -116,39 +112,24 @@ jobs:
           echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
           cat "$RUNNER_TEMP/native.log"
           test "$code" = 0
-          expected_cases=1
-          expected_checks=14
-          if [ "$GROUP" = structure ]; then
-            expected_cases=5
-            expected_checks=70
-          fi
-          grep -Fxq "ASK_DISPATCH_CASES_PASIS $expected_cases" "$RUNNER_TEMP/native.log"
-          grep -Fxq "ASK_DISPATCH_CHECKS_PASIS $expected_checks" "$RUNNER_TEMP/native.log"
-          grep -Fxq 'ASK_DISPATCH_NATIVE_PASIS' "$RUNNER_TEMP/native.log"
-          test "$(grep -c '^ASK_DISPATCH_ROW ' "$RUNNER_TEMP/native.log")" = "$expected_cases"
-          if grep -Eq 'ASK_DISPATCH_FAILURE|ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
-      - name: Independent Python integer oracle
-        shell: bash
-        env:
-          DIRECTION: ${{ matrix.direction }}
-          GROUP: ${{ matrix.group }}
-        run: |
-          set -euo pipefail
-          python3 qa/logo_stage2_ask_dispatcher_oracle.py --log "$RUNNER_TEMP/native.log" --direction "$DIRECTION" --group "$GROUP" > "$RUNNER_TEMP/host.log" 2>&1
-          cat "$RUNNER_TEMP/host.log"
-          grep -Fxq 'ASK_DISPATCH_HOST_ORACLE=PASS' "$RUNNER_TEMP/host.log"
+          grep -Fxq 'ASK_DISPATCH_GATE_PROFILE_DONE' "$RUNNER_TEMP/native.log"
+          for phase in COUNTS STONES HIDDEN VISIBLE BOWLS DROPS AFTER LATCH STIRS ASK RANK; do
+            test "$(grep -Fxc "ASK_DISPATCH_GATE_PROFILE_${phase}_BEGIN" "$RUNNER_TEMP/native.log")" = 1
+          done
+          test "$(grep -Ec '^ASK_DISPATCH_GATE_PROFILE_GAP [0-9]+$' "$RUNNER_TEMP/native.log")" = 1
+          if grep -Eq 'ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
+          echo 'GATE_PROFILE_COMPLETED_DIAGNOSTIC_ONLY=YES'
       - name: Preserve exact-SHA evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-ask-dispatch-${{ matrix.direction }}-${{ matrix.group }}
+          name: logo-gate-profile-${{ matrix.direction }}
           path: |
             ${{ runner.temp }}/commit.txt
             ${{ runner.temp }}/source-blobs.txt
             ${{ runner.temp }}/qa-hashes.txt
             ${{ runner.temp }}/native.logo
             ${{ runner.temp }}/native.log
-            ${{ runner.temp }}/host.log
             ${{ runner.temp }}/exit.txt
             ${{ runner.temp }}/elapsed.txt
           if-no-files-found: warn
