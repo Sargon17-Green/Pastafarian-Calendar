@@ -285,7 +285,7 @@ function Get-StageMetadataState {
         $preflightPatterns = @{
             STAGE43_PREFLIGHT_CI_RUN = '^[0-9]+$'
             STAGE43_PREFLIGHT_CI_SHA = '^[0-9a-fA-F]{40}$'
-            STAGE43_PREFLIGHT_JOBS = '^[0-9]+_OF_[0-9]+_SUCCESS$'
+            STAGE43_PREFLIGHT_JOBS = '^([1-9][0-9]*)_OF_\1_SUCCESS$'
             STAGE43_PREFLIGHT_RUNTIME = '^(WINDOWS_POWERSHELL_5\.1|5\.1\.[0-9]+(\.[0-9]+)?)$'
             STAGE43_PREFLIGHT_ARTIFACT = '^[0-9]+$'
             STAGE43_PREFLIGHT_ARTIFACT_SHA256 = '^[0-9a-fA-F]{64}$'
@@ -346,7 +346,7 @@ function Get-StageMetadataState {
     $nativePatterns = @{
         STAGE43_NATIVE_CI_SHA = '^[0-9a-fA-F]{40}$'
         STAGE43_NATIVE_CI_RUN = '^[0-9]+$'
-        STAGE43_NATIVE_JOBS = '^[0-9]+_OF_[0-9]+_SUCCESS$'
+        STAGE43_NATIVE_JOBS = '^([1-9][0-9]*)_OF_\1_SUCCESS$'
         STAGE43_NATIVE_RUNTIME = '^5\.1\.[0-9]+(\.[0-9]+)?$'
         STAGE43_NATIVE_JOB = '^[0-9]+$'
         STAGE43_NATIVE_ARTIFACT = '^[0-9]+$'
@@ -385,7 +385,7 @@ function Get-StageMetadataState {
     $sealPatterns = @{
         STAGE43_SEAL_CI_RUN = '^[0-9]+$'
         STAGE43_SEAL_CI_SHA = '^[0-9a-fA-F]{40}$'
-        STAGE43_SEAL_CI_JOBS = '^[0-9]+_OF_[0-9]+_SUCCESS$'
+        STAGE43_SEAL_CI_JOBS = '^([1-9][0-9]*)_OF_\1_SUCCESS$'
         STAGE43_SEAL_CI_ARTIFACT = '^[0-9]+$'
         STAGE43_SEAL_CI_FINALIZER_ARTIFACT = '^[0-9]+$'
         STAGE43_SEAL_CI_FINALIZER_SHA256 = '^[0-9a-fA-F]{64}$'

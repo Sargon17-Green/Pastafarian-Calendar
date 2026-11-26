@@ -325,7 +325,23 @@ $bad = New-Stage43MetadataStateFixture -Profile 'Sealed'
 $bad['STAGE43_SEAL_CI_RUN'] = $bad['STAGE43_PREFLIGHT_CI_RUN']
 Assert-StageMetadataStateReject -Name 'N31-seal-run-reuses-preflight-run' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'SEAL_NOT_DISTINCT_FROM_PRIOR_SHA'
 
-if ($script:StageMetadataStateCases -ne 38) {
+$bad = New-Stage43MetadataStateFixture -Profile 'Pending'
+$bad['STAGE43_PREFLIGHT_JOBS'] = '16_OF_17_SUCCESS'
+Assert-StageMetadataStateReject -Name 'N32-preflight-partial-job-success' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'PREFLIGHT_INVALID_FORMAT'
+
+$bad = New-Stage43MetadataStateFixture -Profile 'Pending'
+$bad['STAGE43_PREFLIGHT_JOBS'] = '0_OF_0_SUCCESS'
+Assert-StageMetadataStateReject -Name 'N33-preflight-zero-job-count' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'PREFLIGHT_INVALID_FORMAT'
+
+$bad = New-Stage43MetadataStateFixture -Profile 'Implementing'
+$bad['STAGE43_NATIVE_JOBS'] = '16_OF_17_SUCCESS'
+Assert-StageMetadataStateReject -Name 'N34-native-partial-job-success' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'NATIVE_INVALID_FORMAT'
+
+$bad = New-Stage43MetadataStateFixture -Profile 'Sealed'
+$bad['STAGE43_SEAL_CI_JOBS'] = '16_OF_17_SUCCESS'
+Assert-StageMetadataStateReject -Name 'N35-seal-partial-job-success' -Bytes (New-StageMetadataStateTestBytes -Map $bad) -ExpectedReason 'SEAL_INVALID_FORMAT'
+
+if ($script:StageMetadataStateCases -ne 42) {
     throw ('StageMetadataState case count mismatch: ' + $script:StageMetadataStateCases)
 }
 Write-Output ('STAGE_METADATA_STATE_CASES_PASSED=' + $script:StageMetadataStateCases)
