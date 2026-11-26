@@ -9,6 +9,11 @@ use NormativeOracle;
 var checks = 0;
 var failures = 0;
 
+// Runtime-selectable test partitions. Only checked-mode structure/API runs
+// contribute to the Stage 6 acceptance marker.
+config const researchOnly = false;
+config const structureOnly = false;
+
 proc check(condition: bool, description: string) {
   checks += 1;
   if !condition {
@@ -840,10 +845,25 @@ proc probeSparseWeavingPrefix(const ref monthLengths: list(int),
 }
 
 proc main() {
-  checkResearchSparseTransposeWindowedFinite();
-  checkResearchSparseTransposeMatrixOracle();
-  checkResearchForwardSingletonMatrix();
-  checkSparseWeavingDifferential();
+  if researchOnly && structureOnly then
+    halt("researchOnly and structureOnly cannot both be enabled");
+
+  if researchOnly {
+    checkResearchSparseTransposeWindowedFinite();
+    checkResearchSparseTransposeMatrixOracle();
+    checkResearchForwardSingletonMatrix();
+    checkSparseWeavingDifferential();
+    if failures != 0 then halt("Research-only weaving checks failed.");
+    writeln("YEAR_BOUNDARY_RESEARCH_ONLY_RESULT=PASS");
+    return;
+  }
+
+  if !structureOnly {
+    checkResearchSparseTransposeWindowedFinite();
+    checkResearchSparseTransposeMatrixOracle();
+    checkResearchForwardSingletonMatrix();
+    checkSparseWeavingDifferential();
+  }
   const calculationDay = FOUNDATION_DAY;
   var gates: GateOracle;
   checkpoint("YEAR5000_BEGIN");
@@ -901,41 +921,48 @@ proc main() {
   // Constructive lower bound: all months opened, none closed, each remaining in 1..length-1.
   writeln("YEAR_BOUNDARY_WEAVING_GUARANTEED_REACHABLE_STATES=", weavingGuaranteedReachable);
   try! stdout.flush();
-  // Research-only source-fresh setup attribution. Do not treat this as
-  // production Stage 6 acceptance or as a replacement for chooseMonthWeaving.
-  // Measure the same sparse root setup on the exact production month vector,
-  // then preserve the original production call below unchanged.
-  checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_BEGIN");
-  var setupDiagnostic: SparseWeavingCounter;
-  setupDiagnostic.lengths = structure.monthLengths;
-  var setupTimer: stopwatch;
-  setupTimer.start();
-  const diagnosticRoot = setupDiagnostic.countAll();
-  setupTimer.stop();
-  check(diagnosticRoot > 0, "source-fresh sparse weaving root is positive");
-  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_SECONDS=", setupTimer.elapsed());
-  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_MONTHS=", structure.monthCount);
-  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_DAYS=", weavingInputTotal);
-  writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_RESULT=RESEARCH_ONLY");
-  try! stdout.flush();
-  checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_END");
-  checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_BEGIN");
-  var rankTimer: stopwatch;
-  rankTimer.start();
-  const rankStream = askBowl(r, 4, SEAL_MONTH_WEAVING);
-  const selectedRank = chooseRank(rankStream, diagnosticRoot);
-  rankTimer.stop();
-  check(selectedRank >= 1 && selectedRank <= diagnosticRoot,
-        "source-fresh production rank is within sparse root");
-  writeln("YEAR_BOUNDARY_RANK_SELECTION_SECONDS=", rankTimer.elapsed());
-  writeln("YEAR_BOUNDARY_RANK_SELECTION_RESULT=RESEARCH_ONLY");
-  try! stdout.flush();
-  checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_END");
-  checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_BEGIN");
-  probeSparseWeavingPrefix(structure.monthLengths, diagnosticRoot, selectedRank);
-  checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_END");
+  if !structureOnly {
+    // Research-only source-fresh setup attribution. Do not treat this as
+    // production Stage 6 acceptance or as a replacement for chooseMonthWeaving.
+    // Measure the same sparse root setup on the exact production month vector,
+    // then preserve the original production call below unchanged.
+    checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_BEGIN");
+    var setupDiagnostic: SparseWeavingCounter;
+    setupDiagnostic.lengths = structure.monthLengths;
+    var setupTimer: stopwatch;
+    setupTimer.start();
+    const diagnosticRoot = setupDiagnostic.countAll();
+    setupTimer.stop();
+    check(diagnosticRoot > 0, "source-fresh sparse weaving root is positive");
+    writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_SECONDS=", setupTimer.elapsed());
+    writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_MONTHS=", structure.monthCount);
+    writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_DAYS=", weavingInputTotal);
+    writeln("YEAR_BOUNDARY_ROOT_SETUP_DIAGNOSTIC_RESULT=RESEARCH_ONLY");
+    try! stdout.flush();
+    checkpoint("STRUCTURE_MONTH_WEAVING_ROOT_SETUP_DIAGNOSTIC_END");
+    checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_BEGIN");
+    var rankTimer: stopwatch;
+    rankTimer.start();
+    const rankStream = askBowl(r, 4, SEAL_MONTH_WEAVING);
+    const selectedRank = chooseRank(rankStream, diagnosticRoot);
+    rankTimer.stop();
+    check(selectedRank >= 1 && selectedRank <= diagnosticRoot,
+          "source-fresh production rank is within sparse root");
+    writeln("YEAR_BOUNDARY_RANK_SELECTION_SECONDS=", rankTimer.elapsed());
+    writeln("YEAR_BOUNDARY_RANK_SELECTION_RESULT=RESEARCH_ONLY");
+    try! stdout.flush();
+    checkpoint("STRUCTURE_MONTH_WEAVING_RANK_SELECTION_DIAGNOSTIC_END");
+    checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_BEGIN");
+    probeSparseWeavingPrefix(structure.monthLengths, diagnosticRoot, selectedRank);
+    checkpoint("STRUCTURE_MONTH_WEAVING_PREFIX_DIAGNOSTIC_END");
+  }
   checkpoint("STRUCTURE_MONTH_WEAVING_BEGIN");
+  var monthWeavingTimer: stopwatch;
+  monthWeavingTimer.start();
   structure.monthWeaving = chooseMonthWeaving(r, structure.monthLengths);
+  monthWeavingTimer.stop();
+  writeln("YEAR_BOUNDARY_CHECKED_MONTH_WEAVING_SECONDS=", monthWeavingTimer.elapsed());
+  try! stdout.flush();
   checkpoint("STRUCTURE_MONTH_WEAVING_END");
   checkpoint("STRUCTURE_MONTH_NAMES_BEGIN");
   structure.monthNameIndices = chooseMonthNameIndices(r, structure.monthCount);
@@ -1044,7 +1071,7 @@ proc main() {
   for targetDay in sampleDays {
     checkpoint("CALENDAR_DATE_BEGIN_" + targetDay:string);
     var actual: CalendarDateResult;
-    if targetDay == firstDay {
+    if targetDay == firstDay && !structureOnly {
       actual = calendarDate(gates, calculationDay, targetDay);
       fullCalendarDateCalls += 1;
     } else {
@@ -1054,6 +1081,15 @@ proc main() {
     checkpoint("CALENDAR_DATE_END_" + targetDay:string);
     checkpoint("INDEPENDENT_DATE_BEGIN_" + targetDay:string);
     const expected = independentDate(gates, year, structure, targetDay);
+    if structureOnly && targetDay == firstDay {
+      writeln("YEAR_BOUNDARY_EXPECTED_TARGET_DAY=", targetDay);
+      writeln("YEAR_BOUNDARY_EXPECTED_YEAR_NUMBER=", expected.yearNumber);
+      writeln("YEAR_BOUNDARY_EXPECTED_CUTLET_NAME=", expected.cutletName);
+      writeln("YEAR_BOUNDARY_EXPECTED_DAY_IN_CUTLET=", expected.dayInCutlet);
+      writeln("YEAR_BOUNDARY_EXPECTED_MONTH_NAME=", expected.monthName);
+      writeln("YEAR_BOUNDARY_EXPECTED_DAY_IN_MONTH=", expected.dayInMonth);
+      try! stdout.flush();
+    }
     checkpoint("INDEPENDENT_DATE_END_" + targetDay:string);
     check(sameDate(actual, expected),
           "calendarDate matches independent decomposition at targetDay=" + targetDay:string);
@@ -1072,14 +1108,22 @@ proc main() {
     }
   }
 
-  check(fullCalendarDateCalls == 1 &&
-        reusedStructureDateCalls == sampleDays.size-1,
-        "calendarDate full-build and reused-structure call counts");
+  if structureOnly then
+    check(fullCalendarDateCalls == 0 &&
+          reusedStructureDateCalls == sampleDays.size,
+          "structure-only run reuses the built structure for every sample");
+  else
+    check(fullCalendarDateCalls == 1 &&
+          reusedStructureDateCalls == sampleDays.size-1,
+          "calendarDate full-build and reused-structure call counts");
   writeln("YEAR_BOUNDARY_CALENDAR_DATE_FULL_BUILD_CALLS=",fullCalendarDateCalls);
   writeln("YEAR_BOUNDARY_CALENDAR_DATE_REUSED_STRUCTURE_CALLS=",reusedStructureDateCalls);
   writeln("YEAR_BOUNDARY_PROBE_CHECKS=", checks);
   writeln("YEAR_BOUNDARY_PROBE_FAILURES=", failures);
   writeln("YEAR_BOUNDARY_CALENDAR_DATE_COMPARISONS=", calendarDateChecks);
   if failures != 0 then halt("Year-boundary/date decomposition probe failed.");
-  writeln("YEAR_BOUNDARY_PROBE_RESULT=PASS");
+  if structureOnly then
+    writeln("YEAR_BOUNDARY_STRUCTURE_RESULT=PASS");
+  else
+    writeln("YEAR_BOUNDARY_PROBE_RESULT=PASS");
 }
