@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,69 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==202
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay));
+    addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')));
+    assert(strcmp(which('pastafari.unrankGeneralWeaveSuffixChunkAdjoint'), ...
+        fullfile(overlay,'+pastafari','unrankGeneralWeaveSuffixChunkAdjoint.m')));
+    qaArithmeticExactness();
+    prior=jsondecode(fileread(fullfile(root,'evidence','prior-prefix-result.json')));
+    certificate=jsondecode(fileread(fullfile(root,'evidence','interval-hashes.json')));
+    assert(numel(certificate)==202 && prior.prefix_symbols_matched==12 && ...
+        prior.full_converter_calls==0 && ~prior.full_word_verified && ~prior.stage55_accepted);
+    prefix=double(prior.prefix(:).'); remaining=double(prior.remaining(:).');
+    opened=prior.opened_up_to; closed=prior.closed_up_to;
+    assert(isequal(prefix,expected(1:12)) && opened==10 && closed==0);
+    expectedRemaining=L;
+    for i=1:12, expectedRemaining(prefix(i))=expectedRemaining(prefix(i))-1; end
+    assert(isequal(remaining,expectedRemaining));
+    rank=pastafari.BigInt(prior.rank_decimal); count=pastafari.BigInt(prior.count_decimal);
+    assert(strcmp(sha256Ascii(char(rank)),certificate(12).rank_sha256) && ...
+        strcmp(sha256Ascii(char(count)),certificate(12).count_sha256));
+    fprintf('QA_CERTIFIED_CURSOR_RESUME START=12 TARGET=202\n');
+    for position=13:202
+        stepTimer=tic;
+        [piece,cursor]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint( ...
+            L,remaining,opened,closed,rank,1);
+        elapsed=toc(stepTimer);
+        assert(cursor.initialCount==count && isscalar(piece) && piece==expected(position));
+        assert(certificate(position).position==position && ...
+            certificate(position).symbol==piece);
+        prefix=[prefix,piece]; %#ok<AGROW>
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==max(prefix) && closed==0 && ~cursor.done);
+        rank=cursor.rank; count=cursor.count;
+        rHash=sha256Ascii(char(rank)); cHash=sha256Ascii(char(count));
+        assert(rank>=pastafari.BigInt(1) && rank<=count);
+        assert(strcmp(rHash,certificate(position).rank_sha256) && ...
+            strcmp(cHash,certificate(position).count_sha256), ...
+            'Independent exact interval mismatch.');
+        result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+            'prefix_only',true,'prefix_symbols_matched',position,'days',4244, ...
+            'prefix',prefix,'remaining',remaining,'opened_up_to',opened, ...
+            'closed_up_to',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+            'rank_sha256',rHash,'count_sha256',cHash, ...
+            'initial_count_sha256',prior.initial_count_sha256, ...
+            'original_rank_sha256',prior.original_rank_sha256, ...
+            'prior_native_run',45908453935,'reference_cxx_inverse_run_id',45686680226, ...
+            'step_seconds',elapsed,'qa_arithmetic_overlay',true,'full_word_verified',false, ...
+            'full_converter_calls',0,'stage55_accepted',false);
+        file=fullfile(root,'evidence',sprintf('prefix-%04d-result.json',position));
+        fid=fopen([file,'.part'],'w'); assert(fid>=0);
+        fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+        movefile([file,'.part'],file,'f');
+        fprintf('QA_CERTIFIED_STEP_PASS PREFIX=%d SYMBOL=%d OPENED=%d SECONDS=%.3f\n', ...
+            position,piece,opened,elapsed);
+    end
+    assert(opened==44 && closed==0 && sum(remaining)==4042);
+    fprintf('QA_CERTIFIED_PREFIX_PASS PREFIX=202 OPENED=44 FULL_WORD_VERIFIED=0\n');
+    return
+end
 
 if prefixLimit==12
     overlay=getenv('PASTAFARI_QA_OVERLAY');
