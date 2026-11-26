@@ -191,7 +191,7 @@ foreach ([
     }
 }
 echo "STAGE56_SUFFIX_CHECKPOINT_REGRESSION vectors=2 endpoints=6 midpoints=2 status=PASS\n";
-echo "STAGE56_SUFFIX_STRIDE9_REGRESSION vectors=2 endpoints=6 midpoints=2 status=PASS\n";
+echo "STAGE56_SUFFIX_LARGE_SHAPE_REGRESSION vectors=2 endpoints=6 midpoints=2 status=PASS\n";
 
 if ($vectors !== 120 || $words !== 3940 || $rankChecks !== 3940 ||
     $unrankChecks !== 3940 || $positions !== 83776 || $outOfRange !== 360 ||

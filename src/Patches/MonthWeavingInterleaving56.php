@@ -473,11 +473,9 @@ final class MonthWeavingInterleaving56
                 break;
             }
         }
-        // For the measured 45/46-month shapes, stride 9 reserves four
-        // checkpoint rows and four active rows instead of five and three.
-        // Other shapes retain stride 8; the eight-row budget is unchanged.
-        $stride = ($this->monthCount === 45 || $this->monthCount === 46) ? 9 : 8;
-        $activeRows = 8 - intdiv($this->monthCount - 2, $stride);
+        // At most five absolute checkpoints (8,16,24,32,40); reserve
+        // the remaining slots of the original eight-row cache for active rows.
+        $activeRows = 8 - intdiv($this->monthCount - 2, 8);
         $profilePath = getenv('STAGE56_DP_PROFILE_PATH');
         $profileEnabled = is_string($profilePath) && $profilePath !== '';
         $profileId = $profileEnabled ? ++self::$dpProfileSequence : 0;
@@ -513,7 +511,7 @@ final class MonthWeavingInterleaving56
             }
             $following = $current;
             if ($index < $start + $activeRows) $this->suffixCache[$index] = $current;
-            if ($index > 0 && $index % $stride === 0 && $index < $this->monthCount - 1 &&
+            if ($index > 0 && $index % 8 === 0 && $index < $this->monthCount - 1 &&
                 count($this->suffixCheckpoints[$index] ?? []) < count($current)) {
                 $this->suffixCheckpoints[$index] = $current;
             }
