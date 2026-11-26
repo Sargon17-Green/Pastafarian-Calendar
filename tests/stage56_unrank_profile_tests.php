@@ -16,6 +16,16 @@ try {
         throw new RuntimeException('STAGE56_UNRANK_PROFILE_DISABLE');
     }
 
+    // Decimal width oracle: independent string representation, including limb boundaries.
+    foreach (['0', '1', '-1', '999999999', '1000000000', '-1000000000',
+        '999999999999999999', '1000000000000000000', str_repeat('9', 6800),
+        '-1' . str_repeat('0', 6800)] as $literal) {
+        $number = \Pastafari\Stage01\BigInt::fromString($literal);
+        if ($number->decimalDigitCount() !== strlen(ltrim($literal, '-')) ||
+            $number->decimalDigitCount() !== strlen(ltrim($number->toString(), '-'))) {
+            throw new RuntimeException('STAGE56_UNRANK_PROFILE_DECIMAL_WIDTH');
+        }
+    }
     $lengths = array_fill(0, 5, 52);
     $plain = (new \Pastafari\Stage01\Patches\MonthWeavingInterleaving56($lengths))
         ->unrank(\Pastafari\Stage01\BigInt::one());

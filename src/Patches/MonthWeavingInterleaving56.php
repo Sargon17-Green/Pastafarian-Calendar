@@ -344,6 +344,8 @@ final class MonthWeavingInterleaving56
                     $bucketStartPosition = $position + 1;
                     $bucketStartNs = hrtime(true);
                     ++$bucketIndex;
+                    // Record the incoming rank even when no subtraction occurs in this bucket.
+                    if ($position < $totalLength - 1) self::trackUnrankDigits($profile, 'rank', $rank);
                 }
             }
         }
@@ -383,7 +385,7 @@ final class MonthWeavingInterleaving56
     private static function trackUnrankDigits(?array &$profile, string $role, BigInt $value): void
     {
         if ($profile === null) return;
-        $digits = strlen(ltrim($value->toString(), '-'));
+        $digits = $value->decimalDigitCount();
         $profile['max_decimal_digits'] = max($profile['max_decimal_digits'], $digits);
         $profile['max_decimal_digits_by_role'][$role] = max(
             $profile['max_decimal_digits_by_role'][$role] ?? 0,

@@ -341,6 +341,13 @@ final class BigInt
         return $v;
     }
 
+    /** Exact decimal width of the magnitude; zero has one digit. */
+    public function decimalDigitCount(): int
+    {
+        $last = count($this->limbs) - 1;
+        return $last * self::BASE_DIGITS + strlen((string)$this->limbs[$last]);
+    }
+
     public function toString(): string
     {
         if ($this->sign === 0) {
