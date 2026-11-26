@@ -435,7 +435,7 @@
               (swap! totals update :source-accounting-non-equal inc)))))
     (assoc @totals
            :profiles (count small-profiles)
-           :digest (hex-bytes (.digest digest)))))
+           :digest (hex-bytes (.digest digest))))))
 
 (defn- parse-python-output [output]
   (into {}
@@ -596,7 +596,8 @@
          :full-month-weaving-materialized? false
          :production-date-api-invoked? false
          :stage2 :open
-         :result :PASS_MODEL_ONLY}]
+         :result :MODEL_ONLY_DIAGNOSTIC
+         :successful-ci-test-required true}]
     (ensure-invariant! (= (:source-sha canonical-input) (System/getenv "GITHUB_SHA"))
                        "canonical input SHA does not match this checkout"
                        {:canonical-source-sha (:source-sha canonical-input)
