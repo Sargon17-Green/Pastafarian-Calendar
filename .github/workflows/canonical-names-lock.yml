@@ -944,3 +944,346 @@ jobs:
           name: dart-hebrew-stage8-cost-attribution
           path: out/dart-hebrew-stage8-cost-attribution/
           if-no-files-found: error
+
+  dart-hebrew-exact-memo-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-exact-memo-qa]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Exact memo feasibility in disposable copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import statistics
+          import subprocess
+          import tempfile
+          
+          ROOT = Path.cwd()
+          OUT = ROOT / "out/dart-hebrew-exact-memo-qa"
+          BASE = "2a967d28cb3364d0a2a061472fd1eb89d5e48bab"
+          CAP = 256 * 1024
+          LOCKS = {
+              "COUNT": "c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8",
+              "FIRST": "dc2dabc1c69f5007425c032e576577195ea6cf7b1d1054a9faca74e025aaf13c",
+              "LAST": "71b78eb2ce0c68252f404e6c6d34b52a2f8f2b834eb6a2eff687bbc6c0bccdd8",
+              "CANONICAL": "7093c6c666dc19642d650fe7fd8a9bbe43cd12238ac4f563ebe668d370eacdda",
+          }
+          COUNTER = "lib/src/monster_month_weave_counter.dart"
+          PROFILE = "bin/stage8_cost_attribution_profile.dart"
+          ANCHOR = """  static BigInt countCompletions(
+              List<int> remaining, {
+              required int openedUpTo,
+              required int closedUpTo,
+            }) {
+          """
+          WRAPPER = """  static BigInt countCompletions(
+              List<int> remaining, {
+              required int openedUpTo,
+              required int closedUpTo,
+            }) {
+              return MemoQA.run(
+                remaining, openedUpTo, closedUpTo,
+                () => _countWithoutMemo(
+                  remaining, openedUpTo: openedUpTo, closedUpTo: closedUpTo,
+                ),
+              );
+            }
+          
+            static BigInt _countWithoutMemo(
+              List<int> remaining, {
+              required int openedUpTo,
+              required int closedUpTo,
+            }) {
+          """
+          DART = """
+          // Disposable QA only. Accounted bytes are a model, not Dart heap/RSS.
+          final class MemoEntry {
+            final BigInt value;
+            final int bytes;
+            MemoEntry(this.value, this.bytes);
+          }
+          
+          final class MemoQA {
+            static const entryLimit = 64;
+            static const byteLimit = 256 * 1024;
+            static bool enabled = false;
+            static final _cache = <String, MemoEntry>{};
+            static final _events = <Map<String, Object>>[];
+            static int bytes = 0, peak = 0, peakEntries = 0;
+            static int hits = 0, misses = 0, bypasses = 0, evictions = 0, oversize = 0;
+          
+            static void reset(bool on) {
+              enabled = on;
+              _cache.clear();
+              _events.clear();
+              bytes = peak = peakEntries = hits = misses = bypasses = evictions = oversize = 0;
+            }
+          
+            static BigInt run(List<int> remaining, int opened, int closed,
+                BigInt Function() calculate) {
+              final timer = Stopwatch()..start();
+              late BigInt value;
+              String status;
+              if (!enabled) {
+                bypasses++;
+                status = 'bypass';
+                value = calculate();
+              } else {
+                // Exact, immutable, delimiter-separated ordered integer tuple.
+                final key = opened.toString() + '/' + closed.toString() + '/' +
+                    remaining.join(',');
+                final old = _cache.remove(key);
+                if (old != null) {
+                  hits++;
+                  status = 'hit';
+                  _cache[key] = old;
+                  value = old.value;
+                } else {
+                  misses++;
+                  status = 'miss';
+                  // Invalid inputs throw before insertion; exceptions never cached.
+                  value = calculate();
+                  // Fixed overhead allowance + UTF-16 key + BigInt payload.
+                  final cost = 128 + 2 * key.length + (value.bitLength + 7) ~/ 8;
+                  if (cost > byteLimit) {
+                    oversize++;
+                    status = 'oversize';
+                  } else {
+                    while (_cache.length >= entryLimit || bytes + cost > byteLimit) {
+                      final victim = _cache.remove(_cache.keys.first)!;
+                      bytes -= victim.bytes;
+                      evictions++;
+                    }
+                    _cache[key] = MemoEntry(value, cost);
+                    bytes += cost;
+                    if (bytes > peak) peak = bytes;
+                    if (_cache.length > peakEntries) peakEntries = _cache.length;
+                  }
+                }
+              }
+              timer.stop();
+              if (bytes < 0 || bytes > byteLimit || _cache.length > entryLimit) {
+                throw StateError('Memo budget violated');
+              }
+              _events.add(<String, Object>{
+                'status': status, 'us': timer.elapsedMicroseconds,
+                'bits': value.bitLength, 'bytes': bytes, 'entries': _cache.length,
+              });
+              return value;
+            }
+          
+            static Map<String, Object> snapshot() => <String, Object>{
+              'hits': hits, 'misses': misses, 'bypasses': bypasses,
+              'evictions': evictions, 'oversize': oversize, 'bytes': bytes,
+              'peakBytes': peak, 'peakEntries': peakEntries,
+              'events': List<Map<String, Object>>.of(_events),
+            };
+          
+            static void check(bool ok) {
+              if (!ok) throw StateError('Memo isolated invariant failed');
+            }
+          
+            static void selfTest() {
+              reset(true);
+              final a = <int>[1, 2];
+              check(run(a, 0, 0, () => BigInt.one) == BigInt.one);
+              a[0] = 2;
+              check(run(a, 0, 0, () => BigInt.from(2)) == BigInt.from(2));
+              check(run(<int>[1, 2], 0, 0, () => throw StateError('miss')) == BigInt.one);
+              check(run(<int>[2, 1], 0, 0, () => BigInt.from(3)) == BigInt.from(3));
+              check(run(<int>[1, 2], 1, 0, () => BigInt.from(4)) == BigInt.from(4));
+              check(run(<int>[1, 2], 1, 1, () => BigInt.from(5)) == BigInt.from(5));
+              check(hits == 1 && misses == 5);
+              reset(true);
+              for (var i = 0; i < entryLimit; i++) {
+                run(<int>[i], 0, 0, () => BigInt.from(i));
+              }
+              run(<int>[0], 0, 0, () => throw StateError('LRU hit missing'));
+              run(<int>[entryLimit], 0, 0, () => BigInt.one);
+              check(evictions == 1 && _cache.length == entryLimit);
+              run(<int>[0], 0, 0, () => throw StateError('recent hit missing'));
+              run(<int>[1], 0, 0, () => BigInt.one);
+              check(misses == entryLimit + 2 && evictions == 2);
+              reset(true);
+              final large = BigInt.one << (128 * 1024 * 8);
+              run(<int>[1], 0, 0, () => large);
+              run(<int>[2], 0, 0, () => large);
+              check(evictions == 1 && _cache.length == 1);
+              final huge = BigInt.one << (byteLimit * 8);
+              run(<int>[3], 0, 0, () => huge);
+              check(oversize == 1 && _cache.length == 1);
+              reset(true);
+              try {
+                MonsterMonthWeaveCounter.countCompletions(<int>[0], openedUpTo: 0, closedUpTo: 0);
+                throw StateError('Expected invalid-input rejection');
+              } on ArgumentError {
+                check(_cache.isEmpty);
+              }
+              reset(false);
+            }
+          }
+          """
+          INIT = """  MemoQA.selfTest();
+            final memoOn = Platform.environment['MEMO_QA_ON'] == '1';
+            MemoQA.reset(memoOn);
+          """
+          CONTROL = """  output['memo'] = MemoQA.snapshot();
+            MemoQA.reset(memoOn);
+            final control = <String>[];
+            final controlTimer = Stopwatch()..start();
+            // Distinct full-scale vectors: no repeated keys in this workload.
+            for (var i = 1; i <= 8; i++) {
+              final vector = List<int>.of(lengths.lengths);
+              vector[0] += i;
+              control.add(MonsterMonthWeaveCounter.countWholeWeaves(vector).toString());
+            }
+            controlTimer.stop();
+            output['control'] = <String, Object>{
+              'us': controlTimer.elapsedMicroseconds,
+              'outputs': control,
+              'memo': MemoQA.snapshot(),
+            };
+          """
+          
+          def cmd(args, cwd=ROOT, timeout=180, env=None):
+              result = subprocess.run(args, cwd=cwd, env=env, timeout=timeout,
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+              print("$", " ".join(args), result.stdout, flush=True)
+              result.check_returncode()
+              return result.stdout.strip()
+          
+          def once(text, old, new):
+              if text.count(old) != 1:
+                  raise RuntimeError("Expected exactly one source anchor")
+              return text.replace(old, new, 1)
+          
+          def require(ok, msg):
+              if not ok:
+                  raise RuntimeError(msg)
+          
+          def digest(value):
+              payload = ",".join(map(str, value)) if isinstance(value, list) else str(value)
+              return hashlib.sha256(payload.encode()).hexdigest()
+          
+          def validate(data, enabled):
+              require(data["yearNumber"] == "5000" and data["yearLength"] == 4244
+                      and data["monthCount"] == 45, "year lock")
+              actual = {k: digest(data["phases"][k]["result"]) for k in LOCKS}
+              require(actual == LOCKS, "exact historical output SHA mismatch")
+              require(data["count"] == data["phases"]["COUNT"]["result"], "count mismatch")
+              require(data["canonicalModulus"] == data["count"], "modulus mismatch")
+              for m in (data["memo"], data["control"]["memo"]):
+                  events = m["events"]
+                  require(len(events) == m["hits"] + m["misses"] + m["bypasses"], "event accounting")
+                  require(m["hits"] == sum(e["status"] == "hit" for e in events), "hit accounting")
+                  require(m["misses"] == sum(e["status"] in ("miss", "oversize") for e in events), "miss accounting")
+                  require(m["oversize"] == sum(e["status"] == "oversize" for e in events), "oversize accounting")
+                  require(m["bypasses"] == sum(e["status"] == "bypass" for e in events), "bypass accounting")
+                  require(m["peakBytes"] == max([0] + [e["bytes"] for e in events]), "peak byte reconciliation")
+                  require(m["peakEntries"] == max([0] + [e["entries"] for e in events]), "peak entry reconciliation")
+                  require(0 <= m["peakBytes"] <= CAP and 0 <= m["peakEntries"] <= 64, "budget")
+                  require(all(e["us"] >= 0 for e in events), "negative duration")
+                  if enabled:
+                      require(m["bypasses"] == 0, "enabled bypass")
+                  else:
+                      require(m["hits"] == m["misses"] == m["peakBytes"] == m["evictions"] == 0, "off cache touched")
+              ctrl = data["control"]
+              require(len(ctrl["outputs"]) == len(ctrl["memo"]["events"]) == 8, "control coverage")
+              require(ctrl["memo"]["hits"] == 0, "no-overlap control hit")
+              return actual
+          
+          def main():
+              OUT.mkdir(parents=True, exist_ok=True)
+              head = cmd(["git", "rev-parse", "HEAD"])
+              require(os.environ["GITHUB_REF"] == "refs/heads/Dart+עברית", "branch")
+              require(head == os.environ["GITHUB_SHA"], "checkout")
+              require(cmd(["git", "rev-parse", "HEAD^"]) == "dd4c6a3db7ff6a2c89e29b21a868a9b86dbefb1b", "parent source lock")
+              require(cmd(["git", "diff", "--name-only", BASE, "HEAD"]).splitlines() == [".github/workflows/canonical-names-lock.yml", ".github/workflows/dart-hebrew-exact-memo-qa.yml"], "QA-only path lock")
+              cmd(["git", "diff", "--exit-code", BASE, "HEAD", "--", "lib", "bin", "tool", "pubspec.yaml"])
+              source_tree = cmd(["git", "ls-tree", "-r", "HEAD", "lib/src"])
+              require(len(source_tree.splitlines()) == 19, "source file count")
+              require(cmd(["git", "rev-parse", "HEAD:" + COUNTER]) == "5e2321a4c9d00701f2968f2c7dbfc5d5e7c02446", "counter blob")
+              require(cmd(["git", "rev-parse", "HEAD:" + PROFILE]) == "cd9b125edea5bc706b8994a2d9005d43b0db9fda", "profile blob")
+              (OUT / "source-tree.txt").write_text(source_tree + "\n")
+              pairs = []
+              reference = None
+              with tempfile.TemporaryDirectory(prefix="dart-exact-memo-") as temp:
+                  work = Path(temp)
+                  shutil.copytree(ROOT / "lib", work / "lib")
+                  (work / "bin").mkdir()
+                  (work / "tool").mkdir()
+                  shutil.copy2(ROOT / PROFILE, work / PROFILE)
+                  shutil.copy2(ROOT / "tool/stage8_cost_attribution_metrics.dart", work / "tool/stage8_cost_attribution_metrics.dart")
+                  shutil.copy2(ROOT / "pubspec.yaml", work / "pubspec.yaml")
+                  counter = work / COUNTER
+                  counter.write_text(once(counter.read_text(), ANCHOR, WRAPPER) + DART)
+                  profile = work / PROFILE
+                  source = once(profile.read_text(), "  final foundation = BigInt.from(-15055671);", INIT + "  final foundation = BigInt.from(-15055671);")
+                  source = once(source, "  File(args.single).writeAsStringSync", CONTROL + "  File(args.single).writeAsStringSync")
+                  profile.write_text(source)
+                  cmd(["dart", "--version"], work)
+                  cmd(["dart", "pub", "get"], work)
+                  cmd(["dart", "format", COUNTER, PROFILE], work)
+                  cmd(["dart", "analyze"], work)
+                  for i in range(5):
+                      pair = {}
+                      for mode in (("off", "on") if i % 2 == 0 else ("on", "off")):
+                          file = OUT / f"pair-{i+1}-{mode}.json"
+                          env = dict(os.environ, MEMO_QA_ON="1" if mode == "on" else "0")
+                          cmd(["dart", "run", PROFILE, str(file)], work, 240, env)
+                          data = json.loads(file.read_text())
+                          locks = validate(data, mode == "on")
+                          semantic = {
+                              "locks": locks, "monthLengths": data["monthLengths"],
+                              "rank": data["canonicalRank"], "modulus": data["canonicalModulus"],
+                              "control": [digest(v) for v in data["control"]["outputs"]],
+                          }
+                          if reference is None:
+                              reference = semantic
+                          require(reference == semantic, "paired exact outputs differ")
+                          phases = {k: data["phases"][k]["elapsedMicroseconds"] for k in LOCKS}
+                          pair[mode] = {"phases_us": phases, "total_us": sum(phases.values()),
+                                        "control_us": data["control"]["us"],
+                                        "memo": {k:v for k,v in data["memo"].items() if k != "events"}}
+                      pairs.append(pair)
+                      print("MEMO_QA_PAIR_PASS", i + 1, flush=True)
+              gains = [1 - p["on"]["total_us"] / p["off"]["total_us"] for p in pairs]
+              overhead = [p["on"]["control_us"] / p["off"]["control_us"] - 1 for p in pairs]
+              candidate = statistics.median(gains) >= .05 and sum(g > 0 for g in gains) >= 4 and statistics.median(overhead) <= .05
+              summary = {"project_id": "PC-BRANCH-DART-HEBREW", "head": head, "base": BASE,
+                         "pairs": pairs, "reference": reference, "paired_gains": gains,
+                         "control_overhead": overhead, "median_gain": statistics.median(gains),
+                         "median_control_overhead": statistics.median(overhead),
+                         "recommendation": "INVESTIGATE_ONLY" if candidate else "KEEP_A_DISCARD_MEMO",
+                         "accounting": "128 bytes + 2*key code units + ceil(BigInt bitLength/8); not RSS",
+                         "production_changed": False, "promotion_authorized": False}
+              (OUT / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+              print("EXACT_MEMO_QA_PASS", json.dumps(summary), flush=True)
+          
+          try:
+              main()
+          except Exception as exc:
+              OUT.mkdir(parents=True, exist_ok=True)
+              (OUT / "failure.txt").write_text(repr(exc) + "\n")
+              raise
+          
+          PY
+      - name: Upload exact memo evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-exact-memo-qa
+          path: out/dart-hebrew-exact-memo-qa/
+          if-no-files-found: error
