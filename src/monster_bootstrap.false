@@ -582,9 +582,9 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
   z;b:s;a;!n;a;!b;9h;!!s:
   y;6+g;!n:
   z;b:s;a;!n;a;!b;9h;!!s:
-  z;b:6a;!b;20h;!!v:
+  z;b:6a;!b;0h;!!v:
   z;b:s;a;!v;a;!b;9h;!!s:
-  z;b:i;a;!b;20h;!!v:
+  z;b:i;a;!b;0h;!!v:
   z;b:v;a;!149a;!b;23h;!!v:
   z;b:s;a;!v;a;!b;9h;!!t:
   z;b:t;a;!b;25h;!!t:
@@ -614,7 +614,7 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
    z;b:d;a;!f;a;!b;9h;!!d:
    z;b:d;a;!t;a;!b;9h;!!d:
    z;b:d;a;!n;a;!b;9h;!!d:
-   z;b:p;a;!b;20h;!!v:
+   z;b:p;a;!b;0h;!!v:
    z;b:v;a;!v;a;!b;14h;!!v:
    z;b:i;a;!b;20h;!!n:
    z;b:v;a;!n;a;!b;9h;!!v:
