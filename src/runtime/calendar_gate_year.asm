@@ -205,8 +205,29 @@ CalendarGateYearSelect::
     or a
     jp nz, .restore
 
-    ; Normative answer flow is for (c,c), bowl 1, seal 10, N exact candidates.
+    ; Gate-year ABI is absolute signed32; the established sauce ABI is
+    ; signed32 offsets from Foundation. The covered map window guarantees
+    ; c-Foundation fits signed32. Convert both pair inputs before sauce;
+    ; restore the original absolute calculation and caller target afterward.
     ld hl, wCalendarGateYearSavedCalc
+    ld de, wPairCalcOffset
+    ld a, [hli]
+    sub a, CALENDAR_GATE_YEAR_FOUNDATION_B0
+    ld [de], a
+    inc de
+    ld a, [hli]
+    sbc a, CALENDAR_GATE_YEAR_FOUNDATION_B1
+    ld [de], a
+    inc de
+    ld a, [hli]
+    sbc a, CALENDAR_GATE_YEAR_FOUNDATION_B2
+    ld [de], a
+    inc de
+    ld a, [hl]
+    sbc a, CALENDAR_GATE_YEAR_FOUNDATION_B3
+    ld [de], a
+    ; Normative answer flow: same calculation/target, bowl 1, seal 10.
+    ld hl, wPairCalcOffset
     ld de, wPairTargetOffset
     ld b, 4
     call CalendarGateYearCopyN
