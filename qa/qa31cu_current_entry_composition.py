@@ -27,6 +27,9 @@ CT_ARTIFACT = 15062438663
 CT_ARTIFACT_SHA = "9bfb863c51e2eab6efac64a39fbf82eb84ce535a2c97583eb52ebbc0d2eb6a2b"
 REGRESSION_RUN = 45699183338
 REGRESSION_HEAD = "31c6f2950483dd66b940dd053cb505002ec69343"
+# Full raw API pages from run 45900427805, artifact 15155741136:
+# 87 distinct successful jobs (not the connector first page of 30), 69 artifacts.
+REGRESSION_JOB_COUNT = 87
 GATE = (1020, 1046)
 
 
@@ -163,7 +166,11 @@ def verify_run(run, jobs, artifacts, *, run_id, head_sha, job_id=None,
     need(run["status"] == "completed" and run["conclusion"] == "success", "run not completed/success")
     need(run["head_branch"] == BRANCH, "run branch mismatch")
     job_rows = jobs.get("jobs", [])
-    need(len(job_rows) == job_count, "job count mismatch")
+    need(jobs.get("total_count") == len(job_rows) == job_count, "job count mismatch")
+    need(len({j["id"] for j in job_rows}) == len(job_rows), "duplicate job IDs")
+    need(all(j.get("run_id") == run_id and j.get("head_sha") == head_sha
+             and j.get("head_branch") == BRANCH and j.get("run_attempt") == run.get("run_attempt")
+             for j in job_rows), "job identity/SHA/attempt mismatch")
     need(all(j["status"] == "completed" and j["conclusion"] == "success" for j in job_rows),
          "one or more jobs not completed/success")
     if job_id is not None:
@@ -172,7 +179,12 @@ def verify_run(run, jobs, artifacts, *, run_id, head_sha, job_id=None,
         need(all(s.get("conclusion") == "success" for s in selected[0].get("steps", [])),
              "Native job contains a non-success step")
     artifact_rows = artifacts.get("artifacts", [])
-    need(len(artifact_rows) == artifact_count, "artifact count mismatch")
+    need(artifacts.get("total_count") == len(artifact_rows) == artifact_count, "artifact count mismatch")
+    need(len({a["id"] for a in artifact_rows}) == len(artifact_rows), "duplicate artifact IDs")
+    need(all(a.get("workflow_run", {}).get("id") == run_id
+             and a.get("workflow_run", {}).get("head_sha") == head_sha
+             and a.get("workflow_run", {}).get("head_branch") == BRANCH
+             for a in artifact_rows), "artifact run identity/SHA mismatch")
     need(all(not a.get("expired", True) for a in artifact_rows), "an expected artifact is expired")
     if artifact_id is not None:
         selected = [a for a in artifact_rows if a["id"] == artifact_id]
@@ -312,7 +324,7 @@ def main():
                             read_json(meta / "regression_jobs.json"),
                             read_json(meta / "regression_artifacts.json"),
                             run_id=REGRESSION_RUN, head_sha=REGRESSION_HEAD,
-                            job_count=30, artifact_count=69)
+                            job_count=REGRESSION_JOB_COUNT, artifact_count=69)
     cp = verify_cp_artifact(args.evidence_root / "qa31cp")
     ct = verify_ct_artifact(args.evidence_root / "qa31ct")
 
