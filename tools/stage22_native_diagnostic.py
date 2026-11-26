@@ -286,7 +286,7 @@ def fixture(initial, steps, invalid=None):
         for input_index, handle in enumerate(bowl_handles, start=1):
             neq("t;", handle, f"STAGE22_OUTPUT_BOWL_{bowl_id}_ALIASES_INPUT_{input_index}")
         for prior_id in range(1, bowl_id):
-            neq(f"o;{bowl_id}+g", f"o;{prior_id}+g", f"STAGE22_OUTPUT_BOWL_{bowl_id}_ALIASES_OUTPUT_{prior_id}")
+            neq(f"o;{prior_id}+g;!", "t;", f"STAGE22_OUTPUT_BOWL_{bowl_id}_ALIASES_OUTPUT_{prior_id}")
         for cell, want in enumerate(limbs(value)):
             eq(f"t;{cell}+g;!", want, f"STAGE22_OUT_BOWL_{bowl_id}_CELL_{cell}_FAIL")
     for index, value in enumerate(cells):
@@ -375,6 +375,7 @@ def self_check(source):
     assert source.count(OP) == 1
     durable_return = b"z;r:6a;!y;1+g;!a;!y;2+g;!a;!y;3+g;!a;!y;4+g;!a;!y;5+g;!a;!y;6+g;!a;!"
     assert source.count(durable_return) == 1, "missing durable direct six-bowl return"
+    assert b"!y:k;g;!k:z;1-g;!" in source[source.index(OP):], "missing parent-frame restore"
     assert source.count(LOOP) == 1
     assert oracle([1] * 6, 1)[0] == [179, 182, 194, 187, 203, 214]
     assert oracle([2, 3, 5, 7, 11, 13], 1)[0] == [529, 349, 853, 394, 878, 599]
@@ -383,6 +384,7 @@ def self_check(source):
             body, expected, checks, record = fixture(case(name), steps)
             assert body.count(MARKER) == 1 and expected and checks > 30
             assert len(record["expected_bowls"]) == 6
+            assert body.count('+g;!r:r;t;-0=["STAGE22_OUTPUT_BOWL_') == 15
             instrumented = instrument(source, steps)
             assert (instrumented == source) == (steps == 12)
             if steps < 12:
