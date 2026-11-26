@@ -34,7 +34,7 @@ MUTANTS = {
         (b"z;b:v;a;!149a;!b;23h;!!v:", b"z;b:v;a;!148a;!b;23h;!!v:"),
     ),
     "rank_modulus_7_to_6": (
-        (b"z;b:7a;!b;20h;!!v:", b"z;b:6a;!b;20h;!!v:"),
+        (b"z;b:7a;!b;0h;!!v:", b"z;b:6a;!b;0h;!!v:"),
     ),
     "swap_neighbor_weights": (
         (b"z;b:s;a;!3a;!b;23h;!!e:", b"z;b:s;a;!5a;!b;23h;!!e:"),
