@@ -165,7 +165,7 @@ jobs:
               final a = <int>[1, 2];
               check(run(a, 0, 0, () => BigInt.one) == BigInt.one);
               a[0] = 2;
-              check(run(a, 0, 0, () => BigInt.two) == BigInt.two);
+              check(run(a, 0, 0, () => BigInt.from(2)) == BigInt.from(2));
               check(run(<int>[1, 2], 0, 0, () => throw StateError('miss')) == BigInt.one);
               check(run(<int>[2, 1], 0, 0, () => BigInt.from(3)) == BigInt.from(3));
               check(run(<int>[1, 2], 1, 0, () => BigInt.from(4)) == BigInt.from(4));
@@ -274,7 +274,8 @@ jobs:
               head = cmd(["git", "rev-parse", "HEAD"])
               require(os.environ["GITHUB_REF"] == "refs/heads/Dart+עברית", "branch")
               require(head == os.environ["GITHUB_SHA"], "checkout")
-              require(cmd(["git", "rev-parse", "HEAD^"]) == BASE, "parent source lock")
+              require(cmd(["git", "rev-parse", "HEAD^"]) == "dc02150b400e0d3404710f5180bbf9ccb6827289", "parent source lock")
+              require(cmd(["git", "diff", "--name-only", BASE, "HEAD"]).splitlines() == [".github/workflows/dart-hebrew-exact-memo-qa.yml"], "QA-only path lock")
               cmd(["git", "diff", "--exit-code", BASE, "HEAD", "--", "lib", "bin", "tool", "pubspec.yaml"])
               source_tree = cmd(["git", "ls-tree", "-r", "HEAD", "lib/src"])
               require(len(source_tree.splitlines()) == 19, "source file count")
@@ -285,8 +286,11 @@ jobs:
               reference = None
               with tempfile.TemporaryDirectory(prefix="dart-exact-memo-") as temp:
                   work = Path(temp)
-                  for directory in ("lib", "bin", "tool"):
-                      shutil.copytree(ROOT / directory, work / directory)
+                  shutil.copytree(ROOT / "lib", work / "lib")
+                  (work / "bin").mkdir()
+                  (work / "tool").mkdir()
+                  shutil.copy2(ROOT / PROFILE, work / PROFILE)
+                  shutil.copy2(ROOT / "tool/stage8_cost_attribution_metrics.dart", work / "tool/stage8_cost_attribution_metrics.dart")
                   shutil.copy2(ROOT / "pubspec.yaml", work / "pubspec.yaml")
                   counter = work / COUNTER
                   counter.write_text(once(counter.read_text(), ANCHOR, WRAPPER) + DART)
