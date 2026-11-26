@@ -2725,3 +2725,65 @@ fn test_stage49_catalan_thirteenth_prefix_fork_at_17_and_47_months() {
 	stage49_check_thirteenth_prefix_fork(47)
 	println('V_AMHARIC_STAGE49_THIRTEENTH_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
 }
+
+// Stage50: fourteenth Dyck-prefix fork, within the [1,2,...,14] block.
+// Sum fourteen disjoint earlier prefix blocks using reflection-principle ballot counts.
+// Independent DP/reflection ranks: n=17 129644638/129644639;
+// n=47 33864391708660732549537480/33864391708660732549537481.
+// Exhaustive FIFO Dyck enumeration: n=15 rank 9694844/9694845;
+// n=16 rank 35357654/35357655 (45,052,515 words total).
+fn stage50_check_fourteenth_prefix_fork(month_count int) {
+	assert month_count >= 15
+	lengths := []int{len: month_count, init: 2}
+	mut candidate := new_patch15_weave_counter(lengths)
+	mut left_rank := big_sub(big_one(), big_one())
+	for opened in 1 .. 15 {
+		slots := 2 * month_count - opened - 1
+		choose_left := oracle_weave_choose_exact(slots, month_count - opened)
+		choose_right := oracle_weave_choose_exact(slots, month_count - opened - 1)
+		block := big_sub(choose_left, choose_right)
+		assert big_eq(block, stage35_ballot_suffix_count(month_count, opened, 1))
+		left_rank = big_add(left_rank, block)
+	}
+	right_rank := big_add(left_rank, big_one())
+	total_choose := oracle_weave_choose_exact(2 * month_count, month_count)
+	total := oracle_weave_div_small(total_choose, month_count + 1)
+	assert big_eq(candidate.count_all(), total)
+	assert big_cmp(left_rank, big_one()) >= 0
+	assert big_cmp(right_rank, total) <= 0
+
+	mut expected_left := []int{}
+	for label in 1 .. 15 {
+		expected_left << label
+	}
+	expected_left << 1
+	for label in 15 .. month_count + 1 {
+		expected_left << label
+	}
+	for label in 2 .. month_count + 1 {
+		expected_left << label
+	}
+	mut expected_right := []int{}
+	for _ in 0 .. 2 {
+		for label in 1 .. 16 {
+			expected_right << label
+		}
+	}
+	for label in 16 .. month_count + 1 {
+		expected_right << label
+		expected_right << label
+	}
+	left := candidate.unrank1(left_rank)
+	right := candidate.unrank1(right_rank)
+	assert left == expected_left
+	assert right == expected_right
+	assert left[14] == 1 && right[14] == 15
+	assert big_eq(stage35_independent_lexical_rank(month_count, left), left_rank)
+	assert big_eq(stage35_independent_lexical_rank(month_count, right), right_rank)
+}
+
+fn test_stage50_catalan_fourteenth_prefix_fork_at_17_and_47_months() {
+	stage50_check_fourteenth_prefix_fork(17)
+	stage50_check_fourteenth_prefix_fork(47)
+	println('V_AMHARIC_STAGE50_FOURTEENTH_PREFIX_FORK_PASS MONTHS=17,47 PAIRS=2')
+}
