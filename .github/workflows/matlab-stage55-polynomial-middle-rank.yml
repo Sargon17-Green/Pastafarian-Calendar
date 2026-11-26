@@ -35,7 +35,7 @@ jobs:
           test "$(git rev-parse HEAD:src/+pastafari/allOpenedWholeWeaveChildCountsCommonDenominator.m)" = "ec815257fd5302b591b94c6c70842d26773dc87f"
           test "$(git rev-parse HEAD:src/+pastafari/BigInt.m)" = "86581532df7492a236283c5ee9410ca281e2e6f5"
           test "$(git rev-parse HEAD:src/+pastafari/ValidationManager.m)" = "8be154aa7b8a36f1a282515c81f29742719af3a6"
-          test "$(git rev-parse HEAD:src/+pastafari/MonthWeavingCompatibilityRoute.m)" = "add7a46e3b1320f8dd076a8cd144564e6394af15"
+          test "$(git rev-parse HEAD:src/+pastafari/MonthWeavingCompatibilityRoute.m)" = "2bfde51537b332dda6be7f9646a69613d48352c7"
           test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
           test "$(git rev-parse HEAD:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
           test "$(git rev-parse HEAD:tools/stage55_full_prefix_inverse_rank.cpp)" = "542f091e308afdc5131c52b5a5006588cad8bce5"
