@@ -312,7 +312,7 @@ def instrument(source, steps):
     if not 1 <= steps < 12:
         raise ValueError(steps)
     assert source.count(LOOP) == 1, "nonunique Stage22 batch loop"
-    replacement = b" 1i:\n [i;" + str(steps + 1).encode() + b"<["
+    replacement = b" 1i:\n [i;" + str(steps + 1).encode() + b"<]["
     return source.replace(LOOP, replacement, 1)
 
 
@@ -381,7 +381,11 @@ def self_check(source):
             body, expected, checks, record = fixture(case(name), steps)
             assert body.count(MARKER) == 1 and expected and checks > 30
             assert len(record["expected_bowls"]) == 6
-            assert (instrument(source, steps) == source) == (steps == 12)
+            instrumented = instrument(source, steps)
+            assert (instrumented == source) == (steps == 12)
+            if steps < 12:
+                expected_loop = b" 1i:\\n [i;" + str(steps + 1).encode() + b"<]["
+                assert expected_loop in instrumented, ("malformed prefix loop", steps)
     for name in INVALIDS:
         body, expected, checks, record = fixture(case("witness"), 12, invalid=name)
         assert expected is None and checks == 0 and record["expected_marker"].startswith("E_BOWL_BATCH_")
