@@ -2705,8 +2705,8 @@ fn stage49_check_thirteenth_prefix_fork(month_count int) {
 	for label in 2 .. month_count + 1 {
 		expected_left << label
 	}
-	mut expected_right := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1, 2, 3, 4, 5, 6, 7, 8,
-		9, 10, 11, 12, 13, 14]
+	mut expected_right := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1, 2, 3, 4, 5, 6, 7,
+		8, 9, 10, 11, 12, 13, 14]
 	for label in 15 .. month_count + 1 {
 		expected_right << label
 		expected_right << label
