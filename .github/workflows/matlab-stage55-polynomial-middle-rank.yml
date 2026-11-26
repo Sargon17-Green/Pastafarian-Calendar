@@ -1,4 +1,4 @@
-name: MATLAB Stage55 Polynomial First Branch Diagnostic (QA)
+name: MATLAB Stage55 Polynomial Exact Cursor Resume 2 to 6 (QA)
 on:
   push:
     branches:
@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   polynomial-middle-rank:
@@ -113,12 +114,30 @@ jobs:
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
           echo "GATE_PASS all source locks"
+      - name: Restore exact prior native cursor
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15155644322/zip > "$RUNNER_TEMP/prior-prefix.zip"
+          echo "b310603aaa8d63ccc4a0a5fe360b3e60a738269c16117d72684215496475cac5  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib, os, zipfile
+          from pathlib import Path
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"prior-prefix.zip") as z:
+              d=z.read("prefix-result.json")
+              assert hashlib.sha256(d).hexdigest()=="57587a3a7ffa820c739871ecea41dad7062fcf6853d39529a55ca79a76fab301"
+              Path("evidence/prior-prefix-result.json").write_bytes(d)
+          print("PRIOR_NATIVE_ARTIFACT_LOCK_PASS")
+          PY
+
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
           release: R2026a
 
-      - name: Measure exact two-symbol middle-rank prefix
+      - name: Resume exact native prefix 2 through 6
         uses: matlab-actions/run-command@v3
         with:
           command: >-
@@ -127,7 +146,7 @@ jobs:
             try;
               fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
               addpath('tests');
-              run_stage55_polynomial_real_year_middle_rank(2);
+              run_stage55_polynomial_real_year_middle_rank(6);
               diary off;
             catch ME;
               disp(getReport(ME,'extended','hyperlinks','off'));
@@ -140,7 +159,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-polynomial-first-branch-${{ github.run_id }}
+          name: stage55-polynomial-cursor-resume-${{ github.run_id }}
           path: evidence/
           if-no-files-found: warn
           retention-days: 30

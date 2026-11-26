@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,79 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==6
+    % Resume from the actual prior MATLAB cursor, not from oracle rank inputs.
+    % Independent C++ interval-derived hashes are used only as postconditions.
+    prior=jsondecode(fileread(fullfile(root,'evidence','prior-prefix-result.json')));
+    assert(strcmp(prior.schema,'STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1') && ...
+        prior.prefix_only && prior.prefix_symbols_matched==2 && ...
+        ~prior.full_word_verified && prior.full_converter_calls==0);
+    prefix=double(prior.prefix(:).');
+    remaining=double(prior.remaining(:).');
+    opened=prior.opened_up_to; closed=prior.closed_up_to;
+    assert(isequal(prefix,expected(1:2)) && opened==2 && closed==0);
+    expectedRemaining=L;
+    for i=1:2
+        expectedRemaining(prefix(i))=expectedRemaining(prefix(i))-1;
+    end
+    assert(isequal(remaining,expectedRemaining));
+    rank=pastafari.BigInt(prior.rank_decimal);
+    count=pastafari.BigInt(prior.count_decimal);
+    assert(rank>=pastafari.BigInt(1) && rank<=count);
+    assert(strcmp(sha256Ascii(char(rank)), ...
+        '1191f818e77c6dd94d3d2e8e70ee0a419b2a2eb3234ffd60098f8481769c99ac'));
+    assert(strcmp(sha256Ascii(char(count)), ...
+        'd14117c552025c61ee7f5af7140344e390202cdec045e219f1925e60495a53ce'));
+    rankHashes={ ...
+        '25b8697dfb238f466a4c2457e168d3c6cdb177fa8f9b4390dd91e844ba4d9d46', ...
+        '637ec208a1ddbbd3f5b8d236502146a4eb0c84f732736d891e7f243fa47d8d87', ...
+        'f9bace24e466e0a54b8c9438bb024815f6c67185358153e0fbae5a0732e9a32b', ...
+        '71223178e09a86889e1c5497cd7ae30e2458cdb58d0e0d11b96ecb3460959443'};
+    countHashes={ ...
+        'da8d066cf0c7a5d5a613edf7de109301969997102c19794d41a165ec62c30c4a', ...
+        '2b8fbcebcd72d7197a6b216c3271cd241cdd6ab81cfbb7da17387ddbf2498cba', ...
+        '8c0e6abeeee779f8a89c67f7e12aa0198118fdee4cc76290648ae1d92719211f', ...
+        'c47a58f5b9fb8b9d1bb3c17be5b8573dcf72b08e2a3ad0d429672916c5b9f49e'};
+    fprintf('RESUME_EXACT_CURSOR_PASS PREFIX=2 REMAINING=%d\n',sum(remaining));
+    for position=3:6
+        fprintf('RESUME_NATIVE_STEP_BEGIN PREFIX=%d\n',position);
+        stepTimer=tic;
+        [piece,cursor]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint( ...
+            L,remaining,opened,closed,rank,1);
+        elapsed=toc(stepTimer);
+        assert(cursor.initialCount==count,'Prior count differs from native parent.');
+        assert(isscalar(piece) && piece==expected(position),'Independent word mismatch.');
+        prefix=[prefix,piece]; %#ok<AGROW>
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==max(prefix) && closed==0 && ~cursor.done);
+        rank=cursor.rank; count=cursor.count;
+        assert(rank>=pastafari.BigInt(1) && rank<=count);
+        rHash=sha256Ascii(char(rank)); cHash=sha256Ascii(char(count));
+        assert(strcmp(rHash,rankHashes{position-2}),'Independent residual rank mismatch.');
+        assert(strcmp(cHash,countHashes{position-2}),'Independent suffix count mismatch.');
+        result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+            'prefix_only',true,'prefix_symbols_matched',position,'days',4244, ...
+            'prefix',prefix,'remaining',remaining,'opened_up_to',opened, ...
+            'closed_up_to',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+            'rank_sha256',rHash,'count_sha256',cHash, ...
+            'initial_count_sha256',prior.initial_count_sha256, ...
+            'original_rank_sha256',prior.original_rank_sha256, ...
+            'prior_native_run',45900820670,'reference_cxx_inverse_run_id',45686680226, ...
+            'step_seconds',elapsed,'full_word_verified',false, ...
+            'full_converter_calls',0,'stage55_accepted',false);
+        file=fullfile(root,'evidence',sprintf('prefix-%02d-result.json',position));
+        fid=fopen([file,'.part'],'w'); assert(fid>=0);
+        fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+        movefile([file,'.part'],file,'f');
+        fprintf('RESUME_NATIVE_STEP_PASS PREFIX=%d SYMBOL=%d EXACT_CURSOR_MATCH=1 SECONDS=%.3f\n', ...
+            position,piece,elapsed);
+    end
+    fprintf('POLYNOMIAL_PREFIX_RESUME_PASS PREFIX=6 FULL_WORD_VERIFIED=0\n');
+    return
+end
 
 countTimer=tic;
 family=pastafari.WholeMonthWeavingFamilyPolynomial(L(:));
