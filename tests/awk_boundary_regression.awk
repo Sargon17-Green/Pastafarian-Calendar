@@ -4161,6 +4161,44 @@ BEGIN {
     }
     expect_exact("wide original hundred-sixth+1 hundred-seventh-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Hundred-seventh-digit to hundred-eighth-digit transition at original M=2^127-1.
+    # Independent positional BigInt vs closed-form weighted sums 4/4:
+    # boundary/backward 4091 decimal digits; forward rejection rank 1; wrap 4055.
+    WIDE_HUNDRED_SEVENTH=bi_mul(WIDE_HUNDRED_SIXTH,M)
+    STREAM_FIRST=bi_sub(M,"107"); STREAM_STEP=1
+    choose_rank_wide(WIDE_HUNDRED_SEVENTH)
+    EXPECTED_HUNDRED_SEVENTH=WIDE_HUNDRED_SEVENTH
+    QA_POWER="1"
+    for (QA_I=0;QA_I<107;QA_I++) {
+        EXPECTED_HUNDRED_SEVENTH=bi_sub(EXPECTED_HUNDRED_SEVENTH,bi_mul_small(QA_POWER,107-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original hundred-seventh hundred-seventh-digit boundary", CHOSEN_RANK, EXPECTED_HUNDRED_SEVENTH)
+
+    WIDE_N=bi_add(WIDE_HUNDRED_SEVENTH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original hundred-seventh+1 hundred-eighth-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_HUNDRED_SEVENTH
+    QA_POWER=M
+    for (QA_I=1;QA_I<107;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"108")
+    expect_exact("wide original hundred-seventh+1 hundred-eighth-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"106")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<107;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original hundred-seventh+1 hundred-eighth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
