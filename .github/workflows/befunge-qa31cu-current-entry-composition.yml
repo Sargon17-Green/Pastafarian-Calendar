@@ -6,6 +6,9 @@ on:
       - '.github/workflows/befunge-qa31cu-current-entry-composition.yml'
       - 'qa/qa31cu_current_entry_composition.py'
       - 'qa/QA31CU_CURRENT_ENTRY_COMPOSITION_2026-11-26.md'
+      - 'qa/qa31cv_late_digit_gate_native.py'
+      - 'qa/QA31CV_LATE_DIGIT_GATE_CAUSAL_NATIVE_CONTRACT_2026-11-26.md'
+      - 'qa/stage1_native_diverse_geometry.py'
       - 'qa/qa31ch_results.json'
       - 'qa/qa31cj_results.json'
       - 'qa/qa31ck_results.json'
@@ -64,4 +67,33 @@ jobs:
         with:
           name: befunge-qa31cu-current-entry-composition
           path: ${{ runner.temp }}/qa31cu/qa31cu_composition.json
+          retention-days: 30
+
+  native-late-digit-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Execute later-iteration signed gate interventions in Native PyFunge
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/qa31cv"
+          mkdir -p "$out/results"
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$out/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $out/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$out/results:/results" \
+            -v "$out/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 220s python -u qa/qa31cv_late_digit_gate_native.py src/work_counts.b98 /results/qa31cv_late_digit_gate.json
+            '
+          python3 -m json.tool "$out/results/qa31cv_late_digit_gate.json" >/dev/null
+      - name: Retain later-iteration causal Native traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31cv-late-digit-gate-native
+          path: ${{ runner.temp }}/qa31cv/results/
           retention-days: 30
