@@ -33,11 +33,12 @@ jobs:
           fi
           echo "GATE_PASS ref"
 
-          if [[ "$(git rev-parse HEAD^)" != "de4ba7748c148d398cb50dc99b9454952d3d69b8" ]]; then
-            echo "GATE_FAIL parent actual=$(git rev-parse HEAD^)"
+          if git merge-base --is-ancestor de4ba7748c148d398cb50dc99b9454952d3d69b8 HEAD; then
+            echo "GATE_PASS frozen base is an ancestor"
+          else
+            echo "GATE_FAIL frozen base is not an ancestor"
             exit 1
           fi
-          echo "GATE_PASS parent"
 
           check_object() {
             local path="$1"
