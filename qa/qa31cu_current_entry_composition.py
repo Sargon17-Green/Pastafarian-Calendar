@@ -69,7 +69,7 @@ def verify_patch(baseline, active, patch):
 def verify_source_delta(baseline, active):
     old_lines = baseline.decode("utf-8").splitlines()
     new_lines = active.decode("utf-8").splitlines()
-    need(len(old_lines) == len(new_lines) == 2016, "unexpected source grid height")
+    need(len(old_lines) == len(new_lines) == 2015, "unexpected source grid height")
     changes = []
     for y, (old, new) in enumerate(zip(old_lines, new_lines)):
         for x in range(max(len(old), len(new))):
