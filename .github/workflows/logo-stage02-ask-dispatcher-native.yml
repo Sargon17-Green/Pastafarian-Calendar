@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 isolated fourth gate profile
+name: Logo Stage2 QA D19 fourth gate quotient-zero fastpath
 on:
   push:
     branches:
@@ -77,6 +77,26 @@ jobs:
           git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
           git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
           sha256sum qa/logo_ido_ask_dispatcher_code_bundle.zip qa/logo_stage2_ask_dispatcher_common.logo qa/logo_stage2_ask_dispatcher_oracle.py QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md .github/workflows/logo-stage02-ask-dispatcher-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
+          # QA candidate: patch only worktree after exact source-lock verification.
+          # For 0 <= rem < den, quotient digit=0 and remainder=rem.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("src/exact_integer.logo")
+          s = p.read_text(encoding="utf-8")
+          anchor = "to bi.mag.qdigit :rem :den\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend"
+          replacement = 'make "AD.QDIGIT.ZERO.HITS 0\n\n' + 'to bi.mag.qdigit :rem :den\n  if (bi.mag.compare :rem :den) < 0 [\n    make "AD.QDIGIT.ZERO.HITS (:AD.QDIGIT.ZERO.HITS + 1)\n    output (list 0 :rem)\n  ]\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
+          assert s.count(anchor) == 1
+          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
+          q = Path("qa/logo_stage2_ask_dispatcher_common.logo")
+          s = q.read_text(encoding="utf-8")
+          anchor = "  print [ASK_DISPATCH_GATE_PROFILE_DONE]"
+          assert s.count(anchor) == 1
+          q.write_text(s.replace(anchor, '  print (sentence [ASK_DISPATCH_QDIGIT_ZERO_HITS] :AD.QDIGIT.ZERO.HITS)\n' + anchor), encoding="utf-8")
+          print("QA_QDIGIT_ZERO_CANDIDATE=READY")
+          PY
+          git diff -- src/exact_integer.logo > "$RUNNER_TEMP/candidate.patch"
+          test -s "$RUNNER_TEMP/candidate.patch"
+          sha256sum src/exact_integer.logo qa/logo_stage2_ask_dispatcher_common.logo > "$RUNNER_TEMP/candidate-hashes.txt"
           cat > "$RUNNER_TEMP/native.logo" <<EOF
           make "AD.DIRECTION "$DIRECTION
           make "AD.GROUP "$GROUP
@@ -97,12 +117,13 @@ jobs:
           make -j2
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
-      - name: Run bounded fourth-gate phase diagnostic
+      - name: Run bounded fourth-gate fastpath differential
         shell: bash
         env:
           GROUP: ${{ matrix.group }}
         run: |
           set -euo pipefail
+          # Expected signed steps are locked to the generated runner.
           started=$SECONDS
           set +e
           echo bye | timeout --signal=TERM --kill-after=5s 1200 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
@@ -118,6 +139,15 @@ jobs:
           done
           test "$(grep -Ec '^ASK_DISPATCH_GATE_PROFILE_GAP [0-9]+$' "$RUNNER_TEMP/native.log")" = 1
           if grep -Eq 'ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
+          # Independent integer oracle; forward label means -4, reverse +4.
+          case "$(sed -n 's/^ASK_DISPATCH_GATE_PROFILE_DIRECTION //p' "$RUNNER_TEMP/native.log")" in
+            forward) expected=759; baseline=234 ;;
+            reverse) expected=218; baseline=384 ;;
+            *) exit 2 ;;
+          esac
+          grep -Fxq "ASK_DISPATCH_GATE_PROFILE_GAP $expected" "$RUNNER_TEMP/native.log"
+          test "$(grep -Ec '^ASK_DISPATCH_QDIGIT_ZERO_HITS [1-9][0-9]*$' "$RUNNER_TEMP/native.log")" = 1
+          printf 'SIGNED_GAP_DIFFERENTIAL=PASS\nBASELINE_SECONDS=%s\nCANDIDATE_SECONDS=%s\n' "$baseline" "$(cat "$RUNNER_TEMP/elapsed.txt")" | tee "$RUNNER_TEMP/differential.txt"
           echo 'GATE_PROFILE_COMPLETED_DIAGNOSTIC_ONLY=YES'
       - name: Preserve exact-SHA evidence
         if: always()
@@ -132,5 +162,8 @@ jobs:
             ${{ runner.temp }}/native.log
             ${{ runner.temp }}/exit.txt
             ${{ runner.temp }}/elapsed.txt
+            ${{ runner.temp }}/candidate.patch
+            ${{ runner.temp }}/candidate-hashes.txt
+            ${{ runner.temp }}/differential.txt
           if-no-files-found: warn
           retention-days: 30
