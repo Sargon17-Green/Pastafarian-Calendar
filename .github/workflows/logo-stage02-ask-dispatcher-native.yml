@@ -9,29 +9,13 @@ jobs:
   ask-dispatcher:
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 2
       matrix:
         include:
           - direction: forward
-            group: gate
-          - direction: forward
-            group: year5000
-          - direction: forward
-            group: next
-          - direction: forward
-            group: previous
-          - direction: forward
-            group: structure
-          - direction: reverse
-            group: gate
-          - direction: reverse
             group: year5000
           - direction: reverse
-            group: next
-          - direction: reverse
-            group: previous
-          - direction: reverse
-            group: structure
+            group: year5000
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -77,6 +61,20 @@ jobs:
               changed += actual
           if changed != 6:
               raise SystemExit(f"expected six QA harness fixes; changed {changed}")
+          # Diagnostic only: a containing year has open < calculation <= close and length <= 5778.
+          # Therefore its endpoints are within calculation +/- 5778. Strictly monotone gate
+          # days make the first covering gates sufficient. No outer next/previous prefetch:
+          # this two-job diagnostic invokes only year5000. Frozen reference scan/sort/ASK stay intact.
+          start_marker = "to ad.year5000.data :calculation\n"
+          assert source.count(start_marker) == 1
+          start = source.index(start_marker)
+          end = source.index("\nend\n", start) + len("\nend\n")
+          original = source[start:end]
+          assert "bi.small 139" in original and "bi.small 274" in original
+          assert "nr.year5000.scan.i" in original and "nr.year.pair.sort" in original
+          replacement = "to ad.year5000.data :calculation\n  ; QA diagnostic: cover actual days, not a fixed index radius.\n  nr.gate.reset\n  localmake \"low bi.sub :calculation bi.small 5778\n  localmake \"high bi.add :calculation bi.small 5778\n  print [ASK_DISPATCH_DIAG_COVER_BEGIN]\n  while [bi.gt (nr.gate.known :NR.MIN.GATE) :low] [\n    ignore nr.gate.extend.backward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_BACKWARD] (bi.digits :NR.MIN.GATE))\n  ]\n  while [bi.lt (nr.gate.known :NR.MAX.GATE) :high] [\n    ignore nr.gate.extend.forward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD] (bi.digits :NR.MAX.GATE))\n  ]\n  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]\n  localmake \"raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation\n  localmake \"candidates nr.year.pair.sort :raw\n  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))\n  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY] stop]\n  localmake \"N bi.small count :candidates\n  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]\n  localmake \"s nr.sauce :calculation :calculation\n  localmake \"stream nr.ask :s 1 10\n  localmake \"rank nr.choose.rank :stream :N\n  localmake \"chosen item bi.to.small :rank :candidates\n  localmake \"year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)\n  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]\n  output (list :year :N)\nend\n"
+          source = source[:start] + replacement + source[end:]
+          print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
           path.write_text(source, encoding="utf-8")
           print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
           PY
