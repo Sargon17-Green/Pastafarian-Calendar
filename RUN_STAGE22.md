@@ -1,6 +1,6 @@
 # Stage22 — Twelve-batch bowl evolution
 
-**State (2026-11-25):** production operation 39 has been appended to `src/monster_bootstrap.false`; source/static review only; Native has not been run; Stage22 is not accepted.
+**State (2026-11-26):** production operation 39 is committed. Bounded Native attempts have reached the original interpreter, but no attempt has passed the complete acceptance gate; the latest source-locked run is queued. Stage22 is not accepted.
 
 ## Normative basis
 
@@ -102,8 +102,8 @@ The serialized oracle output is in `evidence/stage22_design_oracle_2026-11-25.js
 Production operation `39` is appended after accepted operation `38`. It validates the allocated `[1,bowls]` argument and six canonical positive Base512 BigInts; sums the six old bowl values; computes `T=SAVE(sum+6+149u)`; derives rank `4+((T-4) mod 7)` with the signed BigInt Euclidean-remainder helper; obtains the lexicographic order from production operation `34`; maps predecessor/successor positions back to bowl IDs; computes all six new values from the same old snapshot; and only then builds a fresh direct `[6,...]` table for the next batch. It returns the final direct table after exactly twelve batches. Input records and BigInts are read-only. Invalid physical pointers, truncated allocations, corrupt heaps, and memory-unsafe aliasing remain outside the bounded contract.
 
 - Design oracle: PASS (397 cases; 4,764 transitions; 28,584 comparisons).
-- Production op39: source committed; Native/static execution not yet performed.
-- CI/Native: NOT_RUN.
+- Production op39: source committed; Native attempts have run, but no complete acceptance gate has passed.
+- CI/Native: PREACCEPTANCE_FAILURES; latest source pin `82134a9f16a60ae68ddd45bf9599690bcd849a3c` has queued run `45777329229`.
 - Stage22 acceptance: NO.
 - Main/merge/release: not authorized and not performed.
 
@@ -113,10 +113,23 @@ Production operation `39` is appended after accepted operation `38`. It validate
 - First CI attempt: run `45684008657`, job `139451675350`, failed at source-pin verification because `SOURCE_PIN` contained a literal backslash; build and Native steps were skipped.
 - Second CI attempt: run `45684287557`, job `139452646856`, passed source/runtime pin, compiler build and Unicode preflight, then stopped before Native because `cmp` required byte-identical JSON key order and historical metadata. The generated and committed mathematical oracle values agree; the gate is being changed to compare the full mathematical fields and all five numeric witnesses semantically. Artifact `15056140710` has SHA-256 `df9f01220730ca81fed08e1b1d0db14ae8e2fdf64288180e1e370fd9e7a91d8b`; ZIP CRC test passed.
 - Third CI attempt: run `45684661404`, job `139453960901`, reached the original FALSE interpreter and failed immediately at `op22` with `stack type mismatch` while adding `6+149u` to the BigInt total; no numeric result was accepted. The fixture self-check passed. Artifact `15054463704` has SHA-256 `237c7b788a01afd604ce8d2568bad1a1d0db729104dc5ee26fafe89d5f55db3a`; ZIP CRC test passed.
-- Repair: replace the two scalar `op22` constructions with explicit `op20` small-to-BigInt, `op23` small multiplication, and `op9` BigInt addition; compute `u+p²` as BigInt via `op20`/`op14`/`op9`; add the computed `7LR` term before reusing its scratch handle for the batch index. Mathematical recurrence is unchanged. Prefix probes now run before full paths for faster fault localization.
-- Native/CI: not yet completed; no PASS claimed.
+- Superseded initial repair attempt: `op20` was incorrectly treated as small-to-BigInt. The subsequent Native failure showed that `op20` converts BigInt to a small cell; the correct signed-small-to-BigInt constructor is `op0`.
+- Corrected source mapping (2026-11-26): all six scalar conversions in op39 (`6`, batch index in T, constants `4` and `7`, position `p`, and batch index in each bowl formula) now use `op0`. `op23` remains the BigInt-by-small multiplier; `op9` adds BigInts; `op14` multiplies BigInts; `op25` applies SAVE. The `7LR` term is added before its scratch handle is reused for the batch index. The mathematical recurrence is unchanged. The rank-modulus and position-square source-mutant anchors were retargeted to `op0`.
+- Native/CI: no PASS claimed; attempts and exact causes are recorded below.
 - Independent offline audit: prepared, not yet executed.
 - Stage22 acceptance: NO.
 - Main/merge/release: not authorized and not performed.
+
+## Native QA attempt log — 2026-11-26
+
+All attempts below are bounded preacceptance diagnostics. A failed probe or self-check is not a production PASS and does not accept Stage22.
+
+- Run `45685335977`, job `139456325033`, source `4763c0f56507327abc70c8f91153203ad59420af`: fixture self-check passed; first positive probe failed at EOF with `unterminated statement`. Artifact `15054319915`, SHA-256 `41091671eaccae99c7be6f40d09034ba8fefb81a5546a47a956f62dc3c567c5d`, ZIP CRC PASS. Cause: prefix instrumentation omitted the closing bracket of the condition lambda.
+- Run `45685426309`, job `139456648522`, source `624b23768772df237e166185b895ae30bb6982d2`: same malformed prefix-loop failure before numeric execution. Artifact `15055793724`, SHA-256 `51ad4a5e0d865b3e8e0fdddd0396281aa121ac0851296758b5725b1acb58083f`, ZIP CRC PASS. The instrumentation replacement was corrected to preserve `[condition][body]`.
+- Run `45776706036`, job `139761977609`, source `183f4426d254b46880d309a7e27a8bd086b9a3fd`: pre-Native self-check failed because the newly added expected-loop assertion encoded a literal backslash-n rather than a newline. Artifact `15095508758`, SHA-256 `875e67d6985815a97ec08c7b022aaef80925e4d649c9a288bbb7e8ab831e415b`, ZIP CRC PASS. The assertion escape was corrected.
+- Run `45776844772`, job `139762441041`, source `875ed860d2950aed9b753c2968c02f91fa5767e5`: design snapshot and fixture/mutation self-check passed; first Native probe failed at `E_SMALL_SIGN` with a stack type mismatch. Artifact `15096915102`, SHA-256 `c31e96bb9fbec6f7de8724f232981b000a6d9f97b79f2d10bb5bef86da41bb1a`, ZIP CRC PASS. Cause: op39 called op20 with scalar input although op20 is BigInt-to-small; scalar-to-BigInt must use op0.
+- Run `45777104027`, job `139763299835`, source `e4c001c583787e3fa90767cbffa8b17cf341549e`: pre-Native self-check failed because the position-square mutant still targeted the old op20 conversion anchor. Artifact `15097035208`, SHA-256 `3ca02ec89a25358566c29a497c3fbe1d6db37b1f79a4b44e3c3d0815243a774c`, ZIP CRC PASS. The position-square and rank-modulus mutant anchors were retargeted to op0.
+- Intermediate runs `45777231412` (source `f56c3cf22079d1805e5e6b8a0a2ed8f15b1b5526`) and `45777291329` (source `3f602c0e03bac792a2bafa6044df8f5a3792a2f0`) were queued before the final mutation-anchor repair; they are not acceptance evidence.
+- Current source snapshot: `82134a9f16a60ae68ddd45bf9599690bcd849a3c`; all six scalar-to-BigInt conversions and both affected mutation anchors use op0. Run `45777329229` is queued for this exact source SHA. No Native PASS is claimed.
 
 **NEXT:** inspect the completed Stage22 run, job logs, exact source/runtime pins, artifact SHA-256/ZIP CRC, and offline audit; only then decide bounded acceptance. No main/merge.
