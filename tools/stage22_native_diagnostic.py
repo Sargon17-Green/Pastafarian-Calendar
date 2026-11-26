@@ -373,6 +373,8 @@ def execute(name, program, seconds, want=MARKER, exitcode=0):
 def self_check(source):
     assert len(INVALIDS) == 16 and len(MUTANTS) == 5
     assert source.count(OP) == 1
+    durable_return = b"z;r:6a;!y;1+g;!a;!y;2+g;!a;!y;3+g;!a;!y;4+g;!a;!y;5+g;!a;!y;6+g;!a;!"
+    assert source.count(durable_return) == 1, "missing durable direct six-bowl return"
     assert source.count(LOOP) == 1
     assert oracle([1] * 6, 1)[0] == [179, 182, 194, 187, 203, 214]
     assert oracle([2, 3, 5, 7, 11, 13], 1)[0] == [529, 349, 853, 394, 878, 599]
