@@ -111,4 +111,5 @@ jobs:
           path: |
             evidence/stage22_acceptance/
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
