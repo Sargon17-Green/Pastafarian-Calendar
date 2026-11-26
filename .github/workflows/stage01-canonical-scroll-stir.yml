@@ -187,10 +187,10 @@ jobs:
           retention-days: 30
 
   scroll-full-date-context-diff:
-    name: Independent Hebrew Scroll full-date differential (28 cases — boundary, wide, legacy pairs)
+    name: Independent Hebrew Scroll full-date differential (36 cases — boundary, wide, legacy and actual-weave pairs)
     needs: canonical-scroll-stir
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install GNU Fortran
@@ -284,13 +284,13 @@ jobs:
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=9/9 CASES; 45/45 EXACT FIELDS' build/stage01-scroll-full-date-boundary.log
 
-      - name: Differential exact legacy normative and expanded target pairs at calculation offset zero
+      - name: Differential exact legacy normative, expanded and actual-weave target pairs at calculation offset zero
         shell: bash
         run: |
           set -euo pipefail
           set +e
           (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/stage01-scroll-full-date-legacy-resource.log \
-            timeout --signal=TERM --kill-after=5s 700s python3 -u test/stage01_scroll_full_date_diff.py \
+            timeout --signal=TERM --kill-after=5s 1200s python3 -u test/stage01_scroll_full_date_diff.py \
               --fortran-exe build/stage01_scroll_full_date_probe \
               --suite legacy-offset-zero \
               --output build/stage01-scroll-full-date-legacy-offset-zero.json \
@@ -299,9 +299,9 @@ jobs:
           rc=$?
           set -e
           cat build/stage01-scroll-full-date-legacy-offset-zero.log
-          echo "STAGE01_SCROLL_FULL_DATE_LEGACY_EXIT=$rc TIME_LIMIT=700 MEMORY_KIB=1048576"
+          echo "STAGE01_SCROLL_FULL_DATE_LEGACY_EXIT=$rc TIME_LIMIT=1200 MEMORY_KIB=1048576"
           if [ "$rc" -ne 0 ]; then exit "$rc"; fi
-          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=10/10 CASES; 50/50 EXACT FIELDS' build/stage01-scroll-full-date-legacy-offset-zero.log
+          grep -Fxq 'STAGE01_SCROLL_FULL_DATE_DIFFERENTIAL=18/18 CASES; 90/90 EXACT FIELDS' build/stage01-scroll-full-date-legacy-offset-zero.log
           grep -Fxq 'STAGE01_SCROLL_FULL_DATE_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/stage01-scroll-full-date-legacy-offset-zero.log
 
       - name: Preserve independent full-date evidence

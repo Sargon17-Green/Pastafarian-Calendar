@@ -78,6 +78,13 @@ LEGACY_OFFSET_ZERO_CASES = (
     ("old-expanded-plus-2350", 0, 2350),
 )
 
+# Target offsets from the legacy actual-weave diagnostic; only inputs are reused.
+# Expected fields are computed by the independent Scroll oracle, not the legacy Python fixture.
+ACTUAL_WEAVE_OFFSET_ZERO_CASES = tuple(
+    (f"actual-weave-{target:+d}", 0, target)
+    for target in (-2022, 2161, -2011, 2175, -1995, 2189, -1777, 2179)
+)
+
 _STRUCTURE_CACHE: dict[tuple[int, int, int, int], dict] = {}
 
 
@@ -371,6 +378,8 @@ def self_test():
     verify(len(CUTLET_NAMES) == 17 and len(MONTH_NAMES) == 47, "canonical name catalog sizes")
     verify(len(LEGACY_OFFSET_ZERO_CASES) == 10 and all(calc == 0 for _, calc, _ in LEGACY_OFFSET_ZERO_CASES), "ten exact legacy pairs use calculation offset zero")
     verify(tuple(target for _, _, target in LEGACY_OFFSET_ZERO_CASES) == (-2032, -2031, -1, 0, 1, 2212, 2213, -2169, 271, 2350), "legacy target offsets")
+    verify(len(ACTUAL_WEAVE_OFFSET_ZERO_CASES) == 8 and all(calc == 0 for _, calc, _ in ACTUAL_WEAVE_OFFSET_ZERO_CASES), "eight actual-weave targets use Foundation calculation context")
+    verify(len({(calc, target) for _, calc, target in LEGACY_OFFSET_ZERO_CASES + ACTUAL_WEAVE_OFFSET_ZERO_CASES}) == 18, "all eighteen legacy and actual-weave target pairs are distinct")
     return checks
 
 
@@ -378,7 +387,7 @@ def compare(args):
     suites = {
         "boundary": BOUNDARY_CASES,
         "wide": WIDE_CONTEXT_CASES,
-        "legacy-offset-zero": LEGACY_OFFSET_ZERO_CASES,
+        "legacy-offset-zero": LEGACY_OFFSET_ZERO_CASES + ACTUAL_WEAVE_OFFSET_ZERO_CASES,
     }
     cases = suites[args.suite]
     report = {

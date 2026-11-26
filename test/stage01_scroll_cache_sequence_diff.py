@@ -39,6 +39,9 @@ SEQUENCES = (
 
 PROJECT_ID = "PC-BRANCH-FORTRAN-ENGLISH"
 PREFIX = "STAGE01_SCROLL_SEQUENCE_RESULT="
+# Three repeated groups exercise exactly these nine of the fourteen catalogued pairs.
+SEQUENCE_CASE_IDS = frozenset((4, 5, 6, 7, 8, 11, 12, 13, 14))
+EXPECTED_SEQUENCE_PAIRS = 9
 
 
 def make_calls():
@@ -309,7 +312,8 @@ def self_test():
     checks += 1
 
     required_pairs = sorted({(call[3], call[4]) for call in calls})
-    assert len(required_pairs) == 14
+    assert {call[2] for call in calls} == SEQUENCE_CASE_IDS
+    assert len(required_pairs) == EXPECTED_SEQUENCE_PAIRS
     checks += 1
     synthetic_cases = [
         {
@@ -331,7 +335,7 @@ def self_test():
         "matched_fields": len(synthetic_cases) * 5,
         "cases": synthetic_cases,
     }
-    assert len(expected_from_documents([synthetic_document], calls)) == 14
+    assert len(expected_from_documents([synthetic_document], calls)) == EXPECTED_SEQUENCE_PAIRS
     checks += 1
     bad_document = dict(synthetic_document)
     bad_document["source_sha256"] = "0" * 64
@@ -386,7 +390,7 @@ def main():
             expected_cache = load_expected_artifacts(args.oracle_json, calls)
             print(
                 f"STAGE01_SCROLL_CACHE_SEQUENCE_ORACLE_ARTIFACTS={len(args.oracle_json)} "
-                f"EXPECTED_PAIRS={len(expected_cache)}/14",
+                f"EXPECTED_PAIRS={len(expected_cache)}/{EXPECTED_SEQUENCE_PAIRS}",
                 flush=True,
             )
         else:
@@ -413,9 +417,9 @@ def main():
         print(f"STAGE01_SCROLL_CACHE_SEQUENCE_ORACLE_ERROR={exc}", file=sys.stderr, flush=True)
         return 2
 
-    if len(expected_cache) != 14:
+    if len(expected_cache) != EXPECTED_SEQUENCE_PAIRS:
         print(
-            f"STAGE01_SCROLL_CACHE_SEQUENCE_EXPECTED_PAIRS={len(expected_cache)}/14",
+            f"STAGE01_SCROLL_CACHE_SEQUENCE_EXPECTED_PAIRS={len(expected_cache)}/{EXPECTED_SEQUENCE_PAIRS}",
             file=sys.stderr,
             flush=True,
         )
