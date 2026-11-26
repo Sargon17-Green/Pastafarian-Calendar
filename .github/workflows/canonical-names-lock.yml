@@ -1824,3 +1824,64 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  stage01-canonical-full-year:
+    if: ${{ !contains(github.event.head_commit.message, '[diagnostic-only]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original Fortran full-year QA adapter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/big_integer.f90 -o build/big_integer.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran -std=f2018 -ffree-line-length-none -fcheck=all -J build -I build test/stage01_canonical_full_year_probe.f90 build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o build/normative_oracle_core.o build/normative_oracle_calendar.o -o build/stage01_canonical_full_year_probe
+      - name: Bounded original full-year and rank projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 450s build/stage01_canonical_full_year_probe) > build/canonical-year-actual.log 2> build/canonical-year-actual.stderr
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > build/canonical-year-native.exit
+          exit "$rc"
+      - name: Independent full-year and rank differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile test/stage01_canonical_full_year_diff.py
+          set +e
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=5s 1000s python3 -u test/stage01_canonical_full_year_diff.py --actual build/canonical-year-actual.log --output build/canonical-year-report.json) 2>&1 | tee build/canonical-year-diff.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          printf '%s\n' "$rc" > build/canonical-year-diff.exit
+          test "$rc" -eq 0
+          grep -Fxq 'CANONICAL_YEAR_MONTH_IDS=4399/4399' build/canonical-year-diff.log
+          grep -Fxq 'CANONICAL_YEAR_FIELDS=21995/21995' build/canonical-year-diff.log
+          grep -Fxq 'CANONICAL_YEAR_RANK_IDS=17596/17596' build/canonical-year-diff.log
+          grep -Fxq 'CANONICAL_YEAR_COUNT_MATCH=true' build/canonical-year-diff.log
+      - name: Record provenance
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build
+          printf 'PROJECT_ID=PC-BRANCH-FORTRAN-ENGLISH\nGITHUB_SHA=%s\n' "$GITHUB_SHA" > build/canonical-year-source.txt
+          sha256sum test/stage01_canonical_full_year_probe.f90 test/stage01_canonical_full_year_diff.py test/stage01_scroll_weaving_reverse_endpoint.py test/stage01_foundation_candidate_capture.py > build/canonical-year-source-hashes.txt
+      - name: Preserve full-year QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-canonical-full-year
+          path: build/canonical-year-*
+          if-no-files-found: error
+          retention-days: 30
