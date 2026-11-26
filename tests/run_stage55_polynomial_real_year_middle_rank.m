@@ -1,4 +1,6 @@
-function run_stage55_polynomial_real_year_middle_rank()
+function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
+if nargin==0, prefixLimit=0; end
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -67,6 +69,42 @@ assert(numel(Rtext)==6764 && ...
     'Polynomial middle rank differs from independent GMP inverse-rank certificate.');
 fprintf('POLYNOMIAL_MIDDLE_RANK_POLICY_PASS DIGITS=%d POLICY=floor(T/2)+1\n', ...
     numel(Rtext));
+
+if prefixLimit==2
+    % The first letter is forced; the second tests the first nontrivial
+    % branch of the same native adjoint candidate. No production calls.
+    fprintf('POLYNOMIAL_FIRST_BRANCH_BEGIN STEPS=2\n');
+    prefixTimer=tic;
+    [actualPrefix,cursor]=family.prefixAt1(R,prefixLimit);
+    prefixSeconds=toc(prefixTimer);
+    assert(isequal(double(actualPrefix(:).'),expected(1:prefixLimit)), ...
+        'Native prefix differs from independently inverse-ranked fixture.');
+    assert(cursor.initialCount==T && cursor.rank>=pastafari.BigInt(1) && ...
+        cursor.rank<=cursor.count && ~cursor.done, 'Exact prefix cursor invalid.');
+    remaining=L;
+    for i=1:numel(actualPrefix)
+        remaining(actualPrefix(i))=remaining(actualPrefix(i))-1;
+    end
+    assert(isequal(double(cursor.remaining(:).'),remaining), ...
+        'Prefix cursor remaining multiplicities differ.');
+    assert(cursor.openedUpTo==max(actualPrefix) && cursor.closedUpTo==0, ...
+        'Prefix frontier inconsistent.');
+    result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+        'prefix_only',true,'prefix_symbols_matched',2,'days',4244, ...
+        'prefix',actualPrefix,'remaining',cursor.remaining, ...
+        'opened_up_to',cursor.openedUpTo,'closed_up_to',cursor.closedUpTo, ...
+        'rank_decimal',char(cursor.rank),'count_decimal',char(cursor.count), ...
+        'initial_count_sha256',sha256Ascii(Ttext), ...
+        'original_rank_sha256',sha256Ascii(Rtext), ...
+        'prefix_seconds',prefixSeconds,'count_seconds',countSeconds, ...
+        'full_word_verified',false,'full_converter_calls',0,'stage55_accepted',false);
+    fid=fopen(fullfile(root,'evidence','prefix-result.json'),'w');
+    assert(fid>=0,'Cannot create prefix diagnostic evidence.');
+    closer=onCleanup(@() fclose(fid)); %#ok<NASGU>
+    fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char');
+    fprintf('POLYNOMIAL_FIRST_BRANCH_PASS MATCHED=2/2 SECONDS=%.3f\n',prefixSeconds);
+    return
+end
 
 fprintf('POLYNOMIAL_MIDDLE_UNRANK_BEGIN DAYS=4244\n');
 unrankTimer=tic;
