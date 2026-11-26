@@ -30,7 +30,10 @@ Assert-StageTrue -Condition (($md -match '(?m)^CURRENT_STAGE=32\s*$') -or $stage
 Assert-StageTrue -Condition (($md -match '(?m)^LAST_COMPLETED_STAGE=32\s*$') -or $stage33Sealed) -Name 'Stage32 completed or Stage33 exact seal'
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage32 sealed'
 if ($stage43Allowed) {
-    Assert-StageTrue -Condition ($md -match '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage33 own evidence required under Stage43 profile'
+    if ($md -cnotmatch '(?m)^STAGE33_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') {
+        throw 'Stage33 own evidence required under Stage43 profile'
+    }
+    Write-Host 'PASS: Stage33 own evidence required under Stage43 profile'
 }
 Assert-StageTrue -Condition ($md -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Stage26 historical red'
 $f=[System.Numerics.BigInteger](Get-NormFoundationDay)
@@ -126,7 +129,7 @@ Write-Host "STAGE33_MIXED_STEP_SAME=$mixedNoFlips"
 Write-Host ("STAGE33_DISTINCT_MIXED="+$seen.Count)
 Write-Host "STAGE33_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE33_ASSERTIONS_FAILED=$script:StageTestFailed"
-if($script:StageTestPassed -ne 561){Write-Host 'STAGE33_ASSERTION_COUNT=FAIL_EXPECTED_561';exit 1}
+if($script:StageTestPassed -ne 560){Write-Host 'STAGE33_ASSERTION_COUNT=FAIL_EXPECTED_560';exit 1}
 if($script:StageTestFailed -ne 0){Write-Host 'STAGE33_DISCOVERY18=FAIL';exit 1}
 Write-Host 'STAGE33_DISCOVERY18=BOUNDED_RESEARCH_ONLY'
 exit 0

@@ -31,7 +31,10 @@ Assert-StageTrue -Condition (($metadata -match '(?m)^CURRENT_STAGE=(31|32|33|34|
 Assert-StageTrue -Condition ($stage32Awaiting -or $stage32Sealed) -Name 'Stage32 metadata is a consistent pending or sealed pair'
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE31_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage31 research evidence preserved'
 if ($stage43Allowed) {
-    Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') -Name 'Stage32 own evidence required under Stage43 profile'
+    if ($metadata -cnotmatch '(?m)^STAGE32_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED\s*$') {
+        throw 'Stage32 own evidence required under Stage43 profile'
+    }
+    Write-Host 'PASS: Stage32 own evidence required under Stage43 profile'
 }
 Assert-StageTrue -Condition ($metadata -match '(?m)^STAGE26_RUNTIME_VERIFICATION=EXPECTED_RED_CONFIRMED\s*$') -Name 'Historical Stage26 red preserved'
 $f = [System.Numerics.BigInteger](Get-NormFoundationDay)
@@ -106,7 +109,7 @@ Write-Host "STAGE32_STEP_SAME=$signSame"
 Write-Host ("STAGE32_DISTINCT_DELTAS=" + $distinctDeltas.Count)
 Write-Host "STAGE32_ASSERTIONS_PASSED=$script:StageTestPassed"
 Write-Host "STAGE32_ASSERTIONS_FAILED=$script:StageTestFailed"
-if ($script:StageTestPassed -ne 240) { Write-Host 'STAGE32_ASSERTION_COUNT=FAIL_EXPECTED_240'; exit 1 }
+if ($script:StageTestPassed -ne 239) { Write-Host 'STAGE32_ASSERTION_COUNT=FAIL_EXPECTED_239'; exit 1 }
 if ($script:StageTestFailed -ne 0) { Write-Host 'STAGE32_DISCOVERY17=FAIL'; exit 1 }
 Write-Host 'STAGE32_DISCOVERY17=BOUNDED_RESEARCH_ONLY'
 exit 0
