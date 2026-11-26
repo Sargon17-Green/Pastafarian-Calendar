@@ -384,7 +384,7 @@ def self_check(source):
             instrumented = instrument(source, steps)
             assert (instrumented == source) == (steps == 12)
             if steps < 12:
-                expected_loop = b" 1i:\\n [i;" + str(steps + 1).encode() + b"<]["
+                expected_loop = b" 1i:\n [i;" + str(steps + 1).encode() + b"<]["
                 assert expected_loop in instrumented, ("malformed prefix loop", steps)
     for name in INVALIDS:
         body, expected, checks, record = fixture(case("witness"), 12, invalid=name)
