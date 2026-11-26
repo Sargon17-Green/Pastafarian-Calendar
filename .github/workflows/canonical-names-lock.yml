@@ -28,7 +28,7 @@ jobs:
   clojure-native-stage02-discovery24:
     if: github.event_name == 'push' && github.ref == 'refs/heads/Clojure+Nederlands' && !contains(github.event.head_commit.message, '[generic-e2e-next-year-p1]') && !contains(github.event.head_commit.message, '[generic-e2e-canonical-plus17]') && !contains(github.event.head_commit.message, '[generic-e2e-first-refusal]') && !contains(github.event.head_commit.message, '[discovery24-dp-feasibility]')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v4
@@ -45,6 +45,20 @@ jobs:
         run: clojure -Sdescribe
       - name: Native Stage 1 regression and Stage 2 DISCOVERY24 genuine end-to-end bounded numerical differential
         run: clojure -M:test
+      - name: Require exact-SHA p520 five-field differential evidence
+        if: success()
+        shell: bash
+        run: test -s qa/clojure-dutch/discovery24_inplace_five_field.edn
+      - name: Preserve exact-SHA in-place insertion differential
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clojure-dutch-inplace-five-field-differential
+          path: |
+            qa/clojure-dutch/discovery24_inplace_five_field.edn
+            qa/clojure-dutch/discovery24_canonical_dp_input.json
+          if-no-files-found: warn
+          retention-days: 90
 
   clojure-dutch-generic-e2e-feasibility:
     # New workflows added only on this feature branch are not registered for

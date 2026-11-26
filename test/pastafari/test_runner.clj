@@ -28,6 +28,12 @@
             [pastafari.discovery24-inplace-insertion-test]))
 
 (defn -main [& _]
+  (let [inplace-test (ns-resolve 'pastafari.discovery24-inplace-insertion-test
+                                 'discovery24-inplace-insertion-cross-check)]
+    (when-not (and inplace-test (fn? (:test (meta inplace-test))))
+      (throw (ex-info "DISCOVERY24 in-place differential test Var is not registered"
+                      {:namespace 'pastafari.discovery24-inplace-insertion-test
+                       :test 'discovery24-inplace-insertion-cross-check}))))
   (let [result (test/run-tests 'pastafari.stage01-test
                                'pastafari.stage02-test
                                'pastafari.stage02-stones-test
@@ -47,6 +53,7 @@
                                'pastafari.stage02-month-length-test
                                'pastafari.stage02-month-weaving-test
                                'pastafari.stage02-month-weaving-large-test
+                               'pastafari.stage02-month-unrank-large-test
                                'pastafari.stage02-month-profile-test
                                'pastafari.stage02-month-selection-test
                                'pastafari.stage02-month-names-test

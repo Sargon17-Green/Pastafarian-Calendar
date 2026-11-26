@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.string :as string]
             [pastafari.maandrang :as maandrang]
-            [pastafari.discovery24-dp-feasibility-test :as canonical])
+            [pastafari.discovery24-dp-feasibility-test :as canonical]
+            [pastafari.normative-oracle :as oracle])
   (:import [java.nio.charset StandardCharsets]
            [java.security MessageDigest]
            [java.util LinkedHashMap]))
@@ -462,7 +463,64 @@
 (defn- python-long [python-result key]
   (Long/parseLong (get python-result key)))
 
+(defn- ensure-invariant! [condition message details]
+  (when-not condition
+    (throw (ex-info message details))))
+
+(def ^:private canonical-calculation-day -15055654N)
+
+(defn- normative-five-fields [calculation-day target-day month-id day-in-month]
+  ;; The month ID and occurrence come from the independent gap-convolution
+  ;; prefix oracle. All other date fields are recomputed by the normative
+  ;; oracle; no full 3,569-symbol month weaving is materialized.
+  (let [state (oracle/new-gate-state)
+        year (oracle/find-target-year state calculation-day target-day)
+        first-day (inc (:open-gate-day year))
+        target-position (inc (-' target-day first-day))
+        structure-sauce (oracle/sauce calculation-day first-day)
+        cutlet-count (oracle/choose-cutlet-count structure-sauce year)
+        cutlet-partition (oracle/choose-cutlet-partition
+                          state calculation-day structure-sauce year cutlet-count)
+        cutlet-name-indices (oracle/choose-cutlet-names structure-sauce cutlet-count)
+        cutlets (oracle/materialize-cutlets
+                 state year cutlet-partition cutlet-name-indices)
+        matching-cutlets (filterv #(<= (:first-day %) target-day (:last-day %))
+                                  cutlets)
+        month-count (oracle/choose-month-count structure-sauce year)
+        month-name-indices (oracle/choose-month-names structure-sauce month-count)]
+    (ensure-invariant! (= 520N target-position)
+                       "canonical target is not the p520 day"
+                       {:target-position target-position :target-day target-day
+                        :first-day first-day})
+    (ensure-invariant! (= 1 (count matching-cutlets))
+                       "normative oracle did not identify exactly one cutlet"
+                       {:matching-cutlets (count matching-cutlets)})
+    (ensure-invariant! (and (integer? month-id) (<= 1 month-id month-count))
+                       "gap oracle month ID is outside the normative month range"
+                       {:month-id month-id :month-count month-count})
+    (ensure-invariant! (and (integer? day-in-month) (pos? day-in-month))
+                       "gap oracle returned an invalid day-in-month"
+                       {:day-in-month day-in-month})
+    (let [cutlet (first matching-cutlets)
+          month-name-index (nth month-name-indices (dec (int month-id)))
+          date-components
+          [(bigint (:number year))
+           (bigint (:name-index cutlet))
+           (inc (-' target-day (:first-day cutlet)))
+           (bigint month-name-index)
+           (bigint day-in-month)]]
+      {:target-position target-position
+       :first-day first-day
+       :year (:number year)
+       :cutlet-name-index (:name-index cutlet)
+       :day-in-cutlet (nth date-components 2)
+       :month-id (bigint month-id)
+       :month-name-index (bigint month-name-index)
+       :day-in-month (bigint day-in-month)
+       :date-components date-components})))
+
 (deftest discovery24-inplace-insertion-cross-check
+  (println "DISCOVERY24_CLOJURE_INPLACE_BEGIN")
   (testing "the measured source-accounting function is pinned"
     (is (= "62f304dc013a9a9f70475bb0d34f186838b27318"
            (git-blob-sha (slurp "src/pastafari/maandrang.clj")))))
@@ -474,7 +532,79 @@
                                    (:rank canonical-input)
                                    520
                                    context)
-        snapshots (:snapshots actual)]
+        snapshots (:snapshots actual)
+        p520 (get snapshots 520)
+        gap-month-id (bigint (python-long python :GAP_P520_MONTH_ID))
+        gap-day-in-month (bigint (python-long python :GAP_P520_DAY_IN_MONTH))
+        gap-five-fields (normative-five-fields canonical-calculation-day
+                                               canonical-calculation-day
+                                               gap-month-id gap-day-in-month)
+        inplace-five-fields (normative-five-fields canonical-calculation-day
+                                                   canonical-calculation-day
+                                                   (:month-id p520)
+                                                   (:day-in-month p520))
+        five-field-match? (= (:date-components gap-five-fields)
+                             (:date-components inplace-five-fields))
+        metric-snapshots
+        (into {}
+              (map (fn [position]
+                     (let [snapshot (get snapshots position)]
+                       [position
+                        {:source-raming-cost (:source-raming-cost snapshot)
+                         :alternative-dp-cell-writes (:dp-cell-writes snapshot)
+                         :shared-group-cost (:python-shared-group-cost snapshot)}]))
+                   [81 82 520]))
+        report
+        {:project-id "PC-BRANCH-CLOJURE-DUTCH"
+         :branch "Clojure+Nederlands"
+         :source-sha (System/getenv "GITHUB_SHA")
+         :production-source-blob-sha "62f304dc013a9a9f70475bb0d34f186838b27318"
+         :python-insertion-oracle-blob-sha "e3a5616acda7c1fd1853e9c6114049efa86d7bd3"
+         :normative-oracle-blob-sha "5b2f486a12aeb8ff3cea0d762ba26882d67fb4cc"
+         :canonical-input {:calculation-day canonical-calculation-day
+                           :target-day canonical-calculation-day
+                           :target-year (:year canonical-input)
+                           :profile (:profile canonical-input)
+                           :profile-months (count (:profile canonical-input))
+                           :profile-days (reduce +' 0N (:profile canonical-input))
+                           :weaving-total-digits (count (str (:total canonical-input)))
+                           :weaving-rank-digits (count (str (:rank canonical-input)))
+                           :search-budget 128N
+                           :production-shared-group-ceiling 5000000N}
+         :small-exhaustive {:profiles (:profiles small)
+                            :legal-words (:legal-words small)
+                            :rank-position-checks (:rank-position-checks small)
+                            :exact-budget-accepts (:exact-budget-accepts small)
+                            :budget-minus-one-refusals (:budget-minus-one-refusals small)
+                            :source-accounting-non-equal (:source-accounting-non-equal small)
+                            :digest (:digest small)}
+         :p81 (get snapshots 81)
+         :p82 (get snapshots 82)
+         :p520 p520
+         :cost-comparison metric-snapshots
+         :cost-units {:source-raming-cost
+                      "Cumulative sum of the pinned production raming() result for each candidate examined, including the root candidate; not the production shared-group bill."
+                      :alternative-dp-cell-writes
+                      "One unit per output-distribution array entry written by the test-only in-place DP; a separate work metric."
+                      :shared-group-cost
+                      "The active/new candidate-group charge schedule independently reproduced by the Python gap oracle; compare this metric with the existing 5000000 production ceiling."}
+         :five-field-differential {:status (if five-field-match? :passed :mismatch)
+                                   :method :normative-oracle-plus-independent-gap-convolution-prefix
+                                   :target-position (:target-position gap-five-fields)
+                                   :gap-oracle-date-components (:date-components gap-five-fields)
+                                   :clojure-inplace-date-components (:date-components inplace-five-fields)}
+         :full-month-weaving-materialized? false
+         :production-date-api-invoked? false
+         :stage2 :open
+         :result :PASS_MODEL_ONLY}]
+    (ensure-invariant! (= (:source-sha canonical-input) (System/getenv "GITHUB_SHA"))
+                       "canonical input SHA does not match this checkout"
+                       {:canonical-source-sha (:source-sha canonical-input)
+                        :github-sha (System/getenv "GITHUB_SHA")})
+    (ensure-invariant! five-field-match?
+                       "p520 five-field differential mismatch"
+                       {:gap-date (:date-components gap-five-fields)
+                        :inplace-date (:date-components inplace-five-fields)})
     (testing "small exhaustive profiles match the committed Python oracle"
       (is (= "PASS_MODEL_ONLY" (:RESULT python)))
       (is (= (:profiles small) (python-long python :SMALL_PROFILES)))
@@ -519,18 +649,23 @@
                     (:dp-cell-writes snapshot))
               (str "production raming units and alternative DP writes are not interchangeable at p"
                    position))))
-      (is (<= (:dp-cell-writes actual) alternative-write-limit))
-      (println "DISCOVERY24_CLOJURE_INPLACE_RESULT"
-               (pr-str
-                {:source-blob-sha "62f304dc013a9a9f70475bb0d34f186838b27318"
-                 :python-oracle-blob-sha "e3a5616acda7c1fd1853e9c6114049efa86d7bd3"
-                 :profile-months (count (:profile canonical-input))
-                 :profile-days (reduce +' 0N (:profile canonical-input))
-                 :rank-digits (count (str (:rank canonical-input)))
-                 :dp-cell-writes (:dp-cell-writes actual)
-                 :p81 (get snapshots 81)
-                 :p82 (get snapshots 82)
-                 :p520 (get snapshots 520)
-                 :five-field-differential :not-run
-                 :stage2 :open}))))))
-
+      (is (= 4995675N (:shared-group-cost (get metric-snapshots 81))))
+      (is (= 5002652N (:shared-group-cost (get metric-snapshots 82))))
+      (is (= 5218257N (:shared-group-cost (get metric-snapshots 520))))
+      (is (= 3507625N (:alternative-dp-cell-writes (get metric-snapshots 82))))
+      (is (= 3713186N (:alternative-dp-cell-writes (get metric-snapshots 520))))
+      (is (= 10N (:month-id p520)))
+      (is (= 18N (:day-in-month p520)))
+      (is (= "65c683810ee69f740e38334bbc67969d4ac429bc7d7943646a2a02aa14d8ae0b"
+             (:prefix-sha256 p520)))
+      (is (<= (:dp-cell-writes actual) alternative-write-limit)))
+    (testing "independent normative five-field differential for canonical p520"
+      (is (= 520N (:target-position gap-five-fields)))
+      (is (= 5000N (first (:date-components gap-five-fields))))
+      (is (= 5 (count (:date-components gap-five-fields))))
+      (is (every? integer? (:date-components gap-five-fields)))
+      (is (= (:date-components gap-five-fields)
+             (:date-components inplace-five-fields))))
+    (spit "qa/clojure-dutch/discovery24_inplace_five_field.edn"
+          (str (pr-str report) "\n"))
+    (println "DISCOVERY24_CLOJURE_INPLACE_RESULT" (pr-str report))))
