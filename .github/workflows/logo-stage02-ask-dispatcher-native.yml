@@ -55,13 +55,15 @@ jobs:
           cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_common.logo" qa/
           cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_oracle.py" qa/
           cp "$RUNNER_TEMP/qa-bundle/QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md" .
-          # Gate extension reporters mutate the reference cache and return BI lists;
+          # Gate reporters return BI lists; the row logger must also nest binary SENTENCE inputs.
           # explicitly discard those values when they are used as loop commands.
           python3 - <<'PY'
           from pathlib import Path
           path = Path("qa/logo_stage2_ask_dispatcher_common.logo")
           source = path.read_text(encoding="utf-8")
           replacements = (
+              ("  print sentence [ASK_DISPATCH_ROW] :tag :step [A] (bi.digits :firstValue) [N] (bi.digits :N) [R] (bi.digits :rank)\n",
+               "  print (sentence [ASK_DISPATCH_ROW] (sentence :tag (sentence :step (sentence [A] (sentence (bi.digits :firstValue) (sentence [N] (sentence (bi.digits :N) (sentence [R] (bi.digits :rank)))))))))\n", 1),
               ("    nr.gate.extend.forward\n", "    ignore nr.gate.extend.forward\n", 1),
               ("[nr.gate.extend.backward]", "[ignore nr.gate.extend.backward]", 2),
               ("[nr.gate.extend.forward]", "[ignore nr.gate.extend.forward]", 2),
@@ -73,10 +75,10 @@ jobs:
                   raise SystemExit(f"expected {expected} occurrences of {old!r}; found {actual}")
               source = source.replace(old, new)
               changed += actual
-          if changed != 5:
-              raise SystemExit(f"expected five reporter fixes; changed {changed}")
+          if changed != 6:
+              raise SystemExit(f"expected six QA harness fixes; changed {changed}")
           path.write_text(source, encoding="utf-8")
-          print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 5/5")
+          print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
           PY
           git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
           git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
