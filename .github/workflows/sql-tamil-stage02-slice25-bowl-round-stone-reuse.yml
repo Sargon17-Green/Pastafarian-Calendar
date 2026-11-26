@@ -1,7 +1,7 @@
 name: SQL Tamil Slice25 two-timeout stone-state reuse
 on:
   push:
-    branches: ['SQL+தமிழ்']
+    branches: ['SQL\+தமிழ்']
     paths:
       - 'sql/06_stage02_visible_drops.sql'
       - 'sql/08_stage02_bowl_round.sql'
@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 3
       - name: Run bounded component differential and archived oracle
         shell: bash
         run: bash sql/test/run_181_stage25_bowl_round_stone_reuse.sh "$CASE_ID"

@@ -18,7 +18,9 @@ trap cleanup EXIT
 
 test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
 test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
-test "$(git rev-parse "${GITHUB_SHA}^")" = "$BASELINE_SHA"
+OPTIMIZATION_SHA=4905a59a01777f23052f1fd1eb6ee3b4b4335c1e
+test "$(git rev-parse "${GITHUB_SHA}^")" = "$OPTIMIZATION_SHA"
+test "$(git rev-parse "${OPTIMIZATION_SHA}^")" = "$BASELINE_SHA"
 mapfile -t changed_prod < <(git diff --name-only "$BASELINE_SHA" "$GITHUB_SHA" -- sql \
   | grep -E '^sql/[0-9]{2}_.*\.sql$' | sort)
 test "${#changed_prod[@]}" -eq 2
@@ -29,6 +31,8 @@ while read -r expected path; do test "$(git hash-object "$path")" = "$expected";
 test "$(wc -l < sql/test/181_source_locks.txt)" -eq 29
 while read -r expected path; do test "$(git hash-object "$path")" = "$expected"; done < sql/test/181_test_locks.txt
 test "$(wc -l < sql/test/181_test_locks.txt)" -eq 5
+cp sql/test/181_source_locks.txt sql/test/181_test_locks.txt "$EVIDENCE/"
+printf 'SOURCE_LOCKS=29/29\nTEST_LOCKS=5/5\nOPTIMIZATION_SHA=%s\nBASELINE_SHA=%s\n' "$OPTIMIZATION_SHA" "$BASELINE_SHA" > "$EVIDENCE/lock-status.txt"
 
 git cat-file -e "$BASELINE_SHA^{commit}"
 git show "$BASELINE_SHA:sql/06_stage02_visible_drops.sql" > "$EVIDENCE/baseline/06_stage02_visible_drops.sql"
