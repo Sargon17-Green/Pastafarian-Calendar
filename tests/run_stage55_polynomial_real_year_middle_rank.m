@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,78 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==12
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay),'QA-only arithmetic overlay missing.');
+    addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')), ...
+        'Optimized arithmetic was not selected.');
+    assert(strcmp(which('pastafari.unrankGeneralWeaveSuffixChunkAdjoint'), ...
+        fullfile(overlay,'+pastafari','unrankGeneralWeaveSuffixChunkAdjoint.m')));
+    qaArithmeticExactness();
+    prior=jsondecode(fileread(fullfile(root,'evidence','prior-prefix-result.json')));
+    assert(prior.prefix_symbols_matched==6 && prior.full_converter_calls==0 && ...
+        ~prior.full_word_verified && ~prior.stage55_accepted);
+    prefix=double(prior.prefix(:).'); remaining=double(prior.remaining(:).');
+    opened=prior.opened_up_to; closed=prior.closed_up_to;
+    assert(isequal(prefix,expected(1:6)) && opened==6 && closed==0);
+    expectedRemaining=L;
+    for i=1:6, expectedRemaining(prefix(i))=expectedRemaining(prefix(i))-1; end
+    assert(isequal(remaining,expectedRemaining));
+    rank=pastafari.BigInt(prior.rank_decimal); count=pastafari.BigInt(prior.count_decimal);
+    assert(strcmp(sha256Ascii(char(rank)),'71223178e09a86889e1c5497cd7ae30e2458cdb58d0e0d11b96ecb3460959443'));
+    assert(strcmp(sha256Ascii(char(count)),'c47a58f5b9fb8b9d1bb3c17be5b8573dcf72b08e2a3ad0d429672916c5b9f49e'));
+    rankHashes={ ...
+        '9bcda2a7da72a077ee51db8debd858b2cdd578ab5b95913212209d9bf2a313fa', ...
+        '038e3565af370fbac347033fada61fdfe4830e265d4cf94c40d6f6ceca9acd79', ...
+        '6ba97455e7575822d215fe020e7140815d55759f889710f99c23e2281fd3633a', ...
+        '39053710e806551b019c8a4b87ef0e2c98afece5efc384a88431dd91a5b33fc8', ...
+        'e0c60e5e0b4deb0b169269402d43c420d4fe5c4b2295ba3dc5f7473be9776ac1', ...
+        'a39b215363a95ead14111432cd29b779be0e333857d7d7570d217cf0abdada55'};
+    countHashes={ ...
+        '311b713ba26e926b60243b9a63b0bb8d13132a17d95a346b4841b02e5b5e2eec', ...
+        '3adfc02aa07e839ae8477c1852b05a3012b916dad070e3aa24a9834757e138c3', ...
+        'd17a7f10a6ed4ff570134adb6e13f0d028118d9985b56ee6a4c28249924ecf0a', ...
+        '42433e519055e6f1d25b640264c4ce3b1f72abc5e4a9df66a820209ff4c7d96a', ...
+        'fd999f8e3c4cf00910df2956eb7dfff62bc1b891d503ec51d5336ac3e44c4709', ...
+        '9cc21ee7a163a496a079b4610124dd7a83e612ae111a07c7bf6f71f23ed69c44'};
+    fprintf('QA_OPTIMIZED_CURSOR_START PREFIX=6\n');
+    for position=7:12
+        stepTimer=tic;
+        [piece,cursor]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint( ...
+            L,remaining,opened,closed,rank,1);
+        elapsed=toc(stepTimer);
+        assert(cursor.initialCount==count && isscalar(piece) && piece==expected(position));
+        prefix=[prefix,piece]; %#ok<AGROW>
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==max(prefix) && closed==0 && ~cursor.done);
+        rank=cursor.rank; count=cursor.count;
+        rHash=sha256Ascii(char(rank)); cHash=sha256Ascii(char(count));
+        assert(rank>=pastafari.BigInt(1) && rank<=count);
+        assert(strcmp(rHash,rankHashes{position-6}) && strcmp(cHash,countHashes{position-6}), ...
+            'Independent exact interval mismatch.');
+        result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+            'prefix_only',true,'prefix_symbols_matched',position,'days',4244, ...
+            'prefix',prefix,'remaining',remaining,'opened_up_to',opened, ...
+            'closed_up_to',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+            'rank_sha256',rHash,'count_sha256',cHash, ...
+            'initial_count_sha256',prior.initial_count_sha256, ...
+            'original_rank_sha256',prior.original_rank_sha256, ...
+            'prior_native_run',45905761751,'reference_cxx_inverse_run_id',45686680226, ...
+            'step_seconds',elapsed,'qa_arithmetic_overlay',true,'full_word_verified',false, ...
+            'full_converter_calls',0,'stage55_accepted',false);
+        file=fullfile(root,'evidence',sprintf('prefix-%02d-result.json',position));
+        fid=fopen([file,'.part'],'w'); assert(fid>=0);
+        fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+        movefile([file,'.part'],file,'f');
+        fprintf('QA_OPTIMIZED_STEP_PASS PREFIX=%d SYMBOL=%d SECONDS=%.3f\n',position,piece,elapsed);
+    end
+    fprintf('QA_OPTIMIZED_PREFIX_PASS PREFIX=12 FULL_WORD_VERIFIED=0\n');
+    return
+end
 
 if prefixLimit==6
     % Resume from the actual prior MATLAB cursor, not from oracle rank inputs.
@@ -225,4 +297,44 @@ md.update(int8(uint8(value)));
 raw=md.digest();
 bytes=typecast(raw,'uint8');
 hex=lower(reshape(dec2hex(bytes,2).',1,[]));
+end
+
+function qaArithmeticExactness()
+% Java is only a test oracle, never the implementation under test.
+rng(551206,'twister');
+lengths=[1 7 8 31 224 225 700 6765];
+divisors=[1 2 3 97 9999 1000000 9999999];
+checks=0;
+for n=lengths
+    for variant=1:3
+        if variant==1
+            a=repmat('9',1,n);
+        elseif variant==2
+            a=['1',repmat('0',1,n-1)];
+        else
+            a=['7',char(randi([48 57],1,n-1))];
+        end
+        for sign=[1 -1]
+            s=a; if sign<0, s=['-',a]; end
+            A=pastafari.BigInt(s); J=javaObject('java.math.BigInteger',s);
+            for d=divisors
+                B=pastafari.BigInt(d); D=javaObject('java.math.BigInteger',sprintf('%d',d));
+                [q,r]=A.floorDivMod(B);
+                jr=J.mod(D); jq=J.subtract(jr); jq=jq.divide(D);
+                assert(strcmp(char(q),char(jq.toString())) && strcmp(char(r),char(jr.toString())));
+                P=A*B; JP=J.multiply(D);
+                assert(strcmp(char(P),char(JP.toString())));
+                checks=checks+2;
+            end
+            for m=[7 8 70 217 224 225 231]
+                b=repmat('9',1,m);
+                P=A*pastafari.BigInt(b);
+                JB=javaObject('java.math.BigInteger',b); JP=J.multiply(JB);
+                assert(strcmp(char(P),char(JP.toString())));
+                checks=checks+1;
+            end
+        end
+    end
+end
+fprintf('QA_ARITHMETIC_ORACLE_PASS CHECKS=%d\n',checks);
 end

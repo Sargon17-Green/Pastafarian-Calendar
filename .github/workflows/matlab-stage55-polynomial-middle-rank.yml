@@ -1,4 +1,4 @@
-name: MATLAB Stage55 Polynomial Exact Cursor Resume 2 to 6 (QA)
+name: MATLAB Stage55 Exact Arithmetic Fast Paths Prefix 6 to 12 (QA)
 on:
   push:
     branches:
@@ -114,30 +114,88 @@ jobs:
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
           echo "GATE_PASS all source locks"
-      - name: Restore exact prior native cursor
+      - name: Restore exact prior native cursor and build isolated arithmetic overlay
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15155644322/zip > "$RUNNER_TEMP/prior-prefix.zip"
-          echo "b310603aaa8d63ccc4a0a5fe360b3e60a738269c16117d72684215496475cac5  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15158955749/zip > "$RUNNER_TEMP/prior-prefix.zip"
+          echo "7cef5e350262043e54e4ec3a073a5ef58783f319516c6ab655146b227c086589  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
           python3 - <<'PY'
-          import hashlib, os, zipfile
+          import hashlib, os, zipfile, shutil
           from pathlib import Path
-          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"prior-prefix.zip") as z:
-              d=z.read("prefix-result.json")
-              assert hashlib.sha256(d).hexdigest()=="57587a3a7ffa820c739871ecea41dad7062fcf6853d39529a55ca79a76fab301"
+          tmp=Path(os.environ["RUNNER_TEMP"])
+          with zipfile.ZipFile(tmp/"prior-prefix.zip") as z:
+              d=z.read("prefix-06-result.json")
+              assert hashlib.sha256(d).hexdigest()=="e7e99e26b8031edcb4c00071a1829e5343707658222781310268a262034e7d46"
               Path("evidence/prior-prefix-result.json").write_bytes(d)
-          print("PRIOR_NATIVE_ARTIFACT_LOCK_PASS")
+          overlay=tmp/"qa-arithmetic-overlay"
+          shutil.copytree("src",overlay)
+          p=overlay/"+pastafari"/"BigInt.m"
+          s=p.read_text()
+          mul="            out = zeros(1, numel(a) + numel(b) + 1);\n"
+          # Bounds: <=32 products (<10^14 each), accumulator <3.2e15,
+          # carry <3.2e8; all integers exactly representable in binary64.
+          fast_mul="""            if numel(a) < numel(b)
+                          t=a; a=b; b=t;
+                      end
+                      if numel(b)==1
+                          out=pastafari.BigInt.mulMagnitudeSmall(a,b(1));
+                          return
+                      end
+                      if numel(b)<=32
+                          raw=zeros(1,numel(a)+numel(b)+1);
+                          for j=1:numel(b)
+                              ix=j:j+numel(a)-1;
+                              raw(ix)=raw(ix)+a.*b(j);
+                          end
+                          carry=0; base=pastafari.BigInt.BASE;
+                          for k=1:numel(raw)
+                              cur=raw(k)+carry;
+                              carry=floor(cur/base);
+                              raw(k)=cur-carry*base;
+                          end
+                          assert(carry==0);
+                          out=pastafari.BigInt.trimMagnitude(raw);
+                          return
+                      end
+          """
+          assert s.count(mul)==1
+          s=s.replace(mul,fast_mul+mul)
+          div="            q = zeros(1, numel(a));\n            r = 0;\n"
+          # Single limb division: 0<=r<b<10^7, so cur<10^14.
+          # The quotient is <10^7, and its distance from a nonintegral
+          # boundary is >=1/b>1e-7, exceeding half an ulp.
+          fast_div="""            if numel(b)==1
+                          q=zeros(1,numel(a)); r=0;
+                          base=pastafari.BigInt.BASE;
+                          for pos=numel(a):-1:1
+                              cur=r*base+a(pos);
+                              digit=floor(cur/b(1));
+                              r=cur-digit*b(1);
+                              q(pos)=digit;
+                          end
+                          q=pastafari.BigInt.trimMagnitude(q);
+                          return
+                      end
+          """
+          assert s.count(div)==1
+          s=s.replace(div,fast_div+div)
+          p.write_text(s)
+          Path("evidence/BigInt-QA-overlay.m.txt").write_text(s)
+          print("QA_OVERLAY_SHA256="+hashlib.sha256(p.read_bytes()).hexdigest())
           PY
+          echo "PASTAFARI_QA_OVERLAY=$RUNNER_TEMP/qa-arithmetic-overlay" >> "$GITHUB_ENV"
+          git diff --exit-code -- src
+          echo "PRIOR_NATIVE_ARTIFACT_LOCK_PASS"
 
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
           release: R2026a
 
-      - name: Resume exact native prefix 2 through 6
+      - name: Test isolated exact arithmetic fast paths and prefix 7 through 12
         uses: matlab-actions/run-command@v3
         with:
           command: >-
@@ -146,7 +204,7 @@ jobs:
             try;
               fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
               addpath('tests');
-              run_stage55_polynomial_real_year_middle_rank(6);
+              run_stage55_polynomial_real_year_middle_rank(12);
               diary off;
             catch ME;
               disp(getReport(ME,'extended','hyperlinks','off'));
@@ -159,7 +217,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-polynomial-cursor-resume-${{ github.run_id }}
+          name: stage55-polynomial-arithmetic-overlay-${{ github.run_id }}
           path: evidence/
           if-no-files-found: warn
           retention-days: 30
