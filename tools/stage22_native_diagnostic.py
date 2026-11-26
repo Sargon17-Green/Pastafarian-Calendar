@@ -41,7 +41,7 @@ MUTANTS = {
         (b"z;b:l;a;!5a;!b;23h;!!f:", b"z;b:l;a;!3a;!b;23h;!!f:"),
     ),
     "omit_position_squared": (
-        (b"z;b:p;a;!b;20h;!!v:", b"z;b:0a;!b;20h;!!v:"),
+        (b"z;b:p;a;!b;0h;!!v:", b"z;b:0a;!b;0h;!!v:"),
     ),
     "cross_weight_7_to_6": (
         (b"z;b:n;a;!7a;!b;23h;!!n:", b"z;b:n;a;!6a;!b;23h;!!n:"),
