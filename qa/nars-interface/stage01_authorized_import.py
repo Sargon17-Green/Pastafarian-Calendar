@@ -30,6 +30,58 @@ STAGE01_MARKER = (
 )
 
 
+# Source-anchored diagnostic only. Each span preserves the original statements,
+# including entire control blocks. The three final spans invoke the ORIGINAL
+# subtests, so the first unfinished span identifies the next focused probe.
+TRACE_GROUPS = (
+    (172, 172), (173, 173), (174, 174), (175, 175),
+    *((n, n) for n in range(177, 196)),
+    (196, 198), (199, 201), (202, 208), (210, 215), (217, 219),
+    (221, 223), (225, 228), (230, 231), (233, 244), (246, 250),
+    (252, 259), (261, 261), (262, 262), (263, 264), (265, 267),
+    (269, 276), (278, 288), (290, 292), (294, 302), (304, 310),
+    (312, 316), (318, 321), (323, 323), (324, 324), (325, 325),
+    (327, 327),
+)
+TRACE_HEADER = f"APL_GERMAN_STAGE01_TRACE_V1|SOURCE={SOURCE_COMMIT}|"
+TRACE_HELPER = [
+    "QAS01T token;unused",
+    "  unused←token ⎕NAPPEND QAS01TraceTie",
+]
+
+
+def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
+    if (block["name"], block["path"], block["start_line"], block["end_line"]) != (
+        "RunStage01Tests", "test/stage01_tests.apl", 171, 328
+    ):
+        raise ValueError("TRACE_SOURCE_ANCHOR_MISMATCH")
+    original = fx_definition_lines(block)
+    if not original[0].startswith("RunStage01Tests;"):
+        raise ValueError("TRACE_HEADER_MISMATCH")
+    starts = {a for a, _ in TRACE_GROUPS}
+    ends = {b for _, b in TRACE_GROUPS}
+    covered = [n for a, b in TRACE_GROUPS for n in range(a, b + 1)]
+    actual = [171 + i for i, line in enumerate(original[1:], 1) if line.strip()]
+    if sorted(covered) != actual or len(covered) != len(set(covered)):
+        raise ValueError("TRACE_SPAN_COVERAGE_MISMATCH")
+    traced = ["QAS01TraceMain" + original[0][len("RunStage01Tests"):]]
+    tokens = []
+    for n, line in enumerate(original[1:], 172):
+        if n in starts:
+            token = f"{n:04d}S"
+            traced.append(f"  QAS01T '{token}'")
+            tokens.append(token)
+        traced.append(line)
+        if n in ends:
+            token = f"{n:04d}E"
+            traced.append(f"  QAS01T '{token}'")
+            tokens.append(token)
+    restored = [original[0]] + [line for line in traced[1:] if not line.startswith("  QAS01T '")]
+    if restored != original:
+        raise ValueError("TRACE_ORIGINAL_STATEMENT_CHANGED")
+    return traced, tokens
+
+
 def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[bytes, dict]:
     locked = load_locked_sources(root)
     blocks = locked["blocks"]
@@ -92,7 +144,9 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
     # expression. If the original RunStage01Tests signals an APL error, the
     # marker expression that follows it must never execute.
     suite_paths = {name: str(path_obj.with_name(f"{path_obj.stem}_suite_{name}.txt"))
-                   for name in ("start", "return", "ec", "et", "payload", "done")}
+                   for name in ("start", "return", "ec", "et", "payload", "done",
+                                "trace_helper_fx", "trace_main_fx", "trace_run_fx",
+                                "trace", "trace_ec", "trace_et", "trace_payload")}
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
@@ -109,9 +163,34 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01FinalEC[1]", suite_paths["ec"]),
         write_expr("⊃QAS01FinalEC[2]", suite_paths["et"]),
         write_expr("⊃QAS01FinalEC[3]", suite_paths["payload"]),
+    ]
+    # Do not overwrite or modify any original function. Only after original
+    # EC=0, run a separately named diagnostic copy with unchanged statements.
+    # Its initializers run again; it is not independent acceptance evidence.
+    traced, trace_tokens = build_trace_definition(next(b for b in blocks if b["name"] == "RunStage01Tests"))
+    trace_runner = [
+        "QAS01TraceRun",
+        "  :If 0=⊃QAS01FinalEC[1]",
+        f"      QAS01TraceTie←(⎕UCS {_codes(suite_paths['trace'])}) ⎕NCREATE 0",
+        f"      QAS01T ⎕UCS {_codes(TRACE_HEADER)}",
+        "      QAS01DiagEC←⎕EC 'QAS01TraceMain'",
+        "  :EndIf",
+    ]
+    diagnostic_programs = [
+        write_expr("⎕FX " + nested_fx_expression(TRACE_HELPER), suite_paths["trace_helper_fx"]),
+        write_expr("⎕FX " + nested_fx_expression(traced), suite_paths["trace_main_fx"]),
+        write_expr("⎕FX " + nested_fx_expression(trace_runner), suite_paths["trace_run_fx"]),
+        "QAS01TraceRun",
+        write_expr("⊃QAS01DiagEC[1]", suite_paths["trace_ec"]),
+        write_expr("⊃QAS01DiagEC[2]", suite_paths["trace_et"]),
+        write_expr("⊃QAS01DiagEC[3]", suite_paths["trace_payload"]),
+    ]
+    receipt_programs += diagnostic_programs + [
         marker_write(f"APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE={SOURCE_COMMIT}", suite_paths["done"]),
     ]
     programs = chunk_programs + [final_program] + receipt_programs
+    if any(len(program) >= 65000 for program in programs):
+        raise ValueError("TRACE_OR_IMPORT_PROGRAM_TOO_LONG")
     # Keep assignment inside a code-point-encoded controlled expression.
     # Only quad and diamond may appear as non-ASCII glyphs in the workspace LX.
     # The original test and final marker remain in the SAME inner EC.
@@ -160,6 +239,11 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         "marker_token": STAGE01_MARKER,
         "suite_paths": suite_paths,
         "suite_start_token": start_token,
+        "trace_header": TRACE_HEADER,
+        "trace_tokens": trace_tokens,
+        "trace_groups": [list(pair) for pair in TRACE_GROUPS],
+        "trace_definition_sha256": hashlib.sha256("\n".join(traced).encode("utf-8")).hexdigest(),
+        "trace_diagnostic_only": True,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
         "workspace_source_sha256": base_meta["input_sha256"],
         "outer_lx_chars": len(outer),

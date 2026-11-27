@@ -71,7 +71,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
- foreach($key in @('start','return','ec','et','payload','done')) {
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload')) {
    $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_stage01_chunked_suite_'+$key+'.txt')
    if($meta.suite_paths.$key -cne $expectedPath -or (Test-Path -LiteralPath $expectedPath)){throw 'SUITE_RECEIPT_PATH_INVALID_OR_PREEXISTS'}
  }
@@ -138,7 +138,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $suite=@{}
- foreach($key in @('start','return','ec','et','payload','done')){
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload')){
    $path=[string]$meta.suite_paths.$key
    if(Test-Path -LiteralPath $path -PathType Leaf){
      Copy-Item -LiteralPath $path -Destination (Join-Path $Evidence ('suite_'+$key+'.txt')) -Force
@@ -151,6 +151,33 @@ try {
  $r['suite_ec']=$suite.ec
  $r['suite_error_type']=$suite.et
  $r['suite_payload']=$suite.payload
+ # Diagnostics never participate in acceptance. Validate the raw trace as
+ # an exact prefix of its source-anchored ordered token manifest.
+ $r['trace_compile_exact']=($suite.trace_helper_fx -ceq 'QAS01T' -and $suite.trace_main_fx -ceq 'QAS01TraceMain' -and $suite.trace_run_fx -ceq 'QAS01TraceRun')
+ $r['trace_ec']=$suite.trace_ec
+ $r['trace_et']=$suite.trace_et
+ $r['trace_payload']=$suite.trace_payload
+ $r['trace_prefix_exact']=$false
+ $r['trace_events']=@()
+ $r['trace_next_expected']=$null
+ $traceHeader=('APL_GERMAN_STAGE01_TRACE_V1|SOURCE='+$source+'|')
+ if($meta.trace_header -cne $traceHeader -or $meta.trace_diagnostic_only -ne $true -or $meta.trace_tokens.Count -ne 98){throw 'TRACE_METADATA_CONTRACT_FAILED'}
+ if($null -ne $suite.trace -and $suite.trace.StartsWith($traceHeader,[StringComparison]::Ordinal)){
+   $body=$suite.trace.Substring($traceHeader.Length)
+   if($body.Length % 5 -eq 0 -and $body.Length -le 5*$meta.trace_tokens.Count){
+     $n=[int]($body.Length/5)
+     $valid=$true
+     $events=@()
+     for($i=0;$i -lt $n;$i++){
+       $event=$body.Substring(5*$i,5)
+       $events+= $event
+       if($event -cne $meta.trace_tokens[$i]){$valid=$false}
+     }
+     $r['trace_prefix_exact']=$valid
+     $r['trace_events']=$events
+     if($valid -and $n -lt $meta.trace_tokens.Count){$r['trace_next_expected']=$meta.trace_tokens[$n]}
+   }
+ }
  $ecValue=([string]$suite.ec).Trim()
  $r['suite_status']=if($ecValue -cin @('1','2')){'RETURNED_SUCCESS'}elseif($ecValue -ceq '0'){'RETURNED_ERROR'}elseif($r['suite_receipts_attempted_exact'] -or $null -ne $suite.payload -or $null -ne $suite.et){'RECEIPT_CAPTURE_FAILURE'}elseif($r['deadline_elapsed']){'TIMEOUT_NO_EC'}else{'NO_EC_RECEIPT'}
  $fxOK=(($last -eq 95) -and (-not $inconsistent) -and (@($rows | Where-Object { $_.exact -ne $true }).Count -eq 0))
