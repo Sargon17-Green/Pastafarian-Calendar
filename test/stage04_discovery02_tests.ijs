@@ -61,8 +61,10 @@ saveM4=. STAGE04_SAVE_MODULUS
 ((stage04Save _1x) = saveM4-1x) stage04Check 'SAVE(-1)=M-1'
 ((stage04Save -saveM4) = saveM4) stage04Check 'SAVE(-M)=M'
 ((stage04Save 1x+10x*saveM4) = 1x) stage04Check 'multipli pozitivi de M sunt eliminati exact'
-(128 = 3!:0 3r1) stage04Check 'fixture rational-intreg are tip J128'
-(((stage04Save 3r1) = 3x) *. (64 = 3!:0 stage04Save 3r1)) stage04Check 'rational-intreg devine rezultat exact J64'
+NB. Use a named rational noun, as in Stage 3, to avoid adjacent numeric words in 3!:0.
+rational4=. 3r1
+(128 = 3!:0 rational4) stage04Check 'fixture rational-intreg are tip J128'
+(((stage04Save rational4) = 3x) *. (64 = 3!:0 stage04Save rational4)) stage04Check 'rational-intreg devine rezultat exact J64'
 large4=. 2x ^ 240
 ((stage04Save large4) = stage04Save large4+saveM4) stage04Check 'periodicitate pentru un numar foarte mare'
 ((stage04Save large4) = stage04Save large4-5x*saveM4) stage04Check 'periodicitate la deplasari negative de multipli M'
