@@ -1,0 +1,59 @@
+name: MATLAB Stage55 Source Forward Differential
+on:
+  push:
+    branches: ['MATLAB\+Polski']
+    paths:
+      - 'tools/stage55_source_forward_oracle.py'
+      - 'tools/run_stage55_source_forward_native.m'
+      - 'tools/verify_stage55_source_forward.py'
+      - '.github/workflows/matlab-stage55-source-forward.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: matlab-stage55-source-forward-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-forward:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock exact checkout and fixture
+        run: |
+          set -eu
+          mkdir -p logs/stage55_source_forward
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git rev-parse HEAD > logs/stage55_source_forward/checkout.txt
+          test "$(git hash-object tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = a1383b111a88203b0d652b8f0a0e9af1a8b75f25
+          test "$(git hash-object src/+pastafari/WholeMonthWeavingFamily.m)" = 4aa94c632399fc73208adb1d9ef4c2a6d3927a0b
+          test "$(git hash-object src/+pastafari/BigInt.m)" = 86581532df7492a236283c5ee9410ca281e2e6f5
+      - name: Independent forward oracle with bounded exit status
+        run: |
+          set +e
+          ulimit -v 1048576
+          timeout 120s python3 tools/stage55_source_forward_oracle.py > logs/stage55_source_forward/oracle.log 2>&1
+          rc=$?
+          echo "$rc" > logs/stage55_source_forward/oracle.exit
+          exit "$rc"
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native source selector and family
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 165
+        with:
+          command: >-
+            addpath('tools'); diary('logs/stage55_source_forward/native.log');
+            try; run_stage55_source_forward_native(); diary off;
+            catch ME; disp(getReport(ME,'extended','hyperlinks','off')); diary off; rethrow(ME); end
+      - name: Compare exact decimal count, actual rank, and full word
+        run: python3 tools/verify_stage55_source_forward.py
+      - name: Preserve partial and final evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-source-forward-${{ github.sha }}
+          path: logs/stage55_source_forward/
+          if-no-files-found: error
+          retention-days: 30
