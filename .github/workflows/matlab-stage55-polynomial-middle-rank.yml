@@ -1,4 +1,4 @@
-name: Stage55 GMP Actual Source Rank Full Word Certificate (QA)
+name: MATLAB Stage55 Actual Source Rank Full Word Differential (QA)
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   polynomial-middle-rank:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 220
     steps:
       - name: Checkout exact QA branch
         uses: actions/checkout@v4
@@ -114,164 +114,114 @@ jobs:
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
           echo "GATE_PASS all source locks"
-      - name: Restore immutable native rank and independently checked rank
+      - name: Restore exact native rank, GMP certificate and verified arithmetic overlay
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
           gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15178712147/zip > "$RUNNER_TEMP/source-rank.zip"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15179093713/zip > "$RUNNER_TEMP/gmp-source.zip"
           echo "424c346b85ef09eeb3615332429f3319dca4a21a9e61e315c44f456d6b88ba3f  $RUNNER_TEMP/source-rank.zip" | sha256sum -c -
+          echo "b5a833b220ce728b99a3626fd372e73c330fe1c01bfea5be3fecaea089863420  $RUNNER_TEMP/gmp-source.zip" | sha256sum -c -
           python3 - <<'PY'
-          import hashlib,json,os,sys,zipfile
+          import hashlib,json,os,shutil,sys,zipfile
           from pathlib import Path
           sys.set_int_max_str_digits(0)
-          ev=Path("evidence")
-          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"source-rank.zip") as z:
+          tmp=Path(os.environ["RUNNER_TEMP"]); ev=Path("evidence")
+          digest=lambda b:hashlib.sha256(b).hexdigest()
+          with zipfile.ZipFile(tmp/"source-rank.zip") as z:
               assert z.testzip() is None
-              for name in ("source-weave-rank.json","source-weave-rank-oracle.json"):
-                  (ev/name).write_bytes(z.read(name))
-          d=json.loads((ev/"source-weave-rank.json").read_text())
-          o=json.loads((ev/"source-weave-rank-oracle.json").read_text())
-          digest=lambda n:hashlib.sha256(n.encode("ascii")).hexdigest()
-          assert d["rank"]==o["rank"]
-          assert digest(d["rank"])==o["rank_sha256"]=="160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3"
-          assert digest(d["root_count"])==o["count_sha256"]=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
-          assert d["native_selector_executed"] and d["rejection_steps"]=="0"
-          assert 1<=int(d["rank"])<=int(d["root_count"])
-          (ev/"rank.txt").write_text(d["rank"])
-          (ev/"root-count.txt").write_text(d["root_count"])
-          print("SOURCE_RANK_LOCK_PASS")
+              d=json.loads(z.read("source-weave-rank.json"))
+              o=json.loads(z.read("source-weave-rank-oracle.json"))
+              optimized=z.read("BigInt-QA-overlay.m.txt")
+              assert digest(optimized)=="22df597bf9174e38e38b968e8b80fe456882029a94c526f199fd030f03e0980d"
+              assert d["rank"]==o["rank"] and d["native_selector_executed"] and d["rejection_steps"]=="0"
+              rank=d["rank"].encode("ascii"); count=d["root_count"].encode("ascii")
+              assert digest(rank)=="160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3"
+              assert digest(count)=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
+              (ev/"rank.txt").write_bytes(rank); (ev/"root-count.txt").write_bytes(count)
+          with zipfile.ZipFile(tmp/"gmp-source.zip") as z:
+              assert z.testzip() is None
+              assert z.read("rank.txt")==rank and z.read("root-count.txt")==count
+              word=z.read("source-word.json")
+              assert digest(word)=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+              hashes=z.read("source-interval-hashes.json")
+              summary=json.loads(z.read("source-certificate-summary.json"))
+              assert summary["symbols"]==4244 and summary["closed"]==45
+              assert summary["rank_sha256"]==digest(rank) and summary["root_sha256"]==digest(count)
+              assert len(json.loads(hashes))==4244
+              (ev/"source-word.json").write_bytes(word)
+              (ev/"source-interval-hashes.json").write_bytes(hashes)
+              (ev/"source-certificate-summary.json").write_bytes(z.read("source-certificate-summary.json"))
+          overlay=tmp/"qa-arithmetic-overlay"
+          shutil.copytree("src",overlay)
+          (overlay/"+pastafari"/"BigInt.m").write_bytes(optimized)
+          (ev/"BigInt-QA-overlay.m.txt").write_bytes(optimized)
+          for source in Path("src").rglob("*"):
+              if source.is_file() and source.as_posix()!="src/+pastafari/BigInt.m":
+                  assert source.read_bytes()==(overlay/source.relative_to("src")).read_bytes()
+          print("QA_ACTUAL_SOURCE_INPUTS_LOCK_PASS")
           PY
+          echo "PASTAFARI_QA_OVERLAY=$RUNNER_TEMP/qa-arithmetic-overlay" >> "$GITHUB_ENV"
+          git diff --exit-code -- src
 
-      - name: Compile independent GMP unrank driver around frozen inverse counter
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq libgmp-dev
-          cat > "$RUNNER_TEMP/source-rank-unrank.cpp" <<'CPP'
-          #define main frozen_inverse_main
-          #include "stage55_full_prefix_inverse_rank.cpp"
-          #undef main
-          int main(int argc,char** argv) {
-              try {
-                  if(argc!=5) throw std::runtime_error("fixture rank root output-dir");
-                  run_tiny_self_test();
-                  std::string f=read_file(argv[1]);
-                  auto key=f.find("\"month_lengths\"");
-                  if(key==std::string::npos) throw std::runtime_error("fixture key");
-                  auto L=parse_integer_array(f,key);
-                  if(L.size()!=45 || std::accumulate(L.begin(),L.end(),0L)!=4244)
-                      throw std::runtime_error("fixture dimensions");
-                  Big target=parse_big_decimal(read_file(argv[2]),"source rank");
-                  Big root=parse_big_decimal(read_file(argv[3]),"root count");
-                  Big rank=target,count=root,low=1;
-                  if(rank<1 || rank>root) throw std::runtime_error("rank bounds");
-                  std::vector<long> R=L,word;
-                  long opened=0,closed=0;
-                  std::string dir=argv[4];
-                  std::ofstream trace(dir+"/source-prefix-intervals.tsv");
-                  if(!trace) throw std::runtime_error("trace open");
-                  trace<<"position\tsymbol\tlow\thigh\topened\tclosed\n";
-                  auto start=Clock::now();
-                  for(long pos=1;pos<=4244;++pos) {
-                      if(std::chrono::duration<double>(Clock::now()-start).count()>900)
-                          throw std::runtime_error("bounded time exceeded");
-                      auto blocks=first_letter_blocks(R,opened,closed);
-                      Big total=0;
-                      for(auto &b:blocks) {
-                          if(b<0) throw std::runtime_error("negative block");
-                          total+=b;
-                      }
-                      if(total!=count) throw std::runtime_error("parent count mismatch");
-                      long selected=-1;
-                      for(long j=0;j<45;++j) {
-                          if(rank>blocks[j]) {rank-=blocks[j];low+=blocks[j];}
-                          else {selected=j;count=blocks[j];break;}
-                      }
-                      if(selected<0 || count<=0 || rank<1 || rank>count)
-                          throw std::runtime_error("unrank bounds");
-                      long j=selected;
-                      if(R[j]<=0) throw std::runtime_error("exhausted label");
-                      if(R[j]==L[j]) {
-                          if(j!=opened) throw std::runtime_error("opening order");
-                          ++opened;
-                      }
-                      if(--R[j]==0) {
-                          if(j!=closed) throw std::runtime_error("closing order");
-                          ++closed;
-                      }
-                      Big high=low+count-1;
-                      if(low+rank-1!=target || target>high)
-                          throw std::runtime_error("interval invariant");
-                      word.push_back(j+1);
-                      trace<<pos<<'\t'<<j+1<<'\t'<<low<<'\t'<<high<<'\t'<<opened<<'\t'<<closed<<'\n';
-                      if(!trace) throw std::runtime_error("trace write");
-                      if(pos%100==0 || pos==4244) {
-                          trace.flush();
-                          std::cout<<"GMP_SOURCE_PROGRESS POS="<<pos<<" OPENED="<<opened<<" CLOSED="<<closed<<std::endl;
-                      }
-                  }
-                  if(opened!=45 || closed!=45 || rank!=1 || count!=1 || low!=target ||
-                     std::any_of(R.begin(),R.end(),[](long x){return x!=0;}))
-                      throw std::runtime_error("terminal invariant");
-                  trace.close();
-                  std::ofstream out(dir+"/source-word.json");
-                  out<<"[";
-                  for(size_t i=0;i<word.size();++i) out<<(i?",":"")<<word[i];
-                  out<<"]\n";out.close();
-                  std::cout<<"GMP_SOURCE_FULL_WORD_PASS SYMBOLS=4244 RANK_EXACT=1 CLOSED=45"<<std::endl;
-                  return 0;
-              } catch(const std::exception& e){std::cerr<<e.what()<<std::endl;return 1;}
-          }
-          CPP
-          cp "$RUNNER_TEMP/source-rank-unrank.cpp" evidence/
-          g++ -std=c++17 -O3 -Wall -Wextra -I "$PWD/tools" "$RUNNER_TEMP/source-rank-unrank.cpp" -lgmpxx -lgmp -o "$RUNNER_TEMP/source-rank-unrank"
-          timeout 920s "$RUNNER_TEMP/source-rank-unrank" tests/fixtures/stage55_year5000_appendix_a_metadata.json evidence/rank.txt evidence/root-count.txt evidence | tee evidence/gmp-unrank.log
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
 
-      - name: Audit full source-rank certificate and publish interval hashes
+      - name: Compute actual source word independently in MATLAB
+        timeout-minutes: 200
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            diary('evidence/STAGE55_ACTUAL_SOURCE_NATIVE.log');
+            try;
+              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
+              addpath('tests');
+              run_stage55_polynomial_real_year_middle_rank(5001);
+              diary off;
+            catch ME;
+              disp(getReport(ME,'extended','hyperlinks','off'));
+              diary off;
+              rethrow(ME);
+            end
+
+      - name: Audit native ledger against independent GMP certificate
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import csv,gzip,hashlib,json,sys
+          import json
           from pathlib import Path
-          sys.set_int_max_str_digits(0)
           ev=Path("evidence")
-          R=int((ev/"rank.txt").read_text()); N=int((ev/"root-count.txt").read_text())
-          L=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())["month_lengths"]
+          cert=json.loads((ev/"source-interval-hashes.json").read_text())
+          rows=[json.loads(x) for x in (ev/"source-native-ledger.jsonl").read_text().splitlines()]
+          end=json.loads((ev/"latest-source-native-cursor.json").read_text())
+          summary=json.loads((ev/"source-native-summary.json").read_text())
           word=json.loads((ev/"source-word.json").read_text())
-          assert len(word)==4244
-          remaining=L[:]; lo,hi=1,N; opened=closed=0; hashes=[]; first44=first45=None
-          digest=lambda n:hashlib.sha256(str(n).encode("ascii")).hexdigest()
-          with (ev/"source-prefix-intervals.tsv").open() as f:
-              for i,row in enumerate(csv.DictReader(f,delimiter="\t"),1):
-                  assert i<=4244 and int(row["position"])==i
-                  symbol=int(row["symbol"]); a,b=int(row["low"]),int(row["high"])
-                  assert symbol==word[i-1] and 1<=symbol<=45 and lo<=a<=R<=b<=hi
-                  if remaining[symbol-1]==L[symbol-1]:
-                      assert symbol==opened+1; opened+=1
-                      if opened==44: first44=i
-                      if opened==45: first45=i
-                  remaining[symbol-1]-=1
-                  assert remaining[symbol-1]>=0
-                  if remaining[symbol-1]==0:
-                      assert symbol==closed+1; closed+=1
-                  assert opened==int(row["opened"]) and closed==int(row["closed"])
-                  hashes.append(dict(position=i,symbol=symbol,rank_sha256=digest(R-a+1),count_sha256=digest(b-a+1),opened=opened,closed=closed))
-                  lo,hi=a,b
-          assert len(hashes)==4244 and lo==hi==R and remaining==[0]*45 and opened==closed==45
-          (ev/"source-interval-hashes.json").write_text(json.dumps(hashes,separators=(",",":"))+"\n")
-          summary=dict(schema="STAGE55_GMP_SOURCE_RANK_CERTIFICATE/1",symbols=4244,rank_sha256=digest(R),root_sha256=digest(N),
-                       word_sha256=hashlib.sha256((ev/"source-word.json").read_bytes()).hexdigest(),
-                       opened44_at=first44,opened45_at=first45,closed=45,full_converter_calls=0,stage55_accepted=False)
-          (ev/"source-certificate-summary.json").write_text(json.dumps(summary,indent=2)+"\n")
-          with (ev/"source-prefix-intervals.tsv").open("rb") as src, gzip.open(ev/"source-prefix-intervals.tsv.gz","wb") as dst:
-              import shutil
-              shutil.copyfileobj(src,dst)
-          (ev/"source-prefix-intervals.tsv").unlink()
-          print("SOURCE_CERTIFICATE_AUDIT_PASS",json.dumps(summary))
+          lengths=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())["month_lengths"]
+          remaining=lengths[:]; opened=closed=0
+          assert len(rows)==len(cert)==len(word)==4244
+          for i,(row,ref) in enumerate(zip(rows,cert),1):
+              for k in ("position","symbol","opened","closed","rank_sha256","count_sha256"):
+                  assert row[k]==ref[k],(i,k)
+              symbol=row["symbol"]
+              assert row["position"]==i and symbol==word[i-1]
+              if remaining[symbol-1]==lengths[symbol-1]:
+                  assert symbol==opened+1; opened+=1
+              remaining[symbol-1]-=1
+              assert remaining[symbol-1]>=0
+              if remaining[symbol-1]==0:
+                  assert symbol==closed+1; closed+=1
+              assert row["opened"]==opened and row["closed"]==closed
+          assert opened==closed==45 and remaining==[0]*45
+          assert end["position"]==4244 and end["prefix"]==word and end["remaining"]==remaining
+          assert end["rank_decimal"]==end["count_decimal"]=="1"
+          assert summary["symbols_matched"]==4244 and summary["full_word_verified"]
+          assert summary["full_converter_calls"]==0 and not summary["stage55_accepted"]
+          print("QA_ACTUAL_SOURCE_NATIVE_LEDGER_PASS SYMBOLS=4244 CLOSED=45")
           PY
           git diff --exit-code -- src
 
@@ -279,7 +229,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-gmp-source-rank-certificate-${{ github.run_id }}
+          name: stage55-matlab-actual-source-word-${{ github.run_id }}
           path: evidence/
           if-no-files-found: warn
           retention-days: 30

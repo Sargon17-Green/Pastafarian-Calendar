@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265 4244 5000]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265 4244 5000 5001]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,86 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==5001
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay)); addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')));
+    assert(strcmp(which('pastafari.unrankGeneralWeaveSuffixChunkAdjoint'), ...
+        fullfile(overlay,'+pastafari','unrankGeneralWeaveSuffixChunkAdjoint.m')));
+    qaFactoredSmallOracle();
+    ev=fullfile(root,'evidence');
+    target=pastafari.BigInt(strtrim(fileread(fullfile(ev,'rank.txt'))));
+    count=pastafari.BigInt(strtrim(fileread(fullfile(ev,'root-count.txt'))));
+    assert(strcmp(sha256Ascii(char(target)), ...
+        '160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3'));
+    assert(strcmp(sha256Ascii(char(count)), ...
+        'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8'));
+    cert=jsondecode(fileread(fullfile(ev,'source-interval-hashes.json')));
+    expected=double(jsondecode(fileread(fullfile(ev,'source-word.json'))));
+    expected=expected(:).';
+    assert(numel(cert)==4244 && numel(expected)==4244);
+    prefix=zeros(1,4244); remaining=L; opened=0; closed=0;
+    rank=target; one=pastafari.BigInt(1);
+    totalSeconds=0;
+    fprintf('QA_ACTUAL_SOURCE_WORD_BEGIN TARGET=4244\n');
+    for position=1:4244
+        stepTimer=tic;
+        oldClosed=closed;
+        if opened<44
+            [piece,cursor]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint( ...
+                L,remaining,opened,closed,rank,1);
+            method='native_adjoint';
+        else
+            [piece,cursor]=qaFactoredStep(L,remaining,opened,closed,rank,count);
+            method='qa_factored_last_order';
+        end
+        elapsed=toc(stepTimer); totalSeconds=totalSeconds+elapsed;
+        assert(cursor.initialCount==count && isscalar(piece));
+        % The independent certificate is consulted only AFTER selecting.
+        assert(piece==expected(position) && cert(position).position==position && ...
+            cert(position).symbol==piece,'Independent word mismatch');
+        prefix(position)=piece;
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==max(prefix(1:position)) && closed>=oldClosed && closed<=oldClosed+1);
+        assert(opened==cert(position).opened && closed==cert(position).closed);
+        assert(all(remaining(1:closed)==0) && all(remaining(closed+1:end)>0));
+        assert(sum(remaining)==4244-position && cursor.done==(position==4244));
+        rank=cursor.rank; count=cursor.count;
+        rh=sha256Ascii(char(rank)); ch=sha256Ascii(char(count));
+        assert(rank>=one && rank<=count && strcmp(rh,cert(position).rank_sha256) && ...
+            strcmp(ch,cert(position).count_sha256),'Independent exact interval mismatch');
+        row=struct('position',position,'symbol',piece,'opened',opened,'closed',closed, ...
+            'rank_sha256',rh,'count_sha256',ch,'step_seconds',elapsed,'method',method);
+        fid=fopen(fullfile(ev,'source-native-ledger.jsonl'),'a'); assert(fid>=0);
+        fprintf(fid,'%s\n',jsonencode(row)); fclose(fid);
+        if position<=255 || mod(position,25)==0 || closed~=oldClosed || position==4244
+            state=struct('schema','STAGE55_ACTUAL_SOURCE_CURSOR/1', ...
+                'position',position,'prefix',prefix(1:position),'remaining',remaining, ...
+                'opened',opened,'closed',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+                'rank_sha256',rh,'count_sha256',ch,'total_compute_seconds',totalSeconds, ...
+                'full_converter_calls',0,'stage55_accepted',false);
+            file=fullfile(ev,'latest-source-native-cursor.json');
+            fid=fopen([file,'.part'],'w'); assert(fid>=0);
+            fwrite(fid,jsonencode(state),'char'); fwrite(fid,newline,'char'); fclose(fid);
+            movefile([file,'.part'],file,'f');
+            fprintf('QA_SOURCE_NATIVE_PROGRESS POS=%d OPENED=%d CLOSED=%d SECONDS=%.3f METHOD=%s\n', ...
+                position,opened,closed,totalSeconds,method);
+        end
+    end
+    assert(isequal(prefix,expected) && all(remaining==0) && opened==45 && closed==45);
+    assert(rank==one && count==one && cursor.done);
+    result=struct('schema','STAGE55_ACTUAL_SOURCE_NATIVE_WORD/1','symbols_matched',4244, ...
+        'full_word_verified',true,'closed_months',45,'final_rank',char(rank), ...
+        'final_count',char(count),'compute_seconds',totalSeconds,'full_converter_calls',0, ...
+        'stage55_accepted',false);
+    fid=fopen(fullfile(ev,'source-native-summary.json'),'w'); assert(fid>=0);
+    fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+    fprintf('QA_SOURCE_NATIVE_FULL_WORD_PASS MATCHED=4244 CLOSED=45 RANK=1 COUNT=1\n');
+    return
+end
 
 if prefixLimit==5000
     % Source-derived rank only, NOT a date conversion or a full weaving.
