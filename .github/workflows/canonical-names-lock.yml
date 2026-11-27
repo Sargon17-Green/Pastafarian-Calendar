@@ -379,6 +379,13 @@ jobs:
           timeout --signal=TERM --kill-after=5s 120s \
             v test ./pastafari/normative_oracle_test.v -run-only 'test_stage54_catalan_eighteenth_prefix_fork_at_19_and_47_months' \
             2>&1 | tee stage54_eighteenth_prefix_fork.log
+      - name: Stage 55 — exact Catalan nineteenth-prefix fork (20/47 months)
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 120s \
+            v test ./pastafari/normative_oracle_test.v -run-only 'test_stage55_catalan_nineteenth_prefix_fork_at_20_and_47_months' \
+            2>&1 | tee stage55_nineteenth_prefix_fork.log
       - name: Stage 31 — bounded independent phase probes (diagnostic only)
         shell: bash
         run: |
@@ -467,4 +474,5 @@ jobs:
             stage52_sixteenth_prefix_fork.log
             stage53_seventeenth_prefix_fork.log
             stage54_eighteenth_prefix_fork.log
+            stage55_nineteenth_prefix_fork.log
           if-no-files-found: ignore
