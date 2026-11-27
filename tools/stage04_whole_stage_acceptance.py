@@ -180,12 +180,23 @@ def supported_stage_state(s):
                         and "CURRENT_KIND=DISCOVERY05" in s
                         and "CURRENT_PATCH=PATCH04" in s
                         and "EXPECTED_REPOSITORY_STATE=DISCOVERY05_STAGE10_ACCEPTED_HOLD_NO_STAGE11" in s)
+    stage11_started = ("CURRENT_STAGE=11" in s
+                       and "LAST_COMPLETED_STAGE=10" in s
+                       and "CURRENT_KIND=PATCH05" in s
+                       and "CURRENT_PATCH=PATCH05" in s
+                       and "EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_PENDING_NATIVE" in s)
+    stage11_accepted = ("CURRENT_STAGE=11" in s
+                       and "LAST_COMPLETED_STAGE=11" in s
+                       and "CURRENT_KIND=PATCH05" in s
+                       and "CURRENT_PATCH=PATCH05" in s
+                       and "EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12" in s)
     return (stage04_accepted or stage05_started or stage05_accepted
             or stage06_started or stage06_accepted
             or stage07_started or stage07_accepted
             or stage08_started or stage08_accepted
             or stage09_started or stage09_accepted
-            or stage10_started or stage10_accepted)
+            or stage10_started or stage10_accepted
+            or stage11_started or stage11_accepted)
 
 def verify_repo(repo:Path,sha:str):
     def git(*args):
@@ -272,6 +283,28 @@ class UnitTests(unittest.TestCase):
             "CURRENT_STAGE=10", "LAST_COMPLETED_STAGE=10",
             "CURRENT_KIND=DISCOVERY05", "CURRENT_PATCH=PATCH04",
             "EXPECTED_REPOSITORY_STATE=DISCOVERY05_STAGE10_ACCEPTED_HOLD_NO_STAGE11"]))
+    def test_stage11_pending_is_supported_successor(self):
+        self.assertTrue(supported_stage_state([
+            "CURRENT_STAGE=11", "LAST_COMPLETED_STAGE=10",
+            "CURRENT_KIND=PATCH05", "CURRENT_PATCH=PATCH05",
+            "EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_PENDING_NATIVE"]))
+    def test_stage11_accepted_is_supported_successor(self):
+        self.assertTrue(supported_stage_state([
+            "CURRENT_STAGE=11", "LAST_COMPLETED_STAGE=11",
+            "CURRENT_KIND=PATCH05", "CURRENT_PATCH=PATCH05",
+            "EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12"]))
+    def test_stage11_inconsistent_state_fails_closed(self):
+        for last, marker in (
+            (10, "PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12"),
+            (11, "PATCH05_STAGE11_PENDING_NATIVE"),
+            (9, "PATCH05_STAGE11_PENDING_NATIVE"),
+            (12, "PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12"),
+        ):
+            with self.subTest(last=last, marker=marker):
+                self.assertFalse(supported_stage_state([
+                    "CURRENT_STAGE=11", f"LAST_COMPLETED_STAGE={last}",
+                    "CURRENT_KIND=PATCH05", "CURRENT_PATCH=PATCH05",
+                    f"EXPECTED_REPOSITORY_STATE={marker}"]))
     def test_unknown_successor_state_fails_closed(self):
         self.assertFalse(supported_stage_state([
             "CURRENT_STAGE=11", "LAST_COMPLETED_STAGE=10",

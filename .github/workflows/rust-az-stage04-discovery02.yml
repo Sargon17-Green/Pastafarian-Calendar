@@ -274,7 +274,7 @@ jobs:
             python3 tools/stage04_whole_stage_acceptance.py --self-test \
             > evidence/stage04_whole_stage_contract_tests.txt 2>&1
           cat evidence/stage04_whole_stage_contract_tests.txt
-          grep -Fq 'Ran 14 tests' evidence/stage04_whole_stage_contract_tests.txt
+          grep -Fq 'Ran 17 tests' evidence/stage04_whole_stage_contract_tests.txt
           grep -Fxq 'OK' evidence/stage04_whole_stage_contract_tests.txt
           timeout --signal=TERM --kill-after=5s 30s \
             python3 tools/stage04_whole_stage_acceptance.py --repo . --evidence evidence \
