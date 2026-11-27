@@ -1,0 +1,126 @@
+name: Soak v227 historical Ada Fortran Rust weave lineage (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v227-ada-fortran-rust-lineage.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify durable roster and historical and incident pins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "4a4a2a9cfb3013fb3779ab32861bdac166a69e27"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v227-ada-fortran-rust-lineage.yml"
+          test "$(git rev-parse HEAD:qa/soak/archive/v226/manifest.json)" = "9377d0783cc20ca31be2b67bd88c6179317cc1bd"
+          mkdir -p evidence
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          p=Path("qa/soak/archive/v225/v131.zip")
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=="383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              b=z.read("v131-lineage-screen.json")
+          assert hashlib.sha256(b).hexdigest()=="dc47db154744da65ccea13eee734995e6534882164c92df99eacf44b505d7aac"
+          rows={r["record_id"]:r for r in json.loads(b)["records"]}
+          assert len(rows)==91
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          groups=[
+            ("REF-03","8f32107460c9f77e081db34d80d63ca80431c7b5","a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",{"src/normative_oracle.adb":"923733d4f8face03586aee304640bf7540c28b4c","src/month_weaving.adb":"9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef"}),
+            ("REF-18","389c7da51a818fe281a35a3fe67963661ae00934","23349b9748859a1032b8a3afad0812b1d392be94",{"test/normative_oracle_calendar.f90":"7491d53d10bd2a30072732e2b3ea718be804bf61","test/normative_oracle_core.f90":"7dff7b5e5f33b5b23cb171543ce92bcb11a00e47"}),
+            ("REF-47","35de5c531437ea463230dedcc77307e908c97bdb",None,{"tests/support/normative_oracle.rs":"8881f34deadecf43a2c897088b791f4892a160db"})]
+          inv={};src={}
+          for rid,ref,incident,pins in groups:
+              row=rows[rid]
+              assert row["historical_head_commit"]==ref and row["observed_source_path"] in pins
+              for p,h in pins.items():
+                  def fetch(commit):
+                      b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={commit}"],timeout=45)
+                      assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+                      return b
+                  b=fetch(ref)
+                  if incident:assert b==fetch(incident)
+                  if p==row["observed_source_path"]:
+                      assert h==row["git_blob_sha1"] and hashlib.sha256(b).hexdigest()==row["source_sha256"]
+                  inv[p]={"roster_record":rid,"historical_commit":ref,"same_bytes_at_incident_commit":incident,"blob":h,"sha256":hashlib.sha256(b).hexdigest(),"bytes":len(b)}
+                  Path("evidence",Path(p).name+".source.txt").write_bytes(b)
+                  src[p]=b.decode("utf-8")
+          def check(p,anchors):
+              assert all(a in src[p] for a in anchors),(p,[a for a in anchors if a not in src[p]])
+          check("src/normative_oracle.adb",["Interior : constant Natural := Total - 2 * M_Count","Answer_At (Stream, B (I - 1))","Choose_Rank (Shifted, B (Slots))","Month_Weaving.From_Choices (Lengths, Tickets)"])
+          check("src/month_weaving.adb",["Remains (J) := Lengths (J) - 2","Output (Pos) := J","Slots : Natural := Total - 2 * Lengths'Length","return Factorial (Total - 2 * Month_Count) / Denominator"])
+          check("test/normative_oracle_calendar.f90",["use normative_oracle_core","N=count_weavings(s%monthLengths)","call unrank_weaving(s%monthLengths,rank,s%monthWeaving,N)"])
+          check("test/normative_oracle_core.f90",["previous(1)=bi_one()","current(p+1)=bi_mul(prefix(p),chooseSuffix)","call weave_build_suffix_table(lengths,suffix)","child=bi_mul(childFactor,suffix(opened+1)%completions(R-1))","table(s)%completions(0)=table(s+1)%completions(k-1)"])
+          check("tests/support/normative_oracle.rs",["memo: HashMap<WeaveKey, BigUint>","total += self.count_state(&next)","let block = self.count_state(&next)","let mut family = WeavingCounter::new(month_lengths)"])
+          Path("evidence/source-pins.json").write_text(json.dumps(inv,indent=2)+"\n")
+          PY
+      - name: Compare exact count models in small normative domain
+        run: |
+          set -euo pipefail
+          ulimit -v 524288
+          timeout -k 5s 120s python3 - <<'PY'
+          from itertools import product
+          from functools import lru_cache
+          from math import comb,factorial,prod
+          from pathlib import Path
+          import json
+          cases=states=trans=proper=0
+          example=None
+          for m in (3,4):
+           for L in product(range(4,7),repeat=m):
+            if sum(L)>18:continue
+            cases+=1
+            @lru_cache(None)
+            def brute(r,o,c):
+             global states,trans
+             states+=1
+             if not any(r):return 1
+             v=0
+             for i,n in enumerate(r):
+              if not n or (n==L[i] and i!=o) or (n==1 and i!=c):continue
+              rr=list(r);rr[i]-=1;trans+=1
+              v+=brute(tuple(rr),o+(n==L[i]),c+(n==1))
+             return v
+            N=brute(L,0,0)
+            # Forward insertion by first position of highest label.
+            n=L[0];p=[0,1]+[0]*(n-1)
+            for r in L[1:]:
+             q=[0]*(n+r+1);s=0
+             for i in range(1,n+1):
+              s+=p[i];q[i+1]=s*comb(n-i+r-2,r-2)
+             p=q;n+=r
+            assert sum(p)==N
+            @lru_cache(None)
+            def F(o,S):
+             if o==m:return 1
+             k=L[o]
+             return sum(comb(k+j-2,k-2)*F(o+1,j+k-1) for j in range(S+1))
+            assert F(0,0)==N
+            rail=factorial(sum(L)-2*m)//prod(factorial(x-2) for x in L)
+            assert rail<N
+            proper+=1
+            if L==(4,4,4):example={"lengths":L,"full_family_count":N,"fixed_rail_family_count":rail}
+          assert (cases,states,trans,proper)==(42,6888,17809,42)
+          assert example["full_family_count"]==1301 and example["fixed_rail_family_count"]==90
+          out={"schema":"SOAK_V227_ADA_FORTRAN_RUST_LINEAGE/1","records":["REF-03","REF-18","REF-47"],"ada_historical_weave_files_byte_identical_to_incident":2,"fortran_historical_weave_files_byte_identical_to_incident":2,"ada_model":"FIXED_OPEN_CLOSE_RAILS_SEPARATE_INTERIOR_TICKETS","fortran_count_model":"FORWARD_FIRST_POSITION_INSERTION","fortran_non_extreme_unrank_model":"SUFFIX_FACTOR_RECURRENCE","rust_model":"FULL_REMAINING_VECTOR_MEMO","normative_small_domain":{"months":[3,4],"lengths":[4,6],"max_total_days":18},"vectors":cases,"states":states,"transitions":trans,"full_family_count_disagreements":0,"fixed_rail_strict_subfamily_cases":proper,"example":example,"evidence_class":"SOURCE_STATIC_AND_SOURCE_MODEL","model_only":True,"native_date_calls":0,"whole_year_credit":0,"admitted_engines":0,"full_dependency_closure_verified":False,"soak_dispatch_authorized":False}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v227-historical-model-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
