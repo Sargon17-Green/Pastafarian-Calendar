@@ -146,7 +146,7 @@ def main():
         return sum((-1)**j*math.comb(k,j)*math.comb(s-120*j+k-1,k-1) for j in range(min(k,s//120)+1))
     m=len(lengths); N=bounded(sum(lengths),m)
     comp_rank,_=source_rank(f['calculation_day'],f['first_day'],N,3,31)
-    assert str(comp_rank)=='21706039149316943527912320903423885398156086660683714452395033170314294340946533'
+    assert str(comp_rank)=='21706039149316943527912320903423885398156086660670683714452395033170314294340946533'
     r=comp_rank; rest=sum(lengths); derived=[]
     for k in range(m-1,-1,-1):
         for x in range(4,124):
