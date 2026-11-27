@@ -348,6 +348,29 @@ final class BigInt
         return $last * self::BASE_DIGITS + strlen((string)$this->limbs[$last]);
     }
 
+    /** Scratch-only canonical unsigned base-10^9 limbs, little endian. */
+    public function scratchUnsignedLimbs56(): string
+    {
+        if ($this->sign < 0) throw new InvalidArgumentException('STAGE56_SCRATCH_NEGATIVE');
+        return pack('V*', ...$this->limbs);
+    }
+
+    public static function fromScratchUnsignedLimbs56(string $bytes): self
+    {
+        $n = strlen($bytes);
+        if ($n < 4 || $n > 8192 || $n % 4 !== 0) {
+            throw new InvalidArgumentException('STAGE56_SCRATCH_LIMB_SIZE');
+        }
+        $limbs = array_values(unpack('V*', $bytes));
+        foreach ($limbs as $limb) {
+            if ($limb >= self::BASE) throw new InvalidArgumentException('STAGE56_SCRATCH_LIMB_RANGE');
+        }
+        if (count($limbs) > 1 && $limbs[array_key_last($limbs)] === 0) {
+            throw new InvalidArgumentException('STAGE56_SCRATCH_LIMB_CANONICAL');
+        }
+        return new self(1, $limbs);
+    }
+
     public function toString(): string
     {
         if ($this->sign === 0) {

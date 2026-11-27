@@ -1435,6 +1435,14 @@ jobs:
           test ! -s stage56-b4-evidence/unrank-profiler-stderr.txt
           grep -Fx 'STAGE56_UNRANK_PROFILE_SCHEMA_PASS positions=259 buckets=2 status=PASS' \
             stage56-b4-evidence/unrank-profiler-stdout.txt
+      - name: Stage56 isolated scratch row synthetic gate
+        shell: bash
+        run: |
+          set -uo pipefail
+          if timeout 900s php -d memory_limit=512M tests/stage56_scratch_rows.php > stage56-b4-evidence/scratch-stdout.txt 2> stage56-b4-evidence/scratch-stderr.txt; then code=0; else code=$?; fi
+          printf '%s\n' "$code" > stage56-b4-evidence/scratch-exit.txt
+          cat stage56-b4-evidence/scratch-stdout.txt
+          test "$code" -eq 0 && test ! -s stage56-b4-evidence/scratch-stderr.txt && grep -E '^STAGE56_SCRATCH_SYNTHETIC_PASS cells=[0-9]+ shapes=3 negative=10 status=PASS$' stage56-b4-evidence/scratch-stdout.txt
       - name: Retain SHA-bound B4 Native evidence
         if: always()
         uses: actions/upload-artifact@v4

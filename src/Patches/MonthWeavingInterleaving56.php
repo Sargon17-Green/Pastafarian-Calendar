@@ -20,9 +20,13 @@ final class MonthWeavingInterleaving56
     /** @var list<int> */
     private array $lengths;
     private int $monthCount;
+    private bool $scratchExperiment;
+    private bool $scratchFailed = false;
+    private ?SuffixScratchRows56 $scratch = null;
+    private int $scratchLoads = 0;
 
     /** @param list<int> $lengths */
-    public function __construct(array $lengths)
+    public function __construct(array $lengths, bool $scratchExperiment = false)
     {
         if (!array_is_list($lengths) || $lengths === [] || count($lengths) > 47) {
             throw new InvalidArgumentException('STAGE56_INTERLEAVING_LENGTHS');
@@ -37,6 +41,7 @@ final class MonthWeavingInterleaving56
         if ($total > 5778) throw new InvalidArgumentException('STAGE56_INTERLEAVING_TOTAL');
         $this->lengths = array_values($lengths);
         $this->monthCount = count($lengths);
+        $this->scratchExperiment = $scratchExperiment;
     }
 
     public function count(): BigInt
@@ -431,6 +436,41 @@ final class MonthWeavingInterleaving56
         $profile = self::emptyUnrankProfile();
     }
 
+    /** Experimental diagnostics, never shared with another engine. */
+    public function scratchStats56(): array
+    {
+        return ['bytes' => $this->scratch?->bytes() ?? 0, 'loads' => $this->scratchLoads,
+            'rows' => $this->scratch?->rows() ?? 0];
+    }
+
+    private function scratchCount56(int $index, int $q, ?array &$profile): BigInt
+    {
+        if ($this->scratchFailed) throw new LogicException('STAGE56_SCRATCH_FAILED');
+        try {
+            if ($this->scratch === null) {
+                require_once __DIR__ . '/SuffixScratchRows56.php';
+                $this->scratch = new SuffixScratchRows56($this->lengths);
+                if ($profile !== null) ++$profile['suffix_rebuilds'];
+                $this->rebuildSuffix(0, $this->lengths[0]);
+            }
+            if (!isset($this->suffixCache[$index])) {
+                // Evict before decoding: never retain a second decoded cache row.
+                $this->suffixCache = [];
+                $this->suffixCache[$index] = $this->scratch->load($index);
+                ++$this->scratchLoads;
+            } elseif ($profile !== null) {
+                ++$profile['suffix_cache_hits'];
+            }
+            return $this->suffixCache[$index][$q]
+                ?? throw new LogicException('STAGE56_SCRATCH_WIDTH');
+        } catch (\Throwable $error) {
+            $this->suffixCache = [];
+            $this->scratch = null;
+            $this->scratchFailed = true;
+            throw $error;
+        }
+    }
+
     private function suffixCount(int $lastSeen, int $q, ?array &$profile = null): BigInt
     {
         if ($profile !== null) ++$profile['suffix_count_calls'];
@@ -438,6 +478,7 @@ final class MonthWeavingInterleaving56
             if ($profile !== null) ++$profile['suffix_terminal_shortcuts'];
             return BigInt::one();
         }
+        if ($this->scratchExperiment) return $this->scratchCount56($lastSeen, $q, $profile);
         $cached = $this->suffixCache[$lastSeen] ?? null;
         if ($cached !== null && count($cached) > $q) {
             if ($profile !== null) ++$profile['suffix_cache_hits'];
@@ -475,7 +516,7 @@ final class MonthWeavingInterleaving56
         }
         // At most five absolute checkpoints (8,16,24,32,40); reserve
         // the remaining slots of the original eight-row cache for active rows.
-        $activeRows = 8 - intdiv($this->monthCount - 2, 8);
+        $activeRows = $this->scratchExperiment ? 1 : 8 - intdiv($this->monthCount - 2, 8);
         $profilePath = getenv('STAGE56_DP_PROFILE_PATH');
         $profileEnabled = is_string($profilePath) && $profilePath !== '';
         $profileId = $profileEnabled ? ++self::$dpProfileSequence : 0;
@@ -511,7 +552,10 @@ final class MonthWeavingInterleaving56
             }
             $following = $current;
             if ($index < $start + $activeRows) $this->suffixCache[$index] = $current;
-            if ($index > 0 && $index % 8 === 0 && $index < $this->monthCount - 1 &&
+            if ($this->scratchExperiment && $index < $this->monthCount - 1) {
+                $this->scratch->append($index, $current);
+            }
+            if (!$this->scratchExperiment && $index > 0 && $index % 8 === 0 && $index < $this->monthCount - 1 &&
                 count($this->suffixCheckpoints[$index] ?? []) < count($current)) {
                 $this->suffixCheckpoints[$index] = $current;
             }
