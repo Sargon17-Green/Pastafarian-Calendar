@@ -94,31 +94,3 @@ jobs:
           path: evidence/
           if-no-files-found: error
           retention-days: 90
- "evidence/$name.log" && grep -Fxq 'SAVE_GATE=PASS' "evidence/$name.log" ;;
-                candidates) grep -Fxq 'INT02_YEAR_CANDIDATES_CASES=58 GATE=PASS_BOUNDED_CANDIDATES_ONLY' "evidence/$name.log" ;;
-                wide) grep -Fxq '{"cases":1051,"statusCounts":{"0":702,"22":3,"24":346},"scope":"NATIVE_WIDE_ONLY","gate":"MATCH"}' "evidence/$name.log" ;;
-              esac
-              rc=$?
-            fi
-            printf '%s exit=%s\n' "$name" "$rc" | tee -a evidence/status.log
-            return "$rc"
-          }
-          failures=0
-          gate save test/calendar_save_tests.cob src/calendar_save.cob 30s ./build-int02/save || failures=$((failures+1))
-          gate candidates test/int02_year_candidates_driver.cob src/calendar_year_candidates.cob 300s node test/int02_year_candidates_diff.mjs "$(pwd)/build-int02/candidates" || failures=$((failures+1))
-          gate wide test/int02_wide_driver.cob src/calendar_wide.cob 300s node test/int02_wide_diff.mjs "$(pwd)/build-int02/wide" || failures=$((failures+1))
-          printf 'FAILED_GATES=%s\n' "$failures" | tee -a evidence/status.log
-          test "$failures" = 0
-      - name: Hash logs
-        if: always()
-        shell: bash
-        run: |
-          mkdir -p evidence
-          (cd evidence && find . -maxdepth 1 -type f -name '*.log' -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS)
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cobol-int02-bounded-native
-          path: evidence/
-          if-no-files-found: error
-          retention-days: 90
