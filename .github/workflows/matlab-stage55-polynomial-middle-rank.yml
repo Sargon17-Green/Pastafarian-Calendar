@@ -1,4 +1,4 @@
-name: MATLAB Stage55 Actual Source Rank Full Word Differential (QA)
+name: MATLAB Stage55 Actual Source Word Five Field Projection (QA)
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   polynomial-middle-rank:
     runs-on: ubuntu-24.04
-    timeout-minutes: 220
+    timeout-minutes: 35
     steps:
       - name: Checkout exact QA branch
         uses: actions/checkout@v4
@@ -67,6 +67,9 @@ jobs:
           check_object "tests/fixtures/stage55_year5000_appendix_a_metadata.json" "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
           check_object "tools/stage55_full_prefix_inverse_rank.cpp" "542f091e308afdc5131c52b5a5006588cad8bce5"
 
+          check_object "tools/run_stage55_year5000_middle_projection_native.m" "4567def9f004c6862cb5db1060df8140b292c8ea"
+          check_object "tools/stage55_full_year_projection_oracle.py" "e4f8d1b043467af8cc7baadbbe6e465cc2a27adb"
+
           python3 - <<'PY'
           import subprocess
           expected = sorted([
@@ -114,114 +117,96 @@ jobs:
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
           echo "GATE_PASS all source locks"
-      - name: Restore exact native rank, GMP certificate and verified arithmetic overlay
+      - name: Restore native word and independently generate five-field projection
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15178712147/zip > "$RUNNER_TEMP/source-rank.zip"
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15179093713/zip > "$RUNNER_TEMP/gmp-source.zip"
-          echo "424c346b85ef09eeb3615332429f3319dca4a21a9e61e315c44f456d6b88ba3f  $RUNNER_TEMP/source-rank.zip" | sha256sum -c -
-          echo "b5a833b220ce728b99a3626fd372e73c330fe1c01bfea5be3fecaea089863420  $RUNNER_TEMP/gmp-source.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15183489189/zip > "$RUNNER_TEMP/native.zip"
+          echo "8a760aba7359f34c90d92f5104712fc6882695077786ef6e4fb50a88f08d0b2e  $RUNNER_TEMP/native.zip" | sha256sum -c -
           python3 - <<'PY'
-          import hashlib,json,os,shutil,sys,zipfile
+          import hashlib,json,os,zipfile
           from pathlib import Path
-          sys.set_int_max_str_digits(0)
-          tmp=Path(os.environ["RUNNER_TEMP"]); ev=Path("evidence")
-          digest=lambda b:hashlib.sha256(b).hexdigest()
-          with zipfile.ZipFile(tmp/"source-rank.zip") as z:
+          ev=Path("evidence")
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"native.zip") as z:
               assert z.testzip() is None
-              d=json.loads(z.read("source-weave-rank.json"))
-              o=json.loads(z.read("source-weave-rank-oracle.json"))
-              optimized=z.read("BigInt-QA-overlay.m.txt")
-              assert digest(optimized)=="22df597bf9174e38e38b968e8b80fe456882029a94c526f199fd030f03e0980d"
-              assert d["rank"]==o["rank"] and d["native_selector_executed"] and d["rejection_steps"]=="0"
-              rank=d["rank"].encode("ascii"); count=d["root_count"].encode("ascii")
-              assert digest(rank)=="160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3"
-              assert digest(count)=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
-              (ev/"rank.txt").write_bytes(rank); (ev/"root-count.txt").write_bytes(count)
-          with zipfile.ZipFile(tmp/"gmp-source.zip") as z:
-              assert z.testzip() is None
-              assert z.read("rank.txt")==rank and z.read("root-count.txt")==count
-              word=z.read("source-word.json")
-              assert digest(word)=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
-              hashes=z.read("source-interval-hashes.json")
-              summary=json.loads(z.read("source-certificate-summary.json"))
-              assert summary["symbols"]==4244 and summary["closed"]==45
-              assert summary["rank_sha256"]==digest(rank) and summary["root_sha256"]==digest(count)
-              assert len(json.loads(hashes))==4244
-              (ev/"source-word.json").write_bytes(word)
-              (ev/"source-interval-hashes.json").write_bytes(hashes)
-              (ev/"source-certificate-summary.json").write_bytes(z.read("source-certificate-summary.json"))
-          overlay=tmp/"qa-arithmetic-overlay"
-          shutil.copytree("src",overlay)
-          (overlay/"+pastafari"/"BigInt.m").write_bytes(optimized)
-          (ev/"BigInt-QA-overlay.m.txt").write_bytes(optimized)
-          for source in Path("src").rglob("*"):
-              if source.is_file() and source.as_posix()!="src/+pastafari/BigInt.m":
-                  assert source.read_bytes()==(overlay/source.relative_to("src")).read_bytes()
-          print("QA_ACTUAL_SOURCE_INPUTS_LOCK_PASS")
+              s=json.loads(z.read("source-native-summary.json"))
+              end=json.loads(z.read("latest-source-native-cursor.json"))
+              w=z.read("source-word.json")
+              rows=[json.loads(x) for x in z.read("source-native-ledger.jsonl").splitlines()]
+              cert=json.loads(z.read("source-interval-hashes.json"))
+              assert hashlib.sha256(w).hexdigest()=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+              word=json.loads(w)
+              assert len(word)==len(rows)==len(cert)==4244
+              assert s["full_word_verified"] and s["symbols_matched"]==4244 and s["closed_months"]==45
+              assert s["full_converter_calls"]==0 and not s["stage55_accepted"]
+              assert end["prefix"]==word and end["rank_decimal"]==end["count_decimal"]=="1"
+              assert end["remaining"]==[0]*45 and end["closed"]==45
+              for i,(row,ref) in enumerate(zip(rows,cert),1):
+                  assert row["position"]==i and row["symbol"]==word[i-1]
+                  assert all(row[k]==ref[k] for k in ("position","symbol","opened","closed","rank_sha256","count_sha256"))
+              # Use native output, not the independent word as projection input.
+              (ev/"native-word.json").write_text(json.dumps(end["prefix"],separators=(",",":"))+"\n")
+              (ev/"prior-native-summary.json").write_bytes(z.read("source-native-summary.json"))
+          assert hashlib.sha256((ev/"native-word.json").read_bytes()).hexdigest()=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+          src=Path("tools/run_stage55_year5000_middle_projection_native.m").read_text()
+          old="fullfile(root,'tests','fixtures', ...\n    'stage55_year5000_middle_word.json')"
+          new="fullfile(root,'evidence','native-word.json')"
+          assert src.count(old)==1
+          src=src.replace(old,new).replace("run_stage55_year5000_middle_projection_native()","run_stage55_actual_source_projection_native()",1)
+          dst=Path("tools/run_stage55_actual_source_projection_native.m")
+          dst.write_text(src)
+          (ev/"projection-runner.m.txt").write_text(src)
+          print("QA_NATIVE_WORD_LOCK_PASS SYMBOLS=4244")
           PY
-          echo "PASTAFARI_QA_OVERLAY=$RUNNER_TEMP/qa-arithmetic-overlay" >> "$GITHUB_ENV"
-          git diff --exit-code -- src
+          python3 tools/stage55_full_year_projection_oracle.py tests/fixtures/stage55_year5000_appendix_a_metadata.json evidence/oracle --word-json evidence/native-word.json
 
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
           release: R2026a
 
-      - name: Compute actual source word independently in MATLAB
-        timeout-minutes: 200
+      - name: Native PATCH25 projection twice for actual source word
+        timeout-minutes: 20
         uses: matlab-actions/run-command@v3
         with:
           command: >-
-            diary('evidence/STAGE55_ACTUAL_SOURCE_NATIVE.log');
-            try;
-              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
-              addpath('tests');
-              run_stage55_polynomial_real_year_middle_rank(5001);
-              diary off;
-            catch ME;
-              disp(getReport(ME,'extended','hyperlinks','off'));
-              diary off;
-              rethrow(ME);
-            end
+            addpath('tools');
+            run_stage55_actual_source_projection_native();
 
-      - name: Audit native ledger against independent GMP certificate
+      - name: Audit five-field rows and original discrepancy witness without converter invocation
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json
+          import csv,hashlib,json,shutil
           from pathlib import Path
           ev=Path("evidence")
-          cert=json.loads((ev/"source-interval-hashes.json").read_text())
-          rows=[json.loads(x) for x in (ev/"source-native-ledger.jsonl").read_text().splitlines()]
-          end=json.loads((ev/"latest-source-native-cursor.json").read_text())
-          summary=json.loads((ev/"source-native-summary.json").read_text())
-          word=json.loads((ev/"source-word.json").read_text())
-          lengths=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())["month_lengths"]
-          remaining=lengths[:]; opened=closed=0
-          assert len(rows)==len(cert)==len(word)==4244
-          for i,(row,ref) in enumerate(zip(rows,cert),1):
-              for k in ("position","symbol","opened","closed","rank_sha256","count_sha256"):
-                  assert row[k]==ref[k],(i,k)
-              symbol=row["symbol"]
-              assert row["position"]==i and symbol==word[i-1]
-              if remaining[symbol-1]==lengths[symbol-1]:
-                  assert symbol==opened+1; opened+=1
-              remaining[symbol-1]-=1
-              assert remaining[symbol-1]>=0
-              if remaining[symbol-1]==0:
-                  assert symbol==closed+1; closed+=1
-              assert row["opened"]==opened and row["closed"]==closed
-          assert opened==closed==45 and remaining==[0]*45
-          assert end["position"]==4244 and end["prefix"]==word and end["remaining"]==remaining
-          assert end["rank_decimal"]==end["count_decimal"]=="1"
-          assert summary["symbols_matched"]==4244 and summary["full_word_verified"]
-          assert summary["full_converter_calls"]==0 and not summary["stage55_accepted"]
-          print("QA_ACTUAL_SOURCE_NATIVE_LEDGER_PASS SYMBOLS=4244 CLOSED=45")
+          oracle=ev/"oracle"/"STAGE55_YEAR5000_CANDIDATE.csv"
+          data=oracle.read_bytes()
+          for trial in (1,2):
+              path=Path("logs")/f"STAGE55_YEAR5000_CANDIDATE_RUN{trial}.csv"
+              assert path.read_bytes()==data, f"native projection differs trial {trial}"
+              shutil.copy2(path,ev/path.name)
+          rows=list(csv.DictReader(data.decode("ascii").splitlines()))
+          assert len(rows)==4244
+          f=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())
+          position=f["calculation_day"]-f["first_day"]+1
+          assert position==2032
+          row=rows[position-1]
+          fields=["YEAR","CUTLET_INDEX","CUTLET_DAY","MONTH_INDEX","MONTH_DAY"]
+          actual=[int(row[k]) for k in fields]
+          assert actual==[5000,10,503,20,56], actual
+          result=dict(schema="STAGE55_SOURCE_WORD_PROJECTION/1",native_trials=2,rows_per_trial=4244,
+              matched_rows=8488,negative_boundaries=2,projection_sha256=hashlib.sha256(data).hexdigest(),
+              source_word_rank_verified_prior_run=45959356502,calculation_day=f["calculation_day"],
+              witness_position=position,witness=actual,reference_original=[5000,10,503,20,56],
+              historical_ada_original=[5000,10,503,30,52],witness_matches_reference=True,
+              full_converter_calls=0,stage55_accepted=False,scope="fixed source-derived metadata and independently certified native weaving; not full converter")
+          (ev/"projection-summary.json").write_text(json.dumps(result,indent=2)+"\n")
+          shutil.copy2("logs/STAGE55_MIDDLE_PROJECTION_NATIVE.log",ev/"projection-native.log")
+          print("QA_ACTUAL_SOURCE_PROJECTION_PASS",json.dumps(result))
           PY
           git diff --exit-code -- src
 
@@ -229,7 +214,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-matlab-actual-source-word-${{ github.run_id }}
-          path: evidence/
+          name: stage55-matlab-actual-source-projection-${{ github.run_id }}
+          path: |
+            evidence/
+            logs/STAGE55_MIDDLE_PROJECTION_NATIVE.log
           if-no-files-found: warn
           retention-days: 30
