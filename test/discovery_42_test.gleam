@@ -161,10 +161,7 @@ fn verify(
   base.combined_windows
   |> should.equal(left_count + right_count - intersection)
 
-  #(
-    directional.left_coverage_numerator,
-    directional.left_coverage_denominator,
-  )
+  #(directional.left_coverage_numerator, directional.left_coverage_denominator)
   |> should.equal(fraction(intersection, left_count))
   #(
     directional.right_coverage_numerator,
@@ -183,12 +180,13 @@ fn verify(
   { d > 0 && n >= 0 && n <= d } |> should.equal(True)
   d |> should.equal(minimum_denominator(xor, total_pairs, 1))
   { n == 0 }
-  |> should.equal(
-    {
-      left_count > 0 && right_count > 0 && intersection == 0
-      || intersection == left_count && intersection == right_count
-    },
-  )
+  |> should.equal({
+    left_count > 0
+    && right_count > 0
+    && intersection == 0
+    || intersection == left_count
+    && intersection == right_count
+  })
   { n == d }
   |> should.equal({ { left_count == 0 } != { right_count == 0 } })
   jn * qd * d + qn * jd * d + n * jd * qd

@@ -99,13 +99,11 @@ pub fn dispatch_discovery_42(
             False, True -> n == 1 && den == 1
             False, False -> n * l * r == i * { l + r - 2 * i } * den
           }
-          let zero_ok =
-            { n == 0 } == { a == 0 && c == 0 || a == b && c == d }
+          let zero_ok = { n == 0 } == { a == 0 && c == 0 || a == b && c == d }
           let one_ok = { n == den } == { { l == 0 } != { r == 0 } }
           let partition_ok =
             jn * qd * den + qn * jd * den + n * jd * qd == jd * qd * den
-          let linear_ok =
-            n * md * jd == { 2 * mn * jd - 2 * jn * md } * den
+          let linear_ok = n * md * jd == { 2 * mn * jd - 2 * jn * md } * den
           case
             valid_fraction(n, den)
             && counts_match
