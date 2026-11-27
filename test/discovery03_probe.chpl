@@ -996,12 +996,47 @@ proc probeFiveInnerUnequalMonthWeavings() {
   }
 }
 
+// Незалежний чотиримісний оракул: усі 3^4=81 кортежі в [2,4]^4.
+// Суми 7..17 включають обидві порожні межі; коефіцієнти
+// (1+x+x^2)^4: 1,4,10,16,19,16,10,4,1 (суми 8..16).
+// Прямий лексикографічний перебір не використовує DP для еталону.
+// 81 порівняння рангів + 11 потужностей = 92 нові твердження.
+// Очікувано 2610 загалом; не Native PASS і не історичний Legacy witness.
+proc probeFourSlotBoundedCompositions() {
+  for total in 7..17 {
+    var tested: BoundedCompositionCounter;
+    tested.totalValue = total;
+    tested.slotsTotal = 4;
+    tested.lo = 2;
+    tested.hi = 4;
+    var enumerated = 0;
+    for a in 2..4 {
+      for b in 2..4 {
+        for c in 2..4 {
+          for d in 2..4 {
+            if a+b+c+d != total then continue;
+            enumerated += 1;
+            const actual = tested.unrank1(new bigint(enumerated));
+            check(actual.size == 4 && actual[0] == a &&
+                  actual[1] == b && actual[2] == c && actual[3] == d,
+                  "Чотири частини: сума=" + total:string +
+                  ", ранг=" + enumerated:string);
+          }
+        }
+      }
+    }
+    check(tested.countAll() == enumerated,
+          "Чотири частини: незалежна потужність, сума=" + total:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
   probeCutletCompositions(8, 3);
   probeCutletCompositions(9, -1);
   probeBoundedCompositions(12, 4, 8);
+  probeFourSlotBoundedCompositions();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
