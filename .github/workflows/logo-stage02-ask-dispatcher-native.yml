@@ -95,7 +95,10 @@ jobs:
                   s = s.replace(anchor, '      make "PROFILE.SINGLE (:PROFILE.SINGLE + 1)\n' + anchor)
               (out / (variant + '-instrumented.logo')).write_text(s)
           # Instrument only a generated copy of the frozen gate reporter.
-          s = (out / 'frozen-reference.logo').read_text()
+          source = (out / 'frozen-reference.logo').read_text()
+          start = source.index('to nr.gate.gap :signedStep\n')
+          end = source.index('\nend\n', start) + len('\nend\n')
+          s = source[start:end]
           for anchor, marker in [
               ('  localmake "s nr.sauce nr.foundation :target', 'SAUCE'),
               ('  localmake "stream nr.ask :s 1 1', 'ASK'),
@@ -103,7 +106,7 @@ jobs:
               ('  output bi.add bi.small 41 :chosen', 'DONE')]:
               assert s.count(anchor) == 1, anchor
               s = s.replace(anchor, '  print [PROFILE_' + marker + ']\n' + anchor)
-          (out / 'phases.logo').write_text(s)
+          (out / 'phases.logo').write_text(source[:start] + s + source[end:])
           PY
           sha256sum "$out/"*.logo > "$out/all-source-hashes.txt"
       - name: Build pinned UCBLogo 6.2.5
