@@ -1,0 +1,165 @@
+name: Soak v225 durable historical lineage evidence archive (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v225-durable-lineage-archive.yml
+permissions:
+  actions: read
+  contents: write
+jobs:
+  preserve:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock exact QA activation and index
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "777cfba8bdafb0b98295272000449020007a947c"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v225-durable-lineage-archive.yml"
+          test "$(git rev-parse HEAD:qa/soak/v224_weaving_lineage_review_index.json)" = "57b2734dfa119c456425c99234486787e5133ba1"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          test ! -e qa/soak/archive/v225
+      - name: Verify 16 raw ZIPs, failed receipts, and reconcile historical roster
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p qa/soak/archive/v225
+          ulimit -v 1048576
+          timeout -k 5s 360s python3 - <<'PY'
+          import hashlib,io,json,os,subprocess,zipfile
+          from pathlib import Path,PurePosixPath
+          root=Path("qa/soak/archive/v225")
+          index=json.loads(Path("qa/soak/v224_weaving_lineage_review_index.json").read_text())
+          assert index["schema"]=="SOAK_V224_WEAVING_LINEAGE_REVIEW_INDEX/1"
+          assert len(index["records"])==22==len({r["record_id"] for r in index["records"]})
+          assert [r["version"] for r in index["receipts"]]==list(range(209,224))
+          assert index["gates"]["stop_new_native_soak_dispatch"] and index["gates"]["official_year_credit"]==0
+          heads={
+            131:"1c99c36ee9da266f354bfebdbfdaa047c075e3fa",
+            209:"4d1aa56c2f728b2dffaf0ea35f24d43c96216671",
+            210:"7fd99f6ecc3a13ed316ff7a2fcaf177fb013d343",
+            211:"17be40cdd70a705c041b51d6e2ed979e447ee73a",
+            212:"8819adb7b352bbda67dce4c2330b40a8e133a829",
+            213:"888f9f2dbbd1551a674e8623ef0de05e71dab686",
+            214:"d10a8e461dd81841ffafdac0a419251f49fc4581",
+            215:"23ba4e32d8f69b0792edffa2208ed209eb5b5b06",
+            216:"cd87b5a63cf6f4226a218cc54d775134d786cc88",
+            217:"0d25a5271479cd43455ef8f12acef1c974f5da42",
+            218:"5315c6b3953b0d3bcbd40917aad88fa1ef535541",
+            219:"3a0b910fa6075bf4ff5c784c526317e2b992d213",
+            220:"c96604e6cde1ee798308277d464ecbb6cfaa9c59",
+            221:"3f7385a0e9dd2e4c75e8059c6ae2aada49685043",
+            222:"a9eef1646f6bb9dbe8b3355bfef71c38ed701889",
+            223:"55a320b40b36e9d7f67c2b96b60c0228eadf55e1"
+          }
+          specs=[{"version":131,"disposition":"SUCCESS",**index["source_roster"]}]+index["receipts"]
+          assert specs[5]["version"]==213 and specs[5]["sha256"] is None
+          # Resolve the formerly absent digest without altering the historical index.
+          specs[5]["sha256"]="9e9b3ae3071f76127ab506278d2ffce8dd9549409efdb9a55e9a253b883b4e45"
+          repo=os.environ["GITHUB_REPOSITORY"]
+          def api(p):
+              return subprocess.check_output(["gh","api",f"repos/{repo}/{p}"],timeout=35)
+          def sha(b):return hashlib.sha256(b).hexdigest()
+          def inspect(raw):
+              assert len(raw)<=25*1024*1024
+              with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                  files=[f for f in z.infolist() if not f.is_dir()]
+                  assert 1<=len(files)<=5000
+                  assert sum(f.file_size for f in files)<=80*1024*1024
+                  names=[f.filename for f in files]
+                  assert len(names)==len(set(names))
+                  for n in names:
+                      p=PurePosixPath(n)
+                      assert not p.is_absolute() and ".." not in p.parts and "\\" not in n
+                  assert z.testzip() is None
+                  return {f.filename:{"bytes":f.file_size,"sha256":sha(z.read(f))} for f in files}
+          archives={}
+          for s in specs:
+              v=s["version"]; run=s["run"]; aid=s["artifact"]; h=s["sha256"]
+              label=f"v{v}"
+              expected="failure" if v in (210,213) else "success"
+              r=json.loads(api(f"actions/runs/{run}"))
+              m=json.loads(api(f"actions/artifacts/{aid}"))
+              assert r["status"]=="completed" and r["conclusion"]==expected and r["head_sha"]==heads[v],(v,r["status"],r["conclusion"],r["head_sha"])
+              assert m["workflow_run"]["id"]==run and m["workflow_run"]["head_sha"]==heads[v]
+              assert not m["expired"] and m["digest"]=="sha256:"+h
+              assert 0<m["size_in_bytes"]<=25*1024*1024
+              raw=api(f"actions/artifacts/{aid}/zip")
+              assert len(raw)==m["size_in_bytes"] and sha(raw)==h
+              members=inspect(raw)
+              (root/(label+".zip")).write_bytes(raw)
+              archives[label]={"run":run,"artifact":aid,"run_head":heads[v],"conclusion":expected,"disposition":s["disposition"],"bytes":len(raw),"sha256":h,"members":members}
+              print("RAW_ZIP_VERIFIED",label,expected,len(raw),len(members),h,flush=True)
+          def member(v,name):
+              with zipfile.ZipFile(root/(v+".zip")) as z:
+                  matches=[n for n in z.namelist() if n==name or n.endswith("/"+name)]
+                  assert len(matches)==1,(v,name,matches)
+                  return z.read(matches[0])
+          raw=member("v131","v131-lineage-screen.json")
+          assert sha(raw)=="dc47db154744da65ccea13eee734995e6534882164c92df99eacf44b505d7aac"
+          original=json.loads(raw)
+          rows={r["record_id"]:r for r in original["records"]}
+          assert len(original["records"])==91==len(rows)
+          reconciliation=[]
+          for r in index["records"]:
+              q=rows[r["record_id"]]
+              assert r["historical_head"]==q["historical_head_commit"],(r["record_id"],r["historical_head"],q["historical_head_commit"])
+              assert not r["full_dependency_closure_verified"] and not r["algorithmic_independence_certified"] and not r["eligible_for_soak"]
+              reconciliation.append({"record_id":r["record_id"],"repository":q["repository"],"historical_head_commit":q["historical_head_commit"],"observed_source_path":q["observed_source_path"],"git_blob_sha1":q["git_blob_sha1"],"source_sha256":q["source_sha256"],"weave_model":r["weave_model"]})
+          checks={
+              "v217":{"vectors":89,"states":2682,"existing_transitions":3550,"opening_transitions":1324,"mismatches":0},
+              "v218":{"vectors":77,"states":20545,"transitions":58153,"mismatches":0},
+              "v219":{"vectors":305,"states":5850,"transitions":9158,"shift_equivalence_checks":2593,"mismatches":0},
+              "v220":{"vectors":310,"states":13338,"transitions":29095,"rank_checks":3632,"mismatches":0},
+              "v221":{"vectors":54,"states":7149,"transitions":18202,"rank_checks":312,"mismatches":0},
+              "v222":{"normalized_unrank_identical":True,"normalized_lines":84,"normalized_chars":2304,"cumulative_checks":5442,"rank_checks":260,"mismatches":0},
+              "v223":{"vectors":305,"states":5850,"transitions":9158,"rank_checks":3607,"same_entrypoint_blob_but_changed_dependency":True,"mismatches":0}
+          }
+          for v,fields in checks.items():
+              d=json.loads(member(v,"result.json"))
+              for k,expected in fields.items():assert d[k]==expected,(v,k,d[k],expected)
+              assert d["native_date_calls"]==d["whole_year_credit"]==0 and d["soak_dispatch_authorized"] is False
+          assert len(archives)==16
+          receipt={"schema":"SOAK_V225_DURABLE_LINEAGE_ARCHIVE/1","index_commit":"777cfba8bdafb0b98295272000449020007a947c","index_blob":"57b2734dfa119c456425c99234486787e5133ba1","archives":archives,"failed_attempts_preserved":["v210","v213"],"roster_reconciled_records":reconciliation,"roster_total":91,"outside_this_index":69,"semantic_receipt_checks":list(checks),"workflow_log_zip_archive":"NOT_PERFORMED_IN_V225","whole_year_credit":0,"native_date_calls":0,"admitted_engines":0,"independent_algorithms_certified":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (root/"manifest.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print("ARCHIVE_VERIFIED",len(archives),len(reconciliation),sum(r["bytes"] for r in archives.values()),flush=True)
+          PY
+      - name: Commit verified ZIP bytes and manifest only on QA branch
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- qa/soak/archive/v225/
+          python3 - <<'PY'
+          import subprocess
+          p="qa/soak/archive/v225/"
+          expected={p+"manifest.json",p+"v131.zip"}|{p+f"v{i}.zip" for i in range(209,224)}
+          actual=set(subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines())
+          assert actual==expected,(actual,expected)
+          PY
+          git commit -m "qa(soak): preserve exact historical lineage archive ZIP bytes and roster reconciliation"
+          git push origin HEAD:refs/heads/qa/issue29-gmp-complete-small-family-v198
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$(git rev-parse HEAD)"
+          echo "ARCHIVE_COMMIT=$(git rev-parse HEAD)"
+      - name: Read back committed raw bytes and verify hashes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,subprocess
+          p="qa/soak/archive/v225/"
+          m=json.loads(subprocess.check_output(["git","show","HEAD:"+p+"manifest.json"]))
+          assert len(m["archives"])==16 and len(m["roster_reconciled_records"])==22
+          for label,r in m["archives"].items():
+              raw=subprocess.check_output(["git","show","HEAD:"+p+label+".zip"])
+              assert len(raw)==r["bytes"] and hashlib.sha256(raw).hexdigest()==r["sha256"]
+          print("DURABLE_GIT_ARCHIVE_PASS",len(m["archives"]),len(m["roster_reconciled_records"]))
+          PY
