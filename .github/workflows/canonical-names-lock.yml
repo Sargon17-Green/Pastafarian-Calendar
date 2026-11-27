@@ -955,3 +955,34 @@ jobs:
             build/calendar_gate_year.gb
             build/calendar_gate_year.map
             build/calendar_gate_year.sym
+
+  dmg-directional-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate the source-derived 1025-entry gate map
+        run: make build/calendar_gate_year_map.inc
+      - name: Build isolated Native396 with RGBDS v1.0.4
+        run: |
+          docker run --rm --mount type=bind,src="$PWD",dst=/work \
+            -w /work ghcr.io/gbdev/rgbds:v1.0.4 \
+            sh -c 'make build/calendar_directional.gb'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PyBoy
+        run: python -m pip install 'pyboy>=2,<3'
+      - name: Verify map, independent actual-map oracle and Native396 differential
+        timeout-minutes: 25
+        run: python3 tests/test_rom_directional.py build/calendar_directional.gb
+      - name: Preserve Native396 ROM, map and symbols
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sm83-native396-directional
+          if-no-files-found: error
+          path: |
+            build/calendar_directional.gb
+            build/calendar_directional.map
+            build/calendar_directional.sym

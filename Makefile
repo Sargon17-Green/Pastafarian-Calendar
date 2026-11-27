@@ -238,3 +238,15 @@ test-stage1-gate-year: build/calendar_gate_year.gb
 # Independent Host-only Stage1 bounded gate-window/radix histogram design.
 test-stage1-gate-histogram:
 	$(PYTHON) tests/test_sm83_stage1_gate_histogram.py
+
+# Native396 isolated directional selector; Native370..395 targets unchanged.
+.PHONY: test-stage1-directional
+build/calendar_directional.o: build/calendar.o build/calendar_gate_year_map.inc src/runtime/calendar_gate_year.asm src/runtime/calendar_directional.asm src/runtime/calendar_bowl_answer_rank.asm src/runtime/calendar_bowl_poststirs.asm src/tests/calendar_directional_native_test.asm
+	$(RGBASM) -Wall -D STAGE1_DIRECTIONAL_NATIVE_BENCH=1 -o $@ src/boot.asm
+
+build/calendar_directional.gb: build/calendar_directional.o
+	$(RGBLINK) -n build/calendar_directional.sym -m build/calendar_directional.map -o $@ $<
+	$(RGBFIX) -v -p 0 -m 0x1a -r 0x04 -t PASTA-GEEZ $@
+
+test-stage1-directional: build/calendar_directional.gb
+	$(PYTHON) tests/test_rom_directional.py build/calendar_directional.gb
