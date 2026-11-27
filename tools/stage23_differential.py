@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import time
 import stage23_measure as measure
@@ -194,11 +195,15 @@ def main():
     # GNU time measures this single interpreter process; AS and watchdog inherited.
     cmd=['/usr/bin/time','-v','-o',str(E/'time.txt'),'upstream/false_int','-e',str(path)]
     started=time.monotonic()
-    try:
-        p=subprocess.run(cmd,capture_output=True,timeout=600,preexec_fn=measure.limits,check=False)
-        code,out,err=p.returncode,p.stdout,p.stderr
-    except subprocess.TimeoutExpired as ex:
-        code,out,err=124,ex.stdout or b'',ex.stderr or b''
+    with subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                          start_new_session=True,preexec_fn=measure.limits) as p:
+        try:
+            out,err=p.communicate(timeout=600)
+            code=p.returncode
+        except subprocess.TimeoutExpired:
+            os.killpg(p.pid,signal.SIGKILL)
+            out,err=p.communicate()
+            code=124
     elapsed=time.monotonic()-started
     (E/'stdout.txt').write_bytes(out)
     (E/'stderr.txt').write_bytes(err)
