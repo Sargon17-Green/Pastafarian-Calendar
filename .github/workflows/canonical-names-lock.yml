@@ -1359,3 +1359,28 @@ jobs:
           name: dart-hebrew-representative-small-oracle
           path: out/dart-hebrew-representative-small-oracle/
           if-no-files-found: warn
+
+  dart-hebrew-representative-memo-small:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-memo-small]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Disposable counter memo off/on small oracle and LRU replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_memo_small.py
+          python3 tool/dart_hebrew_representative_memo_small.py --out out/dart-hebrew-representative-memo-small
+      - name: Upload disposable memo small evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-memo-small
+          path: out/dart-hebrew-representative-memo-small/
+          if-no-files-found: warn
