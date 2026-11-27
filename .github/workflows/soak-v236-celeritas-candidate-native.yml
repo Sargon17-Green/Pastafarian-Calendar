@@ -1,0 +1,129 @@
+name: Soak v236 exact Celeritas candidate native regression (token fix)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v236-celeritas-candidate-native.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind accepted component and exact candidate source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "0dbb3c3dfcb8546c96af7f314b11707a6bfea99c"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v236-celeritas-candidate-native.yml"
+          test "$(git rev-parse HEAD:qa/soak/v234_short_rejection_component_probe.cpp)" = "71429208378c21560042c66bf6b7b155230194aa"
+          mkdir -p evidence candidate/include/pastafari candidate/src
+          test -n "$GH_TOKEN"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231492525/zip > evidence/v235-failed.zip
+          echo "9ff8d08d98fde45aa2c124137b6cd8d0e8d9ab3aac13a596a836565d293c209c  evidence/v235-failed.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15230524197/zip > evidence/v234.zip
+          echo "059f89e5cf45c86a3165c3c5a2005074d69bcb121a11ad0467eb50840fb0fe9e  evidence/v234.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          ref="97f661ff17aa035fbd7721c690164f007a44dfc6"
+          base="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          def api(p):return subprocess.check_output(["gh","api",p],timeout=45)
+          c=json.loads(api(f"repos/{repo}/compare/{base}...{ref}"))
+          assert c["ahead_by"]==1 and c["behind_by"]==0
+          assert [(f["filename"],f["additions"],f["deletions"]) for f in c["files"]]==[("src/monster.cpp",12,0)]
+          with zipfile.ZipFile("evidence/v234.zip") as z:
+              assert z.testzip() is None
+              r=json.loads(z.read("result.json"))
+              assert r["classification"]=="COMPONENT_NATIVE_CANDIDATE_PASS"
+              assert r["component_checks_verified"]==53 and r["invalid_inputs_rejected"]==3
+              with zipfile.ZipFile(__import__("io").BytesIO(z.read("v233.zip"))) as old:
+                  assert old.testzip() is None
+                  prev=json.loads(old.read("result.json"))
+                  expected=json.loads(old.read("expected-v5.json"))["rows"]
+          pins={"src/monster.cpp":"10e075c67f619e6685fe8d4c00439916bd9e2372","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("candidate",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          assert all(prev["cases"][i]["observed_fields"]==expected[k]["fields"] for i,k in enumerate(["control_000000","timeout_000371","timeout_000385"]))
+          Path("evidence/expected.json").write_text(json.dumps(expected,indent=2)+"\n")
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"base":base,"sources":inv,"source_diff":"+12 lines, no deletions","v234_run":46066864605},indent=2)+"\n")
+          PY
+      - name: Build uninstrumented versioned source and focused probes
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          cat > candidate/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <iostream>
+          using pastafari::Integer;
+          int main(int argc,char** argv) {
+              if(argc!=3) return 2;
+              const Integer c{argv[1]},t{argv[2]};
+              const auto a=pastafari::calendarDateSpaghetti(c,t);
+              std::size_t ci=0,mi=0;
+              for(const auto& x:pastafari::CUTLET_SOURCE_CATALOG) if(x.text==a.cutletName) ci=x.canonicalIndex;
+              for(const auto& x:pastafari::MONTH_SOURCE_CATALOG) if(x.text==a.monthName) mi=x.canonicalIndex;
+              if(!ci||!mi) return 4;
+              std::cout<<"CANONICAL "<<a.yearNumber<<" "<<ci<<" "<<a.dayInCutlet<<" "<<mi<<" "<<a.dayInMonth<<std::endl;
+              std::cout<<"RAW\t"<<c<<"\t"<<t<<"\t"<<a.cutletName<<"\t"<<a.monthName<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I candidate/include -c candidate/src/monster.cpp -o candidate/monster.o) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          g++ -std=c++17 -O2 -pthread -I candidate/include candidate/monster.o qa/soak/v234_short_rejection_component_probe.cpp -o candidate/component
+          g++ -std=c++17 -O2 -pthread -I candidate/include candidate/monster.o candidate/driver.cpp -o candidate/date
+          sha256sum candidate/component candidate/date candidate/monster.o candidate/driver.cpp > evidence/build.sha256
+      - name: Run component and only three frozen self-date witnesses
+        run: |
+          set -euo pipefail
+          (ulimit -v 524288; timeout -k 5s 30s candidate/component) > evidence/component.stdout 2> evidence/component.stderr
+          cat evidence/component.stdout
+          test ! -s evidence/component.stderr
+          grep -Fx 'PATCH13_COMPONENT_PASS checks=53 rejected=3 original_F_calls=0' evidence/component.stdout
+          python3 - <<'PY'
+          import json,subprocess,time
+          from pathlib import Path
+          expected=json.loads(Path("evidence/expected.json").read_text())
+          rows=[]
+          for key in ["control_000000","timeout_000371","timeout_000385"]:
+              v=expected[key];d=v["jdn"]-1721425
+              start=time.monotonic()
+              p=subprocess.run(["bash","-c",'ulimit -v 3145728; exec "$@"',"probe","/usr/bin/time","-v","-o",f"evidence/{key}.time.txt","timeout","-k","5s","160s","candidate/date",str(d),str(d)],capture_output=True,text=True)
+              Path(f"evidence/{key}.stdout").write_text(p.stdout)
+              Path(f"evidence/{key}.stderr").write_text(p.stderr)
+              ls=p.stdout.splitlines()
+              fields=[int(x) for x in ls[0].split()[1:]] if len(ls)==2 and ls[0].startswith("CANONICAL ") else None
+              raw=ls[1].split("\t") if len(ls)==2 else []
+              matched=p.returncode==0 and fields==v["fields"] and len(raw)==5 and raw[:3]==["RAW",str(d),str(d)] and all(raw[3:]) and not p.stderr
+              r={"case":key,"c":d,"t":d,"exit":p.returncode,"seconds":round(time.monotonic()-start,3),"fields":fields,"expected":v["fields"],"raw_names":raw[3:],"matched":bool(matched)}
+              rows.append(r)
+              print(json.dumps(r),flush=True)
+              Path("evidence/result.json").write_text(json.dumps({"schema":"SOAK_V236_CELERITAS_VERSIONED_CANDIDATE/1","source_commit":"97f661ff17aa035fbd7721c690164f007a44dfc6","component_checks":53,"invalid_inputs_rejected":3,"cases":rows,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True},indent=2)+"\n")
+              assert matched
+          assert len(rows)==3
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v236-versioned-candidate-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
