@@ -1384,3 +1384,32 @@ jobs:
           name: dart-hebrew-representative-memo-small
           path: out/dart-hebrew-representative-memo-small/
           if-no-files-found: warn
+
+  dart-hebrew-representative-public-trace:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-public-trace]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [COLD, SAME, MIXED, INDEPENDENT]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Disposable representative public trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_public_trace.py
+          python3 tool/dart_hebrew_representative_public_trace.py --workload ${{ matrix.workload }} --out out/dart-hebrew-public-trace
+      - name: Upload trace evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-public-trace-${{ matrix.workload }}
+          path: out/dart-hebrew-public-trace/
+          if-no-files-found: warn
