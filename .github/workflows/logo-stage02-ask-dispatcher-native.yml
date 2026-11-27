@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 reverse day-window exact carry-split differential
+name: Logo Stage2 QA D19 reverse single-limb quotient differential
 on:
   push:
     branches:
@@ -104,6 +104,18 @@ jobs:
           p.write_text(s.replace(anchor, replacement), encoding="utf-8")
           print("QA_CARRY_SPLIT_CANDIDATE=READY")
           PY
+          # Exact single-limb divisor fast path, with unchanged general fallback.
+          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "90a5a0212435b03f3be8924a6d04787ee4ec1169f308afec684daee28e8e70f1"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("src/exact_integer.logo")
+          s = p.read_text(encoding="utf-8")
+          anchor = '  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
+          replacement = "  if and ((count :den) = 1) ((count :rem) <= 2) [\n    localmake \"d first :den\n    localmake \"n first :rem\n    if (count :rem) = 2 [make \"n (:n + 10000 * last :rem)]\n    if and (and (:d > 0) (:d < 10000)) (and (:n >= 0) (:n < (10000 * :d))) [\n      localmake \"r remainder :n :d\n      localmake \"q int (quotient (:n - :r) :d)\n      output (list :q (list :r))\n    ]\n  ]\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend"
+          assert s.count(anchor) == 1
+          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
+          print("QA_SINGLE_LIMB_QDIGIT=READY")
+          PY
           git diff -- src/exact_integer.logo > "$RUNNER_TEMP/candidate.patch"
           test -s "$RUNNER_TEMP/candidate.patch"
           test "$(sha256sum "$RUNNER_TEMP/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
@@ -160,6 +172,49 @@ jobs:
           grep -Fxq 'SPLIT_NATIVE_CHECKS 302' "$RUNNER_TEMP/split-probe.log"
           grep -Fxq 'SPLIT_NATIVE_PASS' "$RUNNER_TEMP/split-probe.log"
           if grep -Eq 'SPLIT_NATIVE_FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with' "$RUNNER_TEMP/split-probe.log"; then exit 1; fi
+      - name: Native single-limb quotient digit differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/qdigit-probe.logo" <<'PY'
+          import sys, random
+          from pathlib import Path
+          B = 10000
+          def digits(n):
+              out = []
+              while n:
+                  n, r = divmod(n, B)
+                  out.append(r)
+              return '[' + ' '.join(map(str, out or [0])) + ']'
+          cases = []
+          for d in (1, 2, 3, 7, 41, 922, 9999, 10000, 10001, 99999999):
+              for q in (0, 1, 4999, 9999):
+                  for r in sorted({0, d-1}):
+                      cases.append((d*q+r, d))
+          rng = random.Random(20261127)
+          for _ in range(256):
+              d = rng.randrange(1, B)
+              cases.append((rng.randrange(d*B), d))
+          lines = ['load "src/exact_integer.logo', 'make "QD.CHECKS 0',
+                   'to ad.qd.check :n :d :want',
+                   '  localmake "got bi.mag.qdigit :n :d',
+                   '  localmake "old bi.mag.qdigit.binary :n :d 0 9999',
+                   '  if not equalp :got :want [print [QD_NATIVE_ORACLE_FAILURE] bye]',
+                   '  if not equalp :got :old [print [QD_NATIVE_DIFFERENTIAL_FAILURE] bye]',
+                   '  make "QD.CHECKS (:QD.CHECKS + 1)', 'end']
+          for n,d in cases:
+              q,r = divmod(n,d)
+              assert 0 <= q < B and 0 <= r < d and n == q*d+r
+              lines.append(f'ad.qd.check {digits(n)} {digits(d)} [{q} {digits(r)}]')
+          assert len(cases) == 332
+          lines += ['print (sentence [QD_NATIVE_CHECKS] :QD.CHECKS)', 'print [QD_NATIVE_PASS]', 'bye']
+          Path(sys.argv[1]).write_text('\n'.join(lines)+'\n', encoding='utf-8')
+          PY
+          echo bye | timeout --signal=TERM --kill-after=5s 120 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/qdigit-probe.logo" > "$RUNNER_TEMP/qdigit-probe.log" 2>&1
+          cat "$RUNNER_TEMP/qdigit-probe.log"
+          grep -Fxq 'QD_NATIVE_CHECKS 332' "$RUNNER_TEMP/qdigit-probe.log"
+          grep -Fxq 'QD_NATIVE_PASS' "$RUNNER_TEMP/qdigit-probe.log"
+          if grep -Eq 'QD_NATIVE_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with' "$RUNNER_TEMP/qdigit-probe.log"; then exit 1; fi
       - name: Run bounded Native selector group
         shell: bash
         env:
@@ -218,5 +273,7 @@ jobs:
             ${{ runner.temp }}/candidate-hashes.txt
             ${{ runner.temp }}/split-probe.logo
             ${{ runner.temp }}/split-probe.log
+            ${{ runner.temp }}/qdigit-probe.logo
+            ${{ runner.temp }}/qdigit-probe.log
           if-no-files-found: warn
           retention-days: 30
