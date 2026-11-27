@@ -1,14 +1,12 @@
 name: PowerShell Tagalog Stage44 preflight
 on:
-  push:
-    branches:
-      - 'PowerShell+Tagalog'
+  workflow_call:
 permissions:
   contents: read
 jobs:
   stage44-preflight:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
@@ -17,6 +15,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
+          if ($env:GITHUB_REF -cne 'refs/heads/PowerShell+Tagalog') { throw 'Unexpected branch' }
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($LASTEXITCODE -ne 0 -or $sha -cne $env:GITHUB_SHA) { throw 'Checkout SHA mismatch' }

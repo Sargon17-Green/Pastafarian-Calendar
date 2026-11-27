@@ -1150,3 +1150,10 @@ jobs:
             stage43-lifecycle-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: error
+
+  stage44-moving-gate-preflight:
+    name: Stage44 bounded moving-gate preflight (not activation)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PowerShell+Tagalog'
+    uses: ./.github/workflows/powershell-tagalog-stage44-preflight.yml
+    permissions:
+      contents: read
