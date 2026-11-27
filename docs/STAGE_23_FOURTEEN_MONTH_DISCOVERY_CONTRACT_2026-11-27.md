@@ -1,0 +1,17 @@
+# Stage23 — authorized 14-month / 56-day discovery contract (2026-11-27)
+PROJECT_ID: PC-BRANCH-PERL-GUOYU
+Branch: Perl+國語. User explicitly approved Stage23 14/56. Exact parent 2251d1f90bc1b83315cacb493f5bf21b2c813484; unchanged producer blob 4a7cd53e7132a6b3ab5fdaffd2d93a498e9296a6.
+LAST_COMPLETED_STAGE=22. Discovery only; no production, CI, Native or whole-year acceptance.
+
+## Contract
+count_weavings(profile), rank_weaving(profile,word), unrank_weaving(profile,rank): positive integer month lengths, 1..14 labels, total 1..56 days; exact Math::BigInt count and one-based numeric lexical ranks. Ascending first and last appearances, exact multiplicities, fresh output words, no mutation of profile or BigInt inputs. Preserve all 13/52 behavior, separate MonthOccurrence 9/36, catalog, chronology and date semantics. Reject 15 months, 57 days, zero/negative/fraction/noncanonical lengths, invalid word order/length/labels/multiplicities, rank 0 and count+1. Perl only; no main, merge, release or full-year claim.
+
+## Executed discovery
+Local Perl v5.40.1, syntax OK, 120s timeout and 393216 KiB VSZ limit: exit 0, stderr 0 bytes, elapsed 0.54s, RSS 13824 KiB. Script qa/perl-guoyu/stage23_discovery_preflight.pl; local source SHA256 dedfd319eedf3bb4692d5e23664195f4fdc81b5df94db09557948c6d4c248227.
+Independent ballot suffix oracle count 2674440 = Catalan(14), rank/unrank internal inverses at 1,2,1337220,2674439,2674440. No producer differential yet. Require independent ordinal enumeration or independently generated shard witnesses covering all 2674440 ranks; heterogeneous brute-force small fixtures, asymmetric maximum-total, 14x4 and exact worst arena.
+Corrected Stage22 endpoint overcount bound n!/(k!(k+1)!s! product((l_i-2)!)); k=0 is 1. Factorial exchange balances interior counts. 4410 feasible (n,k,s) triples; maximum integer upper bound 211400621135291847714750594140071941494784000000000 (51 digits; n=56,k=10,s=3). Prefix concatenation injects suffix completions into root completions. This bound does NOT prove an actual 48-digit overflow, but four base-10^12 limbs no longer have a proven guarantee.
+For radix r=l-1, E'=r(1+E), C'=C+E', arena=C+m+1. Monotone Pareto dominance at fixed m,n is exact (nonnegative radices). Maximum arena 12106881 states at [3,4,4,4,5,5,5,5,5,5,4,4,3]. Raw 32-byte arena plus bitmap=388933553 bytes; 40-byte=485788601 bytes. A scratch independent Python enumeration agreed with bound and maximum arena.
+Proposed candidate: 6 little-endian 32-bit limbs base 10^9 (pack V6), 54 decimal digits, each carry sum <=1999999999. Raw 24-byte arena plus bitmap=292078505 bytes. This is a design estimate, NOT measured candidate RSS or VSZ. Require explicit overflow guard, exact decimal conversion, and isolated arithmetic boundary QA before producer tests.
+
+## NEXT
+Build temporary source-locked producer candidate (not committed initially) with 6x32 packing, 14/56 guards, arithmetic carry/overflow tests. Run exact worst-arena and 14x4 count/rank/unrank cases separately under 120s / 393216 KiB VSZ, record exit/stderr/time/RSS and compare independently computed counts and ranks. If limits fail, investigate a new representation rather than rerunning unchanged. Then add Stage23 tests and dedicated Native canonical job; all mandatory jobs success, exact run/job logs and downloadable source-locked artifact digest/CRC required before acceptance. Do not repeat accepted Stage22 CI without cause.
