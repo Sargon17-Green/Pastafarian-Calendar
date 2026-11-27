@@ -26,4 +26,4 @@ Validatorul accepta numere rational exacte atunci cand valoarea lor este intreag
 
 `src/stage04_save.ijs` implementeaza in productie `SAVE(n)=1+((n-1) mod M)` cu `M=2^127-1`. Intrarea este canonizata prin `stage02CanonicalDay`, fara floating point. Este acceptat un intreg exact sau rational exact cu numitor 1, iar fractiile sunt respinse. `stage04SaveCounts` aplica acelasi reziduu pozitiv vectorului existent de cinci numaratori, fara modificarea contextului public sau calculul componentelor finale de data.
 
-`test/stage04_discovery02_tests.ijs` pregateste 24 de verificari pentru limite, tip J64, rationali, periodicitate, idempotenta, intrari invalide si non-regresie. Stage 4 este implementat, dar Native QA J9.7.1 nu a fost executat; `LAST_COMPLETED_STAGE=3`.
+`test/stage04_discovery02_tests.ijs` pregateste 24 de verificari pentru limite, tip J64, rationali, periodicitate, idempotenta, intrari invalide si non-regresie. Stage 4 a fost acceptat prin Native QA v17, J9.7.1 Windows x64: Stage 4 24/24, regresie Stage 1–3 91/91, exit 0; `LAST_COMPLETED_STAGE=4`. Calea publica ramane `NOT_INTEGRATED`.
