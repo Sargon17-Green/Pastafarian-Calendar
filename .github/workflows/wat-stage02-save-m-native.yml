@@ -1,0 +1,132 @@
+name: WAT Stage02 SAVE(M) source-fresh Native witness
+on:
+  push:
+    branches: ['WAT+Español']
+    paths: ['.github/workflows/wat-stage02-save-m-native.yml']
+permissions:
+  contents: read
+jobs:
+  exact-save-m:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SOURCE_COMMIT: '964e26924bf9bf7b0d456694349d422a80aff104'
+      SOURCE_BLOB: '70267bb5730678f81d6138a2224d6b8d9a193eb8'
+      SOURCE_PATH: 'oracle/normative_calendar_wide.wat'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Preserve exact source and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          e="$RUNNER_TEMP/wat-save-m"
+          mkdir -p "$e"
+          printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nSOURCE_COMMIT=%s\nSOURCE_BLOB=%s\nQA_HEAD=%s\nRUN_ID=%s\nRUN_ATTEMPT=%s\nRUNNER=%s/%s\n' "$SOURCE_COMMIT" "$SOURCE_BLOB" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$RUNNER_OS" "$RUNNER_ARCH" > "$e/identity.txt"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD^)" = "$SOURCE_COMMIT"
+          test "$(git rev-parse "$SOURCE_COMMIT:$SOURCE_PATH")" = "$SOURCE_BLOB"
+          test "$(git rev-parse "HEAD:$SOURCE_PATH")" = "$SOURCE_BLOB"
+          git cat-file blob "$SOURCE_BLOB" > "$e/exact.wat"
+          test "$(git hash-object "$e/exact.wat")" = "$SOURCE_BLOB"
+          sha256sum "$e/exact.wat" | tee "$e/source.sha256"
+      - name: Install pinned WasmKit and WABT
+        shell: bash
+        run: |
+          set -euo pipefail
+          e="$RUNNER_TEMP/wat-save-m"
+          test "$(uname -m)" = x86_64
+          url='https://github.com/swiftwasm/WasmKit/releases/download/0.1.6/wasmkit-x86_64-swift-linux-musl.tar.gz'
+          archive="$RUNNER_TEMP/wasmkit.tar.gz"
+          curl --fail --location --retry 3 --max-time 90 --silent --show-error "$url" -o "$archive"
+          printf '%s  %s\n' '57085becd37769ed618a9057dee6d70303195e31d3b46d09dac1cfb5d477aa24' "$archive" | sha256sum --check | tee "$e/release-check.txt"
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          bin="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl"
+          test -x "$bin/wasmkit"
+          "$bin/wasmkit" --version | tee "$e/wasmkit-version.txt"
+          grep -Fq 0.1.6 "$e/wasmkit-version.txt"
+          sha256sum "$bin/wasmkit" > "$e/wasmkit.sha256"
+          printf '%s\n' "$bin" >> "$GITHUB_PATH"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends wabt
+          wat2wasm --version | tee "$e/wabt-version.txt"
+      - name: Run unmodified predicate and separately observe numeric limbs
+        shell: bash
+        run: |
+          set -euo pipefail
+          e="$RUNNER_TEMP/wat-save-m"
+          wat2wasm "$e/exact.wat" -o "$e/exact.wasm"
+          wasm-validate "$e/exact.wasm"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, resource, subprocess
+          e = pathlib.Path(os.environ['RUNNER_TEMP']) / 'wat-save-m'
+          raw = (e / 'exact.wat').read_bytes()
+          text = raw.decode('utf-8')
+          assert text.rstrip().endswith(')')
+          limit = 1024**3
+          def cap():
+              resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+          cases = []
+          def run(module, name, expected):
+              try:
+                  p = subprocess.run(['wasmkit', 'run', str(e / module), name], capture_output=True, text=True, timeout=30, preexec_fn=cap)
+                  out, err, rc = p.stdout, p.stderr, p.returncode
+              except subprocess.TimeoutExpired as exc:
+                  out = (exc.stdout or b'').decode(errors='replace') if isinstance(exc.stdout, bytes) else (exc.stdout or '')
+                  err = (exc.stderr or b'').decode(errors='replace') if isinstance(exc.stderr, bytes) else (exc.stderr or '')
+                  rc = 124
+              (e / (name + '.stdout')).write_text(out)
+              (e / (name + '.stderr')).write_text(err)
+              m = re.fullmatch(r'\[(?:I32|i32|WasmTypes\.Value\.i32)\((-?\d+)\)\]', out.strip())
+              actual = int(m.group(1)) if m else None
+              row = dict(module=module, export=name, expected=expected, actual=actual, exit_code=rc, passed=(rc == 0 and actual == expected))
+              cases.append(row)
+              (e / 'cases.json').write_text(json.dumps(cases, indent=2))
+              print(json.dumps(row), flush=True)
+              return actual
+          run('exact.wasm', 'test_save_m', 1)
+          # Observation-only copy: append exports before the module's closing parenthesis.
+          # Original functions and bytes before the closing parenthesis remain unchanged.
+          prefix = text.rstrip()[:-1]
+          additions = []
+          M = (1 << 127) - 1
+          limbs = [(M >> (30*i)) & ((1 << 30)-1) for i in range(5)]
+          for label, ptr in [('input', '$M'), ('saved', '$TMP0')]:
+              for index in range(-1, 5):
+                  name = 'qa_' + label + ('_len' if index == -1 else '_limb_' + str(index))
+                  expr = f'(call $len (global.get {ptr}))' if index == -1 else f'(call $limb (global.get {ptr}) (i32.const {index}))'
+                  additions.append(f'  (func (export "{name}") (result i32) (call $init_m) (call $save_big (global.get $TMP0) (global.get $M)) {expr})')
+          instrumented = prefix + '\n' + '\n'.join(additions) + '\n)\n'
+          (e / 'observed.wat').write_text(instrumented, encoding='utf-8')
+          subprocess.run(['wat2wasm', str(e / 'observed.wat'), '-o', str(e / 'observed.wasm')], check=True, timeout=30)
+          subprocess.run(['wasm-validate', str(e / 'observed.wasm')], check=True, timeout=30)
+          decoded = {}
+          for label in ['input', 'saved']:
+              length = run('observed.wasm', 'qa_' + label + '_len', 5)
+              values = [run('observed.wasm', 'qa_' + label + '_limb_' + str(i), v) for i, v in enumerate(limbs)]
+              decoded[label] = str(sum(v << (30*i) for i, v in enumerate(values))) if length == 5 and all(v is not None for v in values) else None
+          passed = len(cases) == 13 and all(c['passed'] for c in cases) and all(v == str(M) for v in decoded.values())
+          summary = dict(expected_M=str(M), decoded=decoded, cases=len(cases), passed=sum(c['passed'] for c in cases), focused_native_pass=passed, stage02_accepted=False, source_sha256=hashlib.sha256(raw).hexdigest())
+          (e / 'summary.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary), flush=True)
+          raise SystemExit(0 if passed else 1)
+          PY
+      - name: Preserve source and all logs
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          e="$RUNNER_TEMP/wat-save-m"
+          if [[ -d "$e" ]]; then
+            cd "$e"
+            find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS.txt
+          fi
+      - name: Upload focused Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-save-m-source-fresh-evidence
+          path: ${{ runner.temp }}/wat-save-m/
+          if-no-files-found: error
