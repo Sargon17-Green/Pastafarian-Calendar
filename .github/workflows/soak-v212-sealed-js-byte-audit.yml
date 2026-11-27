@@ -1,0 +1,122 @@
+name: Soak v212 sealed authoritative JS byte and linkage audit (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v212-sealed-js-byte-audit.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify activation and restore dependency evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "17be40cdd70a705c041b51d6e2ed979e447ee73a"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v212-sealed-js-byte-audit.yml"
+          mkdir -p evidence source
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15215228972/zip > evidence/v211.zip
+          echo "2ba7c7ea06ce65c11427f734ddfd55342ba558bdaccb2ff3e8751c3211ba05ad  evidence/v211.zip" | sha256sum -c -
+      - name: Read and hash sealed data modules without evaluating any JS
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,re,subprocess,zipfile,posixpath
+          from pathlib import Path
+          e=Path("evidence"); src=Path("source")
+          with zipfile.ZipFile(e/"v211.zip") as z:
+              assert z.testzip() is None
+              n=[n for n in z.namelist() if n.endswith("/result.json") or n=="result.json"]
+              assert len(n)==1
+              prior=json.loads(z.read(n[0]))
+          assert prior["shared_weave_count"]==9 and prior["native_calls"]==0
+          repo="Sargon17-Green/pastafari-calendar"
+          ref=prior["historical_commit"]
+          assert ref=="cc2cf0b422757a5e7c33218ce30cffa8f99c6786"
+          j=json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/git/trees/{ref}?recursive=1"],timeout=60))
+          assert not j["truncated"]
+          tree={x["path"]:x for x in j["tree"] if x["type"]=="blob"}
+          names=["browser/pastafari-calendar-core-1.js","browser/pastafari-calendar-core-2.js","browser/pastafari-calendar-core-chronicle.js","browser/pastafari-calendar-core.js","browser/month-weaving-domain-detour.js"]
+          records={}
+          total=0
+          def get(p):
+              global total
+              item=tree[p]
+              assert 0<item["size"]<=16000000 and total+item["size"]<=40000000
+              if p in prior["source_inventory"]:
+                  lock=prior["source_inventory"][p]
+                  assert item["sha"]==lock["git_blob"] and item["size"]==lock["bytes"]
+              f=src/Path(p).name
+              # Raw REST content is data, never imported, evaluated, or executed.
+              with f.open("wb") as out:
+                  subprocess.run(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],stdout=out,check=True,timeout=90)
+              b=f.read_bytes()
+              assert len(b)==item["size"],(p,len(b),item["size"])
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==item["sha"]
+              h=hashlib.sha256(b).hexdigest()
+              total+=len(b)
+              records[p]={"bytes":len(b),"git_blob":item["sha"],"sha256":h}
+              return b.decode("utf-8")
+          texts={p:get(p) for p in names}
+          chron=texts[names[2]]
+          # Match the explicit named imports, then look for literal export identifiers
+          # in the data modules. This is lexical linkage, not a JS execution proof.
+          mappings={}
+          for p in names[:2]:
+              pattern=r'import\s*\{([^{}]+)\}\s*from\s*["\']\./'+re.escape(Path(p).name)+r'["\']'
+              m=re.findall(pattern,chron)
+              assert len(m)==1
+              identifiers=[x.strip() for x in m[0].split(",") if x.strip()]
+              assert identifiers and len(set(identifiers))==len(identifiers)
+              assert all(re.fullmatch(r"_[0-9a-f]+",n) for n in identifiers)
+              body=texts[p]
+              hits=[n for n in identifiers if re.search(r"(?<![A-Za-z0-9_$])"+re.escape(n)+r"(?![A-Za-z0-9_$])",body)]
+              assert hits==identifiers,(p,len(hits),len(identifiers))
+              records[p].update(named_import_count=len(identifiers),lexical_identifier_hits=len(hits),first_200_chars=body[:200],last_200_chars=body[-200:])
+              mappings[p]=identifiers
+          assert len(set(mappings[names[0]]) & set(mappings[names[1]]))==0
+          anchors=["new TextDecoder().decode(_bfdebe6e499d9a)","_24d33d2b36a512=(()=>{}).constructor","Reflect.construct(_24d33d2b36a512,[_d84da8f353ea96])","Reflect.apply(_c13914f06da949,void 0,[])","const MonthWeavingCounter=_9213e4d51ef537[30]","const PastafariCalendar=_9213e4d51ef537[38]","_9213e4d51ef537.length!==91"]
+          assert all(a in chron for a in anchors),[a for a in anchors if a not in chron]
+          facade=texts[names[3]]; det=texts[names[4]]
+          assert "installMonthWeavingGhostDetour(MonthWeavingCounter, comb)" in facade
+          assert "return legacyUnrank.call(this, rank)" in det
+          # Inventory literal relative paths in the readable facade and detour layer.
+          # Do not infer complete closure in code containing computed construction.
+          pending=[names[3],names[2],names[4]]
+          visited=set(); edges=[]
+          while pending:
+              p=pending.pop()
+              if p in visited: continue
+              visited.add(p)
+              assert len(visited)<=40
+              body=texts[p]
+              for target in sorted(set(re.findall(r'(?:\bfrom\s+|\bimport\s*)["\'](\./[^"\'\r\n]+)["\']',body))):
+                  q=posixpath.normpath(posixpath.join(posixpath.dirname(p),target))
+                  assert q.startswith("browser/") and q in tree,(p,q)
+                  edges.append([p,q])
+                  if q not in texts:
+                      assert tree[q]["size"]<=1000000
+                      texts[q]=get(q)
+                  if q not in names[:2] and q not in visited: pending.append(q)
+          result={"schema":"SOAK_V212_SEALED_JS_BYTE_AUDIT/1","commit":ref,"sources":records,"total_bytes_verified":total,"sealed_bytes_verified":sum(records[p]["bytes"] for p in names[:2]),"named_imports":mappings,"literal_relative_edges":edges,"loader_anchors":len(anchors),"loader_constructs_and_invokes_decoded_source":True,"decoded_payload_recovered":False,"effective_algorithm_reviewed":False,"shared_weave_records_verified":9,"tenth_record_status":"UNRESOLVED_ENCODED_ALGORITHM","native_date_calls":0,"original_module_imports":0,"builds":0,"independent_engines_certified":0,"whole_year_credit":0,"soak_dispatch_authorized":False}
+          (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps({k:v for k,v in result.items() if k not in ("sources","named_imports","literal_relative_edges")}))
+          print("STATIC_LINKAGE",len(records),len(edges),sum(map(len,mappings.values())))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v212-sealed-js-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
