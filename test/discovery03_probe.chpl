@@ -1068,6 +1068,42 @@ proc probeFourCutletPartitions() {
   }
 }
 
+// П'ять частин у [1,3], суми 4..16 включно з неможливими.
+// Незалежні коефіцієнти (x+x^2+x^3)^5:
+// 0,1,5,15,30,45,51,45,30,15,5,1,0.
+// Прямий перебір 243 кортежів, 13 потужностей, 256 тверджень.
+// Лише дослідження; не свідок історичного дефекту і не Stage 6.
+proc probeFiveSlotBoundedCompositions() {
+  for total in 4..16 {
+    var tested: BoundedCompositionCounter;
+    tested.totalValue = total;
+    tested.slotsTotal = 5;
+    tested.lo = 1;
+    tested.hi = 3;
+    var enumerated = 0;
+    for a in 1..3 {
+      for b in 1..3 {
+        for c in 1..3 {
+          for d in 1..3 {
+            for e in 1..3 {
+              if a+b+c+d+e != total then continue;
+              enumerated += 1;
+              const actual = tested.unrank1(new bigint(enumerated));
+              check(actual.size == 5 && actual[0] == a &&
+                    actual[1] == b && actual[2] == c &&
+                    actual[3] == d && actual[4] == e,
+                    "П'ять частин: сума=" + total:string +
+                    ", ранг=" + enumerated:string);
+            }
+          }
+        }
+      }
+    }
+    check(tested.countAll() == enumerated,
+          "П'ять частин: незалежна потужність, сума=" + total:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1076,6 +1112,7 @@ proc main() {
   probeFourCutletPartitions();
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
+  probeFiveSlotBoundedCompositions();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
