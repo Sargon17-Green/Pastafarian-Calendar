@@ -1,0 +1,51 @@
+name: MATLAB Stage55 Reverse Full (Experimental)
+on:
+  push:
+    branches: ['MATLAB\+Polski']
+    paths:
+      - 'tools/stage55_reverse_full_external.m'
+      - 'tools/run_stage55_reverse_full_native.m'
+      - 'tools/verify_stage55_reverse_full.py'
+      - '.github/workflows/matlab-stage55-reverse-full.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: matlab-stage55-reverse-full-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  reverse-full:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact checkout and fixture locks
+        run: |
+          set -eu
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          test "$(git hash-object tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          mkdir -p logs/stage55_reverse_full
+          git rev-parse HEAD > logs/stage55_reverse_full/checkout.txt
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native reverse full
+        timeout-minutes: 165
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('tools');
+            diary('logs/stage55_reverse_full/native.log');
+            try; run_stage55_reverse_full_native(); diary off;
+            catch ME; disp(getReport(ME,'extended','hyperlinks','off')); diary off; rethrow(ME); end
+      - name: Verify exact archived full trace oracle
+        run: python3 tools/verify_stage55_reverse_full.py
+      - name: Preserve complete or partial cursor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-reverse-full-${{ github.sha }}
+          path: logs/stage55_reverse_full/
+          if-no-files-found: warn
+          retention-days: 30
