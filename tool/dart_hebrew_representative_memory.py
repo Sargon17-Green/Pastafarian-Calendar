@@ -120,6 +120,14 @@ Future<void> main(List<String> args) async {
 def setup(root,work,out):
     shutil.copytree(root/'lib',work/'lib')
     shutil.copy2(root/'pubspec.yaml',work/'pubspec.yaml')
+    # VM-service/RSS QA uses SDK APIs introduced in Dart 3.2.
+    # Raise only the disposable harness constraint, not the production package.
+    pubspec = work/'pubspec.yaml'
+    spec = pubspec.read_text(encoding='utf-8')
+    sdk = "sdk: '>=3.0.0 <4.0.0'"
+    need(spec.count(sdk)==1,'QA SDK constraint anchor')
+    pubspec.write_text(spec.replace(sdk,"sdk: '>=3.2.0 <4.0.0'",1),encoding='utf-8')
+    save(out/'qa-sdk-constraint.json',dict(original=sdk,temporary="sdk: '>=3.2.0 <4.0.0'"))
     counter=work/COUNTER
     original=counter.read_text(encoding='utf-8')
     need(original.count(MARK)==1,'injection anchor')
