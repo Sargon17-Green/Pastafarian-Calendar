@@ -1,0 +1,46 @@
+name: Stage1 Foundation five-field witness (test only)
+on:
+  push:
+    branches: ['SystemVerilog+Kalaallisut']
+    paths:
+      - 'scripts/verify_foundation_five_field.py'
+      - '.github/workflows/stage1-foundation-five-field.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  foundation-five-field:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Icarus
+        run: sudo apt-get update && sudo apt-get install -y iverilog
+      - name: Fetch accepted immutable native-word archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 60 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/15212979730/zip" \
+            -o "$RUNNER_TEMP/stage1-native.zip"
+          echo "a03f8fce34ec083190889cec72f5a2361e5c3e4b27727a090e8d35f5926bb8aa  $RUNNER_TEMP/stage1-native.zip" | sha256sum -c
+      - name: Execute bounded independent integration
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          /usr/bin/time -v -o build/foundation-five-field.resources timeout 720s python3 scripts/verify_foundation_five_field.py "$RUNNER_TEMP/stage1-native.zip" | tee build/foundation-five-field.log
+          grep -Fq STAGE1_FOUNDATION_FIVE_FIELD_TEST_ONLY_PASS build/foundation-five-field.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: foundation-five-field-test-only
+          path: |
+            build/foundation_five_field/
+            build/foundation-five-field.*
+          if-no-files-found: warn
+          retention-days: 90
