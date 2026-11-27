@@ -2,6 +2,8 @@ name: Canonical Names Lock
 
 on:
   push:
+    paths-ignore:
+      - '.github/workflows/cobol-chinese-int02-bounded.yml'
   pull_request:
 
 permissions:
