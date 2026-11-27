@@ -1,0 +1,66 @@
+name: Issue29 v205 authorized eight remaining F witnesses
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v205-remaining-panel-authorized.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  remaining-panel:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock authorized preparation and unchanged live source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "2506206a1a1e3646089117b26927d17bebed902d"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v205-remaining-panel-authorized.yml"
+          test "$(git rev-parse HEAD:qa/issue29/v205_remaining_panel_prepared.sh)" = "1e65f20c0c00550505d197dcc412532a9e3072b5"
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git rev-parse FETCH_HEAD)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          test "$(git ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          mkdir -p audit
+          git rev-parse HEAD > audit/QA_HEAD.txt
+          git ls-tree -r FETCH_HEAD src > audit/source-blobs.txt
+          bash -n qa/issue29/v205_remaining_panel_prepared.sh
+      - name: Install GNAT and GMP bindings before bounded execution
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > audit/packages.txt
+      - name: Execute authorized eight-case panel at most once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE29_V205_AUTHORIZATION: EIGHT_F_REMAINING_PANEL_ONLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash qa/issue29/v205_remaining_panel_prepared.sh "$GITHUB_WORKSPACE/evidence"
+      - name: Print bounded execution evidence
+        if: always()
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for f in evidence/memory-limits.txt evidence/exit.txt evidence/scope.log evidence/result.json evidence/case_*/F_ATTEMPT_ONCE evidence/case_*/stdout.txt evidence/case_*/stderr.txt evidence/case_*/time.txt evidence/case_*/result.json; do
+            if [[ -f "$f" ]]; then
+              echo "--- $f ---"
+              cat "$f"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v205-remaining-panel-${{ github.run_id }}
+          path: |
+            audit/
+            evidence/
+          retention-days: 30
