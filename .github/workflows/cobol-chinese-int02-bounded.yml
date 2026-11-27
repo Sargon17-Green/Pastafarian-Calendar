@@ -66,7 +66,12 @@ jobs:
             local rc=$?
             if [ "$rc" = 0 ]; then
               case "$name" in
-                save) grep -Eq '^SAVE_CHECKS=0*48
+                save) grep -Eq '^SAVE_CHECKS=0*48$' "evidence/$name.log" && grep -Fxq 'SAVE_GATE=PASS' "evidence/$name.log" ;;
+                candidates) grep -Fxq 'INT02_YEAR_CANDIDATES_CASES=58 GATE=PASS_BOUNDED_CANDIDATES_ONLY' "evidence/$name.log" ;;
+                wide) grep -Fxq '{"cases":1051,"statusCounts":{"0":702,"22":3,"24":346},"scope":"NATIVE_WIDE_ONLY","gate":"MATCH"}' "evidence/$name.log" ;;
+              esac
+              rc=$?
+            fi
             printf '%s exit=%s\n' "$name" "$rc" | tee -a evidence/status.log
             return "$rc"
           }
