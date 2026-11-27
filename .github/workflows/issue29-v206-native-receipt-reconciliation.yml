@@ -1,0 +1,146 @@
+name: Issue29 v206 reconcile sixteen unique native receipts (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v206-native-receipt-reconciliation.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prove historical and current source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "69e3c36d82636002f6a839c19a4a90b0b434eafd"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v206-native-receipt-reconciliation.yml"
+          mkdir -p evidence
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730 1160096aa847c54cbef27c232771ce1549d7ba8f 5e45c95e8822486d1a5d0c2b80e6ff4edcfd8288 97f71c1b1762b7636a03ecf87f36a38ea9b16cd5
+          for ref in d10d50383025d73ad2ce11d19d5759221d70f730 1160096aa847c54cbef27c232771ce1549d7ba8f 5e45c95e8822486d1a5d0c2b80e6ff4edcfd8288 97f71c1b1762b7636a03ecf87f36a38ea9b16cd5; do
+            git rev-parse "$ref:src" | tee -a evidence/source-trees.txt
+            test "$(git rev-parse "$ref:src")" = "$(git rev-parse "d10d50383025d73ad2ce11d19d5759221d70f730:src")"
+          done
+      - name: Fetch immutable native evidence archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          fetch() {
+            gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/"$1"/zip > "evidence/$2.zip"
+            echo "$3  evidence/$2.zip" | sha256sum -c -
+          }
+          fetch 14864708206 v188 97931fdf8bc73f8f0a9744a336f14262a807336ba0a3905f89c7e0e93950cf59
+          fetch 14974288368 v193 4d0a6054153cad978f162125f0a0e7efc505d5daf5d2ca4513c40faeda903835
+          fetch 15212166434 v204 cd3f0ac8aec1a84dda5d2cd437b085e86dc04a3d143679f141e479669dfbff2a
+          fetch 15212082304 v205 cda32e923907d7de7fff147fc89b2c61cf1efb5ac39d7a2e5b5959d0967e3cda
+      - name: Audit actual ZIP members, raw records and distinct inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,zipfile
+          from pathlib import Path
+          e=Path("evidence")
+          records=[]
+          archives={}
+          def sha(x): return hashlib.sha256(x).hexdigest()
+          def add(tag,row):
+              assert len(row)==7
+              records.append(dict(source=tag,c=row[0],t=row[1],fields=row[2:]))
+          def openzip(tag):
+              z=zipfile.ZipFile(e/f"{tag}.zip")
+              assert z.testzip() is None
+              names=[n for n in z.namelist() if not n.endswith("/")]
+              assert len(names)==len(set(names))
+              archives[tag]={"sha256":sha((e/f"{tag}.zip").read_bytes()),"members":{n:{"bytes":len(z.read(n)),"sha256":sha(z.read(n))} for n in names}}
+              return z
+          def get(z,suffix):
+              names=[n for n in z.namelist() if n==suffix or n.endswith("/"+suffix)]
+              assert len(names)==1,(suffix,names)
+              return z.read(names[0])
+          def row(raw,prefix):
+              lines=[l.split() for l in raw.decode("utf-8").splitlines() if l.startswith(prefix+" ")]
+              assert len(lines)==1 and len(lines[0])==8
+              return list(map(int,lines[0][1:]))
+          with openzip("v188") as z:
+              m=json.loads(get(z,"manifest.json"))["files"]
+              for item in m:
+                  raw=get(z,item["path"])
+                  assert len(raw)==item["bytes"] and sha(raw)==item["sha256"]
+              assert len(m)==len(archives["v188"]["members"])-1
+              d=json.loads(get(z,"verdict.json"))
+              a=row(get(z,"ada.stdout"),"ISSUE29_V188_CORRECTED_ADA")
+              assert a==[-15055671,-15055671,5000,10,503,20,56]
+              assert a[2:]==d["ada_final"]==d["python_original"]["date"]
+              assert d["ada_date_calls"]==d["python_original"]["calls"]==1
+              assert int(get(z,"ada.exitcode"))==int(get(z,"python.exitcode"))==0
+              assert not get(z,"ada.stderr") and not get(z,"python.stderr")
+              add("v188",a)
+          with openzip("v193") as z:
+              m=json.loads(get(z,"members.sha256.json"))
+              for name,item in m.items():
+                  raw=get(z,name)
+                  assert len(raw)==item["bytes"] and sha(raw)==item["sha256"]
+              assert len(m)==len(archives["v193"]["members"])-1
+              d=json.loads(get(z,"verdict.json"))
+              assert d["status"]=="PASS_SIX_FRESH_PAIRS_NOT_YEAR" and d["matched"]==6
+              assert len(d["cases"])==6
+              for i,c in enumerate(d["cases"],1):
+                  assert c["status"]=="MATCH"
+                  results=[]
+                  for eng in ("ada","python"):
+                      stem=f"case-{i:02d}-{eng}"
+                      raw=get(z,stem+".stdout")
+                      a=row(raw,"ISSUE29_V193")
+                      err=get(z,stem+".stderr")
+                      r=c[eng]
+                      assert not err and r["exit_code"]==0 and r["stderr_bytes"]==0
+                      assert sha(raw)==r["stdout_sha256"] and sha(err)==r["stderr_sha256"]
+                      assert a==[c["c"],c["t"]]+r["fields"]
+                      results.append(a)
+                  assert results[0]==results[1]
+                  add("v193",results[0])
+          for tag,n in (("v204",1),("v205",8)):
+              with openzip(tag) as z:
+                  d=json.loads(get(z,"evidence/result.json"))
+                  assert d["exit"]==0 and d["whole_year_credit"]==0 and not d["soak"]
+                  assert get(z,"memory-limits.txt").split()==[b"1073741824",b"0"]
+                  assert int(get(z,"exit.txt"))==0
+                  if tag=="v204":
+                      assert d["matched"] and d["attempt_marker"]
+                      cases=[("",d)]
+                  else:
+                      assert d["attempted"]==d["matched"]==8 and d["pass_panel"]
+                      cases=[(f"case_{c['t']}/",c["result"]) for c in d["cases"] if c["attempted"]]
+                  assert len(cases)==n
+                  for stem,c in cases:
+                      assert c["matched"]
+                      a=row(get(z,stem+"stdout.txt"),tag.upper())
+                      assert a==c["actual"]==c["expected"]
+                      assert not get(z,stem+"stderr.txt")
+                      assert get(z,stem+"F_ATTEMPT_ONCE").strip()
+                      timing=get(z,stem+"time.txt").decode()
+                      assert "Exit status: 0" in timing and "Swaps: 0" in timing
+                      add(tag,a)
+          assert len(records)==len({(r["c"],r["t"]) for r in records})==16
+          assert len({r["c"] for r in records})==4
+          assert {r["fields"][0] for r in records}=={4999,5000,5001}
+          result=dict(schema="ISSUE29_V206_RECEIPT_RECONCILIATION/1",unique_native_pairs=16,matched_fields=80,calculation_days=4,years=[4999,5000,5001],calendar_calls=0,whole_year_credit=0,soak=False,records=records,archives=archives)
+          (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps({k:v for k,v in result.items() if k!="archives"}))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v206-reconciled-receipts-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
