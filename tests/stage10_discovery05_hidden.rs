@@ -93,11 +93,15 @@ fn stage10_backward_storage_expected_red_and_context_guards() {
         let calculation = &foundation + BigInt::from(calculation_offset);
         let target = &foundation + BigInt::from(target_offset);
         let expected_case = independent_hidden_values(&calculation, &target, &stones);
-        let case_observation =
-            observe_legacy_hidden_drop(calculation, target, 1).unwrap();
+        let case_observation = observe_legacy_hidden_drop(calculation, target, 1).unwrap();
         for k in 1..=7 {
-            let actual = calendar_hidden_by_nearness(&case_observation.backward_storage, k).unwrap();
-            let class = if actual == expected_case[k] { "MATCH" } else { "RED" };
+            let actual =
+                calendar_hidden_by_nearness(&case_observation.backward_storage, k).unwrap();
+            let class = if actual == expected_case[k] {
+                "MATCH"
+            } else {
+                "RED"
+            };
             println!(
                 "STAGE10_HIDDEN_CELL case={} k={} actual={} expected={} class={}",
                 case, k, actual, expected_case[k], class
