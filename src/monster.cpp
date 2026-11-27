@@ -6407,6 +6407,18 @@ Patch13RejectionSelection Patch13RejectionWrapper::repair(
     }
 
     Integer offset = 0;
+    // PATCH 41 — exact cold short-rejection bypass. The historical loop
+    // below remains executable with acceleration disabled or full historical
+    // validation requested. For +/-1 the rejected suffix has no earlier exit:
+    // descending reaches acceptanceLimit; ascending wraps to 1.
+    // Preserve the exact offset, accepted answer, rank and existing cache writes.
+    if (accelerationsOn() && !fullHistoricalValidationOn()) {
+        const Integer first = ringAnswer(stream, Integer{0});
+        if (first > acceptanceLimit) {
+            if (stream.directionStep == -1) offset = first - acceptanceLimit;
+            else offset = M_OLD - first + 1;
+        }
+    }
     for (;;) {
         const Integer x = ringAnswer(stream, offset);
         if (x <= acceptanceLimit) {
