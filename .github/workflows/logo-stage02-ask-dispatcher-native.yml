@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 reverse single-limb quotient differential
+name: Logo Stage2 bounded paired signed gate profiling
 on:
   push:
     branches:
@@ -6,79 +6,33 @@ on:
 permissions:
   contents: read
 jobs:
-  ask-dispatcher:
+  paired:
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
-        include:
-          - direction: reverse
-            group: year5000
+        gate: [1, 37, 38, 40, 41, -1, -38]
     runs-on: ubuntu-24.04
-    timeout-minutes: 130
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify exact source and generate the fixed runner
+      - name: Verify source and reconstruct candidates
         shell: bash
-        env:
-          DIRECTION: ${{ matrix.direction }}
-          GROUP: ${{ matrix.group }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor "c21646e1b06f25b3f75fb672dd432ead8e664875" HEAD
+          git merge-base --is-ancestor 00620c1b2b80cb63328ea3af3a7a541a53913853 HEAD
           test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = "ad001c6aeeb6c758f5004b206a656fec5d6fc403"
-          git diff --exit-code "c21646e1b06f25b3f75fb672dd432ead8e664875" HEAD -- src test
-          mkdir -p "$RUNNER_TEMP/qa-bundle"
-          unzip -q qa/logo_ido_ask_dispatcher_code_bundle.zip -d "$RUNNER_TEMP/qa-bundle"
-          (cd "$RUNNER_TEMP/qa-bundle" && sha256sum -c qa/bundle.sha256)
-          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_common.logo" qa/
-          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_oracle.py" qa/
-          cp "$RUNNER_TEMP/qa-bundle/QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md" .
-          # Gate reporters return BI lists; the row logger must also nest binary SENTENCE inputs.
-          # explicitly discard those values when they are used as loop commands.
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("qa/logo_stage2_ask_dispatcher_common.logo")
-          source = path.read_text(encoding="utf-8")
-          replacements = (
-              ("  print sentence [ASK_DISPATCH_ROW] :tag :step [A] (bi.digits :firstValue) [N] (bi.digits :N) [R] (bi.digits :rank)\n",
-               "  print (sentence [ASK_DISPATCH_ROW] (sentence :tag (sentence :step (sentence [A] (sentence (bi.digits :firstValue) (sentence [N] (sentence (bi.digits :N) (sentence [R] (bi.digits :rank)))))))))\n", 1),
-              ("    nr.gate.extend.forward\n", "    ignore nr.gate.extend.forward\n", 1),
-              ("[nr.gate.extend.backward]", "[ignore nr.gate.extend.backward]", 2),
-              ("[nr.gate.extend.forward]", "[ignore nr.gate.extend.forward]", 2),
-          )
-          changed = 0
-          for old, new, expected in replacements:
-              actual = source.count(old)
-              if actual != expected:
-                  raise SystemExit(f"expected {expected} occurrences of {old!r}; found {actual}")
-              source = source.replace(old, new)
-              changed += actual
-          if changed != 6:
-              raise SystemExit(f"expected six QA harness fixes; changed {changed}")
-          # Diagnostic only: a containing year has open < calculation <= close and length <= 5778.
-          # Therefore its endpoints are within calculation +/- 5778. Strictly monotone gate
-          # days make the first covering gates sufficient. No outer next/previous prefetch:
-          # this two-job diagnostic invokes only year5000. Frozen reference scan/sort/ASK stay intact.
-          start_marker = "to ad.year5000.data :calculation\n"
-          assert source.count(start_marker) == 1
-          start = source.index(start_marker)
-          end = source.index("\nend\n", start) + len("\nend\n")
-          original = source[start:end]
-          assert "bi.small 139" in original and "bi.small 274" in original
-          assert "nr.year5000.scan.i" in original and "nr.year.pair.sort" in original
-          replacement = "to ad.year5000.data :calculation\n  ; QA diagnostic: cover actual days, not a fixed index radius.\n  nr.gate.reset\n  localmake \"low bi.sub :calculation bi.small 5778\n  localmake \"high bi.add :calculation bi.small 5778\n  print [ASK_DISPATCH_DIAG_COVER_BEGIN]\n  while [bi.gt (nr.gate.known :NR.MIN.GATE) :low] [\n    ignore nr.gate.extend.backward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_BACKWARD] (bi.digits :NR.MIN.GATE))\n  ]\n  while [bi.lt (nr.gate.known :NR.MAX.GATE) :high] [\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD_START] (bi.digits (bi.add :NR.MAX.GATE bi.small 1)))\n    ignore nr.gate.extend.forward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD] (bi.digits :NR.MAX.GATE))\n  ]\n  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]\n  localmake \"raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation\n  localmake \"candidates nr.year.pair.sort :raw\n  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))\n  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY] stop]\n  localmake \"N bi.small count :candidates\n  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]\n  localmake \"s nr.sauce :calculation :calculation\n  localmake \"stream nr.ask :s 1 10\n  localmake \"rank nr.choose.rank :stream :N\n  localmake \"chosen item bi.to.small :rank :candidates\n  localmake \"year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)\n  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]\n  print (sentence [ASK_DISPATCH_QDIGIT_ZERO_HITS] :AD.QDIGIT.ZERO.HITS)\n  output (list :year :N)\nend\n"
-          source = source[:start] + replacement + source[end:]
-          print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
-          path.write_text(source, encoding="utf-8")
-          print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
-          PY
-          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
-          git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
-          sha256sum qa/logo_ido_ask_dispatcher_code_bundle.zip qa/logo_stage2_ask_dispatcher_common.logo qa/logo_stage2_ask_dispatcher_oracle.py QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md .github/workflows/logo-stage02-ask-dispatcher-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
+          git diff --exit-code c21646e1b06f25b3f75fb672dd432ead8e664875 HEAD -- src test
+          mkdir -p "$RUNNER_TEMP/profile"
+          out="$RUNNER_TEMP/profile"
+          git rev-parse HEAD > "$out/commit.txt"
+          git ls-tree -r HEAD src test > "$out/source-blobs.txt"
+          test "$(sha256sum "$out/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
+          cp src/exact_integer.logo "$out/reference.logo"
+          cp test/normative_reference.logo "$out/frozen-reference.logo"
           # QA candidate: patch only worktree after exact source-lock verification.
           # For 0 <= rem < den, quotient digit=0 and remainder=rem.
           python3 - <<'PY'
@@ -104,6 +58,7 @@ jobs:
           p.write_text(s.replace(anchor, replacement), encoding="utf-8")
           print("QA_CARRY_SPLIT_CANDIDATE=READY")
           PY
+          cp src/exact_integer.logo "$out/carry.logo"
           # Exact single-limb divisor fast path, with unchanged general fallback.
           test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "90a5a0212435b03f3be8924a6d04787ee4ec1169f308afec684daee28e8e70f1"
           python3 - <<'PY'
@@ -116,16 +71,41 @@ jobs:
           p.write_text(s.replace(anchor, replacement), encoding="utf-8")
           print("QA_SINGLE_LIMB_QDIGIT=READY")
           PY
-          git diff -- src/exact_integer.logo > "$RUNNER_TEMP/candidate.patch"
-          test -s "$RUNNER_TEMP/candidate.patch"
-          test "$(sha256sum "$RUNNER_TEMP/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
-          sha256sum src/exact_integer.logo qa/logo_stage2_ask_dispatcher_common.logo > "$RUNNER_TEMP/candidate-hashes.txt"
-          cat > "$RUNNER_TEMP/native.logo" <<EOF
-          make "AD.DIRECTION "$DIRECTION
-          make "AD.GROUP "$GROUP
-          load "qa/logo_stage2_ask_dispatcher_common.logo
-          ad.run
-          EOF
+          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "1b4873233d5483692d8a80e60568c207bb3ab29e79d92af9e535479ecb6607f3"
+          cp src/exact_integer.logo "$out/single.logo"
+          git restore -- src/exact_integer.logo
+          sha256sum "$out/"*.logo > "$out/raw-hashes.txt"
+          python3 - "$out" <<'PY'
+          from pathlib import Path
+          import sys
+          out = Path(sys.argv[1])
+          # Both candidates use the identical instrumentation; no semantic changes.
+          for variant in ('carry', 'single'):
+              p = out / (variant + '.logo')
+              s = p.read_text()
+              anchor = 'make "AD.QDIGIT.ZERO.HITS 0'
+              assert s.count(anchor) == 1
+              s = s.replace(anchor, anchor + '\nmake "PROFILE.SINGLE 0\nmake "PROFILE.FALLBACK 0')
+              anchor = '  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
+              assert s.count(anchor) == 1
+              s = s.replace(anchor, '  make "PROFILE.FALLBACK (:PROFILE.FALLBACK + 1)\n' + anchor)
+              if variant == 'single':
+                  anchor = '      output (list :q (list :r))'
+                  assert s.count(anchor) == 1
+                  s = s.replace(anchor, '      make "PROFILE.SINGLE (:PROFILE.SINGLE + 1)\n' + anchor)
+              (out / (variant + '-instrumented.logo')).write_text(s)
+          # Instrument only a generated copy of the frozen gate reporter.
+          s = (out / 'frozen-reference.logo').read_text()
+          for anchor, marker in [
+              ('  localmake "s nr.sauce nr.foundation :target', 'SAUCE'),
+              ('  localmake "stream nr.ask :s 1 1', 'ASK'),
+              ('  localmake "chosen nr.choose.rank :stream bi.small 922', 'CHOOSE'),
+              ('  output bi.add bi.small 41 :chosen', 'DONE')]:
+              assert s.count(anchor) == 1, anchor
+              s = s.replace(anchor, '  print [PROFILE_' + marker + ']\n' + anchor)
+          (out / 'phases.logo').write_text(s)
+          PY
+          sha256sum "$out/"*.logo > "$out/all-source-hashes.txt"
       - name: Build pinned UCBLogo 6.2.5
         shell: bash
         run: |
@@ -140,140 +120,71 @@ jobs:
           make -j2
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
-      - name: Native carry split differential preflight
+      - name: Run three fresh processes for one signed index
         shell: bash
+        env:
+          GATE: ${{ matrix.gate }}
         run: |
           set -euo pipefail
-          cat > "$RUNNER_TEMP/split-probe.logo" <<'EOF'
-          load "src/exact_integer.logo
-          make "SPLIT.CHECKS 0
-          to ad.split.check :n
-            localmake "got bi.small.split.base :n
-            localmake "want bi.small.split.base.work :n 0
-            if not equalp :got :want [print [SPLIT_NATIVE_FAILURE] bye]
-            make "SPLIT.CHECKS (:SPLIT.CHECKS + 1)
-          end
-          to ad.split.boundary :q
-            ad.split.check (:q * 10000)
-            ad.split.check (:q * 10000 + 1)
-            ad.split.check (:q * 10000 + 9998)
-            ad.split.check (:q * 10000 + 9999)
-          end
-          repeat 11 [ad.split.boundary item repcount [0 1 9 10 99 100 999 1000 5000 9998 9999]]
-          repeat 256 [ad.split.check (remainder (repcount * 390151) 100000000)]
-          ad.split.check 100000000
-          ad.split.check -1
-          print (sentence [SPLIT_NATIVE_CHECKS] :SPLIT.CHECKS)
-          print [SPLIT_NATIVE_PASS]
-          bye
-          EOF
-          echo bye | timeout --signal=TERM --kill-after=5s 90 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/split-probe.logo" > "$RUNNER_TEMP/split-probe.log" 2>&1
-          cat "$RUNNER_TEMP/split-probe.log"
-          grep -Fxq 'SPLIT_NATIVE_CHECKS 302' "$RUNNER_TEMP/split-probe.log"
-          grep -Fxq 'SPLIT_NATIVE_PASS' "$RUNNER_TEMP/split-probe.log"
-          if grep -Eq 'SPLIT_NATIVE_FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with' "$RUNNER_TEMP/split-probe.log"; then exit 1; fi
-      - name: Native single-limb quotient digit differential
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - "$RUNNER_TEMP/qdigit-probe.logo" <<'PY'
-          import sys, random
+          python3 - "$RUNNER_TEMP/profile" "$LOGO_BIN" "$GATE" <<'PY'
+          import json, re, subprocess, sys, time
           from pathlib import Path
-          B = 10000
-          def digits(n):
-              out = []
-              while n:
-                  n, r = divmod(n, B)
-                  out.append(r)
-              return '[' + ' '.join(map(str, out or [0])) + ']'
-          cases = []
-          for d in (1, 2, 3, 7, 41, 922, 9999, 10000, 10001, 99999999):
-              for q in (0, 1, 4999, 9999):
-                  for r in sorted({0, d-1}):
-                      cases.append((d*q+r, d))
-          rng = random.Random(20261127)
-          for _ in range(256):
-              d = rng.randrange(1, B)
-              cases.append((rng.randrange(d*B), d))
-          lines = ['load "src/exact_integer.logo', 'make "QD.CHECKS 0',
-                   'to ad.qd.check :n :d :want',
-                   '  localmake "got bi.mag.qdigit :n :d',
-                   '  localmake "old bi.mag.qdigit.binary :n :d 0 9999',
-                   '  if not equalp :got :want [print [QD_NATIVE_ORACLE_FAILURE] bye]',
-                   '  if not equalp :got :old [print [QD_NATIVE_DIFFERENTIAL_FAILURE] bye]',
-                   '  make "QD.CHECKS (:QD.CHECKS + 1)', 'end']
-          for n,d in cases:
-              q,r = divmod(n,d)
-              assert 0 <= q < B and 0 <= r < d and n == q*d+r
-              lines.append(f'ad.qd.check {digits(n)} {digits(d)} [{q} {digits(r)}]')
-          assert len(cases) == 332
-          lines += ['print (sentence [QD_NATIVE_CHECKS] :QD.CHECKS)', 'print [QD_NATIVE_PASS]', 'bye']
-          Path(sys.argv[1]).write_text('\n'.join(lines)+'\n', encoding='utf-8')
+          out, logo, gate = Path(sys.argv[1]), sys.argv[2], int(sys.argv[3])
+          results = {}
+          # Alternate order to reduce systematic order bias. Same runner and binary.
+          order = ['carry', 'single'] if gate % 2 else ['single', 'carry']
+          for variant in order + ['reference']:
+              integer = out / (variant + ('-instrumented' if variant != 'reference' else '') + '.logo')
+              normative = out / ('phases.logo' if variant != 'reference' else 'frozen-reference.logo')
+              script = out / (variant + '-probe.logo')
+              lines = ['load "' + str(integer), 'load "' + str(normative),
+                       'print [PROFILE_BEGIN]',
+                       'make "PROFILE.GAP nr.gate.gap bi.small ' + str(gate),
+                       'print (sentence [PROFILE_GAP] (bi.to.small :PROFILE.GAP))']
+              if variant != 'reference':
+                  lines += ['print (sentence [PROFILE_ZERO] :AD.QDIGIT.ZERO.HITS)',
+                            'print (sentence [PROFILE_SINGLE] :PROFILE.SINGLE)',
+                            'print (sentence [PROFILE_FALLBACK] :PROFILE.FALLBACK)']
+              lines += ['print [PROFILE_PASS]', 'bye']
+              script.write_text('\n'.join(lines) + '\n')
+              start = time.monotonic()
+              marks, values, errors = {}, {}, []
+              log = out / (variant + '.log')
+              with log.open('w') as f:
+                  proc = subprocess.Popen(['timeout','--signal=TERM','--kill-after=5s','300','stdbuf','-oL','-eL',logo,str(script)], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors='replace')
+                  for line in proc.stdout:
+                      elapsed = time.monotonic() - start
+                      f.write(f'{elapsed:.6f} {line}'); f.flush()
+                      line = line.strip()
+                      m = re.fullmatch(r'PROFILE_(BEGIN|SAUCE|ASK|CHOOSE|DONE|PASS)', line)
+                      if m:
+                          if m[1] in marks: errors.append('duplicate '+m[1])
+                          marks[m[1]] = elapsed
+                      m = re.fullmatch(r'PROFILE_(GAP|ZERO|SINGLE|FALLBACK) (-?[0-9]+)', line)
+                      if m:
+                          if m[1] in values: errors.append('duplicate '+m[1])
+                          values[m[1]] = int(m[2])
+                      if re.search(r"don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|ERORO:", line, re.I): errors.append(line)
+                  code = proc.wait()
+              elapsed = time.monotonic()-start
+              phases = {}
+              for a,b in [('SAUCE','ASK'),('ASK','CHOOSE'),('CHOOSE','DONE')]:
+                  if a in marks and b in marks: phases[a] = marks[b]-marks[a]
+              ok = code == 0 and not errors and 'PASS' in marks and 42 <= values.get('GAP',0) <= 963
+              if variant != 'reference':
+                  ok = ok and set(phases)=={'SAUCE','ASK','CHOOSE'} and all(v>=0 for v in phases.values()) and all(values.get(k,-1)>=0 for k in ('ZERO','SINGLE','FALLBACK')) and sum(values.get(k,0) for k in ('ZERO','SINGLE','FALLBACK'))>0
+              results[variant] = dict(exit=code, elapsed=elapsed, marks=marks, values=values, phases=phases, errors=errors, ok=ok)
+              (out / 'results.json').write_text(json.dumps(dict(gate=gate,order=order,results=results),indent=2)+'\n')
+              print(variant, results[variant], flush=True)
+          equal = all(r['ok'] for r in results.values()) and len({r['values']['GAP'] for r in results.values()})==1
+          print('PAIRED_GATE_PASS' if equal else 'PAIRED_GATE_NOT_ACCEPTED', gate, flush=True)
+          sys.exit(0 if equal else 1)
           PY
-          echo bye | timeout --signal=TERM --kill-after=5s 120 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/qdigit-probe.logo" > "$RUNNER_TEMP/qdigit-probe.log" 2>&1
-          cat "$RUNNER_TEMP/qdigit-probe.log"
-          grep -Fxq 'QD_NATIVE_CHECKS 332' "$RUNNER_TEMP/qdigit-probe.log"
-          grep -Fxq 'QD_NATIVE_PASS' "$RUNNER_TEMP/qdigit-probe.log"
-          if grep -Eq 'QD_NATIVE_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with' "$RUNNER_TEMP/qdigit-probe.log"; then exit 1; fi
-      - name: Run bounded Native selector group
-        shell: bash
-        env:
-          GROUP: ${{ matrix.group }}
-        run: |
-          set -euo pipefail
-          started=$SECONDS
-          set +e
-          echo bye | timeout --signal=TERM --kill-after=5s 7200 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
-          code=$?
-          set -e
-          echo "$code" > "$RUNNER_TEMP/exit.txt"
-          echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
-          cat "$RUNNER_TEMP/native.log"
-          test "$code" = 0
-          expected_cases=1
-          expected_checks=14
-          if [ "$GROUP" = structure ]; then
-            expected_cases=5
-            expected_checks=70
-          fi
-          grep -Fxq "ASK_DISPATCH_CASES_PASIS $expected_cases" "$RUNNER_TEMP/native.log"
-          grep -Fxq "ASK_DISPATCH_CHECKS_PASIS $expected_checks" "$RUNNER_TEMP/native.log"
-          grep -Fxq 'ASK_DISPATCH_NATIVE_PASIS' "$RUNNER_TEMP/native.log"
-          for marker in COVER_BEGIN SCAN_BEGIN REFERENCE_SAUCE_BEGIN YEAR5000_DATA_DONE; do
-            test "$(grep -Fxc "ASK_DISPATCH_DIAG_${marker}" "$RUNNER_TEMP/native.log")" = 1
-          done
-          test "$(grep -Ec '^ASK_DISPATCH_QDIGIT_ZERO_HITS [1-9][0-9]*$' "$RUNNER_TEMP/native.log")" = 1
-          test "$(grep -c '^ASK_DISPATCH_ROW ' "$RUNNER_TEMP/native.log")" = "$expected_cases"
-          if grep -Eq 'ASK_DISPATCH_FAILURE|ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
-      - name: Independent Python integer oracle
-        shell: bash
-        env:
-          DIRECTION: ${{ matrix.direction }}
-          GROUP: ${{ matrix.group }}
-        run: |
-          set -euo pipefail
-          python3 qa/logo_stage2_ask_dispatcher_oracle.py --log "$RUNNER_TEMP/native.log" --direction "$DIRECTION" --group "$GROUP" > "$RUNNER_TEMP/host.log" 2>&1
-          cat "$RUNNER_TEMP/host.log"
-          grep -Fxq 'ASK_DISPATCH_HOST_ORACLE=PASS' "$RUNNER_TEMP/host.log"
-      - name: Preserve exact-SHA evidence
+      - name: Preserve exact source, logs and partial measurements
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-ask-dispatch-${{ matrix.direction }}-${{ matrix.group }}
-          path: |
-            ${{ runner.temp }}/commit.txt
-            ${{ runner.temp }}/source-blobs.txt
-            ${{ runner.temp }}/qa-hashes.txt
-            ${{ runner.temp }}/native.logo
-            ${{ runner.temp }}/native.log
-            ${{ runner.temp }}/host.log
-            ${{ runner.temp }}/exit.txt
-            ${{ runner.temp }}/elapsed.txt
-            ${{ runner.temp }}/candidate.patch
-            ${{ runner.temp }}/candidate-hashes.txt
-            ${{ runner.temp }}/split-probe.logo
-            ${{ runner.temp }}/split-probe.log
-            ${{ runner.temp }}/qdigit-probe.logo
-            ${{ runner.temp }}/qdigit-probe.log
-          if-no-files-found: warn
+          name: logo-paired-gate-${{ matrix.gate }}
+          path: ${{ runner.temp }}/profile/
+          if-no-files-found: error
           retention-days: 30
