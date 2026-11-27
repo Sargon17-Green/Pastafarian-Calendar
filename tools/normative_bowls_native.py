@@ -165,7 +165,7 @@ def main():
                          ("rank720",[566,1,1,1,1,1],1),("rank1",[567,1,1,1,1,1],1),
                          ("save_wrap",[M-153,1,1,1,1,1],1)):
         run(22,"batch_"+name,q,steps)
-    q=[2,3,5,7,11,13]
+    q=[20,30,50,70,110,130]
     for label,modified,wrong in (
         ("old_offset",replace_once(src,OFFSET_ANCHOR,OFFSET+OFFSET_ANCHOR),batch(q,1,offset=True)[0]),
         ("old_rank",replace_once(src,RANK_NEW,RANK_OLD),batch(q,1,old_rank=True)[0])):
