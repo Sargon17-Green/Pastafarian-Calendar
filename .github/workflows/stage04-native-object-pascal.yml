@@ -1,18 +1,23 @@
-name: Stage 4 Native Object Pascal - intentional seeded RED
+name: Stage 5 Native Object Pascal - Foundation tag patch
 on:
   push:
     branches:
       - 'Object-Pascal\+Português'
     paths:
       - 'src/Stage02WorkCounts.pas'
+      - 'src/BigInt.pas'
+      - 'src/PastafariCalendar.pas'
+      - 'src/MonsterBootstrap.pas'
+      - 'src/SourceLanguageCatalog.pas'
       - 'test/stage04_foundation_tag_probe.pas'
-      - 'test/build_and_run_stage04_discovery.sh'
+      - 'test/stage05_foundation_tag_legacy.pas'
+      - 'test/build_and_run_stage05_foundation_tag.sh'
       - 'docs/stage04_foundation_day_tag_oracle.py'
       - '.github/workflows/stage04-native-object-pascal.yml'
 permissions:
   contents: read
 jobs:
-  stage04-seeded-red:
+  stage05-native-green:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -21,16 +26,17 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fp-compiler
-      - name: Observe exact seeded mismatch against independent oracle
-        run: bash test/build_and_run_stage04_discovery.sh
+      - name: Verify production GREEN and isolated seeded legacy RED
+        run: bash test/build_and_run_stage05_foundation_tag.sh
       - name: Upload evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage04-seeded-red-evidence
+          name: stage05-foundation-tag-evidence
           path: |
-            evidence/stage04-foundation-tag.log
-            evidence/stage04-native-probe.log
-            build/stage04/vectors.tsv
+            evidence/stage05-foundation-tag.log
+            evidence/stage05-production-probe.log
+            evidence/stage05-legacy-probe.log
+            build/stage05/vectors.tsv
           if-no-files-found: warn
           retention-days: 30

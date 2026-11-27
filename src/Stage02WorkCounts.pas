@@ -13,6 +13,8 @@ type
     Direction: Integer;
   end;
 function ParseCanonicalDay(const Text: string): TBigInt;
+{ Apenas para testes de regressao; nunca usar para conversao. }
+function CountForDaySeededLegacy(const Day: TBigInt): TBigInt;
 function CountForDay(const Day: TBigInt): TBigInt;
 function ComputeWorkCounts(const CalculationDay, TargetDay: TBigInt): TWorkCounts;
 function ComputeWorkCountsDecimal(const CalculationDay, TargetDay: string): TWorkCounts;
@@ -38,7 +40,7 @@ begin
       raise EConvertError.Create('Dia decimal nao canonico.');
   Result := BigFromDecimal(Text);
 end;
-function CountForDay(const Day: TBigInt): TBigInt;
+function CountForDaySeededLegacy(const Day: TBigInt): TBigInt;
 var Foundation, Offset: TBigInt;
 begin
   Foundation := BigFromInt64(FoundationDay);
@@ -46,6 +48,22 @@ begin
     Autorizado pelo utilizador: dia da fundacao retorna 0 em vez de 1.
     Nao e um defeito historico. }
   if BigCompare(Day, Foundation) <= 0 then
+  begin
+    Offset := BigSubtract(Foundation, Day);
+    Result := BigMultiplyUInt32(Offset, 2);
+  end
+  else
+  begin
+    Offset := BigSubtract(Day, Foundation);
+    Result := BigAdd(BigMultiplyUInt32(Offset, 2), BigOne);
+  end;
+end;
+function CountForDay(const Day: TBigInt): TBigInt;
+var Foundation, Offset: TBigInt;
+begin
+  Foundation := BigFromInt64(FoundationDay);
+  { Stage05: fronteira normativa restaurada; o legado injetado fica isolado. }
+  if BigCompare(Day, Foundation) < 0 then
   begin
     Offset := BigSubtract(Foundation, Day);
     Result := BigMultiplyUInt32(Offset, 2);
