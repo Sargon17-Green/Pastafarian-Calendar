@@ -1142,6 +1142,45 @@ proc probeFiveCutletPartitions() {
   }
 }
 
+// Шість частин у [2,4], суми 11..25, включно з двома порожніми.
+// Незалежний оракул: лексикографічний перебір 3^6=729 кортежів.
+// Коефіцієнти (1+x+x^2)^6 для сум 12..24:
+// 1,6,21,50,90,126,141,126,90,50,21,6,1.
+// 729 рангів + 15 потужностей = 744 твердження; очікувано 5811 загалом.
+// Дослідження: не Native PASS, не історичний свідок і не Stage 6.
+proc probeSixSlotBoundedCompositions() {
+  for total in 11..25 {
+    var tested: BoundedCompositionCounter;
+    tested.totalValue = total;
+    tested.slotsTotal = 6;
+    tested.lo = 2;
+    tested.hi = 4;
+    var enumerated = 0;
+    for a in 2..4 {
+      for b in 2..4 {
+        for c in 2..4 {
+          for d in 2..4 {
+            for e in 2..4 {
+              for f in 2..4 {
+                if a+b+c+d+e+f != total then continue;
+                enumerated += 1;
+                const actual = tested.unrank1(new bigint(enumerated));
+                check(actual.size == 6 && actual[0] == a &&
+                      actual[1] == b && actual[2] == c &&
+                      actual[3] == d && actual[4] == e && actual[5] == f,
+                      "Шість частин: сума=" + total:string +
+                      ", ранг=" + enumerated:string);
+              }
+            }
+          }
+        }
+      }
+    }
+    check(tested.countAll() == enumerated,
+          "Шість частин: незалежна потужність, сума=" + total:string);
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1152,6 +1191,7 @@ proc main() {
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
   probeFiveSlotBoundedCompositions();
+  probeSixSlotBoundedCompositions();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
