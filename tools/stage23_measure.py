@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import resource
+import re
 import subprocess
 import time
 
@@ -28,6 +29,44 @@ def limbs(n):
     return [sign,len(digits),*digits]
 def lit(n):
     return str(abs(n)) + ("_" if n < 0 else "")
+# 46042890131: exact source ran to final success marker, exit 0, stderr empty,
+# 590.761s, cumulative child RSS 1834064 KiB; strict measurement failed.
+# ZIP 15220814079 sha256 59a39a31ace1c437623c2e501d41cecedcae5f409244c27de533847c96a1f95d.
+# Archived stdout b'\\n\\nS23_HEAP_CELLS=S23_FULL_PATH_OK': original runtime
+# uses putwchar for strings and printf for numbers on the same stream.
+# Local C reproduction: printf returned -1 after putwchar. No heap value inferred.
+# All seven source blobs, 21 CRC entries, ten receipt hashes, exact fixture and
+# byte-identical design oracle independently verified; separate Python permutation
+# enumeration matched epoch expected intermediate and final values.
+# Only QA framing changes; no new Native PASS or stage acceptance.
+def heap_bits(expr):
+    # Emit exclusively through FALSE string literals (wide output), LSB first.
+    return (expr+'r:"S23_HEAP_BITS_LSB="'
+            'r;0=["0"]?'
+            '[r;0>][r;2/s:r;s;2*-0=["0"]?'
+            'r;s;2*-1=["1"]?s;r:]#'
+            '";S23_FULL_PATH_OK"')
+def parse_heap(out):
+    m=re.fullmatch(rb"S23_HEAP_BITS_LSB=([01]{1,31});S23_FULL_PATH_OK",out)
+    if not m:
+        return None
+    bits=m.group(1)
+    if len(bits)>1 and bits[-1:]!=b"1":
+        return None
+    return int(bits[::-1],2)
+def framing_preflight():
+    for n in (0,1,2,511,512,65537,2147483647):
+        path=E/f"framing_{n}.false"
+        path.write_text(heap_bits(str(n))+"\n")
+        p=subprocess.run(["upstream/false_int","-e",str(path)],
+                         capture_output=True,timeout=15,preexec_fn=limits,check=False)
+        (E/f"framing_{n}.stdout").write_bytes(p.stdout)
+        (E/f"framing_{n}.stderr").write_bytes(p.stderr)
+        (E/f"framing_{n}.exit").write_text(str(p.returncode)+"\n")
+        assert p.returncode==0 and not p.stderr and parse_heap(p.stdout)==n, (n,p.stdout,p.stderr,p.returncode)
+    for bad in (b"", b"S23_HEAP_CELLS=S23_FULL_PATH_OK",b"S23_HEAP_BITS_LSB=10;S23_FULL_PATH_OK",
+                b"S23_HEAP_BITS_LSB=1;S23_FULL_PATH_OKextra",b"S23_HEAP_BITS_LSB=2;S23_FULL_PATH_OK"):
+        assert parse_heap(bad) is None
 def fixture(row):
     cells = []
     def alloc(values):
@@ -73,7 +112,7 @@ def fixture(row):
     for i,value in enumerate(cells):
         expected = f"x;{value}+" if i>=arg else value
         eq(f"x;{i}+g;!",expected,f"S23_INPUT_{i}")
-    lines += ['"S23_HEAP_CELLS="z;.10,','"S23_FULL_PATH_OK"10,',
+    lines += [heap_bits("z;"),
               "[z;0>][%z;1-z:]#"]
     return "\n".join(lines)+"\n",checks
 def limits():
@@ -102,6 +141,7 @@ def main():
     program=Path("src/bigint.false").read_bytes()+b"\n"+Path("src/monster_bootstrap.false").read_bytes()+b"\n"+body.encode()
     path=E/"epoch_equal.false"
     path.write_bytes(program)
+    framing_preflight()
     started=time.monotonic()
     try:
         p=subprocess.run(["upstream/false_int","-e",str(path)],capture_output=True,
@@ -113,19 +153,18 @@ def main():
     (E/"stdout.txt").write_bytes(out)
     (E/"stderr.txt").write_bytes(err)
     (E/"exit_code.txt").write_text(str(code)+"\n")
-    lines=out.decode("utf-8",errors="replace").splitlines()
-    passed=(code==0 and not err and len(lines)==2 and lines[0].startswith("S23_HEAP_CELLS=")
-            and lines[0].split("=")[1].strip().isdigit() and lines[1]=="S23_FULL_PATH_OK")
+    heap_cells=parse_heap(out)
+    passed=(code==0 and not err and heap_cells is not None and heap_cells>0)
     report={"project_id":"PC-BRANCH-FALSE-ARABIC","source_pin":pin,"runtime_pin":RT,
             "source_sha256":source_hashes,"pair":row["pair"],"expected":row,
-            "assertions":checks,"program_sha256":sha(program),"stdout_sha256":sha(out),
+            "assertions":checks,"heap_cells":heap_cells,"framing_preflight_cases":7,"program_sha256":sha(program),"stdout_sha256":sha(out),
             "stderr_sha256":sha(err),"exit_code":code,"elapsed_seconds":round(elapsed,3),
             "peak_child_rss_kib_cumulative":resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,
             "address_space_limit_bytes":LIMIT,"timeout_seconds":600,
             "measurement_pass":passed,"stage_acceptance":False,
             "intermediate_differential":False,"boundary_and_replay_tested":False}
     (E/"receipt.json").write_text(json.dumps(report,indent=2)+"\n")
-    print(json.dumps({k:report[k] for k in ("exit_code","elapsed_seconds","peak_child_rss_kib_cumulative","assertions","measurement_pass","stage_acceptance")}))
+    print(json.dumps({k:report[k] for k in ("exit_code","elapsed_seconds","peak_child_rss_kib_cumulative","heap_cells","assertions","measurement_pass","stage_acceptance")}))
     if not passed:
         raise SystemExit(1)
 if __name__=="__main__":
