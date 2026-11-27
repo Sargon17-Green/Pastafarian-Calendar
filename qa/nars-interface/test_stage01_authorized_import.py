@@ -112,7 +112,13 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(traced[0], "QAS01TraceMain" + source[0][len("RunStage01Tests"):])
         self.assertEqual([line for line in traced[1:] if not line.startswith("  QAS01T '")], source[1:])
         self.assertEqual(tokens, [token for a,b in TRACE_GROUPS for token in (f"{a:04d}S", f"{b:04d}E")])
-        self.assertEqual(len(tokens), 98)
+        self.assertEqual(len(tokens), 100)
+        for n in (230, 231):
+            self.assertIn((n, n), TRACE_GROUPS)
+            statement = source[n - 171]
+            idx = traced.index(statement)
+            self.assertEqual(traced[idx-1], f"  QAS01T '{n:04d}S'")
+            self.assertEqual(traced[idx+1], f"  QAS01T '{n:04d}E'")
         for n, name in ((323, "RunStage01OwnershipTests"), (324, "RunStage01OracleStateTests"), (325, "RunStage01YearTests")):
             idx = traced.index("  " + name)
             self.assertEqual(traced[idx-1], f"  QAS01T '{n:04d}S'")
