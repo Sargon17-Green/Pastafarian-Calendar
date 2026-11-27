@@ -107,8 +107,12 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01FinalEC[1]", suite_paths["ec"]),
     ])
     programs = chunk_programs + [final_program, receipt_program]
+    # Keep assignment inside a code-point-encoded controlled expression.
+    # Only quad and diamond may appear as non-ASCII glyphs in the workspace LX.
+    # The original test and final marker remain in the SAME inner EC.
+    capture_program = "QAS01FinalEC←⎕EC ⎕UCS " + _codes(final_program)
     outer = " ⋄ ".join(["⎕EC ⎕UCS " + _codes(p) for p in chunk_programs]
-                        + ["QAS01FinalEC←⎕EC ⎕UCS " + _codes(final_program),
+                        + ["⎕EC ⎕UCS " + _codes(capture_program),
                            "⎕EC ⎕UCS " + _codes(receipt_program)])
     serialized = outer.replace("⎕", "{quad}").replace("⋄", "{diamond}")
     if serialized.replace("{diamond}", "⋄").replace("{quad}", "⎕") != outer:

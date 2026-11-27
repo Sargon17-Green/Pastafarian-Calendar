@@ -37,10 +37,14 @@ class Stage01ChunkedTests(unittest.TestCase):
         fragments = selfcheck.split(" ⋄ ")
         result = []
         for fragment in fragments:
-            fragment = fragment.removeprefix("QAS01FinalEC←")
             if not fragment.startswith("⎕EC ⎕UCS "):
                 raise AssertionError("OUTER_FRAGMENT_MISSING_EC")
             result.append("".join(chr(int(n)) for n in fragment[len("⎕EC ⎕UCS "):].split()))
+        capture = result[-2]
+        prefix = "QAS01FinalEC←⎕EC ⎕UCS "
+        if not capture.startswith(prefix):
+            raise AssertionError("FINAL_CAPTURE_WRAPPER_MISSING")
+        result[-2] = "".join(chr(int(n)) for n in capture[len(prefix):].split())
         return serialized, selfcheck, result
 
     def test_five_files_and_all_95_unique_source_locked_functions(self):
@@ -74,7 +78,12 @@ class Stage01ChunkedTests(unittest.TestCase):
         _, outer, programs = self.decode(candidate)
         self.assertEqual(len(programs), 25)
         self.assertEqual(outer.count("⎕EC ⎕UCS "), 25)
-        self.assertEqual(outer.count("QAS01FinalEC←"), 1)
+        self.assertNotIn("←", outer)
+        self.assertNotIn("QAS01FinalEC", outer)
+        capture_fragment = outer.split(" ⋄ ")[-2]
+        capture = "".join(chr(int(n)) for n in capture_fragment[len("⎕EC ⎕UCS "):].split())
+        self.assertTrue(capture.startswith("QAS01FinalEC←⎕EC ⎕UCS "))
+        self.assertEqual(capture.count("QAS01FinalEC←"), 1)
         final = programs[-2]
         self.assertEqual(final.count("RunStage01Tests"), 1)
         self.assertEqual(final.count("⎕NAPPEND"), 2)
