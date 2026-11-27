@@ -507,7 +507,7 @@ z;38=~["E_BOWL_UPDATE_LAYOUT"0 0/]?
     z;b:d;a;!i;p;2*1+*a;!b;22h;!!d:
     z;b:d;a;!b;25h;!!f:
    ]?
-   p;3>[z;b:2a;!b;0h;!!f:]?
+   p;3>[z;b:0a;!b;0h;!!f:]?
    { الجاران حسب الموضع لا حسب معرف الكرة. }
    p;1-j:j;0=[6j:]?o;j;+g;!j:y;j;+g;!s:
    p;1+j:j;7=[1j:]?o;j;+g;!j:y;j;+g;!l:
@@ -570,7 +570,7 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
  1j:[j;7<][y;j;+g;!q;!j;1+j:]#
  1i:
  [i;13<][
-  { T = SAVE(sum(old bowls) + 6 + 149*batch). }
+  { T = SAVE(sum(old bowls) + 149*batch). }
   y;1+g;!s:
   y;2+g;!n:
   z;b:s;a;!n;a;!b;9h;!!s:
@@ -582,19 +582,17 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
   z;b:s;a;!n;a;!b;9h;!!s:
   y;6+g;!n:
   z;b:s;a;!n;a;!b;9h;!!s:
-  z;b:6a;!b;0h;!!v:
-  z;b:s;a;!v;a;!b;9h;!!s:
   z;b:i;a;!b;0h;!!v:
   z;b:v;a;!149a;!b;23h;!!v:
   z;b:s;a;!v;a;!b;9h;!!t:
   z;b:t;a;!b;25h;!!t:
-  { rank = 4 + EuclideanRemainder(T-4,7); }
-  z;b:4a;!b;0h;!!v:
+  { rank = 1 + EuclideanRemainder(T-1,720); }
+  z;b:1a;!b;0h;!!v:
   z;b:t;a;!v;a;!b;10h;!!n:
-  z;b:7a;!b;0h;!!v:
+  z;b:720a;!b;0h;!!v:
   z;b:n;a;!v;a;!b;16h;!!n:
   z;b:n;a;!0a;!b;3h;!!r:
-  r;4+r:
+  r;1+r:
   z;b:r;a;!b;34h;!!o:
   { Build six new values from the same old snapshot, in bowl-ID order. }
   0q:1u:
