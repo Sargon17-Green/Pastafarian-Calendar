@@ -19,7 +19,7 @@ constexpr std::uint64_t PERSISTENT_SCAR_GENERATION = 40;
 constexpr std::size_t FINAL_RESULT_BURIAL_LIMIT = 4096;
 constexpr std::size_t ANCESTRAL_STRUCTURE_LIMIT = 128;
 constexpr std::size_t YEAR_CHECKPOINT_LIMIT = 8192;
-constexpr std::size_t GATE_GRAVEYARD_LIMIT = 32768;
+constexpr std::size_t GATE_GRAVEYARD_LIMIT = 131072;
 constexpr std::size_t SAUCE_TOMB_LIMIT = 512;
 constexpr std::size_t STAGE56_SAUCE_TOMB_LIMIT = 256;
 constexpr std::size_t AUTOPSY_LIMIT = 128;
@@ -306,6 +306,8 @@ struct BuriedFinalStructure {
     bool stage56 = false;
     bool poisoned = false;
     std::string semanticFingerprint{};
+    Patch18YearRecord certifiedAnchor{};
+    Patch18YearRecord certifiedTarget{};
 };
 
 std::map<StructureVaultKey, BuriedFinalStructure> ancestralMemoryVault;
@@ -12036,6 +12038,49 @@ FINAL_MAIN_VALIDATE_INPUT:
 
 FINAL_MAIN_YEAR_5000:
     ctx.phase = "FINAL_YEAR_5000";
+    // PATCH 42 — exact-c interval reuse, only from an already validated year.
+    // Preserve normal cache/finalization/validation and all historical routes.
+    if (ctx.stage56CorrectiveRequested && accelerationsOn() &&
+        !fullHistoricalValidationOn() && faultPlan.recoverableFailuresToInject == 0) {
+        std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+        const BuriedFinalStructure* unique = nullptr;
+        bool ambiguous = false;
+        for (const auto& entry : ancestralMemoryVault) {
+            const auto& key = entry.first;
+            const auto& v = entry.second;
+            if (!key.stage56 || key.calculationDay != ctx.calculationDay ||
+                !(key.openGate < ctx.targetDay && ctx.targetDay <= key.closeGate)) continue;
+            const auto& a = v.certifiedAnchor;
+            const auto& t = v.certifiedTarget;
+            const bool valid = !v.poisoned && v.stage56 &&
+                v.calculationDayFingerprint == ctx.calculationDay &&
+                v.yearNumber == key.yearNumber && v.openGate == key.openGate &&
+                v.closeGate == key.closeGate &&
+                fingerprintAcceptable(v.semanticFingerprint, v.burialGeneration, 27) &&
+                a.number == 5000 && a.openGateDay < ctx.calculationDay &&
+                ctx.calculationDay <= a.closeGateDay &&
+                a.closeGateIndex-a.openGateIndex >= 6 &&
+                t.number == key.yearNumber && t.openGateDay == key.openGate &&
+                t.closeGateDay == key.closeGate &&
+                t.closeGateIndex-t.openGateIndex >= 6 &&
+                t.closeGateDay-t.openGateDay == Integer{v.value.monthWeaving.size()} &&
+                !v.value.cutlets.empty() &&
+                v.value.cutlets.front().firstDay == t.openGateDay+1 &&
+                v.value.cutlets.back().lastDay == t.closeGateDay;
+            // Even a second eligible interval invalidates the shortcut.
+            if (!valid || unique != nullptr) { ambiguous = true; break; }
+            unique = &v;
+        }
+        if (!ambiguous && unique != nullptr) {
+            year5000 = unique->certifiedAnchor;
+            targetYear = unique->certifiedTarget;
+            ctx.finalYear5000 = year5000;
+            ctx.finalCurrentYear = targetYear;
+            ctx.branchTrace.push_back("PATCH42_CERTIFIED_YEAR_INTERVAL_HIT");
+            stage = 30;
+            goto FINAL_MAIN_DISPATCH;
+        }
+    }
     year5000 = workspace.finalYear5000();
     ctx.finalYear5000 = year5000;
     stage = 20;
@@ -12339,7 +12384,9 @@ FINAL_MAIN_VALIDATE_OUTPUT:
             27,
             ctx.stage56CorrectiveRequested,
             false,
-            persistentSemanticFingerprint()
+            persistentSemanticFingerprint(),
+            year5000,
+            targetYear
         };
         std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
         const auto existing = ancestralMemoryVault.find(vaultKey);
