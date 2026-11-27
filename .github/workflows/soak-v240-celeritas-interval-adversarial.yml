@@ -1,0 +1,316 @@
+name: Soak v240 Celeritas interval adversarial guard regression (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v240-celeritas-interval-adversarial.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind accepted component and exact candidate source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "aed4720a354f9176aad5daf8855310328a2a4768"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v240-celeritas-interval-adversarial.yml"
+          test "$(git rev-parse HEAD:qa/soak/v234_short_rejection_component_probe.cpp)" = "71429208378c21560042c66bf6b7b155230194aa"
+          mkdir -p evidence candidate/include/pastafari candidate/src
+          test -n "$GH_TOKEN"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15234773876/zip > evidence/v239.zip
+          echo "8b6181d46386f9a3f7ca8f795e5c696943bd5f754a4b095d495c4fcb811e3668  evidence/v239.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15233931703/zip > evidence/v238.zip
+          echo "0a7f5cec763971da6e49741210b2cb4f0564c954e13b3af64d479f108674354a  evidence/v238.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15232689246/zip > evidence/v237.zip
+          echo "9de15c507d5555a941d0097e38b1da0585eb361baacf7d643fba2bd664a5e407  evidence/v237.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231834031/zip > evidence/v236.zip
+          echo "711a95ca9d0d2e24ae128556fc967ddcd653e2803c1395e259ec46b9ef12d841  evidence/v236.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231492525/zip > evidence/v235-failed.zip
+          echo "9ff8d08d98fde45aa2c124137b6cd8d0e8d9ab3aac13a596a836565d293c209c  evidence/v235-failed.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15230524197/zip > evidence/v234.zip
+          echo "059f89e5cf45c86a3165c3c5a2005074d69bcb121a11ad0467eb50840fb0fe9e  evidence/v234.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          ref="97f661ff17aa035fbd7721c690164f007a44dfc6"
+          base="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          def api(p):return subprocess.check_output(["gh","api",p],timeout=45)
+          c=json.loads(api(f"repos/{repo}/compare/{base}...{ref}"))
+          assert c["ahead_by"]==1 and c["behind_by"]==0
+          assert [(f["filename"],f["additions"],f["deletions"]) for f in c["files"]]==[("src/monster.cpp",12,0)]
+          with zipfile.ZipFile("evidence/v234.zip") as z:
+              assert z.testzip() is None
+              r=json.loads(z.read("result.json"))
+              assert r["classification"]=="COMPONENT_NATIVE_CANDIDATE_PASS"
+              assert r["component_checks_verified"]==53 and r["invalid_inputs_rejected"]==3
+              with zipfile.ZipFile(__import__("io").BytesIO(z.read("v233.zip"))) as old:
+                  assert old.testzip() is None
+                  prev=json.loads(old.read("result.json"))
+                  expected=json.loads(old.read("expected-v5.json"))["rows"]
+          with zipfile.ZipFile("evidence/v236.zip") as z:
+              assert z.testzip() is None
+              v236=json.loads(z.read("result.json"))
+          assert v236["schema"]=="SOAK_V236_CELERITAS_VERSIONED_CANDIDATE/1"
+          assert v236["source_commit"]==ref and len(v236["cases"])==3 and all(x["matched"] for x in v236["cases"])
+          assert v236["whole_year_credit"]==0
+          with zipfile.ZipFile("evidence/v237.zip") as z:
+              assert z.testzip() is None
+              v237=json.loads(z.read("result.json"))
+          assert v237["schema"]=="SOAK_V237_CELERITAS_FIXED_C_COST/1"
+          assert v237["source_commit"]==ref and v237["timing_probe_completed"]
+          assert [(x["c"],x["t"]) for x in v237["rows"]]==[(739617,739617),(739617,739617),(739617,739618)]
+          assert v237["rows"][2]["structure_cache_hits"]==1
+          Path("evidence/frozen-v237.json").write_text(json.dumps(v237,indent=2)+"\n")
+          with zipfile.ZipFile("evidence/v238.zip") as z:
+              assert z.testzip() is None
+              ab=json.loads(z.read("result.json"))
+          assert ab["schema"]=="SOAK_V238_CELERITAS_GATE_CACHE_AB/1" and ab["comparison_completed"]
+          assert ab["summary"]["adjacent_base_gate_calculated"]==60414 and ab["summary"]["adjacent_variant_gate_calculated"]==0
+          pins={"src/monster.cpp":"10e075c67f619e6685fe8d4c00439916bd9e2372","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("candidate",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          assert all(prev["cases"][i]["observed_fields"]==expected[k]["fields"] for i,k in enumerate(["control_000000","timeout_000371","timeout_000385"]))
+          Path("evidence/expected.json").write_text(json.dumps(expected,indent=2)+"\n")
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"base":base,"sources":inv,"source_diff":"+12 lines, no deletions","v234_run":46066864605},indent=2)+"\n")
+          PY
+      - name: Build common 131072-capacity baseline and guarded interval diagnostic
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path("candidate/src/monster.cpp")
+          original=p.read_text()
+          a="constexpr std::size_t GATE_GRAVEYARD_LIMIT = 32768;"
+          b="constexpr std::size_t GATE_GRAVEYARD_LIMIT = 131072;"
+          assert original.count(a)==1
+          baseline=original.replace(a,b)
+          assert baseline.replace(b,a)==original
+          replacements=[]
+          def add(a,b):
+              assert baseline.count(a)==1,(a,baseline.count(a))
+              replacements.append((a,b))
+          add("    std::string semanticFingerprint{};\n};\n\nstd::map<StructureVaultKey, BuriedFinalStructure>",
+              "    std::string semanticFingerprint{};\n    Patch18YearRecord certifiedAnchor{};\n    Patch18YearRecord certifiedTarget{};\n};\n\nstd::map<StructureVaultKey, BuriedFinalStructure>")
+          add("            27,\n            ctx.stage56CorrectiveRequested,\n            false,\n            persistentSemanticFingerprint()\n        };\n        std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);",
+              "            27,\n            ctx.stage56CorrectiveRequested,\n            false,\n            persistentSemanticFingerprint(),\n            year5000,\n            targetYear\n        };\n        std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);")
+          a='FINAL_MAIN_YEAR_5000:\n    ctx.phase = "FINAL_YEAR_5000";\n    year5000 = workspace.finalYear5000();'
+          add(a,'''FINAL_MAIN_YEAR_5000:
+              ctx.phase = "FINAL_YEAR_5000";
+              // QA-only hypothesis. Use only one already validated interval
+              // for this exact calculation day and canonical generation.
+              // Preserve the normal cache/finalization/validation stages.
+              if (ctx.stage56CorrectiveRequested && accelerationsOn() &&
+                  !fullHistoricalValidationOn() && faultPlan.recoverableFailuresToInject == 0) {
+                  std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+                  const BuriedFinalStructure* unique = nullptr;
+                  bool ambiguous = false;
+                  for (const auto& entry : ancestralMemoryVault) {
+                      const auto& key = entry.first;
+                      const auto& v = entry.second;
+                      if (!key.stage56 || key.calculationDay != ctx.calculationDay ||
+                          !(key.openGate < ctx.targetDay && ctx.targetDay <= key.closeGate)) continue;
+                      const auto& a = v.certifiedAnchor;
+                      const auto& t = v.certifiedTarget;
+                      const bool valid = !v.poisoned && v.stage56 &&
+                          v.calculationDayFingerprint == ctx.calculationDay &&
+                          v.yearNumber == key.yearNumber && v.openGate == key.openGate &&
+                          v.closeGate == key.closeGate &&
+                          fingerprintAcceptable(v.semanticFingerprint, v.burialGeneration, 27) &&
+                          a.number == 5000 && a.openGateDay < ctx.calculationDay &&
+                          ctx.calculationDay <= a.closeGateDay &&
+                          a.closeGateIndex-a.openGateIndex >= 6 &&
+                          t.number == key.yearNumber && t.openGateDay == key.openGate &&
+                          t.closeGateDay == key.closeGate &&
+                          t.closeGateIndex-t.openGateIndex >= 6 &&
+                          t.closeGateDay-t.openGateDay == Integer{v.value.monthWeaving.size()} &&
+                          !v.value.cutlets.empty() &&
+                          v.value.cutlets.front().firstDay == t.openGateDay+1 &&
+                          v.value.cutlets.back().lastDay == t.closeGateDay;
+                      // Even a second eligible interval invalidates the shortcut.
+                      if (!valid || unique != nullptr) { ambiguous = true; break; }
+                      unique = &v;
+                  }
+                  if (!ambiguous && unique != nullptr) {
+                      year5000 = unique->certifiedAnchor;
+                      targetYear = unique->certifiedTarget;
+                      ctx.finalYear5000 = year5000;
+                      ctx.finalCurrentYear = targetYear;
+                      ctx.branchTrace.push_back("QA_CERTIFIED_YEAR_INTERVAL_HIT");
+                      std::cerr << "INTERVAL_HIT " << ctx.calculationDay << " "
+                                << ctx.targetDay << " " << targetYear.number << std::endl;
+                      stage = 30;
+                      goto FINAL_MAIN_DISPATCH;
+                  }
+              }
+              year5000 = workspace.finalYear5000();''')
+          variant=baseline
+          for a,b in replacements:variant=variant.replace(a,b)
+          variant="#include <iostream>\n"+variant
+          restored=variant.removeprefix("#include <iostream>\n")
+          for a,b in reversed(replacements):
+              assert restored.count(b)==1
+              restored=restored.replace(b,a)
+          assert restored==baseline
+          Path("candidate/src/base.cpp").write_text(baseline)
+          Path("candidate/src/variant.cpp").write_text(variant)
+          Path("evidence/ab-source.json").write_text(json.dumps({"original_sha256":hashlib.sha256(original.encode()).hexdigest(),"base_sha256":hashlib.sha256(baseline.encode()).hexdigest(),"variant_sha256":hashlib.sha256(variant.encode()).hexdigest(),"common_gate_capacity":131072,"variant_reversible":True,"variant_scope":"validated exact-c interval reuse before stage10/20; stage30/50/60 unchanged; full historical/fault path excluded"},indent=2)+"\n")
+          PY
+          python3 - <<'PY'
+          import json,zipfile,hashlib
+          from pathlib import Path
+          with zipfile.ZipFile("evidence/v239.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+              pins=json.loads(z.read("ab-source.json"))
+          assert prior["schema"]=="SOAK_V239_CELERITAS_CERTIFIED_INTERVAL_AB/1" and prior["comparison_completed"]
+          assert prior["summary"]["interior_gate_rebuild_eliminated"]
+          p=Path("candidate/src/variant.cpp")
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==pins["variant_sha256"]
+          Path("evidence/frozen-v239.json").write_text(json.dumps(prior,indent=2)+"\n")
+          # Test-only injection is appended after binding the exact v239 candidate.
+          # No control-flow or algorithm edits to the candidate.
+          helper=r'''
+          namespace pastafari {
+          bool qaInjectCompetingInterval(const Integer& c, bool insert) {
+              std::lock_guard<std::mutex> guard(ancestralMemoryVaultMutex);
+              for (auto it=ancestralMemoryVault.begin();it!=ancestralMemoryVault.end();++it) {
+                  const auto& k=it->first;
+                  if (!k.stage56 || k.calculationDay!=c ||
+                      k.yearNumber!=(insert?Integer{5000}:Integer{987654321})) continue;
+                  if (!insert) { ancestralMemoryVault.erase(it); return true; }
+                  auto key=k;
+                  auto value=it->second;
+                  if (value.poisoned) return false;
+                  key.yearNumber=987654321;
+                  value.yearNumber=key.yearNumber;
+                  value.certifiedTarget.number=key.yearNumber;
+                  return ancestralMemoryVault.emplace(key,value).second;
+              }
+              return false;
+          }
+          }
+          '''
+          Path("candidate/src/adversarial.cpp").write_text(p.read_text()+helper)
+          Path("evidence/helper.cpp").write_text(helper)
+          PY
+          cat > candidate/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          namespace pastafari {
+            bool poisonPatch27AncestralCorpseForCI();
+            bool qaInjectCompetingInterval(const Integer&,bool);
+          }
+          using namespace pastafari;
+          void require(bool x,const char* m){if(!x)throw std::runtime_error(m);}
+          std::size_t ci(const std::string& name){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& name){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("month");}
+          void emit(const char* label,const Integer& c,const Integer& t,const SpaghettiDateFive& a) {
+            std::cout<<"DATE\t"<<label<<"\t"<<c<<"\t"<<t<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<std::endl;
+          }
+          void date(const char* label,const Integer& c,const Integer& t) {
+            std::cerr<<"BEGIN "<<label<<std::endl;
+            emit(label,c,t,calendarDateSpaghetti(c,t));
+          }
+          int main(){
+            const Integer c{739617};
+            resetPersistentScarVaultsDiagnostic();
+            setAccelerationScarsEnabled(true);
+            setFullHistoricalAccelerationValidation(false);
+            date("cold",c,c);
+            date("valid",c,Integer{739529});
+            require(poisonPatch27AncestralCorpseForCI(),"poison injection did not run");
+            const auto before=persistentScarMetricsDiagnostic();
+            date("stale",c,Integer{744003});
+            const auto after=persistentScarMetricsDiagnostic();
+            require(after.patch27RejectedCorpse>before.patch27RejectedCorpse,"stale fingerprint not rejected");
+            require(qaInjectCompetingInterval(c,true),"competing interval injection failed");
+            date("ambiguous",c,c+1);
+            require(qaInjectCompetingInterval(c,false),"competing interval removal failed");
+            std::cerr<<"BEGIN recovery"<<std::endl;
+            BaseMonsterManager manager;
+            FinalIntegrationFaultPlan f;
+            f.injectionStage=40;
+            f.recoverableFailuresToInject=1;
+            const auto r=manager.executeFinalIntegrationStage56RecoveryAudit(c,c,f);
+            require(r.ready&&r.recoverableFailuresObserved==1&&r.recoverySnapshotRestoredExactly,"recovery guard");
+            emit("recovery",c,c,r.result);
+            std::cerr<<"BEGIN restored"<<std::endl;
+            // Fresh manager bypasses the exact-date result cache.
+            BaseMonsterManager fresh;
+            const auto again=fresh.executeFinalIntegrationStage56(c,c+1);
+            require(again.ready,"restored interval");
+            emit("restored",c,c+1,again.result);
+            std::cout<<"ADVERSARIAL_INTERVAL_PASS"<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -DPASTAFARI_INTERNAL_SCAR_POISON_ORACLE -std=c++17 -O2 -pthread -I candidate/include candidate/src/adversarial.cpp candidate/driver.cpp -o candidate/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum candidate/probe candidate/driver.cpp candidate/src/adversarial.cpp > evidence/build.sha256
+      - name: Native focused adversarial cache guard checks
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 3145728; /usr/bin/time -v -o evidence/time.txt timeout -k 5s 200s candidate/probe) > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/exit.txt
+          cat evidence/stdout.txt evidence/stderr.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("evidence")
+          prior=json.loads((p/"frozen-v239.json").read_text())
+          frozen={r["case"]:r for r in prior["modes"]["base"]["rows"]}
+          mapping={"cold":"cold","valid":"first","stale":"last","ambiguous":"adjacent","recovery":"cold","restored":"adjacent"}
+          rows=[]
+          for l in (p/"stdout.txt").read_text().splitlines():
+              if not l.startswith("DATE\t"):continue
+              a=l.split("\t")
+              assert len(a)==11
+              row={"case":a[1],"c":int(a[2]),"t":int(a[3]),"fields":list(map(int,a[4:9])),"raw_names":a[9:11]}
+              old=frozen[mapping[row["case"]]]
+              row["matches_frozen"]=all(row[k]==old[k] for k in ["c","t","fields","raw_names"])
+              rows.append(row)
+          active=None;hits=[]
+          for l in (p/"stderr.txt").read_text().splitlines():
+              a=l.split()
+              if a[0]=="BEGIN":active=a[1]
+              elif a[0]=="INTERVAL_HIT":hits.append(active)
+          code=int((p/"exit.txt").read_text())
+          ok=code==0 and [r["case"] for r in rows]==list(mapping) and all(r["matches_frozen"] for r in rows) and hits==["valid","restored"] and (p/"stdout.txt").read_text().splitlines()[-1]=="ADVERSARIAL_INTERVAL_PASS"
+          out={"schema":"SOAK_V240_INTERVAL_ADVERSARIAL/1","source_commit":"97f661ff17aa035fbd7721c690164f007a44dfc6","v239_run":46075930072,"rows":rows,"interval_hits":hits,"exit":code,"adversarial_pass":ok,"stale_fingerprint_fallback":ok,"overlap_fallback":ok,"stage40_recovery_fallback":ok,"full_historical_mode_runtime_tested":False,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v240-interval-adversarial-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
