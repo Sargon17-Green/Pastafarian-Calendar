@@ -1104,12 +1104,51 @@ proc probeFiveSlotBoundedCompositions() {
   }
 }
 
+// П'ять додатних частин, N=4..10, усі внутрішні межі та -1.
+// Незалежний перелік чотирьох роздільників, не DP.
+// 49 родин, 1260 рангів, 1309 тверджень; очікувано 5067 загалом.
+// C(N-1,4) без межі, C(N-2,3) із межею; нуль при N<5.
+// Лише дослідження, не історичний свідок і не Stage 6.
+proc probeFiveCutletPartitions() {
+  for total in 4..10 {
+    for boundary in -1..(total-1) {
+      if boundary == 0 then continue;
+      var tested: CutletPartitionCounter;
+      tested.totalGaps = total;
+      tested.slotsTotal = 5;
+      tested.requiredBoundary = boundary;
+      var enumerated = 0;
+      for i in 1..(total-4) {
+        for j in (i+1)..(total-3) {
+          for k in (j+1)..(total-2) {
+            for m in (k+1)..(total-1) {
+              if boundary >= 0 && boundary != i && boundary != j &&
+                 boundary != k && boundary != m then continue;
+              enumerated += 1;
+              const actual = tested.unrank1(new bigint(enumerated));
+              check(actual.size == 5 && actual[0] == i &&
+                    actual[1] == j-i && actual[2] == k-j &&
+                    actual[3] == m-k && actual[4] == total-m,
+                    "П'ять котлет: N=" + total:string +
+                    ", B=" + boundary:string + ", ранг=" + enumerated:string);
+            }
+          }
+        }
+      }
+      check(tested.countAll() == enumerated,
+            "П'ять котлет: потужність N=" + total:string +
+            ", B=" + boundary:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
   probeCutletCompositions(8, 3);
   probeCutletCompositions(9, -1);
   probeFourCutletPartitions();
+  probeFiveCutletPartitions();
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
   probeFiveSlotBoundedCompositions();
