@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,75 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==265
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay));
+    addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')));
+    assert(strcmp(which('pastafari.unrankGeneralWeaveSuffixChunkAdjoint'), ...
+        fullfile(overlay,'+pastafari','unrankGeneralWeaveSuffixChunkAdjoint.m')));
+    qaFactoredSmallOracle();
+    prior=jsondecode(fileread(fullfile(root,'evidence','prior-prefix-result.json')));
+    certificate=jsondecode(fileread(fullfile(root,'evidence','interval-hashes.json')));
+    assert(numel(certificate)==265 && prior.prefix_symbols_matched==165 && ...
+        prior.full_converter_calls==0 && ~prior.full_word_verified && ~prior.stage55_accepted);
+    prefix=double(prior.prefix(:).'); remaining=double(prior.remaining(:).');
+    opened=prior.opened_up_to; closed=prior.closed_up_to;
+    assert(isequal(prefix,expected(1:165)) && opened==43 && closed==0);
+    expectedRemaining=L;
+    for i=1:165, expectedRemaining(prefix(i))=expectedRemaining(prefix(i))-1; end
+    assert(isequal(remaining,expectedRemaining));
+    rank=pastafari.BigInt(prior.rank_decimal); count=pastafari.BigInt(prior.count_decimal);
+    assert(strcmp(sha256Ascii(char(rank)),certificate(165).rank_sha256) && ...
+        strcmp(sha256Ascii(char(count)),certificate(165).count_sha256));
+    fprintf('QA_CERTIFIED_CURSOR_RESUME START=165 TARGET=265\n');
+    for position=166:265
+        stepTimer=tic;
+        if opened<44
+            [piece,cursor]=pastafari.unrankGeneralWeaveSuffixChunkAdjoint( ...
+                L,remaining,opened,closed,rank,1);
+            method='native_adjoint';
+        else
+            [piece,cursor]=qaFactoredStep(L,remaining,opened,closed,rank,count);
+            method='qa_factored_last_order';
+        end
+        elapsed=toc(stepTimer);
+        assert(cursor.initialCount==count && isscalar(piece) && piece==expected(position));
+        assert(certificate(position).position==position && ...
+            certificate(position).symbol==piece);
+        prefix=[prefix,piece]; %#ok<AGROW>
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==max(prefix) && closed==0 && ~cursor.done);
+        rank=cursor.rank; count=cursor.count;
+        rHash=sha256Ascii(char(rank)); cHash=sha256Ascii(char(count));
+        assert(rank>=pastafari.BigInt(1) && rank<=count);
+        assert(strcmp(rHash,certificate(position).rank_sha256) && ...
+            strcmp(cHash,certificate(position).count_sha256), ...
+            'Independent exact interval mismatch.');
+        result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+            'prefix_only',true,'prefix_symbols_matched',position,'days',4244, ...
+            'prefix',prefix,'remaining',remaining,'opened_up_to',opened, ...
+            'closed_up_to',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+            'rank_sha256',rHash,'count_sha256',cHash, ...
+            'initial_count_sha256',prior.initial_count_sha256, ...
+            'original_rank_sha256',prior.original_rank_sha256, ...
+            'prior_native_run',45909328891,'reference_cxx_inverse_run_id',45686680226, ...
+            'step_seconds',elapsed,'method',method,'qa_arithmetic_overlay',true,'full_word_verified',false, ...
+            'full_converter_calls',0,'stage55_accepted',false);
+        file=fullfile(root,'evidence',sprintf('prefix-%04d-result.json',position));
+        fid=fopen([file,'.part'],'w'); assert(fid>=0);
+        fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+        movefile([file,'.part'],file,'f');
+        fprintf('QA_CERTIFIED_STEP_PASS PREFIX=%d SYMBOL=%d OPENED=%d SECONDS=%.3f METHOD=%s\n', ...
+            position,piece,opened,elapsed,method);
+    end
+    assert(opened==45 && closed==0 && sum(remaining)==3979);
+    fprintf('QA_CERTIFIED_PREFIX_PASS PREFIX=265 OPENED=45 FULL_WORD_VERIFIED=0\n');
+    return
+end
 
 if prefixLimit==202
     overlay=getenv('PASTAFARI_QA_OVERLAY');
@@ -400,4 +469,123 @@ for n=lengths
     end
 end
 fprintf('QA_ARITHMETIC_ORACLE_PASS CHECKS=%d\n',checks);
+end
+
+function [symbol,cursor]=qaFactoredStep(L,R,opened,closed,rank,F)
+% QA only. With at most one unopened month, first-order constraints are
+% vacuous. The suffix family equals the all-open last-order family.
+assert(opened>=numel(L)-1 && rank>=pastafari.BigInt(1) && rank<=F);
+blocks=qaFactoredBlocks(R(closed+1:end),F);
+symbol=0;
+for i=1:numel(blocks)
+    b=blocks{i};
+    if b.iszero(), continue; end
+    if rank>b
+        rank=rank-b;
+    else
+        symbol=closed+i;
+        count=b;
+        break
+    end
+end
+assert(symbol>0);
+n=R(symbol);
+assert(n>0 && (n<L(symbol) || symbol==opened+1) && (n>1 || symbol==closed+1));
+R(symbol)=n-1;
+opened=opened+double(n==L(symbol));
+closed=closed+double(n==1);
+cursor=struct('remaining',R,'openedUpTo',opened,'closedUpTo',closed, ...
+    'rank',rank,'count',count,'initialCount',F,'done',all(R==0));
+end
+
+function blocks=qaFactoredBlocks(r,F)
+% Same common denominator identity as the frozen implementation, but
+% factor D into small positive integers. Sequential gcd cancellations
+% compute F/gcd(F,D) and D/gcd(F,D) without general long division.
+r=double(r(:).'); m=numel(r);
+assert(m>=1 && all(r>0) && all(fix(r)==r) && sum(r)<1e7);
+one=pastafari.BigInt(1); zero=pastafari.BigInt(0);
+S=cumsum(r); Q=F; reduced=ones(1,m);
+P=cell(1,m); H=cell(1,m+1); P{1}=one; H{m+1}=one;
+for j=2:m
+    d=S(j)-1;
+    P{j}=P{j-1}*pastafari.BigInt(d);
+    [q,rem]=Q.floorDivMod(pastafari.BigInt(d));
+    g=gcd(d,rem.toDoubleExact());
+    assert(g>=1 && mod(d,g)==0);
+    if g==d
+        Q=q;
+    elseif g>1
+        [Q,rem]=Q.floorDivMod(pastafari.BigInt(g));
+        assert(rem.iszero());
+    end
+    reduced(j)=d/g;
+end
+for j=m:-1:2
+    H{j}=H{j+1}*pastafari.BigInt(S(j-1));
+end
+blocks=repmat({zero},1,m); total=zero;
+for i=1:m
+    if i==1
+        N=H{2};
+    elseif r(i)>1
+        N=pastafari.BigInt(r(i)-1)*P{i-1}*H{i+1};
+    else
+        continue
+    end
+    for j=2:m
+        if reduced(j)>1
+            [N,rem]=N.floorDivMod(pastafari.BigInt(reduced(j)));
+            assert(rem.iszero(),'Reduced denominator did not divide numerator.');
+        end
+    end
+    b=Q*N;
+    assert(b>=one);
+    blocks{i}=b; total=total+b;
+end
+assert(total==F,'Factored partition differs from exact parent.');
+end
+
+function qaFactoredSmallOracle()
+% Independent enumerative recurrence on small positive multiplicities.
+% A label with one remaining occurrence can be selected only if it is
+% the first active label. No binomial/product identity is used here.
+memo=containers.Map('KeyType','char','ValueType','double');
+families=0; checks=0;
+for k=1:4
+    for code=0:3^k-1
+        r=mod(floor(code./(3.^(0:k-1))),3)+1;
+        F=qaBruteLastOrder(r,memo);
+        blocks=qaFactoredBlocks(r,pastafari.BigInt(F));
+        families=families+1;
+        for i=1:k
+            if i>1 && r(i)==1
+                n=0;
+            else
+                child=r; child(i)=child(i)-1;
+                if child(1)==0, child=child(2:end); end
+                n=qaBruteLastOrder(child,memo);
+            end
+            assert(blocks{i}==pastafari.BigInt(n));
+            checks=checks+1;
+        end
+    end
+end
+assert(families==120 && checks==426);
+fprintf('QA_FACTORED_SMALL_ORACLE_PASS FAMILIES=%d BLOCKS=%d\n',families,checks);
+end
+
+function n=qaBruteLastOrder(r,memo)
+if isempty(r), n=1; return; end
+key=sprintf('%d,',r);
+if isKey(memo,key), n=memo(key); return; end
+n=0;
+for i=1:numel(r)
+    if i>1 && r(i)==1, continue; end
+    child=r; child(i)=child(i)-1;
+    if child(1)==0, child=child(2:end); end
+    n=n+qaBruteLastOrder(child,memo);
+end
+assert(n<=flintmax && n==fix(n));
+memo(key)=n;
 end
