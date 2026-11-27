@@ -1,0 +1,39 @@
+name: COBOL Chinese calendar integration work counts
+on:
+  push:
+    branches:
+      - 'COBOL+简体中文'
+    paths:
+      - 'src/calendar_work_counts.cob'
+      - 'test/calendar_work_counts_tests.cob'
+      - '.github/workflows/cobol-chinese-calendar-work-counts.yml'
+      - 'src/big_integer.cob'
+      - 'src/patched_day_tag.cob'
+      - 'src/patched_distance.cob'
+permissions:
+  contents: read
+jobs:
+  work-counts-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install compiler
+        run: sudo apt-get update && sudo apt-get install -y gnucobol
+      - name: Build and test only production-linked implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\n' "$GITHUB_SHA" | tee evidence/work-counts.log
+          cobc -V | tee -a evidence/work-counts.log
+          cobc -free -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror -x -o /tmp/work-counts test/calendar_work_counts_tests.cob src/calendar_work_counts.cob src/big_integer.cob src/patched_day_tag.cob src/patched_distance.cob 2>&1 | tee -a evidence/work-counts.log
+          timeout 60s /tmp/work-counts 2>&1 | tee -a evidence/work-counts.log
+          grep -Fx 'WORK_COUNTS_CASES=00015' evidence/work-counts.log
+          grep -Fx 'WORK_COUNTS_GATE=PASS' evidence/work-counts.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobol-calendar-work-counts-evidence
+          path: evidence/
+          if-no-files-found: error
