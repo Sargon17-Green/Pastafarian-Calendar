@@ -1,0 +1,116 @@
+name: Issue29 v207 durable raw evidence preservation (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v207-durable-evidence.yml
+permissions:
+  actions: read
+  contents: write
+jobs:
+  preserve:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock QA branch and existing disposition
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "429a073bc4a38140c8b9f4495bae1abb1d3bb479"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v207-durable-evidence.yml"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "56bc4173aae4975ded019ef5ab5a36249f1424df"
+          test "$(git ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          test ! -e qa/issue29/archive/v207
+      - name: Fetch exact archives and verify all bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p qa/issue29/archive/v207
+          python3 - <<'PY'
+          import hashlib,io,json,os,subprocess,zipfile
+          from pathlib import Path
+          root=Path("qa/issue29/archive/v207")
+          specs=[
+            ("v199",46014553020,15205476998,"2b23f3f9918a33eceaeec214c14afdf11339d722c1ec7084be5f68aebec4c6aa",22636),
+            ("v200",46015762967,15205058248,"f1cb9a14583c826750b074e1028f0216d5af3a7478cc310d981251973761de93",3476),
+            ("v201",46017638697,15205504948,"fc9828a2722fa6c84c82d442d6ec409e7e34a2bb9c81de211fd04fdad0095f22",5449),
+            ("v202",46018725743,15208001005,"e0b098f45eeee289884fb6b70a0fbae2e6a41f9b04a6fc56f8073e9ff596880e",65152),
+            ("v203",46021352708,15207414709,"c09dde12f2b1dc59a251ed15f06c6ee67ea4d1aefb303a7eb4450fc5362e73c5",114127),
+            ("matlab",46004594338,15199677578,"937dc0962d77c4e66f28bbde731716b08612cfb5a304b948ad02543b0af25e50",99041),
+            ("v206",46028471318,15213451206,"a19b2f623af1723e52eb903cb60294949a9623711b711e4b02a9858f02f38e34",174635),
+          ]
+          def digest(b): return hashlib.sha256(b).hexdigest()
+          def inspect(data):
+              with zipfile.ZipFile(io.BytesIO(data)) as z:
+                  assert z.testzip() is None
+                  names=[n for n in z.namelist() if not n.endswith("/")]
+                  assert len(names)==len(set(names))
+                  return {n:{"bytes":len(z.read(n)),"sha256":digest(z.read(n))} for n in names}
+          records={}
+          for label,run,aid,h,size in specs:
+              runmeta=json.loads(subprocess.check_output(["gh","api",f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run}"]))
+              assert runmeta["status"]=="completed" and runmeta["conclusion"]=="success"
+              meta=json.loads(subprocess.check_output(["gh","api",f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{aid}"]))
+              assert meta["workflow_run"]["id"]==run and not meta["expired"] and meta["digest"]=="sha256:"+h
+              raw=subprocess.check_output(["gh","api",f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{aid}/zip"])
+              assert len(raw)==size and digest(raw)==h
+              members=inspect(raw)
+              (root/(label+".zip")).write_bytes(raw)
+              records[label]={"run":run,"artifact":aid,"run_head":runmeta["head_sha"],"bytes":size,"sha256":h,"members":members}
+              print(label,len(raw),len(members),h,flush=True)
+          with zipfile.ZipFile(root/"v206.zip") as z:
+              def get(s):
+                  n=[n for n in z.namelist() if n==s or n.endswith("/"+s)]
+                  assert len(n)==1
+                  return z.read(n[0])
+              d=json.loads(get("result.json"))
+              assert d["unique_native_pairs"]==16 and d["matched_fields"]==80 and d["whole_year_credit"]==0
+              expected={"v188":"97931fdf8bc73f8f0a9744a336f14262a807336ba0a3905f89c7e0e93950cf59","v193":"4d0a6054153cad978f162125f0a0e7efc505d5daf5d2ca4513c40faeda903835","v204":"cd3f0ac8aec1a84dda5d2cd437b085e86dc04a3d143679f141e479669dfbff2a","v205":"cda32e923907d7de7fff147fc89b2c61cf1efb5ac39d7a2e5b5959d0967e3cda"}
+              nested={}
+              for label,h in expected.items():
+                  raw=get(label+".zip")
+                  assert digest(raw)==h
+                  nested[label]={"bytes":len(raw),"sha256":h,"members":inspect(raw)}
+          receipt={"schema":"ISSUE29_V207_DURABLE_RAW_ARCHIVE/1","archives":records,"nested_native_archives":nested,"source_tree":"a39f73fa2f371e80b5e7ea4156583f3ec34042df","calendar_calls":0,"whole_year_credit":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (root/"manifest.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print("ARCHIVE_VERIFIED",len(records),len(nested),sum(r["bytes"] for r in records.values()))
+          PY
+      - name: Commit only verified raw archives on exact QA branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- qa/issue29/archive/v207/
+          python3 - <<'PY'
+          import subprocess
+          expected={"qa/issue29/archive/v207/"+n for n in ["v199.zip","v200.zip","v201.zip","v202.zip","v203.zip","matlab.zip","v206.zip","manifest.json"]}
+          actual=set(subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines())
+          assert actual==expected,(actual,expected)
+          PY
+          git commit -m "qa(issue29): preserve verified v199-v206 evidence ZIP bytes and manifest"
+          git push origin HEAD:refs/heads/qa/issue29-gmp-complete-small-family-v198
+          test "$(git ls-remote origin refs/heads/qa/issue29-gmp-complete-small-family-v198 | cut -f1)" = "$(git rev-parse HEAD)"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "56bc4173aae4975ded019ef5ab5a36249f1424df"
+          test "$(git ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          echo "ARCHIVE_COMMIT=$(git rev-parse HEAD)"
+      - name: Verify committed ZIP bytes against manifest
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,subprocess
+          p="qa/issue29/archive/v207/"
+          m=json.loads(subprocess.check_output(["git","show","HEAD:"+p+"manifest.json"]))
+          for k,v in m["archives"].items():
+              b=subprocess.check_output(["git","show","HEAD:"+p+k+".zip"])
+              assert len(b)==v["bytes"] and hashlib.sha256(b).hexdigest()==v["sha256"]
+          print("DURABLE_GIT_ARCHIVE_PASS",len(m["archives"]))
+          PY
