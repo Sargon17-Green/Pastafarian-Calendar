@@ -110,6 +110,91 @@ def check_map_budget(path: Path) -> None:
     )
 
 
+
+def extended_year_vectors() -> list[tuple[str, int, int, bytes]]:
+    """Host-only coverage expansion; never use ROM output as an oracle.
+
+    The map boundary is inclusive: equality with its first/last gate is
+    sufficient for coverage. The older gate_window requires a strictly
+    external gate, so compare against year5000 only in the strict interior.
+    All day inputs and published endpoints are absolute signed32; the sauce
+    oracle translates absolute days to Foundation-relative work counts.
+    """
+    from struct import pack
+    from test_sm83_stage1_selection_oracle import ask, gate_gap, YEAR_MIN
+
+    # Rebuild both directions iteratively from normative gap selections,
+    # independently of the generated include and the runtime histogram.
+    negative = [FOUNDATION]
+    positive = [FOUNDATION]
+    for i in range(1, 513):
+        negative.append(negative[-1] - gate_gap(i, False))
+        positive.append(positive[-1] + gate_gap(i, True))
+    gates = negative[:0:-1] + positive
+    assert len(gates) == 1025 and gates[512] == FOUNDATION
+    raw = b"".join(pack("<i", g - FOUNDATION) for g in gates)
+    assert hashlib.sha256(raw).hexdigest() == (
+        "d4bc06694ca0389bac5cc856593c527449f059c81971243c0b481b06f198f407"
+    ), "independent recurrence differs from accepted map"
+    low, high = gates[0] + YEAR_MAX, gates[-1] - YEAR_MAX
+    assert low < FOUNDATION < high
+    days = [("foundation", FOUNDATION)]
+    for index in (-17, -1, 0, 1, 17):
+        for delta in (-1, 0, 1):
+            if index == delta == 0:
+                continue
+            days.append((f"gate{index:+d}_day{delta:+d}", gates[512 + index] + delta))
+    days += [("lower_edge", low), ("lower_inside", low + 1),
+             ("upper_edge", high), ("upper_inside", high - 1),
+             ("lower_outside", low - 1), ("upper_outside", high + 1),
+             ("int32_min", -(1 << 31)), ("int32_max", (1 << 31) - 1)]
+    vectors = []
+    abi_mutants_rejected = 0
+    strict_checks = 0
+    for name, c in days:
+        if not low <= c <= high:
+            # Runtime status 2; previous 18-byte publication must survive.
+            vectors.append((name, c, 2, b""))
+            continue
+        window = [(i, g) for i, g in enumerate(gates) if c-YEAR_MAX <= g <= c+YEAR_MAX]
+        left = [(i, g) for i, g in window if g < c]
+        right = [(i, g) for i, g in window if g >= c]
+        pairs = sorted((b-a, a, b) for i, a in left for j, b in right
+                       if j-i >= 6 and YEAR_MIN <= b-a <= YEAR_MAX)
+        n = len(pairs)
+        assert 1 <= n <= 19044 and len(left) <= 138 and len(right) <= 138
+        assert len(set(pairs)) == n
+        rank = ask(c, c, 1, 10, n).rank
+        assert 1 <= rank <= n
+        span, opening, closing = pairs[rank-1]
+        assert opening < c <= closing and closing-opening == span
+        if low < c < high:
+            old, old_count, old_rank = year5000(c)
+            assert (opening, closing, span, n, rank) == (
+                old.open_gate, old.close_gate, old.length, old_count, old_rank)
+            strict_checks += 1
+        # The old native ABI bug fed c instead of c-F into the sauce;
+        # ask(F+c,F+c) reproduces that error in absolute-day oracle terms.
+        wrong_rank = ask(FOUNDATION+c, FOUNDATION+c, 1, 10, n).rank
+        abi_mutants_rejected += wrong_rank != rank
+        payload = pack("<iiHHHHBB", opening, closing, span, n, rank,
+                       len(window), len(left), len(right))
+        assert len(payload) == 18
+        vectors.append((name, c, 0, payload))
+    assert len(vectors) == 23
+    assert sum(status == 2 for _, _, status, _ in vectors) == 4
+    assert strict_checks == 17
+    assert abi_mutants_rejected > 0, "suite failed to distinguish absolute/relative ABI mutant"
+    assert vectors[0][3] == pack("<iiHHHHBB", -15057703, -15053459, 4244, 43, 15, 21, 11, 10)
+    for name, c, status, payload in vectors:
+        print(f"HOST_YEAR_VECTOR name={name} c_abs={c} sauce_rel={c-FOUNDATION} "
+              f"status={status} result18={payload.hex() if payload else 'UNCHANGED'}", flush=True)
+    print(f"HOST_STAGE1_GATE_YEAR_EXTENDED=PASS valid=19 invalid=4 "
+          f"strict_crosschecks={strict_checks} abi_mutants_rejected={abi_mutants_rejected} "
+          "native_extended=NOT_EXECUTED", flush=True)
+    return vectors
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("rom", type=Path)
@@ -161,6 +246,8 @@ def main() -> None:
         f"window_gates={len(gates)} left={left_count} right={right_count}",
         flush=True,
     )
+
+    extended_year_vectors()
 
     try:
         from pyboy import PyBoy
