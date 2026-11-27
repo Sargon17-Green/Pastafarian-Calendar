@@ -26,12 +26,53 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@v4
-        with:
-          name: apl-german-sha-pinned-nars-installer-for-offline-analysis
-          run-id: 44372361730
-          github-token: ${{ github.token }}
-          path: pinned_release
+      - name: Fetch pinned official NARS installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $ProgressPreference='SilentlyContinue'
+          $sourceLock='0f24aae0f2e45b8e816d4ecd27be154afa2fe94f'
+          $uri='https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
+          $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
+          $expectedBytes=9430788
+          $expectedSHA='28e8d1dbcea13360a271e704196b5680f0c3e9461cfc38daa41b96dba202f11b'
+          New-Item -ItemType Directory -Force 'pinned_release/verified_release','stage01_chunked_evidence' | Out-Null
+          $failures=@()
+          try {
+            $downloaded=$false
+            for($attempt=1;$attempt -le 4;$attempt++){
+              try {
+                Invoke-WebRequest -Uri $uri -OutFile $installer -MaximumRedirection 3 -TimeoutSec 90
+              } catch {
+                $message=$_.Exception.Message
+                $failures+= [ordered]@{attempt=$attempt;class='DOWNLOAD_ERROR';message=$message}
+                Write-Warning ("OFFICIAL_NARS_DOWNLOAD_ATTEMPT_"+$attempt+"_FAILED: "+$message)
+                Remove-Item -LiteralPath $installer -Force -ErrorAction SilentlyContinue
+                if($attempt -lt 4){Start-Sleep -Seconds (3*$attempt)}
+                continue
+              }
+              $bytes=(Get-Item -LiteralPath $installer).Length
+              $sha=(Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+              if($bytes -ne $expectedBytes -or $sha -cne $expectedSHA){
+                throw ("PINNED_INSTALLER_LOCK_FAILED|bytes="+$bytes+"|sha256="+$sha)
+              }
+              $downloaded=$true
+              break
+            }
+            if(-not $downloaded){throw 'OFFICIAL_NARS_DOWNLOAD_EXHAUSTED_4_ATTEMPTS'}
+            Write-Output 'PINNED_PUBLISHER_INSTALLER_SHA_LOCK_PASS'
+          } catch {
+            [ordered]@{
+              schema='APL_GERMAN_STAGE01_BOOTSTRAP_FAILURE_V1'
+              stage01='NOT_ACCEPTED'
+              native_executed=$false
+              source_commit=$sourceLock
+              status='PRE_NATIVE_BOOTSTRAP_FAILURE'
+              message=$_.Exception.Message
+              failures=$failures
+            } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath 'stage01_chunked_evidence/bootstrap_failure.json' -Encoding utf8
+            throw
+          }
       - name: Provision exact pinned NARS2000 and temporary APL font
         shell: pwsh
         run: ./qa/nars-interface/bootstrap_exact_nars.ps1 -Evidence font_bootstrap_evidence -Runtime verified_runtime
@@ -56,6 +97,15 @@ jobs:
           if ($r.suite_start_exact -ne $true -or $r.suite_status -cne 'RETURNED_SUCCESS' -or $r.qa_commit -cne $env:GITHUB_SHA) { throw 'ORIGINAL_SUITE_EC_NOT_CONFIRMED' }
           if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 23 -or $c.chunk_count -ne 23 -or $c.tail_chunk_size -ne 1 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
           if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) { throw 'STAGE01_CHUNK_MARKER_MISMATCH' }
+          $indices=@((1..18 | ForEach-Object { $_ * 5 }) + @(91,92,93,94,95))
+          for($i=0;$i -lt $indices.Count;$i++){
+            $after=$indices[$i]
+            $point=$c.chunk_records[$i]
+            $expectedToken=('APL_GERMAN_STAGE01_CHUNK_V1|SOURCE='+$r.source_commit+'|FX=95|AFTER='+('{0:D2}' -f $after)+'|NAME='+$c.function_names[$after-1])
+            $path=('stage01_chunked_evidence/checkpoint_files/after_{0:D2}.txt' -f $after)
+            $raw=[IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $path).Path)
+            if($point.after -ne $after -or $point.token -cne $expectedToken -or [Convert]::ToBase64String($raw) -cne [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($expectedToken))){throw ('INDEPENDENT_FX_RECEIPT_MISMATCH_'+$after)}
+          }
           $nativeMarker='stage01_chunked_evidence/final_native_marker.txt'
           if (-not (Test-Path -LiteralPath $nativeMarker)) { throw 'STAGE01_NATIVE_MARKER_NOT_ARCHIVED' }
           [byte[]]$actual=[IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $nativeMarker).Path)
