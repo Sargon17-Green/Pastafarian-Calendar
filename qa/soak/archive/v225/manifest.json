@@ -1,0 +1,880 @@
+{
+  "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+  "admitted_engines": 0,
+  "archives": {
+    "v131": {
+      "artifact": 14618673805,
+      "bytes": 16126,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "v131-lineage-screen.json": {
+          "bytes": 90434,
+          "sha256": "dc47db154744da65ccea13eee734995e6534882164c92df99eacf44b505d7aac"
+        },
+        "v131-summary.json": {
+          "bytes": 528,
+          "sha256": "ec6735b29627358c9ff00459841ce8c8568da7613abedb3c0a19625e520e462a"
+        },
+        "v131-tests.log": {
+          "bytes": 2767,
+          "sha256": "6289cffaa3378b14236babb29c38be4c6976fd86af35d3aeee6490ed8d751cde"
+        }
+      },
+      "run": 44715717410,
+      "run_head": "1c99c36ee9da266f354bfebdbfdaa047c075e3fa",
+      "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+    },
+    "v209": {
+      "artifact": 15213499464,
+      "bytes": 30727,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "MAIN-C.txt": {
+          "bytes": 9563,
+          "sha256": "80db6ef400299e98a4fc8fffc369bd9bdf39455c4030ef3e1853a7bf7b1c437f"
+        },
+        "MAIN-CPP.txt": {
+          "bytes": 6383,
+          "sha256": "8f09eb0a285dec6e678da166c0c76f4b40f43d69a04a5c22d395d21052e6d9fd"
+        },
+        "MAIN-FAST-JS.txt": {
+          "bytes": 4556,
+          "sha256": "5f0e539cfa97526bea95717f3c2be75210b065c069ae491f7e7b8c861b3c4eec"
+        },
+        "MAIN-JAVA.txt": {
+          "bytes": 6636,
+          "sha256": "fe19ebd0dfa20e3d63fbf5755ca3415bc7f0c1aa256c55ae72519032bb5d26b8"
+        },
+        "MAIN-PY.txt": {
+          "bytes": 5149,
+          "sha256": "26f9b4bcd766ef488df97d4e5d1edb8a5a39f9c803fe01d67dd4b6d49c9f1206"
+        },
+        "MAIN-RUBY.txt": {
+          "bytes": 4671,
+          "sha256": "61b9e7676076266e881d06f24b8e84f615323578d348f15ffc727c774872237d"
+        },
+        "REF-57.txt": {
+          "bytes": 4576,
+          "sha256": "7b2cc7426eae7854c08004f2c1c3d82c5a76ef070c81ed36b10c1ddaba088554"
+        },
+        "REF-58.txt": {
+          "bytes": 4707,
+          "sha256": "7521428591ec4bf50f1ac1bc7d39fa8bc8aa5189a54b16e6ba4105f298435e0c"
+        },
+        "result.json": {
+          "bytes": 4858,
+          "sha256": "5a23ece60efb2ce1dcb52e1d2d8ee894a2f2e2db1780534652eeffe90dd28d0c"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        }
+      },
+      "run": 46031257472,
+      "run_head": "4d1aa56c2f728b2dffaf0ea35f24d43c96216671",
+      "sha256": "d554b52dc4eebd56420d6120a9fa779cb6a4b898bd779a2fde8d2985b6747e6d"
+    },
+    "v210": {
+      "artifact": 15216220568,
+      "bytes": 65037,
+      "conclusion": "failure",
+      "disposition": "FAILURE_QA_EXPECTATION",
+      "members": {
+        "Makefile.source.txt": {
+          "bytes": 2800,
+          "sha256": "6e9f15cf0fbec446fb9613b067a2eb2fd07d52cdae54b9d6dc7a455b1c62b09d"
+        },
+        "month-weaving-domain-detour.js.source.txt": {
+          "bytes": 11022,
+          "sha256": "942e0fc1deab593f255e4cdd889c73ffb1280ec2420f98a4a40085378ef86873"
+        },
+        "pastafari-batch.cob.source.txt": {
+          "bytes": 5865,
+          "sha256": "8b94ce21780302d8bd4c0ab142fa0648bdcb76318888e900c4b3dfff17172ecd"
+        },
+        "pastafari-calendar-core-chronicle.js.source.txt": {
+          "bytes": 39806,
+          "sha256": "61b5e8ddee93f910fddf0c488e33110cf3b63ecd9faf1acf900b373bf10ccfd5"
+        },
+        "pastafari-calendar-core.js.source.txt": {
+          "bytes": 3449,
+          "sha256": "823937139efb9ca37d8b8422187c09855ade5ad95d52efff733036f7b7e62c15"
+        },
+        "pastafari-engine.cob.source.txt": {
+          "bytes": 72321,
+          "sha256": "a0af660776a5c713c44cdbe8d00d4f164e6b49581cd12fabe62975dcf5b0c2f3"
+        },
+        "pastafari-engine.cpy.source.txt": {
+          "bytes": 2012,
+          "sha256": "b57ea5291fbb172923a5e761f641408a84a6efcd305dbb7bfb06c85e4d912954"
+        },
+        "pastafari_bigint.c.source.txt": {
+          "bytes": 21485,
+          "sha256": "a2db834b22b35e1430e935b1fe9acde940271c27e7d229309c1b0e489adb90de"
+        },
+        "pastafari_bigint.h.source.txt": {
+          "bytes": 2885,
+          "sha256": "1c0b796f245b288c7a2b58f7591e225ae0f6d27bb601e6c9e06c5a961d126d4c"
+        },
+        "v209.zip": {
+          "bytes": 30727,
+          "sha256": "d554b52dc4eebd56420d6120a9fa779cb6a4b898bd779a2fde8d2985b6747e6d"
+        }
+      },
+      "run": 46033965002,
+      "run_head": "7fd99f6ecc3a13ed316ff7a2fcaf177fb013d343",
+      "sha256": "ba678f87bac4ad1ddeb0f1b5db34ed641699bf157b34ecc171a56a7c3eeca7d3"
+    },
+    "v211": {
+      "artifact": 15215228972,
+      "bytes": 66808,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "Makefile.source.txt": {
+          "bytes": 2800,
+          "sha256": "6e9f15cf0fbec446fb9613b067a2eb2fd07d52cdae54b9d6dc7a455b1c62b09d"
+        },
+        "month-weaving-domain-detour.js.source.txt": {
+          "bytes": 11022,
+          "sha256": "942e0fc1deab593f255e4cdd889c73ffb1280ec2420f98a4a40085378ef86873"
+        },
+        "pastafari-batch.cob.source.txt": {
+          "bytes": 5865,
+          "sha256": "8b94ce21780302d8bd4c0ab142fa0648bdcb76318888e900c4b3dfff17172ecd"
+        },
+        "pastafari-calendar-core-chronicle.js.source.txt": {
+          "bytes": 39806,
+          "sha256": "61b5e8ddee93f910fddf0c488e33110cf3b63ecd9faf1acf900b373bf10ccfd5"
+        },
+        "pastafari-calendar-core.js.source.txt": {
+          "bytes": 3449,
+          "sha256": "823937139efb9ca37d8b8422187c09855ade5ad95d52efff733036f7b7e62c15"
+        },
+        "pastafari-engine.cob.source.txt": {
+          "bytes": 72321,
+          "sha256": "a0af660776a5c713c44cdbe8d00d4f164e6b49581cd12fabe62975dcf5b0c2f3"
+        },
+        "pastafari-engine.cpy.source.txt": {
+          "bytes": 2012,
+          "sha256": "b57ea5291fbb172923a5e761f641408a84a6efcd305dbb7bfb06c85e4d912954"
+        },
+        "pastafari_bigint.c.source.txt": {
+          "bytes": 21485,
+          "sha256": "a2db834b22b35e1430e935b1fe9acde940271c27e7d229309c1b0e489adb90de"
+        },
+        "pastafari_bigint.h.source.txt": {
+          "bytes": 2885,
+          "sha256": "1c0b796f245b288c7a2b58f7591e225ae0f6d27bb601e6c9e06c5a961d126d4c"
+        },
+        "result.json": {
+          "bytes": 4138,
+          "sha256": "d9ba66b55bcd36312d182706aa9fb1b32e2b36f3c30f571dc912130c8a488fad"
+        },
+        "v209.zip": {
+          "bytes": 30727,
+          "sha256": "d554b52dc4eebd56420d6120a9fa779cb6a4b898bd779a2fde8d2985b6747e6d"
+        }
+      },
+      "run": 46034705999,
+      "run_head": "17be40cdd70a705c041b51d6e2ed979e447ee73a",
+      "sha256": "2ba7c7ea06ce65c11427f734ddfd55342ba558bdaccb2ff3e8751c3211ba05ad"
+    },
+    "v212": {
+      "artifact": 15218001028,
+      "bytes": 70234,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "result.json": {
+          "bytes": 11400,
+          "sha256": "e1f1b91fd3327dfa8a17581a8c63f93d856958b8b43550f3af2867aaf7a4b54b"
+        },
+        "v211.zip": {
+          "bytes": 66808,
+          "sha256": "2ba7c7ea06ce65c11427f734ddfd55342ba558bdaccb2ff3e8751c3211ba05ad"
+        }
+      },
+      "run": 46036641908,
+      "run_head": "8819adb7b352bbda67dce4c2330b40a8e133a829",
+      "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c"
+    },
+    "v213": {
+      "artifact": 15217701839,
+      "bytes": 70700,
+      "conclusion": "failure",
+      "disposition": "FAILURE_LITERAL_EXTRACTION",
+      "members": {
+        "literal-layout.json": {
+          "bytes": 454,
+          "sha256": "cafeb63ba45d65db420d07a2288c8e32e8e6881405fd847bd65ecd58ea259787"
+        },
+        "v212.zip": {
+          "bytes": 70234,
+          "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c"
+        }
+      },
+      "run": 46037066831,
+      "run_head": "888f9f2dbbd1551a674e8623ef0de05e71dab686",
+      "sha256": "9e9b3ae3071f76127ab506278d2ffce8dd9549409efdb9a55e9a253b883b4e45"
+    },
+    "v214": {
+      "artifact": 15219167469,
+      "bytes": 84014,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "literal-layout.json": {
+          "bytes": 114072,
+          "sha256": "ebd03e86c0fd848436c484af9a7382eec055c8188d287f2964e1f038768a4b2a"
+        },
+        "result.json": {
+          "bytes": 1179,
+          "sha256": "d3fcb98c317dc0b7dccb506fd25b9dd8abd943df4a8234e605dfca07bb0b82fa"
+        },
+        "v212.zip": {
+          "bytes": 70234,
+          "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c"
+        }
+      },
+      "run": 46039012605,
+      "run_head": "d10a8e461dd81841ffafdac0a419251f49fc4581",
+      "sha256": "2885b6bf832b7c41b972d64078d51081270cfc444d75cf1dfe0af6c726221418"
+    },
+    "v215": {
+      "artifact": 15218462900,
+      "bytes": 89080,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "lexical-witnesses.json": {
+          "bytes": 30465,
+          "sha256": "7a71cf6a418d873023494b6262ab50196749e2cf2ec4dc0bb430d20eca07456f"
+        },
+        "literal-layout.json": {
+          "bytes": 114072,
+          "sha256": "ebd03e86c0fd848436c484af9a7382eec055c8188d287f2964e1f038768a4b2a"
+        },
+        "result.json": {
+          "bytes": 979,
+          "sha256": "ca2cdeb72641a56cecdd54337d0bfc2344ac0cdb48f82b2fd3bbcec40dd5491d"
+        },
+        "v212.zip": {
+          "bytes": 70234,
+          "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c"
+        }
+      },
+      "run": 46039437887,
+      "run_head": "23ba4e32d8f69b0792edffa2208ed209eb5b5b06",
+      "sha256": "ee3ef8a05462deb25949f0147a660baa288922f231a8a05c5451a418799fd4b5"
+    },
+    "v216": {
+      "artifact": 15220401365,
+      "bytes": 93702,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "literal-layout.json": {
+          "bytes": 114072,
+          "sha256": "ebd03e86c0fd848436c484af9a7382eec055c8188d287f2964e1f038768a4b2a"
+        },
+        "nested-source-witnesses.json": {
+          "bytes": 46786,
+          "sha256": "ceb353d354c5f6ef313557a2fc0739b145115662c4514e7e5a6e60ab79440680"
+        },
+        "result.json": {
+          "bytes": 691,
+          "sha256": "bdecd65eaa6bb8f3b54bd38ab22626b369087fe93cd971463868b1dc98f6149f"
+        },
+        "v212.zip": {
+          "bytes": 70234,
+          "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c"
+        }
+      },
+      "run": 46041713083,
+      "run_head": "cd87b5a63cf6f4226a218cc54d775134d786cc88",
+      "sha256": "3f2925984681b7cc5ef207a7bafe3cc73ef030d414b79460cb4828c271140950"
+    },
+    "v217": {
+      "artifact": 15221217758,
+      "bytes": 115755,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "core.py.source.txt": {
+          "bytes": 42341,
+          "sha256": "c0f5d18836dc3494affcb8122b863242e35958c7f90928608ccc0f779883a1ef"
+        },
+        "month-weaving-domain-detour.js.source.txt": {
+          "bytes": 11022,
+          "sha256": "942e0fc1deab593f255e4cdd889c73ffb1280ec2420f98a4a40085378ef86873"
+        },
+        "month-weaving-reference.mjs.source.txt": {
+          "bytes": 2756,
+          "sha256": "c11b96c80cdf32f4c9ffad11f9bc02165e04a09043aa3f92653d06f1d454ca1a"
+        },
+        "result.json": {
+          "bytes": 801,
+          "sha256": "94af79228862a1b4e48b2c5e9f90cb966740348bc55d7ad7b5ef5a52d45738c3"
+        },
+        "source-pins.json": {
+          "bytes": 1075,
+          "sha256": "f5147182b956751e15e84bdd2b14fc78333461490a09e410d3324ea66408b5d1"
+        },
+        "update-14-month-weaving-report.md.source.txt": {
+          "bytes": 7997,
+          "sha256": "8f041c64677a62001e23f296d923dceb5036143fea299ec4ea3933936a6a9da0"
+        },
+        "update-14-month-weaving-summary.json.source.txt": {
+          "bytes": 2103,
+          "sha256": "c0b78cdaaf74a4829e7146591be834b6dcfcc858bbba51a0bc96b96d47b69dac"
+        },
+        "v216.zip": {
+          "bytes": 93702,
+          "sha256": "3f2925984681b7cc5ef207a7bafe3cc73ef030d414b79460cb4828c271140950"
+        }
+      },
+      "run": 46043798928,
+      "run_head": "0d25a5271479cd43455ef8f12acef1c974f5da42",
+      "sha256": "fd2479106145ff0b7597b441c10af79c6a5dff1a43ca4e0e2be5322377ee5ec6"
+    },
+    "v218": {
+      "artifact": 15220964264,
+      "bytes": 149911,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "discovery24LegacyDailyMonths.ts.source.txt": {
+          "bytes": 8739,
+          "sha256": "dceb9ecdcbf91b679ffe500a3cafc65f25e8bc74b809c1b2ed5b7a623f02fa4f"
+        },
+        "normativeOracle.ts.source.txt": {
+          "bytes": 34362,
+          "sha256": "4f91b9d562d089da01fd829730621df9e4812550fdda72dfcb7754b0757763ac"
+        },
+        "patch24ScalableNativeWeaving.ts.source.txt": {
+          "bytes": 6525,
+          "sha256": "ab828103c4b329c7fba6e41d00ce21e540617476ca603047a55e88e1144eec1d"
+        },
+        "patch24ScalableUnrank.ts.source.txt": {
+          "bytes": 4702,
+          "sha256": "4a1ddf71a4598161c46a4727394daf4fbcd744e415e523fd440c08d9654a7d74"
+        },
+        "postStage55FinalDate.ts.source.txt": {
+          "bytes": 4326,
+          "sha256": "a611f6b99bf982db7e6f3bbb3ac7b59b2ef9596993fe2f041dbf299d105fa030"
+        },
+        "result.json": {
+          "bytes": 824,
+          "sha256": "1ca38148c8cc7c35beb43e99fb6d5c4feed89eb7f547b9187a663b8c83952e82"
+        },
+        "source-pins.json": {
+          "bytes": 997,
+          "sha256": "312012e82c66c2bc5f810a653f62cbec3cb1c95280d37fb88d6fb509dcc74df0"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v217.zip": {
+          "bytes": 115755,
+          "sha256": "fd2479106145ff0b7597b441c10af79c6a5dff1a43ca4e0e2be5322377ee5ec6"
+        }
+      },
+      "run": 46044563580,
+      "run_head": "5315c6b3953b0d3bcbd40917aad88fa1ef535541",
+      "sha256": "d6a6490a06caf92716e7277be9ca9924b51084110961704f0367bd9e9e04d7c7"
+    },
+    "v219": {
+      "artifact": 15221529429,
+      "bytes": 179511,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "NormativeCalendar.kt.source.txt": {
+          "bytes": 14747,
+          "sha256": "c2141f4eeeb2e6a6568b14542d0ce82dcd7058f2b9449516a4be5f72496c97cb"
+        },
+        "NormativeCore.kt.source.txt": {
+          "bytes": 23020,
+          "sha256": "37a20871c8329fcafd62e1e25e36c059cce46c8cbd6576b624c9391c447491dd"
+        },
+        "Post55ProductionDateBridge.kt.source.txt": {
+          "bytes": 2957,
+          "sha256": "f78ac293c67ae2d39d72e2082544e28fccd56611f2f0032f91bb400204e87f55"
+        },
+        "ProductionMonthWeavingEngine.kt.source.txt": {
+          "bytes": 8900,
+          "sha256": "5f85366115075476bc318940f49511ef24719da42515a5da594a21f613554664"
+        },
+        "result.json": {
+          "bytes": 918,
+          "sha256": "01352f62b9cf6f477637e4fb5d5eac300f02a3c056487a01c74ddc2c3601d581"
+        },
+        "source-pins.json": {
+          "bytes": 860,
+          "sha256": "be72909a70ceb34f3362b4d106565b41de17e45363de4461e2f5ae2d27846fb2"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v218.zip": {
+          "bytes": 149911,
+          "sha256": "d6a6490a06caf92716e7277be9ca9924b51084110961704f0367bd9e9e04d7c7"
+        }
+      },
+      "run": 46045439733,
+      "run_head": "3a0b910fa6075bf4ff5c784c526317e2b992d213",
+      "sha256": "fbb63171d940540267c94d47e3bebbe1507d9c6edd6332f0fc6208b2a0cbb684"
+    },
+    "v220": {
+      "artifact": 15222137624,
+      "bytes": 279743,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "monster.cpp.source.txt": {
+          "bytes": 455223,
+          "sha256": "b69e4b29e655d5962e2e431d821d7ead3a9f96d5ea6a98a8889e4dd33cfe639b"
+        },
+        "monster.hpp.source.txt": {
+          "bytes": 124518,
+          "sha256": "719942e52e1d55fd4d8cbeee839c9d77e65c2485b1eaa061db57056531c514e8"
+        },
+        "normative_reference.cpp.source.txt": {
+          "bytes": 39304,
+          "sha256": "3e9bcf63cf8101e5e8823eb8ec7a548e91548752ea30cb35780cd539d499e591"
+        },
+        "result.json": {
+          "bytes": 1908,
+          "sha256": "16520960932589099d6d55be096df419f4d6bc84cccd40ae5dda7f48b451eb2a"
+        },
+        "source-pins.json": {
+          "bytes": 598,
+          "sha256": "3e2fe6b1976c6a7617c4a36b9e56199159a017f00bb222e55ad1bed52d2fd892"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v219.zip": {
+          "bytes": 179511,
+          "sha256": "fbb63171d940540267c94d47e3bebbe1507d9c6edd6332f0fc6208b2a0cbb684"
+        }
+      },
+      "run": 46047176358,
+      "run_head": "c96604e6cde1ee798308277d464ecbb6cfaa9c59",
+      "sha256": "7d1afd1e742651119962c2b0581d325fd8885feaf6c9ffd406f1e3cffd298c2f"
+    },
+    "v221": {
+      "artifact": 15223861465,
+      "bytes": 303028,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "calendar_date_manager.ex.source.txt": {
+          "bytes": 1857,
+          "sha256": "c922ba415a17bccec92cfe382333bc976e4d88b71dd08f1004dce5bcd63abc0f"
+        },
+        "dispatcher.ex.source.txt": {
+          "bytes": 10415,
+          "sha256": "66f04d2d2622f46f4514c1fd9657d22981dc1ba80c5828d761a7d35b0a70f54c"
+        },
+        "legacy_descending_weaving_order.ex.source.txt": {
+          "bytes": 523,
+          "sha256": "d26fe69bad54b836c3cc0e5049dbad6b06578f94980cb976d857e7709d3a083d"
+        },
+        "month_name_index_manager.ex.source.txt": {
+          "bytes": 2176,
+          "sha256": "f7b3256750bf9c45f1df8980795488df6c23e3e3c99f54e6c3d714d6c9e9c2e6"
+        },
+        "month_weaving_manager.ex.source.txt": {
+          "bytes": 2103,
+          "sha256": "5bfd014617523bad2fe2d791423fed485da2046c1b92d9ab8402cec95a96f26e"
+        },
+        "month_weaving_order_patch.ex.source.txt": {
+          "bytes": 1069,
+          "sha256": "7081e9180094aaddcf8dad5813f3507fa7e3d7514711d2c9713d9922695ab37f"
+        },
+        "normative_reference.ex.source.txt": {
+          "bytes": 34294,
+          "sha256": "2719de1f78912b304bb49b600b3764b08b0ca179fdba4d34311b679dcb8a0cad"
+        },
+        "pastafari_calendar_elixir_vietnamese.ex.source.txt": {
+          "bytes": 6505,
+          "sha256": "842f1700c8dd02e1614601cc77ec1f33444b13069bdb6f0b80509132b3fea456"
+        },
+        "result.json": {
+          "bytes": 840,
+          "sha256": "62769b3813bc1650e0e0d2bd60601d7a8990af3e724ee2f47aac6ae9d8bc7640"
+        },
+        "source-pins.json": {
+          "bytes": 2120,
+          "sha256": "d1433113eeaffcd61f1791a86b6f3d0d68077532f98a17b1af685970cfbac18d"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v220.zip": {
+          "bytes": 279743,
+          "sha256": "7d1afd1e742651119962c2b0581d325fd8885feaf6c9ffd406f1e3cffd298c2f"
+        },
+        "weaving_combinatorics.ex.source.txt": {
+          "bytes": 7959,
+          "sha256": "d95f26736ae9a946989d34a1fb4b8bc139494765f43aab67cbed8035ccde8bdf"
+        }
+      },
+      "run": 46049743760,
+      "run_head": "3f7385a0e9dd2e4c75e8059c6ae2aada49685043",
+      "sha256": "e1f26e93bffb6c0da6272cfb624642a0cc24041b51de4ae98ebfd4b3190846a4"
+    },
+    "v222": {
+      "artifact": 15224395751,
+      "bytes": 339811,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "normalized-unrank.txt": {
+          "bytes": 2305,
+          "sha256": "b41f1153b6a253ffe561d94e88aed856e347af5a8db1f34d07d11ba204551d64"
+        },
+        "normative_oracle_test.v.source.txt": {
+          "bytes": 57922,
+          "sha256": "a2171043ee6e38fab09fa3cf530ac3558bee976474d65bf79c501ce718c8992e"
+        },
+        "patch15_numeric_date.v.source.txt": {
+          "bytes": 29004,
+          "sha256": "39c79d7a886eca5e3eef4020c5e02052af895d2aa233c423f2b2be05afd634e4"
+        },
+        "result.json": {
+          "bytes": 1057,
+          "sha256": "8a34919d2fcd7db468bff52013de9cd2b12cf81e6f2b6cd5841441e195ca7d6e"
+        },
+        "source-pins.json": {
+          "bytes": 408,
+          "sha256": "934d09e7df6b17834b570eb6a5e08fdfa7dbd3dba979d18a921c40d30ca600f2"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v221.zip": {
+          "bytes": 303028,
+          "sha256": "e1f26e93bffb6c0da6272cfb624642a0cc24041b51de4ae98ebfd4b3190846a4"
+        }
+      },
+      "run": 46050003381,
+      "run_head": "a9eef1646f6bb9dbe8b3355bfef71c38ed701889",
+      "sha256": "8dfb7558a5d7d6b0755b9220a259edb53dd8370106e7ca02accd98e01528cb62"
+    },
+    "v223": {
+      "artifact": 15223964844,
+      "bytes": 398844,
+      "conclusion": "success",
+      "disposition": "SUCCESS",
+      "members": {
+        "historical-MonthWeavingCompatibilityRoute.m.source.txt": {
+          "bytes": 2426,
+          "sha256": "7cfb83d22a9402cc349a7652ad9ea02a982e1668648a97782ea3b0b741bec51c"
+        },
+        "historical-MonthWeavingDPPatchWrapper.m.source.txt": {
+          "bytes": 1521,
+          "sha256": "270b35ee7eb5108c932818d0c2167d1d02958e16f44825a053fe94dae646a55a"
+        },
+        "historical-WholeMonthWeavingFamily.m.source.txt": {
+          "bytes": 9685,
+          "sha256": "ddc390e63f9161ef23466a437b7049c0a67feae8875e9b3faa02f0638a0e976d"
+        },
+        "historical-WholeMonthWeavingFamilyPolynomial.m.source.txt": {
+          "bytes": 8105,
+          "sha256": "85c0d3c9a16a46707c7ca29f5a7a63614014c21247cc6e2b772d3b6c3a6a7cb0"
+        },
+        "historical-calendarDateSpaghetti.m.source.txt": {
+          "bytes": 1021,
+          "sha256": "74b63602a2addcfc9c04001e6e810060be71bface8a2ab8c37d18bf50ec65edb"
+        },
+        "historical-finalMonsterIntegration.m.source.txt": {
+          "bytes": 23183,
+          "sha256": "167802882e73cbd4154aa46ee2254a253e4191b9cc14bc93613f9c975539456a"
+        },
+        "historical-normative_oracle.m.source.txt": {
+          "bytes": 32947,
+          "sha256": "08a9b792f2a2a30f2aff044a14f4e714278effc7d987f3302e36989df14cb44b"
+        },
+        "later-MonthWeavingCompatibilityRoute.m.source.txt": {
+          "bytes": 2426,
+          "sha256": "7cfb83d22a9402cc349a7652ad9ea02a982e1668648a97782ea3b0b741bec51c"
+        },
+        "later-MonthWeavingDPPatchWrapper.m.source.txt": {
+          "bytes": 1521,
+          "sha256": "270b35ee7eb5108c932818d0c2167d1d02958e16f44825a053fe94dae646a55a"
+        },
+        "later-WholeMonthWeavingFamily.m.source.txt": {
+          "bytes": 7461,
+          "sha256": "a003c218bfca738cde629633702abfb804a812731656c831244ab46ee9f95dd9"
+        },
+        "later-WholeMonthWeavingFamilyPolynomial.m.source.txt": {
+          "bytes": 8105,
+          "sha256": "85c0d3c9a16a46707c7ca29f5a7a63614014c21247cc6e2b772d3b6c3a6a7cb0"
+        },
+        "later-calendarDateSpaghetti.m.source.txt": {
+          "bytes": 1021,
+          "sha256": "74b63602a2addcfc9c04001e6e810060be71bface8a2ab8c37d18bf50ec65edb"
+        },
+        "later-finalMonsterIntegration.m.source.txt": {
+          "bytes": 23183,
+          "sha256": "167802882e73cbd4154aa46ee2254a253e4191b9cc14bc93613f9c975539456a"
+        },
+        "later-normative_oracle.m.source.txt": {
+          "bytes": 32947,
+          "sha256": "08a9b792f2a2a30f2aff044a14f4e714278effc7d987f3302e36989df14cb44b"
+        },
+        "result.json": {
+          "bytes": 958,
+          "sha256": "b8bb451d45be8e6691f6ea8789ad662fdd2493250b39fc29a2ddd7d49dfb7f45"
+        },
+        "source-pins.json": {
+          "bytes": 3860,
+          "sha256": "1acab15b6eb4338275fd7da9bf575464cc351ea428b48fb3928af668e7a67dfd"
+        },
+        "v131.zip": {
+          "bytes": 16126,
+          "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2"
+        },
+        "v222.zip": {
+          "bytes": 339811,
+          "sha256": "8dfb7558a5d7d6b0755b9220a259edb53dd8370106e7ca02accd98e01528cb62"
+        }
+      },
+      "run": 46052448323,
+      "run_head": "55a320b40b36e9d7f67c2b96b60c0228eadf55e1",
+      "sha256": "f4626ed927dac17b3843c11f509fd30299b3b9e689470048cfef98d9bf609e79"
+    }
+  },
+  "failed_attempts_preserved": [
+    "v210",
+    "v213"
+  ],
+  "independent_algorithms_certified": 0,
+  "index_blob": "57b2734dfa119c456425c99234486787e5133ba1",
+  "index_commit": "777cfba8bdafb0b98295272000449020007a947c",
+  "native_date_calls": 0,
+  "outside_this_index": 69,
+  "roster_reconciled_records": [
+    {
+      "git_blob_sha1": "b52e752922907a1e0036c46682acada5a614e812",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/c/src/calendar_core.c",
+      "record_id": "MAIN-C",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "41139730e0e3ef76c86443df7c631bb037dd6bcfe6fcf9902d5965b29db68090",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "c26e5657b950306b5af2b4c769b91269ec4dbef4",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/cpp/src/calendar.cpp",
+      "record_id": "MAIN-CPP",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "61def3bfe53e5a4ac56fb4690eb9f2850bfe0e3500fe6f8f6b74ea86bbe6763d",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "014eca6908ed726c6c760204580bf18119015bbc",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "browser/pastafari-calendar-fast.js",
+      "record_id": "MAIN-FAST-JS",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "9855be62ebe9e9e24d301f849dc010e8195fa8cf7857b45c492b60a2bb0c60ef",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "ccc83664a0d7ad7a4854d0ddb34eac07bdfda8f7",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/java/src/main/java/org/appointedtimes/PastafariCalendar.java",
+      "record_id": "MAIN-JAVA",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "6379efbee6c74f0c0050fb77b522b79157d9a1b2f0e1c04603b5e1927b20dee6",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "e99f6a6b2413bed2f972ef24360a466df59e34cd",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/python/pastafari_calendar/core.py",
+      "record_id": "MAIN-PY",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "c0f5d18836dc3494affcb8122b863242e35958c7f90928608ccc0f779883a1ef",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "ed45d86b647693a74f596775a686188eee75910c",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/ruby/pastafari_calendar.rb",
+      "record_id": "MAIN-RUBY",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "167391c2d9923f2f5b9f8fd3d5509fb6732ec7a45d030a0694640a50ccfa8f9a",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "8c8f092cb43fbaa76a9e7b33aaee1f19266ba516",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "verification/reference-oracle/reference.mjs",
+      "record_id": "REF-57",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "21c103d3540eb5481445a190cef98f2628de7eb90b7240879fede0d519cf4a95",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "7c0947885632c84963a189eed43e8038b08492fa",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/tests/generate_spec_canonical.py",
+      "record_id": "REF-58",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "78214ead588e9e8c34b1d526663d97f4083d19bb30ccfcad85880bcc0a091d59",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT"
+    },
+    {
+      "git_blob_sha1": "0751f5abba43610be16d2cc11f486c9b8b300601",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "implementations/cobol/src/pastafari-engine.cob",
+      "record_id": "MAIN-COBOL",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "a0af660776a5c713c44cdbe8d00d4f164e6b49581cd12fabe62975dcf5b0c2f3",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_C_HELPER_EXPLICIT_JS_CACHE_COMMENT"
+    },
+    {
+      "git_blob_sha1": "3b349037967550b0253db6235db5044ac9703466",
+      "historical_head_commit": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "observed_source_path": "browser/pastafari-calendar-core.js",
+      "record_id": "MAIN-AUTH-JS",
+      "repository": "Sargon17-Green/pastafari-calendar",
+      "source_sha256": "823937139efb9ca37d8b8422187c09855ade5ad95d52efff733036f7b7e62c15",
+      "weave_model": "VISIBLE_RANK_BRIDGE_EQUIVALENT_SEALED_COUNT_UNRANK_UNRESOLVED"
+    },
+    {
+      "git_blob_sha1": "7ef0f98664f6b65da4018055c3cea2edbfaba338",
+      "historical_head_commit": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0",
+      "observed_source_path": "src/postStage55FinalDate.ts",
+      "record_id": "MARATHI-TS",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "a611f6b99bf982db7e6f3bbb3ac7b59b2ef9596993fe2f041dbf299d105fa030",
+      "weave_model": "REVERSED_LAST_FIRST_DISTRIBUTION"
+    },
+    {
+      "git_blob_sha1": "67490019de374ed2c60315e4a8c40dc81775052e",
+      "historical_head_commit": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0",
+      "observed_source_path": "test/normativeOracle.ts",
+      "record_id": "REF-52",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "4f91b9d562d089da01fd829730621df9e4812550fdda72dfcb7754b0757763ac",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO"
+    },
+    {
+      "git_blob_sha1": "3c328abfd40b6fc1edf730e6012b05ad7fcb65d6",
+      "historical_head_commit": "b05b46a8f85733c4d24ed2ddfb422d37c5918ec6",
+      "observed_source_path": "soak/Post55ProductionDateBridge.kt",
+      "record_id": "WELSH-KOTLIN-PRODUCTION",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "f78ac293c67ae2d39d72e2082544e28fccd56611f2f0032f91bb400204e87f55",
+      "weave_model": "SHIFT_EQUIVALENT_SUFFIX_RECURRENCE_EXACT_RATIOS"
+    },
+    {
+      "git_blob_sha1": "033869e43285f793aacf7cf300ce6cf6d0c6a81f",
+      "historical_head_commit": "b05b46a8f85733c4d24ed2ddfb422d37c5918ec6",
+      "observed_source_path": "src/test/kotlin/pastafari/NormativeCalendar.kt",
+      "record_id": "REF-26",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "c2141f4eeeb2e6a6568b14542d0ce82dcd7058f2b9449516a4be5f72496c97cb",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO"
+    },
+    {
+      "git_blob_sha1": "7afdb1fd14541bf6aa25ab8c71386318ac238800",
+      "historical_head_commit": "6c394549081c92f685c437730f2d7e8282947e17",
+      "observed_source_path": "include/pastafari/monster.hpp",
+      "record_id": "LATIN-CPP",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "719942e52e1d55fd4d8cbeee839c9d77e65c2485b1eaa061db57056531c514e8",
+      "weave_model": "HYBRID_FULL_STATE_LE40_SHIFT_EQUIVALENT_SUFFIX_GT40"
+    },
+    {
+      "git_blob_sha1": "098a912212a9329b6ee264a4139084a83556d428",
+      "historical_head_commit": "6c394549081c92f685c437730f2d7e8282947e17",
+      "observed_source_path": "tests/reference/normative_reference.cpp",
+      "record_id": "REF-06",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "3e9bcf63cf8101e5e8823eb8ec7a548e91548752ea30cb35780cd539d499e591",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO"
+    },
+    {
+      "git_blob_sha1": "a2cc063bb853a823fdcfbf38f814dce918d363d3",
+      "historical_head_commit": "748319ac9b83e9c7fa6c0fc85372c858b5e76eb9",
+      "observed_source_path": "lib/pastafari_calendar_elixir_vietnamese.ex",
+      "record_id": "VIET-ELIXIR",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "842f1700c8dd02e1614601cc77ec1f33444b13069bdb6f0b80509132b3fea456",
+      "weave_model": "SHIFT_EQUIVALENT_SUFFIX_RECURRENCE_DUAL_ORDER_SHARED_TABLE"
+    },
+    {
+      "git_blob_sha1": "be1638f46b2190d617af0378a61b077bda10bf32",
+      "historical_head_commit": "748319ac9b83e9c7fa6c0fc85372c858b5e76eb9",
+      "observed_source_path": "test/support/normative_reference.ex",
+      "record_id": "REF-14",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "2719de1f78912b304bb49b600b3764b08b0ca179fdba4d34311b679dcb8a0cad",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO"
+    },
+    {
+      "git_blob_sha1": "a2950a4fc1f6cefc095a870e92bc1dd0f35bc5bf",
+      "historical_head_commit": "a35970c2dbcb0aff6cb8099d9b29bff9f744ccda",
+      "observed_source_path": "pastafari/patch15_numeric_date.v",
+      "record_id": "AMHARIC-V",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "39c79d7a886eca5e3eef4020c5e02052af895d2aa233c423f2b2be05afd634e4",
+      "weave_model": "BOTTOM_UP_SUFFIX_RECURRENCE_CUMULATIVE_BINARY"
+    },
+    {
+      "git_blob_sha1": "a4557ba0b5ec391ff280284a9725cb5ed7e2e7e7",
+      "historical_head_commit": "a35970c2dbcb0aff6cb8099d9b29bff9f744ccda",
+      "observed_source_path": "pastafari/normative_oracle_test.v",
+      "record_id": "REF-54",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "a2171043ee6e38fab09fa3cf530ac3558bee976474d65bf79c501ce718c8992e",
+      "weave_model": "RECURSIVE_SUFFIX_GT12_FIRST_POSITION_DISTRIBUTION_LE12_CUMULATIVE_BINARY"
+    },
+    {
+      "git_blob_sha1": "baa99e11dd32c5dd195d7d3d33a2177a2650c4d5",
+      "historical_head_commit": "6ef2f95c2e37b2bade2dbec5c9a3656d8fc06d20",
+      "observed_source_path": "src/calendarDateSpaghetti.m",
+      "record_id": "POLISH-MATLAB",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "74b63602a2addcfc9c04001e6e810060be71bface8a2ab8c37d18bf50ec65edb",
+      "weave_model": "LAYERED_FULL_STATE_DAG"
+    },
+    {
+      "git_blob_sha1": "2ee12e722004b9426fafafa311c1fe5dccd2ce4b",
+      "historical_head_commit": "6ef2f95c2e37b2bade2dbec5c9a3656d8fc06d20",
+      "observed_source_path": "tests/oracle/normative_oracle.m",
+      "record_id": "REF-30",
+      "repository": "Sargon17-Green/Pastafarian-Calendar",
+      "source_sha256": "08a9b792f2a2a30f2aff044a14f4e714278effc7d987f3302e36989df14cb44b",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO"
+    }
+  ],
+  "roster_total": 91,
+  "schema": "SOAK_V225_DURABLE_LINEAGE_ARCHIVE/1",
+  "semantic_receipt_checks": [
+    "v217",
+    "v218",
+    "v219",
+    "v220",
+    "v221",
+    "v222",
+    "v223"
+  ],
+  "whole_year_credit": 0,
+  "workflow_log_zip_archive": "NOT_PERFORMED_IN_V225"
+}
