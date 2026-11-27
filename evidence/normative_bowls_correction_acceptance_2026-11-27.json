@@ -1,0 +1,39 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "scope": "Normative op55/op56 correction gate only; historical bounded stages retained; Stage23/op57 not started",
+  "source_pin": "bbd5af3b0a7a0cbe1538908ea79dd62c4a0003ca",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "run": 46020305887,
+  "job": 140577919416,
+  "artifact": 15207828599,
+  "zip_sha256": "16119f611744ea0753731b4595b2b8d16c7367fc9178531b051e83c154889de4",
+  "crc_entries": 88,
+  "source_git_blobs_verified": 7,
+  "program_stdout_stderr_hashes_verified": 54,
+  "cases_independently_recomputed": 18,
+  "output_cells_and_order_assertions_verified": 943,
+  "input_cell_immutability_assertions_verified": 12015,
+  "positive_exit0_empty_stderr": 14,
+  "mutant_exact_assertion_exit1": 4,
+  "method": "Offline independent position-indexed recurrence and factoradic unranking; compare raw fixture assertion operands, receipt expected values, file hashes, exact output and exit codes. All allocation cell immutability assertions matched. CI math: 384 seeded properties and 720 ranks; not 720 native runs.",
+  "rank_boundary_cases": [
+    1,
+    512,
+    513,
+    720
+  ],
+  "full_paths": [
+    46,
+    12
+  ],
+  "canonical_run": 46020305849,
+  "canonical_job": 140577920208,
+  "gate": "ACCEPTED_BOUNDED_NORMATIVE_CORRECTION",
+  "exclusions": [
+    "invalid physical pointers",
+    "unallocated/truncated tuples",
+    "full normative op57 integration",
+    "unrestricted domain proof"
+  ],
+  "main_merge": false
+}
