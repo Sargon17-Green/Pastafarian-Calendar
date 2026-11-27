@@ -71,7 +71,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
- foreach($key in @('start','ec','et','payload')) {
+ foreach($key in @('start','return','ec','et','payload','done')) {
    $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_stage01_chunked_suite_'+$key+'.txt')
    if($meta.suite_paths.$key -cne $expectedPath -or (Test-Path -LiteralPath $expectedPath)){throw 'SUITE_RECEIPT_PATH_INVALID_OR_PREEXISTS'}
  }
@@ -82,8 +82,8 @@ try {
  $deadline=[DateTime]::UtcNow.AddSeconds(600)
  $want=[Text.Encoding]::ASCII.GetBytes([string]$meta.marker_token)
  while([DateTime]::UtcNow -lt $deadline){
-   if(Test-Path -LiteralPath $meta.suite_paths.ec -PathType Leaf){
-     if((Get-Item -LiteralPath $meta.suite_paths.ec).Length -ge 1){break}
+   if(Test-Path -LiteralPath $meta.suite_paths.done -PathType Leaf){
+     if((Get-Item -LiteralPath $meta.suite_paths.done).Length -ge 1){break}
    }
    Start-Sleep -Milliseconds 250
    $p.Refresh()
@@ -138,7 +138,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $suite=@{}
- foreach($key in @('start','ec','et','payload')){
+ foreach($key in @('start','return','ec','et','payload','done')){
    $path=[string]$meta.suite_paths.$key
    if(Test-Path -LiteralPath $path -PathType Leaf){
      Copy-Item -LiteralPath $path -Destination (Join-Path $Evidence ('suite_'+$key+'.txt')) -Force
@@ -146,13 +146,15 @@ try {
    }else{$suite[$key]=$null}
  }
  $r['suite_start_exact']=($suite.start -ceq ('APL_GERMAN_STAGE01_START|SOURCE='+$source))
+ $r['suite_return_exact']=($suite.return -ceq ('APL_GERMAN_STAGE01_RETURN|SOURCE='+$source))
+ $r['suite_receipts_attempted_exact']=($suite.done -ceq ('APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE='+$source))
  $r['suite_ec']=$suite.ec
  $r['suite_error_type']=$suite.et
  $r['suite_payload']=$suite.payload
  $ecValue=([string]$suite.ec).Trim()
- $r['suite_status']=if($ecValue -cin @('1','2')){'RETURNED_SUCCESS'}elseif($ecValue -ceq '0'){'RETURNED_ERROR'}elseif($r['deadline_elapsed']){'TIMEOUT_NO_EC'}else{'NO_EC_RECEIPT'}
+ $r['suite_status']=if($ecValue -cin @('1','2')){'RETURNED_SUCCESS'}elseif($ecValue -ceq '0'){'RETURNED_ERROR'}elseif($r['suite_receipts_attempted_exact'] -or $null -ne $suite.payload -or $null -ne $suite.et){'RECEIPT_CAPTURE_FAILURE'}elseif($r['deadline_elapsed']){'TIMEOUT_NO_EC'}else{'NO_EC_RECEIPT'}
  $fxOK=(($last -eq 95) -and (-not $inconsistent) -and (@($rows | Where-Object { $_.exact -ne $true }).Count -eq 0))
- $success=($matchFinal -and $fxOK -and $r['suite_start_exact'] -and $r['suite_status'] -ceq 'RETURNED_SUCCESS' -and $want.Length -eq 113)
+ $success=($matchFinal -and $fxOK -and $r['suite_start_exact'] -and $r['suite_return_exact'] -and $r['suite_receipts_attempted_exact'] -and $r['suite_status'] -ceq 'RETURNED_SUCCESS' -and $want.Length -eq 113)
  $r['native_fx']=if($fxOK){'CONFIRMED'}else{'NOT_CONFIRMED'}
  $r['stage01']=if($success){'ACCEPTED'}else{'NOT_ACCEPTED'}
  $r['status']=if($success){'NATIVE_STAGE01_CHUNKED_ACCEPTED'}else{'NATIVE_STAGE01_CHUNKED_NOT_ACCEPTED'}

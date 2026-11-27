@@ -92,28 +92,33 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
     # expression. If the original RunStage01Tests signals an APL error, the
     # marker expression that follows it must never execute.
     suite_paths = {name: str(path_obj.with_name(f"{path_obj.stem}_suite_{name}.txt"))
-                   for name in ("start", "ec", "et", "payload")}
+                   for name in ("start", "return", "ec", "et", "payload", "done")}
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
-                     + " ⋄ RunStage01Tests ⋄ " + marker_write(STAGE01_MARKER, marker))
+                     + " ⋄ RunStage01Tests ⋄ "
+                     + marker_write(f"APL_GERMAN_STAGE01_RETURN|SOURCE={SOURCE_COMMIT}", suite_paths["return"])
+                     + " ⋄ " + marker_write(STAGE01_MARKER, marker))
     def write_expr(expr, path):
         return f"(⍕({expr})) ⎕NAPPEND ((⎕UCS {_codes(path)}) ⎕NCREATE 0)"
     # EC[1] is status, EC[2] error type, EC[3] result OR error payload.
     # Archive the payload as display text, never interpret a successful result as an error.
-    receipt_program = " ⋄ ".join([
-        write_expr("⊃QAS01FinalEC[3]", suite_paths["payload"]),
-        write_expr("⊃QAS01FinalEC[2]", suite_paths["et"]),
+    # Each receipt is separately controlled: a payload conversion/write error
+    # must not suppress the EC status or the final receipt-attempt marker.
+    receipt_programs = [
         write_expr("⊃QAS01FinalEC[1]", suite_paths["ec"]),
-    ])
-    programs = chunk_programs + [final_program, receipt_program]
+        write_expr("⊃QAS01FinalEC[2]", suite_paths["et"]),
+        write_expr("⊃QAS01FinalEC[3]", suite_paths["payload"]),
+        marker_write(f"APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE={SOURCE_COMMIT}", suite_paths["done"]),
+    ]
+    programs = chunk_programs + [final_program] + receipt_programs
     # Keep assignment inside a code-point-encoded controlled expression.
     # Only quad and diamond may appear as non-ASCII glyphs in the workspace LX.
     # The original test and final marker remain in the SAME inner EC.
     capture_program = "QAS01FinalEC←⎕EC ⎕UCS " + _codes(final_program)
     outer = " ⋄ ".join(["⎕EC ⎕UCS " + _codes(p) for p in chunk_programs]
-                        + ["⎕EC ⎕UCS " + _codes(capture_program),
-                           "⎕EC ⎕UCS " + _codes(receipt_program)])
+                        + ["⎕EC ⎕UCS " + _codes(capture_program)]
+                        + ["⎕EC ⎕UCS " + _codes(p) for p in receipt_programs])
     serialized = outer.replace("⎕", "{quad}").replace("⋄", "{diamond}")
     if serialized.replace("{diamond}", "⋄").replace("{quad}", "⎕") != outer:
         raise ValueError("STAGE01_LX_ESCAPE_NOT_REVERSIBLE")

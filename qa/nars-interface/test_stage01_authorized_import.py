@@ -40,11 +40,11 @@ class Stage01ChunkedTests(unittest.TestCase):
             if not fragment.startswith("⎕EC ⎕UCS "):
                 raise AssertionError("OUTER_FRAGMENT_MISSING_EC")
             result.append("".join(chr(int(n)) for n in fragment[len("⎕EC ⎕UCS "):].split()))
-        capture = result[-2]
+        capture = result[23]
         prefix = "QAS01FinalEC←⎕EC ⎕UCS "
         if not capture.startswith(prefix):
             raise AssertionError("FINAL_CAPTURE_WRAPPER_MISSING")
-        result[-2] = "".join(chr(int(n)) for n in capture[len(prefix):].split())
+        result[23] = "".join(chr(int(n)) for n in capture[len(prefix):].split())
         return serialized, selfcheck, result
 
     def test_five_files_and_all_95_unique_source_locked_functions(self):
@@ -76,23 +76,27 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(receipt["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(receipt["final_expression"], "SAME_EC_AFTER_TEST")
         _, outer, programs = self.decode(candidate)
-        self.assertEqual(len(programs), 25)
-        self.assertEqual(outer.count("⎕EC ⎕UCS "), 25)
+        self.assertEqual(len(programs), 28)
+        self.assertEqual(outer.count("⎕EC ⎕UCS "), 28)
         self.assertNotIn("←", outer)
         self.assertNotIn("QAS01FinalEC", outer)
-        capture_fragment = outer.split(" ⋄ ")[-2]
+        capture_fragment = outer.split(" ⋄ ")[23]
         capture = "".join(chr(int(n)) for n in capture_fragment[len("⎕EC ⎕UCS "):].split())
         self.assertTrue(capture.startswith("QAS01FinalEC←⎕EC ⎕UCS "))
         self.assertEqual(capture.count("QAS01FinalEC←"), 1)
-        final = programs[-2]
+        final = programs[23]
         self.assertEqual(final.count("RunStage01Tests"), 1)
-        self.assertEqual(final.count("⎕NAPPEND"), 2)
+        self.assertEqual(final.count("⎕NAPPEND"), 3)
         self.assertTrue(final.startswith("95 Stage01ChunkAssert 0 ⋄ "))
         self.assertLess(final.index("⎕NAPPEND"), final.index("RunStage01Tests"))
         self.assertLess(final.index("RunStage01Tests"), final.rindex("⎕NAPPEND"))
-        self.assertIn("QAS01FinalEC[1]", programs[-1])
-        self.assertIn("QAS01FinalEC[2]", programs[-1])
-        self.assertIn("QAS01FinalEC[3]", programs[-1])
+        for index, slot in enumerate((1, 2, 3), 24):
+            self.assertIn(f"QAS01FinalEC[{slot}]", programs[index])
+            self.assertEqual(programs[index].count("⎕NAPPEND"), 1)
+            self.assertEqual(programs[index].count("QAS01FinalEC["), 1)
+        self.assertNotIn("QAS01FinalEC", programs[27])
+        self.assertEqual(programs[27].count("⎕NAPPEND"), 1)
+        self.assertEqual(set(receipt["suite_paths"]), {"start", "return", "ec", "et", "payload", "done"})
         self.assertEqual(len(STAGE01_MARKER.encode("ascii")), 113)
         self.assertEqual(receipt["final_inner_sha256"], hashlib.sha256(final.encode("utf-8")).hexdigest())
         self.assertEqual(sum(program.count(" Stage01PrefixFix ") for program in programs), 95)
@@ -124,7 +128,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         serialized, outer, _ = self.decode(candidate)
         self.assertTrue(serialized.isascii())
         self.assertNotIn("⋄", serialized)
-        self.assertEqual(serialized.count("{diamond}"), 24)
+        self.assertEqual(serialized.count("{diamond}"), 27)
         self.assertEqual(receipt["outer_lx_chars"], len(outer))
         self.assertEqual(receipt["outer_lx_sha256"], hashlib.sha256(outer.encode("utf-8")).hexdigest())
         self.assertIn("0=foo=:3", candidate.decode("cp1252"))
