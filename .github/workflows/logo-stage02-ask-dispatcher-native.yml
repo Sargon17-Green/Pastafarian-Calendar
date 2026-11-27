@@ -1,4 +1,4 @@
-name: Logo Stage2 bounded paired signed gate profiling
+name: Logo Stage2 QA signed gap coverage and shard audit
 on:
   push:
     branches:
@@ -6,188 +6,104 @@ on:
 permissions:
   contents: read
 jobs:
-  paired:
+  host-coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 2
       matrix:
-        gate: [1, 37, 38, 40, 41, -1, -38]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+        direction: [forward, reverse]
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify source and reconstruct candidates
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor 00620c1b2b80cb63328ea3af3a7a541a53913853 HEAD
-          test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = "ad001c6aeeb6c758f5004b206a656fec5d6fc403"
-          git diff --exit-code c21646e1b06f25b3f75fb672dd432ead8e664875 HEAD -- src test
-          mkdir -p "$RUNNER_TEMP/profile"
-          out="$RUNNER_TEMP/profile"
-          git rev-parse HEAD > "$out/commit.txt"
-          git ls-tree -r HEAD src test > "$out/source-blobs.txt"
-          test "$(sha256sum "$out/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
-          cp src/exact_integer.logo "$out/reference.logo"
-          cp test/normative_reference.logo "$out/frozen-reference.logo"
-          # QA candidate: patch only worktree after exact source-lock verification.
-          # For 0 <= rem < den, quotient digit=0 and remainder=rem.
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("src/exact_integer.logo")
-          s = p.read_text(encoding="utf-8")
-          anchor = "to bi.mag.qdigit :rem :den\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend"
-          replacement = 'make "AD.QDIGIT.ZERO.HITS 0\n\n' + 'to bi.mag.qdigit :rem :den\n  if (bi.mag.compare :rem :den) < 0 [\n    make "AD.QDIGIT.ZERO.HITS (:AD.QDIGIT.ZERO.HITS + 1)\n    output (list 0 :rem)\n  ]\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
-          assert s.count(anchor) == 1
-          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
-          print("QA_QDIGIT_ZERO_CANDIDATE=READY")
-          PY
-          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "fb96c1b367388a358c21582fe1a3300bd909a30749c05280ca593c873066199b"
-          # Exact bounded carry split: q=(n-r)/10000 is an integer, 0<=r<10000.
-          # No approximate quotient, 32-bit signed safe; leave out-of-range path intact.
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("src/exact_integer.logo")
-          s = p.read_text(encoding="utf-8")
-          anchor = 'to bi.small.split.base :n\n  output bi.small.split.base.work :n 0\nend'
-          replacement = 'to bi.small.split.base :n\n  if and (:n >= 0) (:n < 100000000) [\n    localmake "r remainder :n 10000\n    localmake "q int (quotient (:n - :r) 10000)\n    output (list :q :r)\n  ]\n  output bi.small.split.base.work :n 0\nend'
-          assert s.count(anchor) == 1
-          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
-          print("QA_CARRY_SPLIT_CANDIDATE=READY")
-          PY
-          cp src/exact_integer.logo "$out/carry.logo"
-          # Exact single-limb divisor fast path, with unchanged general fallback.
-          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "90a5a0212435b03f3be8924a6d04787ee4ec1169f308afec684daee28e8e70f1"
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path("src/exact_integer.logo")
-          s = p.read_text(encoding="utf-8")
-          anchor = '  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
-          replacement = "  if and ((count :den) = 1) ((count :rem) <= 2) [\n    localmake \"d first :den\n    localmake \"n first :rem\n    if (count :rem) = 2 [make \"n (:n + 10000 * last :rem)]\n    if and (and (:d > 0) (:d < 10000)) (and (:n >= 0) (:n < (10000 * :d))) [\n      localmake \"r remainder :n :d\n      localmake \"q int (quotient (:n - :r) :d)\n      output (list :q (list :r))\n    ]\n  ]\n  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend"
-          assert s.count(anchor) == 1
-          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
-          print("QA_SINGLE_LIMB_QDIGIT=READY")
-          PY
-          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "1b4873233d5483692d8a80e60568c207bb3ab29e79d92af9e535479ecb6607f3"
-          cp src/exact_integer.logo "$out/single.logo"
-          git restore -- src/exact_integer.logo
-          sha256sum "$out/"*.logo > "$out/raw-hashes.txt"
-          python3 - "$out" <<'PY'
-          from pathlib import Path
-          import sys
-          out = Path(sys.argv[1])
-          # Both candidates use the identical instrumentation; no semantic changes.
-          for variant in ('carry', 'single'):
-              p = out / (variant + '.logo')
-              s = p.read_text()
-              anchor = 'make "AD.QDIGIT.ZERO.HITS 0'
-              assert s.count(anchor) == 1
-              s = s.replace(anchor, anchor + '\nmake "PROFILE.SINGLE 0\nmake "PROFILE.FALLBACK 0')
-              anchor = '  output bi.mag.qdigit.binary :rem :den 0 (:BI.BASE - 1)\nend'
-              assert s.count(anchor) == 1
-              s = s.replace(anchor, '  make "PROFILE.FALLBACK (:PROFILE.FALLBACK + 1)\n' + anchor)
-              if variant == 'single':
-                  anchor = '      output (list :q (list :r))'
-                  assert s.count(anchor) == 1
-                  s = s.replace(anchor, '      make "PROFILE.SINGLE (:PROFILE.SINGLE + 1)\n' + anchor)
-              (out / (variant + '-instrumented.logo')).write_text(s)
-          # Instrument only a generated copy of the frozen gate reporter.
-          source = (out / 'frozen-reference.logo').read_text()
-          start = source.index('to nr.gate.gap :signedStep\n')
-          end = source.index('\nend\n', start) + len('\nend\n')
-          s = source[start:end]
-          for anchor, marker in [
-              ('  localmake "s nr.sauce nr.foundation :target', 'SAUCE'),
-              ('  localmake "stream nr.ask :s 1 1', 'ASK'),
-              ('  localmake "chosen nr.choose.rank :stream bi.small 922', 'CHOOSE'),
-              ('  output bi.add bi.small 41 :chosen', 'DONE')]:
-              assert s.count(anchor) == 1, anchor
-              s = s.replace(anchor, '  print [PROFILE_' + marker + ']\n' + anchor)
-          (out / 'phases.logo').write_text(source[:start] + s + source[end:])
-          PY
-          sha256sum "$out/"*.logo > "$out/all-source-hashes.txt"
-      - name: Build pinned UCBLogo 6.2.5
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
-          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
-          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = "a0215433f07384e4c42fe247525867f11e6f32f7"
-          cd "$RUNNER_TEMP/ucblogo-source"
-          autoreconf -fi
-          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
-          make -j2
-          make install
-          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
-      - name: Run three fresh processes for one signed index
+      - name: Verify exact inputs and reconstruct bounded host coverage
         shell: bash
         env:
-          GATE: ${{ matrix.gate }}
+          DIRECTION: ${{ matrix.direction }}
         run: |
           set -euo pipefail
-          python3 - "$RUNNER_TEMP/profile" "$LOGO_BIN" "$GATE" <<'PY'
-          import json, re, subprocess, sys, time
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/commit.txt
+          test "$(cat evidence/commit.txt)" = "$GITHUB_SHA"
+          git diff --exit-code c21646e1b06f25b3f75fb672dd432ead8e664875 HEAD -- src test
+          test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = ad001c6aeeb6c758f5004b206a656fec5d6fc403
+          test "$(git hash-object qa/logo_signed_gap_oracle.py)" = 0bbce1ed67f4eb7c12986b4a3431eff9b27a4974
+          test "$(git hash-object qa/logo_ido_ask_dispatcher_code_bundle.zip)" = b679bba73363c4d8644aa510c798eaabae915824
+          git ls-tree -r HEAD src test > evidence/source-blobs.txt
+          timeout --signal=TERM --kill-after=5s 540 python3 -u - <<'PY' | tee evidence/host.log
+          import hashlib, json, os, re, sys, zipfile
           from pathlib import Path
-          out, logo, gate = Path(sys.argv[1]), sys.argv[2], int(sys.argv[3])
-          results = {}
-          # Alternate order to reduce systematic order bias. Same runner and binary.
-          order = ['carry', 'single'] if gate % 2 else ['single', 'carry']
-          for variant in order + ['reference']:
-              integer = out / (variant + ('-instrumented' if variant != 'reference' else '') + '.logo')
-              normative = out / ('phases.logo' if variant != 'reference' else 'frozen-reference.logo')
-              script = out / (variant + '-probe.logo')
-              lines = ['load "' + str(integer), 'load "' + str(normative),
-                       'print [PROFILE_BEGIN]',
-                       'make "PROFILE.GAP nr.gate.gap bi.small ' + str(gate),
-                       'print (sentence [PROFILE_GAP] (bi.to.small :PROFILE.GAP))']
-              if variant != 'reference':
-                  lines += ['print (sentence [PROFILE_ZERO] :AD.QDIGIT.ZERO.HITS)',
-                            'print (sentence [PROFILE_SINGLE] :PROFILE.SINGLE)',
-                            'print (sentence [PROFILE_FALLBACK] :PROFILE.FALLBACK)']
-              lines += ['print [PROFILE_PASS]', 'bye']
-              script.write_text('\n'.join(lines) + '\n')
-              start = time.monotonic()
-              marks, values, errors = {}, {}, []
-              log = out / (variant + '.log')
-              with log.open('w') as f:
-                  proc = subprocess.Popen(['timeout','--signal=TERM','--kill-after=5s','300','stdbuf','-oL','-eL',logo,str(script)], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, errors='replace')
-                  for line in proc.stdout:
-                      elapsed = time.monotonic() - start
-                      f.write(f'{elapsed:.6f} {line}'); f.flush()
-                      line = line.strip()
-                      m = re.fullmatch(r'PROFILE_(BEGIN|SAUCE|ASK|CHOOSE|DONE|PASS)', line)
-                      if m:
-                          if m[1] in marks: errors.append('duplicate '+m[1])
-                          marks[m[1]] = elapsed
-                      m = re.fullmatch(r'PROFILE_(GAP|ZERO|SINGLE|FALLBACK) (-?[0-9]+)', line)
-                      if m:
-                          if m[1] in values: errors.append('duplicate '+m[1])
-                          values[m[1]] = int(m[2])
-                      if re.search(r"don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|ERORO:", line, re.I): errors.append(line)
-                  code = proc.wait()
-              elapsed = time.monotonic()-start
-              phases = {}
-              for a,b in [('SAUCE','ASK'),('ASK','CHOOSE'),('CHOOSE','DONE')]:
-                  if a in marks and b in marks: phases[a] = marks[b]-marks[a]
-              ok = code == 0 and not errors and 'PASS' in marks and 42 <= values.get('GAP',0) <= 963
-              if variant != 'reference':
-                  ok = ok and set(phases)=={'SAUCE','ASK','CHOOSE'} and all(v>=0 for v in phases.values()) and all(values.get(k,-1)>=0 for k in ('ZERO','SINGLE','FALLBACK')) and sum(values.get(k,0) for k in ('ZERO','SINGLE','FALLBACK'))>0
-              results[variant] = dict(exit=code, elapsed=elapsed, marks=marks, values=values, phases=phases, errors=errors, ok=ok)
-              (out / 'results.json').write_text(json.dumps(dict(gate=gate,order=order,results=results),indent=2)+'\n')
-              print(variant, results[variant], flush=True)
-          equal = all(r['ok'] for r in results.values()) and len({r['values']['GAP'] for r in results.values()})==1
-          print('PAIRED_GATE_PASS' if equal else 'PAIRED_GATE_NOT_ACCEPTED', gate, flush=True)
-          sys.exit(0 if equal else 1)
+          sys.path.insert(0, 'qa')
+          from logo_signed_gap_oracle import FOUNDATION, gap, reconstruct
+          p = Path('evidence')
+          direction = os.environ['DIRECTION']
+          src = Path('src/exact_integer.logo').read_text()
+          def constant(name):
+              m = re.search(r'^to nr\.' + name + r'\n  output bi\.make (-?1) \[([0-9 ]+)\]\nend$', src, re.M)
+              if not m: raise RuntimeError('constant source shape changed: ' + name)
+              return int(m[1]) * sum(int(x) * 10000**i for i,x in enumerate(m[2].split()))
+          with zipfile.ZipFile('qa/logo_ido_ask_dispatcher_code_bundle.zip') as z:
+              harness = z.read('qa/logo_stage2_ask_dispatcher_common.logo').decode()
+          assert harness.count('localmake "calculation nr.foundation') == 1
+          assert harness.count('if equalp :AD.DIRECTION "reverse [make "calculation nr.tablets]') == 1
+          assert harness.count('if equalp :AD.GROUP "year5000 [ad.run.year5000 :AD.DIRECTION :calculation]') == 1
+          assert constant('foundation') == FOUNDATION == -15055671
+          assert constant('tablets') == -278522
+          center = constant('foundation' if direction == 'forward' else 'tablets')
+          # Previously completed frozen references only; other candidate pairs are not reference evidence.
+          for k,g in [(38,767),(-1,503),(37,238),(41,68)]:
+              assert gap(k) == g, (k,g)
+          print('HOST_COVERAGE_BEGIN',direction,center,flush=True)
+          data = reconstruct(center)
+          rows = data['gates']
+          assert (data['low'],data['high']) == (center-5778,center+5778)
+          def dump(path,obj):
+              path.write_text(json.dumps(obj,sort_keys=True,separators=(',',':'))+'\n')
+          def digest(path):
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          # Host-computed shards, not Native or independent algorithm evidence.
+          manifest=[]
+          for start in range(0,len(rows),512):
+              part=rows[start:start+512]
+              f=p/f'shard-{start//512:04d}.json'
+              dump(f,part)
+              manifest.append({'file':f.name,'sha256':digest(f),'first':part[0]['index'],'last':part[-1]['index'],'count':len(part)})
+          dump(p/'manifest.json',{'center':center,'low':data['low'],'high':data['high'],'shards':manifest})
+          # Reassemble from persisted shards, verify all bounds and signed recurrences.
+          rebuilt=[]
+          for entry in json.loads((p/'manifest.json').read_text())['shards']:
+              f=p/entry['file']; assert digest(f)==entry['sha256']
+              part=json.loads(f.read_text())
+              assert len(part)==entry['count'] and part[0]['index']==entry['first'] and part[-1]['index']==entry['last']
+              rebuilt.extend(part)
+          assert rebuilt==rows
+          assert [x['index'] for x in rebuilt]==list(range(rebuilt[0]['index'],rebuilt[-1]['index']+1))
+          anchor=[x for x in rebuilt if x['index']==0]
+          assert anchor==[{'index':0,'day':FOUNDATION,'gap':None}]
+          for a,b in zip(rebuilt,rebuilt[1:]):
+              g=b['gap'] if b['index']>0 else a['gap']
+              assert type(g) is int and 42<=g<=963 and b['day']-a['day']==g
+          lo,hi=data['low'],data['high']
+          assert rebuilt[0]['day']<=lo<=hi<=rebuilt[-1]['day']
+          left=max(i for i,x in enumerate(rebuilt) if x['day']<=lo)
+          right=min(i for i,x in enumerate(rebuilt) if x['day']>=hi)
+          window=rebuilt[left:right+1]
+          assert window[0]['day']<=lo and window[-1]['day']>=hi
+          # Keep the full anchored proof; separate compact scan window to avoid quadratic cache lookup.
+          dump(p/'window.json',{'center':center,'low':lo,'high':hi,'gates':window})
+          # Boundary and interior Native probes to be run later; no implied Native pass.
+          probes=sorted({x['index'] for x in [window[0],window[-1],window[len(window)//2]] if x['index']!=0})
+          dump(p/'native-probe-plan.json',[{'index':k,'host_gap':gap(k)} for k in probes])
+          dump(p/'summary.json',{'direction':direction,'center':center,'count':len(rebuilt),'first':rebuilt[0],'last':rebuilt[-1],'window_count':len(window),'window_first':window[0],'window_last':window[-1],'manifest_sha256':digest(p/'manifest.json'),'window_sha256':digest(p/'window.json'),'qualification':'HOST_ONLY_NO_NATIVE_ACCEPTANCE'})
+          print((p/'summary.json').read_text(),flush=True)
+          print('HOST_SIGNED_COVERAGE=PASS',flush=True)
           PY
-      - name: Preserve exact source, logs and partial measurements
+      - name: Preserve host evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-paired-gate-${{ matrix.gate }}
-          path: ${{ runner.temp }}/profile/
+          name: logo-host-gap-coverage-${{ matrix.direction }}
+          path: evidence/
           if-no-files-found: error
           retention-days: 30
