@@ -63,26 +63,7 @@ jobs:
           if ($wanted.Length -ne 113 -or $actual.Length -ne 113 -or [Convert]::ToBase64String($actual) -cne [Convert]::ToBase64String($wanted)) { throw 'STAGE01_NATIVE_MARKER_BYTES_MISMATCH' }
           $ec=[IO.File]::ReadAllText((Resolve-Path 'stage01_chunked_evidence/suite_ec.txt').Path)
           $start=[IO.File]::ReadAllText((Resolve-Path 'stage01_chunked_evidence/suite_start.txt').Path)
-          if ($ec -notmatch '^\s*[12]\s*
-      - name: Hash all receipts and native markers
-        if: always()
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force stage01_chunked_evidence,font_bootstrap_evidence | Out-Null
-          Get-ChildItem stage01_chunked_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
-            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$h  $($_.FullName)"
-          } | Set-Content -Encoding utf8 stage01_chunked_evidence.sha256
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: apl-german-stage01-chunked-native-receipts
-          path: |
-            font_bootstrap_evidence/
-            stage01_chunked_evidence/
-            stage01_chunked_evidence.sha256
-          retention-days: 21
- -or $start -cne ('APL_GERMAN_STAGE01_START|SOURCE='+$r.source_commit)) { throw 'INDEPENDENT_NATIVE_EC_OR_START_MISMATCH' }
+          if ($ec.Trim() -cnotin @('1','2') -or $start -cne ('APL_GERMAN_STAGE01_START|SOURCE='+$r.source_commit)) { throw 'INDEPENDENT_NATIVE_EC_OR_START_MISMATCH' }
           Write-Output 'APL_GERMAN_STAGE01_NATIVE_PASS_EXACT_CHUNKED_95'
       - name: Hash all receipts and native markers
         if: always()

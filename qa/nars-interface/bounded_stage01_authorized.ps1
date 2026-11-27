@@ -149,37 +149,8 @@ try {
  $r['suite_ec']=$suite.ec
  $r['suite_error_type']=$suite.et
  $r['suite_payload']=$suite.payload
- $r['suite_status']=if($suite.ec -match '^\s*[12]\s*
- $r['stage01']=if($success){'ACCEPTED'}else{'NOT_ACCEPTED'}
- $r['status']=if($success){'NATIVE_STAGE01_CHUNKED_ACCEPTED'}else{'NATIVE_STAGE01_CHUNKED_NOT_ACCEPTED'}
-}catch{
- $r['status']='FAIL_CLOSED'
- $r['errors']+= $_.Exception.Message
- throw
-}finally{
- $r | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath (Join-Path $Evidence 'native_fx_progress.json') -Encoding utf8
- Write-Output ('STAGE01_CHUNKED_STATUS='+$r['status'])
- Write-Output ('STAGE01_FX_LAST_CONTIGUOUS_AFTER='+$r['last_contiguous_after'])
- Write-Output ('STAGE01_FX_NONCONTIGUOUS_EXACT='+$r['noncontiguous_exact'])
- Write-Output ('STAGE01_FINAL_MARKER_EXACT='+$r['final_marker'].exact)
- Write-Output ('STAGE01='+$r['stage01'])
-}
-){'RETURNED_SUCCESS'}elseif($suite.ec -match '^\s*0\s*
- $r['stage01']=if($success){'ACCEPTED'}else{'NOT_ACCEPTED'}
- $r['status']=if($success){'NATIVE_STAGE01_CHUNKED_ACCEPTED'}else{'NATIVE_STAGE01_CHUNKED_NOT_ACCEPTED'}
-}catch{
- $r['status']='FAIL_CLOSED'
- $r['errors']+= $_.Exception.Message
- throw
-}finally{
- $r | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath (Join-Path $Evidence 'native_fx_progress.json') -Encoding utf8
- Write-Output ('STAGE01_CHUNKED_STATUS='+$r['status'])
- Write-Output ('STAGE01_FX_LAST_CONTIGUOUS_AFTER='+$r['last_contiguous_after'])
- Write-Output ('STAGE01_FX_NONCONTIGUOUS_EXACT='+$r['noncontiguous_exact'])
- Write-Output ('STAGE01_FINAL_MARKER_EXACT='+$r['final_marker'].exact)
- Write-Output ('STAGE01='+$r['stage01'])
-}
-){'RETURNED_ERROR'}elseif($r['deadline_elapsed']){'TIMEOUT_NO_EC'}else{'NO_EC_RECEIPT'}
+ $ecValue=([string]$suite.ec).Trim()
+ $r['suite_status']=if($ecValue -cin @('1','2')){'RETURNED_SUCCESS'}elseif($ecValue -ceq '0'){'RETURNED_ERROR'}elseif($r['deadline_elapsed']){'TIMEOUT_NO_EC'}else{'NO_EC_RECEIPT'}
  $fxOK=(($last -eq 95) -and (-not $inconsistent) -and (@($rows | Where-Object { $_.exact -ne $true }).Count -eq 0))
  $success=($matchFinal -and $fxOK -and $r['suite_start_exact'] -and $r['suite_status'] -ceq 'RETURNED_SUCCESS' -and $want.Length -eq 113)
  $r['native_fx']=if($fxOK){'CONFIRMED'}else{'NOT_CONFIRMED'}
