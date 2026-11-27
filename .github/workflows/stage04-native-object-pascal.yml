@@ -1,0 +1,36 @@
+name: Stage 4 Native Object Pascal - intentional seeded RED
+on:
+  push:
+    branches:
+      - 'Object-Pascal\+Português'
+    paths:
+      - 'src/Stage02WorkCounts.pas'
+      - 'test/stage04_foundation_tag_probe.pas'
+      - 'test/build_and_run_stage04_discovery.sh'
+      - 'docs/stage04_foundation_day_tag_oracle.py'
+      - '.github/workflows/stage04-native-object-pascal.yml'
+permissions:
+  contents: read
+jobs:
+  stage04-seeded-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FPC
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+      - name: Observe exact seeded mismatch against independent oracle
+        run: bash test/build_and_run_stage04_discovery.sh
+      - name: Upload evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage04-seeded-red-evidence
+          path: |
+            evidence/stage04-foundation-tag.log
+            evidence/stage04-native-probe.log
+            build/stage04/vectors.tsv
+          if-no-files-found: warn
+          retention-days: 30

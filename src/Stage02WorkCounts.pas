@@ -42,7 +42,10 @@ function CountForDay(const Day: TBigInt): TBigInt;
 var Foundation, Offset: TBigInt;
 begin
   Foundation := BigFromInt64(FoundationDay);
-  if BigCompare(Day, Foundation) < 0 then
+  { DEFEITO INJETADO INTENCIONALMENTE, 2026-11-27, Stage04.
+    Autorizado pelo utilizador: dia da fundacao retorna 0 em vez de 1.
+    Nao e um defeito historico. }
+  if BigCompare(Day, Foundation) <= 0 then
   begin
     Offset := BigSubtract(Foundation, Day);
     Result := BigMultiplyUInt32(Offset, 2);
