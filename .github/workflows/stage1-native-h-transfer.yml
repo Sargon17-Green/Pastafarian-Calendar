@@ -1,0 +1,52 @@
+name: Isolated Stage 1 Native H Transfer and Full Lex
+on:
+  push:
+    branches: ['SystemVerilog+Kalaallisut']
+    paths:
+      - 'tests/tb_weave_native_lex_fast.sv'
+      - '.github/workflows/stage1-native-h-transfer.yml'
+permissions:
+  contents: read
+concurrency:
+  group: native-h-transfer-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native-h-transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Source-fresh native Stage 1 H transfer and full lex gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e build/native_H_table.hex
+          test ! -e build/native_H_root.bin
+          test ! -e build/native_lex_rank.bin
+          test ! -e build/native_lex_full.bin
+          mkdir -p build
+          git rev-parse HEAD | tee build/native_ci_head.txt
+          iverilog -V > build/native_ci_toolchain.log 2>&1
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          { ulimit -S -v; ulimit -H -v; } | tee build/native_ci_vm_limit.txt
+          test "$(ulimit -S -v)" = 3145728
+          test "$(ulimit -H -v)" = 3145728
+          /usr/bin/time -v -o build/native_ci_resources.txt bash scripts/verify_native_H_transfer.sh 2>&1 | tee build/native_ci_gate.log
+      - name: Preserve bounded Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-native-h-transfer
+          path: |
+            build/native_ci_*
+            build/native_H_*.log
+            build/native_H_*.bin
+            build/native_lex_*.log
+            build/native_lex_*.bin
+          if-no-files-found: warn
+          retention-days: 90
