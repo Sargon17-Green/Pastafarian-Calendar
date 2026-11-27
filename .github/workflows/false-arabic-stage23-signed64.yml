@@ -1,0 +1,54 @@
+name: FALSE Arabic Stage23 uninstrumented signed64 boundaries
+on:
+  push:
+    branches: ['FALSE\+العربية']
+    paths:
+      - '.github/workflows/false-arabic-stage23-signed64.yml'
+      - 'tools/stage23_signed64_native.py'
+permissions:
+  contents: read
+jobs:
+  stage23-signed64:
+    if: github.ref == 'refs/heads/FALSE+العربية'
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      SOURCE_PIN: ${{ github.sha }}
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build exact original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage23_signed64 upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/stage23_signed64/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/stage23_signed64/runtime_observed.txt
+          test "$(cat evidence/stage23_signed64/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+          gcc --version > evidence/stage23_signed64/compiler_version.txt
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src upstream/interpreter.c upstream/src/false.c upstream/utils/file.c upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c upstream/src/token.c -o upstream/false_int > evidence/stage23_signed64/compiler_stdout.txt 2> evidence/stage23_signed64/compiler_stderr.txt
+          printf '%s' '4 7 1ø.%%' > evidence/stage23_signed64/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/stage23_signed64/unicode_pick.false > evidence/stage23_signed64/unicode_pick.stdout 2> evidence/stage23_signed64/unicode_pick.stderr
+          test "$(cat evidence/stage23_signed64/unicode_pick.stdout)" = '4'
+      - name: Run eight separate uninstrumented signed64 boundary cases, stop on first failure
+        run: |
+          python3 -m py_compile tools/stage23_measure.py tools/stage23_differential.py tools/stage23_signed64_native.py
+          python3 tools/stage23_signed64_native.py
+      - name: Preserve exact programs, source, output and receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage23-signed64
+          path: evidence/stage23_signed64/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
