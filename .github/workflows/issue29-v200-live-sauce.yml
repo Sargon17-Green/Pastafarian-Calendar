@@ -1,0 +1,138 @@
+name: Issue29 v200 live Ada upstream Sauce and month selectors (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v200-live-sauce.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  upstream:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock sources and restore independently certified ring
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "0148d2e4c53b2f753ade7b80a05a445881f81012"
+          git diff --exit-code HEAD^ HEAD -- src
+          mkdir -p evidence "$RUNNER_TEMP/live"
+          git rev-parse HEAD > evidence/QA_HEAD.txt
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git rev-parse FETCH_HEAD)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          test "$(git rev-parse FETCH_HEAD:src/normative_oracle.adb)" = "0be8f8ab4ddef26d34963d5567707a511ebda50b"
+          git archive FETCH_HEAD src | tar -x -C "$RUNNER_TEMP/live"
+          git ls-tree -r FETCH_HEAD src > evidence/source-blobs.txt
+          echo "d10d50383025d73ad2ce11d19d5759221d70f730" > evidence/LIVE_HEAD.txt
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15178712147/zip > "$RUNNER_TEMP/source.zip"
+          echo "424c346b85ef09eeb3615332429f3319dca4a21a9e61e315c44f456d6b88ba3f  $RUNNER_TEMP/source.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,os,zipfile
+          from pathlib import Path
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"source.zip") as z:
+              assert z.testzip() is None
+              d=json.loads(z.read("source-weave-rank.json"))
+              o=json.loads(z.read("source-weave-rank-oracle.json"))
+              assert d["rank"]==o["rank"] and d["native_selector_executed"]
+          assert 1 <= int(d["ring_first"]) <= 2**127-1 and d["direction"] in (-1,1)
+          Path("evidence/expected.json").write_text(json.dumps({"ring_first":str(d["ring_first"]),"direction":d["direction"],"month_count":45,"year_length":4244,"calculation_day":-15055671,"year_first_day":-15057702},indent=2)+"\n")
+          PY
+      - name: Install GNAT and GMP bindings
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Execute unchanged native Sauce and selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live"
+          mkdir tests
+          cat > upstream.gpr <<'GPR'
+          with "gnatcoll_gmp.gpr";
+          project Upstream is
+             for Source_Dirs use ("src", "tests");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("issue29_v200_upstream.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata", "-gnato");
+             end Compiler;
+          end Upstream;
+          GPR
+          cat > tests/issue29_v200_upstream.adb <<'ADA'
+          with Ada.Text_IO;
+          with Ada.Numerics.Big_Numbers.Big_Integers;
+          with Normative_Oracle;
+          procedure Issue29_V200_Upstream is
+             use Ada.Text_IO;
+             use Ada.Numerics.Big_Numbers.Big_Integers;
+             use Normative_Oracle;
+             C : constant Big_Integer := To_Big_Integer (-15_055_671);
+             T : constant Big_Integer := To_Big_Integer (-15_057_702);
+             R : constant Sauce_Result := Sauce (C, T);
+             Length : constant Positive := 4244;
+             Low : constant Positive := (Length + 122) / 123;
+             High : constant Positive := Positive'Min (47, Length / 4);
+             Month_Rank : constant Big_Integer :=
+               Choose_Rank (Ask_Bowl (R, 3, 30), To_Big_Integer (High - Low + 1));
+             procedure Report (Label_Text : String; Bowl : Positive; Seal : Natural) is
+                S : constant Answer_Stream := Ask_Bowl (R, Bowl, Seal);
+             begin
+                Put_Line (Label_Text & "_FIRST=" & To_String (S.First));
+                Put_Line (Label_Text & "_DIRECTION=" & Integer'Image (S.Direction_Step));
+             end Report;
+          begin
+             for I in R.Bowls'Range loop
+                Put_Line ("BOWL" & Positive'Image (I) & "=" & To_String (R.Bowls (I)));
+             end loop;
+             Report ("MONTH_COUNT", 3, 30);
+             Report ("MONTH_LENGTHS", 3, 31);
+             Report ("WEAVE", 4, 32);
+             Report ("MONTH_NAMES", 5, 33);
+             Put_Line ("MONTH_COUNT_VALUE=" & To_String (To_Big_Integer (Low - 1) + Month_Rank));
+             Put_Line ("V200_UPSTREAM_COMPLETE ZERO_F=1");
+          end Issue29_V200_Upstream;
+          ADA
+          timeout -k 5s 180s gprbuild -p -j2 -P upstream.gpr > "$GITHUB_WORKSPACE/evidence/build.log" 2>&1
+          sha256sum bin/issue29_v200_upstream > "$GITHUB_WORKSPACE/evidence/binary.sha256"
+          set +e
+          (ulimit -v 2097152; ulimit -t 120; timeout -k 5s 150s /usr/bin/time -v -o "$GITHUB_WORKSPACE/evidence/time.txt" bin/issue29_v200_upstream) > "$GITHUB_WORKSPACE/evidence/stdout.txt" 2> "$GITHUB_WORKSPACE/evidence/stderr.txt"
+          code=$?
+          set -e
+          echo "$code" > "$GITHUB_WORKSPACE/evidence/exit.txt"
+          cat "$GITHUB_WORKSPACE/evidence/stdout.txt"
+          test "$code" = 0
+      - name: Compare actual upstream values against frozen certificate
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          e=Path("evidence")
+          d=json.loads((e/"expected.json").read_text())
+          out=(e/"stdout.txt").read_text()
+          fields=dict(line.split("=",1) for line in out.splitlines() if "=" in line)
+          assert "V200_UPSTREAM_COMPLETE ZERO_F=1" in out
+          actual={"ring_first":str(int(fields["WEAVE_FIRST"])),"direction":int(fields["WEAVE_DIRECTION"]),"month_count":int(fields["MONTH_COUNT_VALUE"])}
+          checks={k:actual[k]==d[k] for k in actual}
+          result={"schema":"ISSUE29_V200_UPSTREAM/1","expected":d,"actual":actual,"checks":checks,"calendar_calls":0,"year_length_input_frozen":True,"month_lengths_executed":False,"whole_year_credit":0}
+          (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps(result))
+          assert all(checks.values()), "upstream mismatch"
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v200-upstream-${{ github.run_id }}
+          path: evidence/
+          retention-days: 30
