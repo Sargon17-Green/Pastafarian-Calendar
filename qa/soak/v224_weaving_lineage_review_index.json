@@ -1,0 +1,425 @@
+{
+  "schema": "SOAK_V224_WEAVING_LINEAGE_REVIEW_INDEX/1",
+  "date": "2026-11-27",
+  "scope": "Additive partial historical component review; not replacement of v131 or prior receipts",
+  "source_roster": {
+    "run": 44715717410,
+    "artifact": 14618673805,
+    "sha256": "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2",
+    "records": 91
+  },
+  "records_in_this_index": 22,
+  "other_roster_records_not_in_this_index": 69,
+  "records": [
+    {
+      "record_id": "MAIN-C",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-CPP",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-FAST-JS",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-JAVA",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-PY",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-RUBY",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-57",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-58",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_AND_INCREMENTAL_PRODUCT",
+      "versions": [
+        209
+      ],
+      "limitations": "Same recurrence and state update; not whole-engine identity or origin proof.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-COBOL",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "SHARED_SUFFIX_RECURRENCE_C_HELPER_EXPLICIT_JS_CACHE_COMMENT",
+      "versions": [
+        209,
+        211
+      ],
+      "limitations": "C dependency owns weave and other combinatorics; not arithmetic-only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MAIN-AUTH-JS",
+      "historical_head": "cc2cf0b422757a5e7c33218ce30cffa8f99c6786",
+      "weave_model": "VISIBLE_RANK_BRIDGE_EQUIVALENT_SEALED_COUNT_UNRANK_UNRESOLVED",
+      "versions": [
+        212,
+        213,
+        214,
+        215,
+        216,
+        217
+      ],
+      "limitations": "Decoded outer payload 7420147 bytes, SHA256 de4ef2f1a6be8e002a2d304e933df67a64dc013344437775baa5babe22b259fc; inner encoding and transformations not reviewed.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "MARATHI-TS",
+      "historical_head": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0",
+      "weave_model": "REVERSED_LAST_FIRST_DISTRIBUTION",
+      "versions": [
+        218
+      ],
+      "limitations": "Source-derived model only; distinct representation not independent origin.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-52",
+      "historical_head": "cc3a613e3b80ba082e5cdb2c7a5d756c7e707df0",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO",
+      "versions": [
+        218
+      ],
+      "limitations": "Reference component only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "WELSH-KOTLIN-PRODUCTION",
+      "historical_head": "b05b46a8f85733c4d24ed2ddfb422d37c5918ec6",
+      "weave_model": "SHIFT_EQUIVALENT_SUFFIX_RECURRENCE_EXACT_RATIOS",
+      "versions": [
+        219
+      ],
+      "limitations": "Explicit singleton path; source model only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-26",
+      "historical_head": "b05b46a8f85733c4d24ed2ddfb422d37c5918ec6",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO",
+      "versions": [
+        219
+      ],
+      "limitations": "Reference component only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "LATIN-CPP",
+      "historical_head": "6c394549081c92f685c437730f2d7e8282947e17",
+      "weave_model": "HYBRID_FULL_STATE_LE40_SHIFT_EQUIVALENT_SUFFIX_GT40",
+      "versions": [
+        220
+      ],
+      "limitations": "Both selector paths reviewed; model only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-06",
+      "historical_head": "6c394549081c92f685c437730f2d7e8282947e17",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO",
+      "versions": [
+        220
+      ],
+      "limitations": "Reference component only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "VIET-ELIXIR",
+      "historical_head": "748319ac9b83e9c7fa6c0fc85372c858b5e76eb9",
+      "weave_model": "SHIFT_EQUIVALENT_SUFFIX_RECURRENCE_DUAL_ORDER_SHARED_TABLE",
+      "versions": [
+        221
+      ],
+      "limitations": "Two orders do not create two independent votes.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-14",
+      "historical_head": "748319ac9b83e9c7fa6c0fc85372c858b5e76eb9",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO",
+      "versions": [
+        221
+      ],
+      "limitations": "Reference component only.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "AMHARIC-V",
+      "historical_head": "a35970c2dbcb0aff6cb8099d9b29bff9f744ccda",
+      "weave_model": "BOTTOM_UP_SUFFIX_RECURRENCE_CUMULATIVE_BINARY",
+      "versions": [
+        222
+      ],
+      "limitations": "Normalized unrank identical to REF-54.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-54",
+      "historical_head": "a35970c2dbcb0aff6cb8099d9b29bff9f744ccda",
+      "weave_model": "RECURSIVE_SUFFIX_GT12_FIRST_POSITION_DISTRIBUTION_LE12_CUMULATIVE_BINARY",
+      "versions": [
+        222
+      ],
+      "limitations": "84 normalized lines identical to production unrank; separate small exhaustive witness is not full F.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "POLISH-MATLAB",
+      "historical_head": "6ef2f95c2e37b2bade2dbec5c9a3656d8fc06d20",
+      "weave_model": "LAYERED_FULL_STATE_DAG",
+      "versions": [
+        223
+      ],
+      "limitations": "Later 6c8e5ba777a52ef85d30e38b893dbbc72de0ee59 reverse suffix distribution; same entrypoint different dependency; no historical overwrite.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    },
+    {
+      "record_id": "REF-30",
+      "historical_head": "6ef2f95c2e37b2bade2dbec5c9a3656d8fc06d20",
+      "weave_model": "FULL_REMAINING_VECTOR_MEMO",
+      "versions": [
+        223
+      ],
+      "limitations": "Same state graph as historical production; traversal order differs.",
+      "full_dependency_closure_verified": false,
+      "algorithmic_independence_certified": false,
+      "eligible_for_soak": false
+    }
+  ],
+  "receipts": [
+    {
+      "version": 209,
+      "run": 46031257472,
+      "artifact": 15213499464,
+      "sha256": "d554b52dc4eebd56420d6120a9fa779cb6a4b898bd779a2fde8d2985b6747e6d",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 210,
+      "run": 46033965002,
+      "artifact": 15216220568,
+      "sha256": "ba678f87bac4ad1ddeb0f1b5db34ed641699bf157b34ecc171a56a7c3eeca7d3",
+      "disposition": "FAILURE_QA_EXPECTATION",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 211,
+      "run": 46034705999,
+      "artifact": 15215228972,
+      "sha256": "2ba7c7ea06ce65c11427f734ddfd55342ba558bdaccb2ff3e8751c3211ba05ad",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 212,
+      "run": 46036641908,
+      "artifact": 15218001028,
+      "sha256": "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 213,
+      "run": 46037066831,
+      "artifact": 15217701839,
+      "sha256": null,
+      "disposition": "FAILURE_LITERAL_EXTRACTION",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 214,
+      "run": 46039012605,
+      "artifact": 15219167469,
+      "sha256": "2885b6bf832b7c41b972d64078d51081270cfc444d75cf1dfe0af6c726221418",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 215,
+      "run": 46039437887,
+      "artifact": 15218462900,
+      "sha256": "ee3ef8a05462deb25949f0147a660baa288922f231a8a05c5451a418799fd4b5",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 216,
+      "run": 46041713083,
+      "artifact": 15220401365,
+      "sha256": "3f2925984681b7cc5ef207a7bafe3cc73ef030d414b79460cb4828c271140950",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 217,
+      "run": 46043798928,
+      "artifact": 15221217758,
+      "sha256": "fd2479106145ff0b7597b441c10af79c6a5dff1a43ca4e0e2be5322377ee5ec6",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 218,
+      "run": 46044563580,
+      "artifact": 15220964264,
+      "sha256": "d6a6490a06caf92716e7277be9ca9924b51084110961704f0367bd9e9e04d7c7",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 219,
+      "run": 46045439733,
+      "artifact": 15221529429,
+      "sha256": "fbb63171d940540267c94d47e3bebbe1507d9c6edd6332f0fc6208b2a0cbb684",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 220,
+      "run": 46047176358,
+      "artifact": 15222137624,
+      "sha256": "7d1afd1e742651119962c2b0581d325fd8885feaf6c9ffd406f1e3cffd298c2f",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 221,
+      "run": 46049743760,
+      "artifact": 15223861465,
+      "sha256": "e1f26e93bffb6c0da6272cfb624642a0cc24041b51de4ae98ebfd4b3190846a4",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 222,
+      "run": 46050003381,
+      "artifact": 15224395751,
+      "sha256": "8dfb7558a5d7d6b0755b9220a259edb53dd8370106e7ca02accd98e01528cb62",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    },
+    {
+      "version": 223,
+      "run": 46052448323,
+      "artifact": 15223964844,
+      "sha256": "f4626ed927dac17b3843c11f509fd30299b3b9e689470048cfef98d9bf609e79",
+      "disposition": "SUCCESS",
+      "byte_archive_verified_in_v224": false
+    }
+  ],
+  "archive_status": "Metadata index only; durable byte archive and revalidation pending; v213 digest not yet retrieved",
+  "next": [
+    "Verify all indexed receipt bytes including failure receipts; archive immutable evidence",
+    "Cross-check every indexed record against v131 exact historical head",
+    "Continue remaining roster groups without conflating other prior reviews"
+  ],
+  "gates": {
+    "issue27_open": true,
+    "issue29_open": true,
+    "stop_new_native_soak_dispatch": true,
+    "admitted_engines": 0,
+    "independent_algorithms_certified": 0,
+    "official_year_credit": 0,
+    "year_target": 10000,
+    "exact_year_bounds_and_calculation_day_policy": "OUTSTANDING",
+    "native_date_calls_in_this_index": 0,
+    "main_changes": false
+  }
+}
