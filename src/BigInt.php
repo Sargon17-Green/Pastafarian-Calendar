@@ -152,7 +152,7 @@ final class BigInt
     {
         $na = count($a->limbs); $nb = count($b->limbs); $nc = count($this->limbs);
         if (!$experiment || PHP_INT_SIZE !== 8 || $this->sign < 0 ||
-            $a->sign <= 0 || $b->sign <= 0 || min($na, $nb) < 8 ||
+            $a->sign <= 0 || $b->sign <= 0 || min($na, $nb) < 24 ||
             min($na, $nb) > 32 || max($na, $nb) < 64 ||
             max($na, $nb, $nc) > 3000) {
             return $this->add($a->mul($b));
