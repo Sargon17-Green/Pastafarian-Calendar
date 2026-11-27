@@ -1,0 +1,160 @@
+name: Soak v220 C++ hybrid weave source lineage (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v220-cpp-hybrid-lineage-model.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify historical source identities and prior receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "3a0b910fa6075bf4ff5c784c526317e2b992d213"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v220-cpp-hybrid-lineage-model.yml"
+          mkdir -p evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14618673805/zip > evidence/v131.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15221529429/zip > evidence/v219.zip
+          echo "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2  evidence/v131.zip" | sha256sum -c -
+          echo "fbb63171d940540267c94d47e3bebbe1507d9c6edd6332f0fc6208b2a0cbb684  evidence/v219.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess
+          from pathlib import Path
+          def load(p,suffix):
+              with zipfile.ZipFile(p) as z:
+                  assert z.testzip() is None
+                  n=[n for n in z.namelist() if n.endswith(suffix)]
+                  assert len(n)==1
+                  return json.loads(z.read(n[0]))
+          prior=load("evidence/v219.zip","result.json")
+          assert (prior["vectors"],prior["states"],prior["transitions"],prior["shift_equivalence_checks"],prior["mismatches"])==(305,5850,9158,2593,0)
+          assert prior["model_only"] and not prior["soak_dispatch_authorized"]
+          r=load("evidence/v131.zip","v131-lineage-screen.json")
+          rows={x["record_id"]:x for x in r["records"]}
+          ref="6c394549081c92f685c437730f2d7e8282947e17"
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          pins={"include/pastafari/monster.hpp":"7afdb1fd14541bf6aa25ab8c71386318ac238800","src/monster.cpp":"d36fc218fe29ea01cbe2c6ca99732581975e3c75","tests/reference/normative_reference.cpp":"098a912212a9329b6ee264a4139084a83556d428"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest(),"bytes":len(b)}
+              Path("evidence",Path(p).name+".source.txt").write_bytes(b)
+          for rid in ["LATIN-CPP","REF-06"]:
+              row=rows[rid]
+              assert row["historical_head_commit"]==ref
+              p=row["observed_source_path"]
+              assert inv[p]["blob"]==row["git_blob_sha1"] and inv[p]["sha256"]==row["source_sha256"]
+          p=Path("evidence/monster.cpp.source.txt").read_text()
+          assert p.count("if (totalLength <= 40)")>=2
+          anchors=["class LegalMonthWeavingCounterInternal","total += countState(applyMove(state, monthId))","class FastLegalMonthWeavingCounterInternal","insertionWays *= (s + n - 2)","insertionWays /= s","static_cast<std::size_t>(s + n - 1)","row[static_cast<std::size_t>(s)] += row[static_cast<std::size_t>(s - 1)]","activeExtensions *= binomial(","suffixPerFixedActive_.at","const Integer legalFamilyCount = exactLegalMonthWeavingCount(lengths)","DPUnrankLegalWeaving(lengths, wantedRank)"]
+          assert all(a in p for a in anchors),[a for a in anchors if a not in p]
+          q=Path("evidence/normative_reference.cpp.source.txt").read_text()
+          anchors=["NormativeOracle::WeaveCounter::count","NormativeOracle::WeaveCounter::legalMove","NormativeOracle::WeaveCounter::applyMove","NormativeOracle::WeaveCounter::unrank1"]
+          assert all(a in q for a in anchors)
+          Path("evidence/source-pins.json").write_text(json.dumps(inv,indent=2)+"\n")
+          PY
+      - name: Compare translated fast and exhaustive state models across selector boundary
+        run: |
+          set -euo pipefail
+          ulimit -v 524288
+          timeout -k 5s 120s python3 - <<'PY'
+          from itertools import product
+          from functools import lru_cache
+          from math import comb
+          import json
+          from pathlib import Path
+          vectors=[L for m in range(1,5) for L in product(range(1,5),repeat=m) if sum(L)<=12]
+          assert len(vectors)==305
+          boundaries=[(13,13,13),(13,13,14),(13,14,14),(20,20),(20,21)]
+          vectors+=boundaries
+          states=transitions=rank_checks=shift_checks=0
+          receipts=[]
+          for L in vectors:
+              m=len(L);N=sum(L)
+              maxactive=[0]
+              for n in L:maxactive.append(maxactive[-1]+n-1)
+              table=[[] for _ in range(m+1)]
+              table[m]=[1]*(maxactive[m]+1)
+              # Literal model of FastLegalMonthWeavingCounterInternal.
+              for a in range(m-1,-1,-1):
+                  n=L[a];ins=1;row=[]
+                  for s in range(maxactive[a]+1):
+                      if s:
+                          assert ins*(s+n-2)%s==0
+                          ins=ins*(s+n-2)//s
+                      row.append(ins*table[a+1][s+n-1]+(row[-1] if s else 0))
+                  table[a]=row
+              @lru_cache(None)
+              def H(i,q):
+                  if i==m-1:return 1
+                  n=L[i+1]
+                  return sum(comb(n+r-2,r)*H(i+1,n+r) for r in range(q))
+              if 1 not in L:
+                  for a in range(1,m+1):
+                      for s,v in enumerate(table[a]):
+                          assert v==H(a-1,s+1)
+                          shift_checks+=1
+              def fast(rem,o,c):
+                  pre=0;B=1
+                  for n in rem[c:o]:
+                      assert n>0
+                      B*=comb(pre+n-1,n-1)
+                      pre+=n
+                  return B*table[o][pre]
+              def children(rem,o,c):
+                  for i,n in enumerate(rem):
+                      if not n or (n==L[i] and i!=o) or (n==1 and i!=c):continue
+                      r=list(rem);r[i]-=1
+                      yield i,(tuple(r),o+(n==L[i]),c+(n==1))
+              @lru_cache(None)
+              def slow(rem,o,c):
+                  global states,transitions
+                  states+=1
+                  if not any(rem):result=1
+                  else:
+                      result=0
+                      for _,child in children(rem,o,c):
+                          transitions+=1
+                          result+=slow(*child)
+                  assert result==fast(rem,o,c),(L,rem,o,c,result,fast(rem,o,c))
+                  return result
+              initial=(L,0,0)
+              total=slow(*initial)
+              def unrank(rank,fn):
+                  state=initial;out=[]
+                  while any(state[0]):
+                      for i,child in children(*state):
+                          block=fn(*child)
+                          if rank>block:rank-=block
+                          else:out.append(i+1);state=child;break
+                      else:raise AssertionError("rank branch")
+                  assert rank==1
+                  return out
+              ranks=range(1,total+1) if total<=100 else sorted({1,2,total//2,total-1,total})
+              for rank in ranks:
+                  assert unrank(rank,slow)==unrank(rank,fast)
+                  rank_checks+=1
+              if L in boundaries:receipts.append({"lengths":L,"total_days":N,"historical_selector":"SLOW" if N<=40 else "FAST","count":str(total),"ranks_checked":len(ranks)})
+          assert len(receipts)==5 and {x["historical_selector"] for x in receipts}=={"SLOW","FAST"}
+          out={"schema":"SOAK_V220_CPP_HYBRID_LINEAGE_MODELS/1","historical_head":"6c394549081c92f685c437730f2d7e8282947e17","source_roster_records":["LATIN-CPP","REF-06"],"production_selector_days_threshold":40,"production_small_model":"FULL_REMAINING_VECTOR_MEMOIZED_CENSUS","production_large_model":"OPENED_TOKEN_SUFFIX_RECURRENCE_WITH_RECOMPUTED_BINOMIAL_PRODUCT","reference_model":"FULL_REMAINING_VECTOR_MEMOIZED_CENSUS","large_model_shift_equivalent_to_main_family_non_singleton":True,"vectors":len(vectors),"states":states,"transitions":transitions,"rank_checks":rank_checks,"shift_equivalence_checks":shift_checks,"boundary_receipts":receipts,"mismatches":0,"evidence_class":"SOURCE_STATIC_AND_SYNTHETIC","model_only":True,"original_cpp_executions":0,"native_date_calls":0,"whole_year_credit":0,"full_dependency_closure_verified":False,"admitted_engines":0,"soak_dispatch_authorized":False}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v220-cpp-model-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
