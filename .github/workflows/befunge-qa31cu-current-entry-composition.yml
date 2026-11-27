@@ -4,6 +4,7 @@ on:
     branches: [qa-befunge98-stage1-order-isolation-20261008]
     paths:
       - '.github/workflows/befunge-qa31cu-current-entry-composition.yml'
+      - 'qa/qa31cw_alternating_zero_sham_native.py'
       - 'qa/qa31cu_current_entry_composition.py'
       - 'qa/QA31CU_CURRENT_ENTRY_COMPOSITION_2026-11-26.md'
       - 'qa/qa31cv_late_digit_gate_native.py'
@@ -24,6 +25,7 @@ permissions:
   actions: read
 jobs:
   compose-current-entry:
+    if: ${{ !contains(github.event.head_commit.message, '[qa31cw-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -86,7 +88,7 @@ jobs:
 
   native-late-digit-gate:
     # Metadata-only repair has no new Native hypothesis; preserve accepted QA31CV.
-    if: ${{ !contains(github.event.head_commit.message, '[qa31cu-meta-only]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[qa31cu-meta-only]') && !contains(github.event.head_commit.message, '[qa31cw-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -113,4 +115,42 @@ jobs:
         with:
           name: befunge-qa31cv-late-digit-gate-native
           path: ${{ runner.temp }}/qa31cv/results/
+          retention-days: 30
+
+  native-alternating-zero-sham:
+    if: ${{ contains(github.event.head_commit.message, '[qa31cw-only]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Execute independent bounded QA31CW Native corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/qa31cw"
+          mkdir -p "$out/results"
+          curl --max-time 60 -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$out/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $out/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+          git rev-parse HEAD > "$out/results/head_sha.txt"
+          set +e
+          timeout --kill-after=10s 1200s docker run --rm --memory=1g --cpus=1 -e PYFUNGE_NO_PSYCO=1 -e QA_HEAD_SHA="$GITHUB_SHA" \
+            -v "$GITHUB_WORKSPACE:/work:ro" -v "$out/results:/results" \
+            -v "$out/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              python -c "compile(open(\"qa/qa31cw_alternating_zero_sham_native.py\").read(), \"qa31cw\", \"exec\")"
+              python -u qa/qa31cw_alternating_zero_sham_native.py src/work_counts.b98 /results /tmp/PyFunge-0.5-rc2.tar.gz
+            ' 2>&1 | tee "$out/results/native.log"
+          rc=${PIPESTATUS[0]}
+          set -e
+          printf '%s\n' "$rc" > "$out/results/exit_code.txt"
+          (cd "$out/results" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
+          test "$rc" -eq 0
+          python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["status"]=="PASS" and r["head_sha"]==sys.argv[2]' "$out/results/qa31cw_receipt.json" "$GITHUB_SHA"
+      - name: Retain QA31CW raw receipts, logs and hashes
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31cw-alternating-zero-sham-native
+          path: ${{ runner.temp }}/qa31cw/results/
           retention-days: 30
