@@ -1,4 +1,4 @@
-name: MATLAB Stage55 Actual Source Weaving Rank Certificate (QA)
+name: Stage55 GMP Actual Source Rank Full Word Certificate (QA)
 on:
   push:
     branches:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   polynomial-middle-rank:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 25
     steps:
       - name: Checkout exact QA branch
         uses: actions/checkout@v4
@@ -114,158 +114,172 @@ jobs:
             echo "REFERENCE_MIDDLE_RANK_SHA256=cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
           } > evidence/source-lock.txt
           echo "GATE_PASS all source locks"
-      - name: Verify prior cursor, frozen arithmetic overlay and independent interval certificate
+      - name: Restore immutable native rank and independently checked rank
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15177965281/zip > "$RUNNER_TEMP/prior-prefix.zip"
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15057540500/zip > "$RUNNER_TEMP/independent-cxx.zip"
-          echo "4a9e08c39af34421488101811c5ced36cba7c2ad079c2642cfd10e0e8a8d7c6f  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
-          echo "8863bb2ae94e3ffb1425d43156d868074bf8d1837937f87b08d3df575039fc5e  $RUNNER_TEMP/independent-cxx.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15178712147/zip > "$RUNNER_TEMP/source-rank.zip"
+          echo "424c346b85ef09eeb3615332429f3319dca4a21a9e61e315c44f456d6b88ba3f  $RUNNER_TEMP/source-rank.zip" | sha256sum -c -
           python3 - <<'PY'
-          import gzip, hashlib, json, os, shutil, sys, zipfile
+          import hashlib,json,os,sys,zipfile
           from pathlib import Path
           sys.set_int_max_str_digits(0)
-          tmp=Path(os.environ["RUNNER_TEMP"])
           ev=Path("evidence")
-          digest=lambda b: hashlib.sha256(b).hexdigest()
-          dec_hash=lambda n: digest(str(n).encode("ascii"))
-          with zipfile.ZipFile(tmp/"prior-prefix.zip") as z:
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"source-rank.zip") as z:
               assert z.testzip() is None
-              prior=z.read("latest-suffix-cursor.json")
-              optimized=z.read("BigInt-QA-overlay.m.txt")
-              # Entire immutable archive is hash-locked; cursor also checked against C++ below.
-              assert json.loads(prior)["prefix_symbols_matched"]==4244 and json.loads(prior)["full_word_verified"]
-              assert digest(optimized)=="22df597bf9174e38e38b968e8b80fe456882029a94c526f199fd030f03e0980d"
-              (ev/"prior-prefix-result.json").write_bytes(prior)
-              (ev/"BigInt-QA-overlay.m.txt").write_bytes(optimized)
-          p=json.loads(prior)
-          base="stage55-full-prefix-inverse-rank/"
-          with zipfile.ZipFile(tmp/"independent-cxx.zip") as z:
-              assert z.testzip() is None
-              wordbytes=z.read(base+"word.json")
-              fixturebytes=z.read(base+"fixture.json")
-              assert digest(wordbytes)=="82042fef5a65cc8b08120d069fa9d8f31c05e6761040f82c3341328ded9b44e5"
-              assert digest(fixturebytes)=="fd5f292e44e47bdba1b2be3cb8992ccbb6e63c56edd5b74f5e5adc6f3d6e5212"
-              assert wordbytes==Path("tests/fixtures/stage55_year5000_middle_word.json").read_bytes()
-              assert fixturebytes==Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_bytes()
-              word=json.loads(wordbytes); fixture=json.loads(fixturebytes)
-              report=json.loads(z.read(base+"report.json"))
-              root_count=int(report["root_count"]); R=int(report["middle_rank"])
-              assert dec_hash(root_count)=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
-              assert dec_hash(R)=="cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
-              assert R==root_count//2+1
-              (ev/"root-count.txt").write_text(str(root_count)+"\n")
-              trace=[json.loads(x) for x in gzip.decompress(z.read(base+"prefix_intervals.jsonl.gz")).splitlines()]
-          assert len(trace)==len(word)==4244 and word.index(44)+1==202 and word.index(45)+1==245
-          lengths=fixture["month_lengths"]
-          assert len(lengths)==45 and sum(lengths)==4244
-          lo,hi=1,root_count
-          hashes=[]
-          remaining=list(lengths)
-          for i,r in enumerate(trace,1):
-              assert r["prefix_length"]==i and r["symbol"]==word[i-1]
-              a,b=int(r["rank_low"]),int(r["rank_high"])
-              assert lo<=a<=R<=b<=hi
-              assert dec_hash(a)==r["rank_low_sha256"] and dec_hash(b)==r["rank_high_sha256"]
-              lo,hi=a,b
-              remaining[word[i-1]-1]-=1
-              assert min(remaining)>=0
-              rank=R-a+1; count=b-a+1
-              if i<=4244:
-                  hashes.append(dict(position=i,symbol=word[i-1],rank_sha256=dec_hash(rank),count_sha256=dec_hash(count)))
-              if i==4244:
-                  assert p["prefix"]==word and p["remaining"]==remaining
-                  assert int(p["rank_decimal"])==rank and int(p["count_decimal"])==count
-                  assert p["opened_up_to"]==45 and p["closed_up_to"]==45
-          assert lo==hi==R and remaining==[0]*45
-          (ev/"interval-hashes.json").write_text(json.dumps(hashes,separators=(",",":"))+"\n")
-          overlay=tmp/"qa-arithmetic-overlay"
-          shutil.copytree("src",overlay)
-          (overlay/"+pastafari"/"BigInt.m").write_bytes(optimized)
-          for source in Path("src").rglob("*"):
-              if source.is_file() and source.as_posix()!="src/+pastafari/BigInt.m":
-                  assert source.read_bytes()==(overlay/source.relative_to("src")).read_bytes()
-          print("QA_CERTIFICATE_LOCK_PASS INTERVALS=4244 PRIOR_PREFIX=4244 SOURCE_RANK_PROBE=1")
+              for name in ("source-weave-rank.json","source-weave-rank-oracle.json"):
+                  (ev/name).write_bytes(z.read(name))
+          d=json.loads((ev/"source-weave-rank.json").read_text())
+          o=json.loads((ev/"source-weave-rank-oracle.json").read_text())
+          digest=lambda n:hashlib.sha256(n.encode("ascii")).hexdigest()
+          assert d["rank"]==o["rank"]
+          assert digest(d["rank"])==o["rank_sha256"]=="160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3"
+          assert digest(d["root_count"])==o["count_sha256"]=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
+          assert d["native_selector_executed"] and d["rejection_steps"]=="0"
+          assert 1<=int(d["rank"])<=int(d["root_count"])
+          (ev/"rank.txt").write_text(d["rank"])
+          (ev/"root-count.txt").write_text(d["root_count"])
+          print("SOURCE_RANK_LOCK_PASS")
           PY
-          echo "PASTAFARI_QA_OVERLAY=$RUNNER_TEMP/qa-arithmetic-overlay" >> "$GITHUB_ENV"
-          git diff --exit-code -- src
 
-      - name: Set up MATLAB R2026a
-        uses: matlab-actions/setup-matlab@v3
-        with:
-          release: R2026a
+      - name: Compile independent GMP unrank driver around frozen inverse counter
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libgmp-dev
+          cat > "$RUNNER_TEMP/source-rank-unrank.cpp" <<'CPP'
+          #define main frozen_inverse_main
+          #include "stage55_full_prefix_inverse_rank.cpp"
+          #undef main
+          int main(int argc,char** argv) {
+              try {
+                  if(argc!=5) throw std::runtime_error("fixture rank root output-dir");
+                  run_tiny_self_test();
+                  std::string f=read_file(argv[1]);
+                  auto key=f.find("\"month_lengths\"");
+                  if(key==std::string::npos) throw std::runtime_error("fixture key");
+                  auto L=parse_integer_array(f,key);
+                  if(L.size()!=45 || std::accumulate(L.begin(),L.end(),0L)!=4244)
+                      throw std::runtime_error("fixture dimensions");
+                  Big target=parse_big_decimal(read_file(argv[2]),"source rank");
+                  Big root=parse_big_decimal(read_file(argv[3]),"root count");
+                  Big rank=target,count=root,low=1;
+                  if(rank<1 || rank>root) throw std::runtime_error("rank bounds");
+                  std::vector<long> R=L,word;
+                  long opened=0,closed=0;
+                  std::string dir=argv[4];
+                  std::ofstream trace(dir+"/source-prefix-intervals.tsv");
+                  if(!trace) throw std::runtime_error("trace open");
+                  trace<<"position\tsymbol\tlow\thigh\topened\tclosed\n";
+                  auto start=Clock::now();
+                  for(long pos=1;pos<=4244;++pos) {
+                      if(std::chrono::duration<double>(Clock::now()-start).count()>900)
+                          throw std::runtime_error("bounded time exceeded");
+                      auto blocks=first_letter_blocks(R,opened,closed);
+                      Big total=0;
+                      for(auto &b:blocks) {
+                          if(b<0) throw std::runtime_error("negative block");
+                          total+=b;
+                      }
+                      if(total!=count) throw std::runtime_error("parent count mismatch");
+                      long selected=-1;
+                      for(long j=0;j<45;++j) {
+                          if(rank>blocks[j]) {rank-=blocks[j];low+=blocks[j];}
+                          else {selected=j;count=blocks[j];break;}
+                      }
+                      if(selected<0 || count<=0 || rank<1 || rank>count)
+                          throw std::runtime_error("unrank bounds");
+                      long j=selected;
+                      if(R[j]<=0) throw std::runtime_error("exhausted label");
+                      if(R[j]==L[j]) {
+                          if(j!=opened) throw std::runtime_error("opening order");
+                          ++opened;
+                      }
+                      if(--R[j]==0) {
+                          if(j!=closed) throw std::runtime_error("closing order");
+                          ++closed;
+                      }
+                      Big high=low+count-1;
+                      if(low+rank-1!=target || target>high)
+                          throw std::runtime_error("interval invariant");
+                      word.push_back(j+1);
+                      trace<<pos<<'\t'<<j+1<<'\t'<<low<<'\t'<<high<<'\t'<<opened<<'\t'<<closed<<'\n';
+                      if(!trace) throw std::runtime_error("trace write");
+                      if(pos%100==0 || pos==4244) {
+                          trace.flush();
+                          std::cout<<"GMP_SOURCE_PROGRESS POS="<<pos<<" OPENED="<<opened<<" CLOSED="<<closed<<std::endl;
+                      }
+                  }
+                  if(opened!=45 || closed!=45 || rank!=1 || count!=1 || low!=target ||
+                     std::any_of(R.begin(),R.end(),[](long x){return x!=0;}))
+                      throw std::runtime_error("terminal invariant");
+                  trace.close();
+                  std::ofstream out(dir+"/source-word.json");
+                  out<<"[";
+                  for(size_t i=0;i<word.size();++i) out<<(i?",":"")<<word[i];
+                  out<<"]\n";out.close();
+                  std::cout<<"GMP_SOURCE_FULL_WORD_PASS SYMBOLS=4244 RANK_EXACT=1 CLOSED=45"<<std::endl;
+                  return 0;
+              } catch(const std::exception& e){std::cerr<<e.what()<<std::endl;return 1;}
+          }
+          CPP
+          cp "$RUNNER_TEMP/source-rank-unrank.cpp" evidence/
+          g++ -std=c++17 -O3 -Wall -Wextra -I "$PWD/tools" "$RUNNER_TEMP/source-rank-unrank.cpp" -lgmpxx -lgmp -o "$RUNNER_TEMP/source-rank-unrank"
+          timeout 920s "$RUNNER_TEMP/source-rank-unrank" tests/fixtures/stage55_year5000_appendix_a_metadata.json evidence/rank.txt evidence/root-count.txt evidence | tee evidence/gmp-unrank.log
 
-      - name: Derive actual source weaving rank using native sauce and ring
-        timeout-minutes: 35
-        uses: matlab-actions/run-command@v3
-        with:
-          command: >-
-            mkdir('evidence');
-            diary('evidence/STAGE55_POLYNOMIAL_MIDDLE_RANK_NATIVE.log');
-            try;
-              fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
-              addpath('tests');
-              run_stage55_polynomial_real_year_middle_rank(5000);
-              diary off;
-            catch ME;
-              disp(getReport(ME,'extended','hyperlinks','off'));
-              fprintf('STAGE55_POLYNOMIAL_MIDDLE_RANK_FAIL\n');
-              diary off;
-              rethrow(ME);
-            end
-
-      - name: Independently derive ring and rank in Python from native bowls
+      - name: Audit full source-rank certificate and publish interval hashes
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import hashlib,json,sys
+          import csv,gzip,hashlib,json,sys
           from pathlib import Path
           sys.set_int_max_str_digits(0)
           ev=Path("evidence")
-          d=json.loads((ev/"source-weave-rank.json").read_text())
-          N=int(d["root_count"])
-          assert hashlib.sha256(str(N).encode()).hexdigest()=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
-          assert d["calculation_day"]==-15055671 and d["structure_target_day"]==-15057702
-          M=2**127-1
-          bowls=list(map(int,d["bowls"])); order=d["order"]
-          assert len(bowls)==6 and sorted(order)==list(range(1,7))
-          successor=order[(order.index(4)+1)%6]
-          save=lambda x:x%M or M
-          first=save((bowls[3]+32+181)**2+179*bowls[successor-1]+32)
-          direction=1 if save((first+32+1+193)**2+193*first+197*bowls[5])%2 else -1
-          assert first==int(d["ring_first"]) and direction==d["direction"]
-          space=M; places=1
-          while space<N:
-              space*=M; places+=1
-          digits=[(first-1+direction*j)%M for j in range(places)]
-          wide=1+sum(x*M**j for j,x in enumerate(digits))
-          limit=space//N*N
-          if wide<=limit: accepted,steps=wide,0
-          elif direction==1: accepted,steps=1,space-wide+1
-          else: accepted,steps=limit,wide-limit
-          rank=(accepted-1)%N+1
-          assert d["places"]==places and list(map(int,d["digits"]))==digits
-          for k,v in dict(wide=wide,space=space,acceptance_limit=limit,accepted=accepted,rejection_steps=steps,rank=rank).items():
-              assert int(d[k])==v,k
-          assert d["native_selector_executed"]==(steps==0)
-          assert d["full_converter_calls"]==0 and not d["stage55_accepted"]
-          out=dict(schema="STAGE55_SOURCE_WEAVE_RANK_ORACLE/1",rank=str(rank),rank_sha256=hashlib.sha256(str(rank).encode()).hexdigest(),
-                   count_sha256=hashlib.sha256(str(N).encode()).hexdigest(),places=places,rank_digits=len(str(rank)),
-                   rejection_steps=str(steps),native_selector_executed=d["native_selector_executed"],
-                   source_bowls_native_only=True,full_converter_calls=0,stage55_accepted=False)
-          (ev/"source-weave-rank-oracle.json").write_text(json.dumps(out,indent=2)+"\n")
-          print("QA_SOURCE_WEAVE_RANK_ORACLE_PASS",json.dumps({k:v for k,v in out.items() if k!="rank"},sort_keys=True))
+          R=int((ev/"rank.txt").read_text()); N=int((ev/"root-count.txt").read_text())
+          L=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())["month_lengths"]
+          word=json.loads((ev/"source-word.json").read_text())
+          assert len(word)==4244
+          remaining=L[:]; lo,hi=1,N; opened=closed=0; hashes=[]; first44=first45=None
+          digest=lambda n:hashlib.sha256(str(n).encode("ascii")).hexdigest()
+          with (ev/"source-prefix-intervals.tsv").open() as f:
+              for i,row in enumerate(csv.DictReader(f,delimiter="\t"),1):
+                  assert i<=4244 and int(row["position"])==i
+                  symbol=int(row["symbol"]); a,b=int(row["low"]),int(row["high"])
+                  assert symbol==word[i-1] and 1<=symbol<=45 and lo<=a<=R<=b<=hi
+                  if remaining[symbol-1]==L[symbol-1]:
+                      assert symbol==opened+1; opened+=1
+                      if opened==44: first44=i
+                      if opened==45: first45=i
+                  remaining[symbol-1]-=1
+                  assert remaining[symbol-1]>=0
+                  if remaining[symbol-1]==0:
+                      assert symbol==closed+1; closed+=1
+                  assert opened==int(row["opened"]) and closed==int(row["closed"])
+                  hashes.append(dict(position=i,symbol=symbol,rank_sha256=digest(R-a+1),count_sha256=digest(b-a+1),opened=opened,closed=closed))
+                  lo,hi=a,b
+          assert len(hashes)==4244 and lo==hi==R and remaining==[0]*45 and opened==closed==45
+          (ev/"source-interval-hashes.json").write_text(json.dumps(hashes,separators=(",",":"))+"\n")
+          summary=dict(schema="STAGE55_GMP_SOURCE_RANK_CERTIFICATE/1",symbols=4244,rank_sha256=digest(R),root_sha256=digest(N),
+                       word_sha256=hashlib.sha256((ev/"source-word.json").read_bytes()).hexdigest(),
+                       opened44_at=first44,opened45_at=first45,closed=45,full_converter_calls=0,stage55_accepted=False)
+          (ev/"source-certificate-summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+          with (ev/"source-prefix-intervals.tsv").open("rb") as src, gzip.open(ev/"source-prefix-intervals.tsv.gz","wb") as dst:
+              import shutil
+              shutil.copyfileobj(src,dst)
+          (ev/"source-prefix-intervals.tsv").unlink()
+          print("SOURCE_CERTIFICATE_AUDIT_PASS",json.dumps(summary))
           PY
+          git diff --exit-code -- src
 
       - name: Upload evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-polynomial-source-weave-rank-${{ github.run_id }}
+          name: stage55-gmp-source-rank-certificate-${{ github.run_id }}
           path: evidence/
           if-no-files-found: warn
           retention-days: 30
