@@ -1,0 +1,20 @@
+# Stage06 DISCOVERY03 — DISTANCE_TAG_SCALE lineage audit
+Date: 2026-11-27. Scope: Object-Pascal+Português only.
+Audited HEAD: 730a22a64b8b98a1887778192e8e4b19b3e9f50f; tree 9c2fc02a3b30f9d0563ee0944c7f3b2fb61a8055 (recursive Git tree, not truncated). Frozen README 56bc4173aae4975ded019ef5ab5a36249f1424df, sections A/F; frozen plan 0c2bad7393f4d66b77f884520f8ab6f5025feedd, row 6 EXPECTED_RED_AND_LIVE_LEGACY_PATH. Stage05 acceptance remains scoped to a939473f325ae98a125e3e1b9e17be2f781a1d3f.
+
+## Contract
+For signed integer days c,t, D=|t-c|+1, hence D>=1, D(c,c)=1, D(c,t)=D(t,c). The independent interval interpretation is the cardinality of the closed integer interval between the days. Section F consumes D with coefficients 4,7,10,13,16,19,22 for k=1..7 in the pre-SAVE hidden-drop expression. A change deltaD induces pre-SAVE difference (3k+1)*deltaD holding other fields fixed; this is not an assertion about post-SAVE or downstream nonlinear values.
+
+## Current source and history
+The recursive tree contains exactly five src Pascal units, no additional Pascal production entry point outside src/test. All five src units were inspected for distance references. Stage02WorkCounts.pas lines 77–96 has the single production distance calculation BigAdd(BigAbs(BigSubtract(t,c)),BigOne), decimal path delegates; PastafariCalendar.pas lines 44–49 delegates context path to it. MonsterBootstrap.pas lines 66–70 clones the two input days; no distance computation. SourceLanguageCatalog has no distance path. BigInt supplies the arbitrary-precision arithmetic; prior Stage01 acceptance is not a Stage06 discovery.
+Path history for src/Stage02WorkCounts.pas returned three commits:
+- dd3e5f2b84e16c5232ad42d0486e9642622564dc blob 88da645965a0898a5217718582dc829e04afff2c line 62: same distance expression.
+- 995869f83ebb249e6841a66ce5fcf5ecf2392a69 blob 85f9ede874da71f0e01ada4f29e38685696ba783 line 65: same distance expression; authorized seeded FOUNDATION_DAY_TAG defect only.
+- a939473f325ae98a125e3e1b9e17be2f781a1d3f: restores foundation tag; current blob ac01f74895f1fe88f83495193f097ade24f9b081 line 83: same distance expression.
+Path history for PastafariCalendar.pas returned bootstrap 52d36b0079b3b48c1bd297abae1c7ad04347d8c0 (no WorkCounts) and context integration 18f9650c27593ccd99b4a2b9b22ca9df8477b918. MonsterBootstrap history returned only bootstrap.
+
+## Additional real test-side lineage and downstream consumers
+test/NormativeOracle.pas is a distinct executable test-side implementation, not production. Its path history returned only bootstrap 52d36b0079b3b48c1bd297abae1c7ad04347d8c0; fetched bootstrap and HEAD blobs both cccddafdf05bc2eb409b060e6f873331b9e24d49. Lines 151–166 calculate Delta=BigAbs(BigSubtract(t,c)), Distance=BigAddInt64(Delta,1); no discrepancy from section A. Lines 79–87 and 188–214 multiply Distance by the correct section-F coefficient for every k, then SAVE and grind. Further test-side consumers are BuildVisibleDrops lines 227–249 (salt*D), InitialBowls lines 304–319 (adds D), Sauce lines 400–414 (passes same counts to each). test/NormativeCalendarOracle.pas calls Sauce in year/calendar methods; test/stage01_tests.pas imports NormativeOracle and asserts distance=1 for c=t=F (lines 93–104). This is not a second production legacy path and shares BigInt, so not independent native evidence. No alternative distance-scale formula or hidden-drop coefficient defect found in these inspected paths. No claim about inaccessible historical source or arbitrary downstream stages.
+
+## Decision
+Static audit only. Existing independent JS preflight 701210881a81a45d5b30776ee4266e35e6c92732 reported 8,100 pairs / 48,600 checks, not rerun here. No native run, no real RED, no source/test/workflow change, no Stage06 acceptance. Stage07 prohibited. To close the discovery gate requires a genuine additional legacy implementation/discrepancy or explicit separate user authorization to reconstruct a transparent seeded RED (not historical discovery). No inherited Stage04 authorization. No merge/main/release.
