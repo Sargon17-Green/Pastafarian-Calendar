@@ -1,0 +1,107 @@
+name: Issue29 Ada Telugu live lifecycle only
+on:
+  push:
+    branches: [qa/issue29-ada-telugu-live-lifecycle-20261127]
+    paths: [.github/workflows/issue29-ada-telugu-live-lifecycle-20261127.yml]
+permissions:
+  contents: read
+concurrency:
+  group: issue29-ada-telugu-live-lifecycle-20261127
+  cancel-in-progress: false
+jobs:
+  lifecycle-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Pin live source and QA-only change
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          git rev-parse HEAD HEAD^ > evidence/commits.txt
+          test "$(git rev-parse HEAD^)" = d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/issue29-ada-telugu-live-lifecycle-20261127.yml
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.ads)" = 0b68edf7eddbc33869358bcfcc21e32465fc591e
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = 845bd8905943a54e63d6aba0334404a5051fe666
+          test "$(git rev-parse HEAD:tests/issue29_lifecycle_instrument.py)" = 22b59b61ab669669ee0d01e4b3547e1fe7f7c010
+          test "$(git rev-parse HEAD:tests/issue29_lifecycle_regression.adb)" = b7404ecbab6cda65c0d652a006f31c01d0f8cbfb
+          test "$(git rev-parse HEAD:tests/issue29_lifecycle_probe.ads)" = a9e9303ebeee1c5d63c4570f8816739282c07fab
+          test "$(git rev-parse HEAD:tests/issue29_lifecycle_probe.adb)" = 69414165ec63eb854cfff72a879aa764b83eff8b
+          git diff --name-only HEAD^ HEAD > evidence/changed-files.txt
+      - name: Install bounded-test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update > evidence/apt-update.log 2>&1
+          sudo apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gnatmake --version > evidence/gnat-version.txt
+          gprbuild --version > evidence/gprbuild-version.txt
+          dpkg-query -W gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/packages.txt
+      - name: Generate temporary instrumented tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B tests/issue29_lifecycle_instrument.py --output-dir "$RUNNER_TEMP/issue29-live" > evidence/generator.log 2>&1
+          cp "$RUNNER_TEMP/issue29-live/manifest.json" evidence/generated-manifest.json
+      - name: Compile and run only the lifecycle suite under one hard memory and time envelope
+        shell: bash
+        run: |
+          set -euo pipefail
+          export LC_ALL=C
+          export EVIDENCE="$GITHUB_WORKSPACE/evidence"
+          export WORK="$RUNNER_TEMP/issue29-live"
+          cat > "$RUNNER_TEMP/issue29-run.sh" <<'SH'
+          #!/bin/bash
+          set -eu
+          ulimit -v 1048576
+          ulimit -t 180
+          cd "$WORK"
+          group=$(awk -F: '$1=="0"{print $3}' /proc/self/cgroup)
+          cat "/sys/fs/cgroup$group/memory.max" > "$EVIDENCE/memory-max.txt"
+          cat "/sys/fs/cgroup$group/memory.swap.max" > "$EVIDENCE/memory-swap-max.txt"
+          test "$(cat "$EVIDENCE/memory-max.txt")" = 1073741824
+          test "$(cat "$EVIDENCE/memory-swap-max.txt")" = 0
+          set +e
+          gprbuild -p -j1 -P issue29_lifecycle_regression.gpr > "$EVIDENCE/build.log" 2>&1
+          rc=$?
+          echo "$rc" > "$EVIDENCE/build.exit"
+          test "$rc" = 0 || exit "$rc"
+          sha256sum bin/issue29_lifecycle_regression > "$EVIDENCE/binary.sha256"
+          /usr/bin/time -v -o "$EVIDENCE/time.txt" bin/issue29_lifecycle_regression > "$EVIDENCE/run.stdout" 2> "$EVIDENCE/run.stderr"
+          rc=$?
+          echo "$rc" > "$EVIDENCE/run.exit"
+          exit "$rc"
+          SH
+          set +e
+          sudo systemd-run --scope --quiet -p MemoryMax=1073741824 -p MemorySwapMax=0 -- /usr/sbin/runuser -u "$USER" -- env WORK="$WORK" EVIDENCE="$EVIDENCE" LC_ALL=C /usr/bin/timeout -k 5s 175s /bin/bash "$RUNNER_TEMP/issue29-run.sh"
+          rc=$?
+          set -e
+          echo "$rc" > evidence/scope.exit
+          test "$rc" = 0
+          test "$(cat evidence/build.exit)" = 0
+          test "$(cat evidence/run.exit)" = 0
+          test ! -s evidence/run.stderr
+          grep -Eq '^ISSUE29_LIFECYCLE_ASSERTIONS= +305$' evidence/run.stdout
+          grep -Fx 'ISSUE29_LIFECYCLE_CONTRACT_PASS' evidence/run.stdout
+          cat evidence/run.stdout
+          git diff --exit-code HEAD -- src tests
+      - name: Freeze evidence even on failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence
+          python3 -B - <<'PY'
+          import hashlib,json,pathlib
+          p=pathlib.Path('evidence')
+          files={x.name:{'bytes':x.stat().st_size,'sha256':hashlib.sha256(x.read_bytes()).hexdigest()} for x in sorted(p.iterdir()) if x.is_file() and x.name!='members.sha256.json'}
+          (p/'members.sha256.json').write_text(json.dumps(files,indent=2,sort_keys=True)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-ada-telugu-live-lifecycle-20261127
+          path: evidence/
+          if-no-files-found: error
