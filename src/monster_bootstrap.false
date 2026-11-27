@@ -664,6 +664,8 @@ z;40=~["E_OP57_LAYOUT"0 0/]?
   ]?
  ]q:
  x;g;!q;!x;1+g;!q;!
+ { Validator used j as a digit; restore saved day-count lambda from frame slot 7. }
+ k;7+g;!j:
  { f is unframed; call before keeping any other intermediate handles. }
  x;f;!y:
  z;b:0a;!b;24h;!!w:
