@@ -1030,11 +1030,50 @@ proc probeFourSlotBoundedCompositions() {
   }
 }
 
+// Незалежний оракул чотирьох додатних частин: три роздільники
+// серед 1..N-1. Ранги лексикографічні за трійкою роздільників,
+// що еквівалентно порядку частин. B=-1 або внутрішня межа.
+// N=3..10: 52 родини, 840 рангів, 892 нові твердження.
+// Потужності C(N-1,3) без межі та C(N-2,2) з межею
+// (нуль для N<4) незалежно звірено з прямим перебором кортежів.
+// Це дослідження, не історичний дефект і не приймання Stage 6.
+proc probeFourCutletPartitions() {
+  for total in 3..10 {
+    for boundary in -1..(total-1) {
+      if boundary == 0 then continue;
+      var tested: CutletPartitionCounter;
+      tested.totalGaps = total;
+      tested.slotsTotal = 4;
+      tested.requiredBoundary = boundary;
+      var enumerated = 0;
+      for i in 1..(total-3) {
+        for j in (i+1)..(total-2) {
+          for k in (j+1)..(total-1) {
+            if boundary >= 0 && boundary != i &&
+               boundary != j && boundary != k then continue;
+            enumerated += 1;
+            const actual = tested.unrank1(new bigint(enumerated));
+            check(actual.size == 4 && actual[0] == i &&
+                  actual[1] == j-i && actual[2] == k-j &&
+                  actual[3] == total-k,
+                  "Чотири котлети: N=" + total:string +
+                  ", B=" + boundary:string + ", ранг=" + enumerated:string);
+          }
+        }
+      }
+      check(tested.countAll() == enumerated,
+            "Чотири котлети: потужність N=" + total:string +
+            ", B=" + boundary:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
   probeCutletCompositions(8, 3);
   probeCutletCompositions(9, -1);
+  probeFourCutletPartitions();
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
   probeWeaving();
