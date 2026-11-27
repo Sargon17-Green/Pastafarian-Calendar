@@ -1,0 +1,119 @@
+name: COBOL Chinese INT-02 isolated bounded Native
+on:
+  push:
+    branches:
+      - 'COBOL+简体中文'
+    paths:
+      - '.github/workflows/cobol-chinese-int02-bounded.yml'
+permissions:
+  contents: read
+jobs:
+  bounded-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact source blobs and initialize evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence build-int02
+          {
+            printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\nSOURCE_LOCK=38ab6a7d71e9c1a971d5b3ff7c48b67cf4a59d15\n' "$GITHUB_SHA"
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+            while read -r expected path; do
+              actual="$(git rev-parse "HEAD:$path")"
+              printf '%s %s\n' "$actual" "$path"
+              test "$actual" = "$expected"
+            done <<'LOCK'
+          d9fa549f6bf1da91b5ddc1fced95db3e774c34da src/calendar_save.cob
+          b41f2d0b8ddf95a018c81ddd412ee482dab35acb src/calendar_wide.cob
+          7bbc0320113bf47c1a76aaea4e60a89fd3bd877a src/calendar_year_candidates.cob
+          e56dd49bae87b6af6d2e8a37304f9072278edcc6 test/calendar_save_tests.cob
+          6d1e7c5a8e8f4b7581296accc6cf4e56e4e39755 test/int02_wide_driver.cob
+          f2b22950038445b44432af939d3314e41ad3bb9f test/int02_wide_diff.mjs
+          d06eb1d4ba4f435c08c1b46fa6e4d58c587acb4a test/int02_year_candidates_driver.cob
+          bae9707e320eb1e1a1f1dbde806144d993e175ec test/int02_year_candidates_diff.mjs
+          63cb9905c7a26d876255711256e84d3a217b2a74 test/int02_source_gate_year_oracle.mjs
+          LOCK
+          } 2>&1 | tee evidence/source-lock.log
+      - name: Install compiler from Ubuntu sources only
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            test -f /etc/apt/sources.list.d/ubuntu.sources
+            opts=(-o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
+            timeout -k 10s 150s sudo apt-get "${opts[@]}" update
+            timeout -k 10s 150s sudo apt-get "${opts[@]}" install -y --no-install-recommends gnucobol3
+            cobc -V
+            node --version
+          } 2>&1 | tee evidence/toolchain.log
+      - name: Execute only the three INT-02 gates independently
+        shell: bash
+        run: |
+          set -uo pipefail
+          flags=(-x -free -Wall -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror)
+          gate() {
+            local name="$1" driver="$2" source="$3" seconds="$4"; shift 4
+            (
+              printf 'GATE=%s HEAD=%s\n' "$name" "$GITHUB_SHA"
+              timeout -k 5s 90s cobc "${flags[@]}" -o "build-int02/$name" "$driver" "$source" || exit $?
+              timeout -k 5s "$seconds" "$@" || exit $?
+            ) 2>&1 | tee "evidence/$name.log"
+            local rc=$?
+            if [ "$rc" = 0 ]; then
+              case "$name" in
+                save) grep -Eq '^SAVE_CHECKS=0*48
+            printf '%s exit=%s\n' "$name" "$rc" | tee -a evidence/status.log
+            return "$rc"
+          }
+          failures=0
+          gate save test/calendar_save_tests.cob src/calendar_save.cob 30s ./build-int02/save || failures=$((failures+1))
+          gate candidates test/int02_year_candidates_driver.cob src/calendar_year_candidates.cob 300s node test/int02_year_candidates_diff.mjs "$(pwd)/build-int02/candidates" || failures=$((failures+1))
+          gate wide test/int02_wide_driver.cob src/calendar_wide.cob 300s node test/int02_wide_diff.mjs "$(pwd)/build-int02/wide" || failures=$((failures+1))
+          printf 'FAILED_GATES=%s\n' "$failures" | tee -a evidence/status.log
+          test "$failures" = 0
+      - name: Hash logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence
+          (cd evidence && find . -maxdepth 1 -type f -name '*.log' -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobol-int02-bounded-native
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
+ "evidence/$name.log" && grep -Fxq 'SAVE_GATE=PASS' "evidence/$name.log" ;;
+                candidates) grep -Fxq 'INT02_YEAR_CANDIDATES_CASES=58 GATE=PASS_BOUNDED_CANDIDATES_ONLY' "evidence/$name.log" ;;
+                wide) grep -Fxq '{"cases":1051,"statusCounts":{"0":702,"22":3,"24":346},"scope":"NATIVE_WIDE_ONLY","gate":"MATCH"}' "evidence/$name.log" ;;
+              esac
+              rc=$?
+            fi
+            printf '%s exit=%s\n' "$name" "$rc" | tee -a evidence/status.log
+            return "$rc"
+          }
+          failures=0
+          gate save test/calendar_save_tests.cob src/calendar_save.cob 30s ./build-int02/save || failures=$((failures+1))
+          gate candidates test/int02_year_candidates_driver.cob src/calendar_year_candidates.cob 300s node test/int02_year_candidates_diff.mjs "$(pwd)/build-int02/candidates" || failures=$((failures+1))
+          gate wide test/int02_wide_driver.cob src/calendar_wide.cob 300s node test/int02_wide_diff.mjs "$(pwd)/build-int02/wide" || failures=$((failures+1))
+          printf 'FAILED_GATES=%s\n' "$failures" | tee -a evidence/status.log
+          test "$failures" = 0
+      - name: Hash logs
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence
+          (cd evidence && find . -maxdepth 1 -type f -name '*.log' -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobol-int02-bounded-native
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 90
