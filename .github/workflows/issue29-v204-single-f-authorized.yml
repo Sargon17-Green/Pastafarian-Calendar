@@ -1,0 +1,65 @@
+name: Issue29 v204 authorized single first-divergence F witness
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v204-single-f-authorized.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  single-f:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock authorized preparation and unchanged live source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "290c768dac6d31f982fae7a10d6a4803b8788f26"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v204-single-f-authorized.yml"
+          test "$(git rev-parse HEAD:qa/issue29/v204_single_f_prepared.sh)" = "c022b49b9797b05e9e4111bf77d56308da79e134"
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git rev-parse FETCH_HEAD)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          test "$(git ls-remote origin 'refs/heads/Ada+తెలుగు' | cut -f1)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          mkdir -p audit
+          git rev-parse HEAD > audit/QA_HEAD.txt
+          git ls-tree -r FETCH_HEAD src > audit/source-blobs.txt
+          bash -n qa/issue29/v204_single_f_prepared.sh
+      - name: Install GNAT and GMP bindings before bounded execution
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > audit/packages.txt
+      - name: Execute exactly one authorized bounded F witness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE29_V204_AUTHORIZATION: ONE_F_FIRST_DIVERGENCE_ONLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash qa/issue29/v204_single_f_prepared.sh "$GITHUB_WORKSPACE/evidence"
+      - name: Print bounded execution evidence
+        if: always()
+        shell: bash
+        run: |
+          for f in evidence/memory-limits.txt evidence/F_ATTEMPT_ONCE evidence/exit.txt evidence/stdout.txt evidence/stderr.txt evidence/time.txt evidence/scope.log evidence/result.json; do
+            if [[ -f "$f" ]]; then
+              echo "--- $f ---"
+              cat "$f"
+            fi
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v204-single-f-${{ github.run_id }}
+          path: |
+            audit/
+            evidence/
+          retention-days: 30
