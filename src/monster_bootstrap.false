@@ -635,3 +635,45 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
  z;r:6a;!y;1+g;!a;!y;2+g;!a;!y;3+g;!a;!y;4+g;!a;!y;5+g;!a;!y;6+g;!a;!
  r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
 ]a;!
+
+{ المرحلة 23: العملية 40؛ تكامل العملية المعيارية 57. }
+{ وسيطة من خليتين مخصصتين [calculationDay,targetDay]؛ دون رأس طول. }
+{ المجال التجريبي: الأعداد الصحيحة الموقعة ذات 64 بت؛ لا يشمل المؤشرات غير المخصصة. }
+{ الناتج [2,finalBowls,order46]؛ لا يستبدل ترتيب القطرة 46 بترتيب الدفعة الأخيرة. }
+z;40=~["E_OP57_LAYOUT"0 0/]?
+[
+ k;\z;2+z:b;a;!d;a;!e;a;!f;a;!i;a;!j;a;!l;a;!m;a;!n;a;!o;a;!p;a;!q;a;!r;a;!s;a;!t;a;!u;a;!v;a;!w;a;!x;a;!y;a;!z;22-k:
+ k;1+g;!x:
+ [
+  d:d;g;!e:d;1+g;!m:
+  e;1>e;1_<|["E_OP57_SIGN"0 0/]?
+  m;1<m;8>|["E_OP57_LENGTH"0 0/]?
+  0i:
+  [i;m;<][
+   d;2+i;+g;!j:
+   j;0<j;511>|["E_OP57_DIGIT"0 0/]?
+   i;1+i:
+  ]#
+  e;0=[
+   m;1= j;0=&~["E_OP57_ZERO"0 0/]?
+  ]?
+  e;0=~[j;0=["E_OP57_TOP"0 0/]?]?
+  m;8=[
+   e;1_= j;1=&~["E_OP57_RANGE"0 0/]?
+   0i:[i;7<][d;2+i;+g;!0=~["E_OP57_RANGE"0 0/]?i;1+i:]#
+  ]?
+ ]q:
+ x;g;!q;!x;1+g;!q;!
+ { f is unframed; call before keeping any other intermediate handles. }
+ x;f;!y:
+ z;b:0a;!b;24h;!!w:
+ z;b:y;a;!w;a;!b;29h;!!v:
+ z;b:y;a;!w;a;!v;a;!b;31h;!!u:
+ z;b:y;a;!b;37h;!!t:
+ z;b:t;a;!u;a;!w;a;!b;38h;!!s:
+ s;g;!2=~["E_OP57_VISIBLE_RESULT"0 0/]?
+ s;1+g;!p:s;2+g;!o:
+ z;b:1a;!p;a;!b;39h;!!n:
+ z;r:2a;!n;a;!o;a;!
+ r;a;!k;2+g;!b:k;3+g;!d:k;4+g;!e:k;5+g;!f:k;6+g;!i:k;7+g;!j:k;8+g;!l:k;9+g;!m:k;10+g;!n:k;11+g;!o:k;12+g;!p:k;13+g;!q:k;14+g;!r:k;15+g;!s:k;16+g;!t:k;17+g;!u:k;18+g;!v:k;19+g;!w:k;20+g;!x:k;21+g;!y:k;g;!k:z;1-g;!
+]a;!

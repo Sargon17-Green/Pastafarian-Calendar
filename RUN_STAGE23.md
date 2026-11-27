@@ -1,0 +1,9 @@
+# Stage23 — bounded op40 integration (authorized 2026-11-27)
+
+Reference op57; production op40; two physically allocated cells containing canonical signed base-512 day handles. Zero [0,1,0]; nonzero sign ±1, length 1–8, limbs 0–511, nonzero top. Eight limbs allowed only for exact -2^63: sign -1, top 1, seven lower zeros. All other eight-limb representations rejected. No pointer provenance or physical truncation claim. This is a first-gate scope, not a normative limitation.
+
+Pipeline f -> 24 -> 29 -> 31 -> 37 -> 38 -> 39. op39 takes [1,after46], not a bare one-cell tuple. Return [2,finalBowls,order46] with direct tables [6,...]. f is unframed and runs before other handles are retained; outer frame restores caller registers and parent k. Existing dependencies unchanged.
+
+First gate: actual uninstrumented op40 with equal epoch pair, compare complete final bowls and visible order against pinned same-branch independent mathematical oracle; validate result shape, freshness, disjoint bowl handles, immutable input cells, parent frame and caller argument register. Capture exit, stdout/stderr, program and source digests, heap cells, peak child RSS, elapsed time; 2 GiB AS and 600s hard process timeout, no core dump. Stop on failure. Source locked at workflow SHA; runtime pin eb3135565a8670cced3f6bbca4dbf7b014c45634. No acceptance from measurement alone.
+
+Next only after measurement review: instrument intermediate checkpoints and compare all 5 counts, 230 stones, 7 hidden, 46 visible, 6 initial, 6 after46, 6 order46, 6 final, 6 returned order; exact signed min -9223372036854775808 (not -9223372036854775807), max and malformed allocated representations, replay/interleaving/frame checks, source mutants with independent numeric witnesses. No unbounded coverage, full differential acceptance, main/merge/release. Preserve all prior receipts.
