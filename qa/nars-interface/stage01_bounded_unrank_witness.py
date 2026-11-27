@@ -313,6 +313,7 @@ def build_bounded_unrank_witness(
             "original_ec": "original_ec",
             "original_message_codes": "original_message_codes",
             "paren_ec_code": "paren_ec_code",
+            "paren_error_type": "paren_error_type",
             "paren_message_codes": "paren_message_codes",
             "paren_result": "paren_result",
             "trace_ec": "trace_ec",
@@ -463,8 +464,9 @@ def build_bounded_unrank_witness(
         marker_write(phase_markers[3]["token"], phase_markers[3]["path"]),
         f"QABoundedParenEC←⎕EC ⎕UCS {_codes(PAREN_ALIAS + ' 12 3 4 4 1')} ⋄ "
         "QABoundedParenCode←QABoundedParenEC[1] ⋄ "
-        "QABoundedParenResult←QABoundedParenEC[2] ⋄ "
-        "QABoundedParenMessageCodes←⎕UCS ⊃QABoundedParenEC[3]",
+        "QABoundedParenErrorType←⊃QABoundedParenEC[2] ⋄ "
+        "QABoundedParenResult←⊃QABoundedParenEC[3] ⋄ "
+        "QABoundedParenMessageCodes←(0=QABoundedParenCode)/⎕UCS ⍕⊃QABoundedParenEC[3]",
         marker_write(phase_markers[4]["token"], phase_markers[4]["path"]),
     ])
     run_body = " ⋄ ".join(run_body_parts)
@@ -477,6 +479,7 @@ def build_bounded_unrank_witness(
         _write_expr("QABoundedTraceCode", paths["trace_ec"]),
         _write_expr("0,QABoundedTraceMessageCodes", paths["trace_message_codes"]),
         _write_expr("QABoundedParenCode", paths["paren_ec_code"]),
+        _write_expr("0,QABoundedParenErrorType", paths["paren_error_type"]),
         _write_expr("0,QABoundedParenMessageCodes", paths["paren_message_codes"]),
         _write_expr("0,QABoundedParenResult", paths["paren_result"]),
         _write_expr("0,QABoundedExpected", paths["expected_values"]),

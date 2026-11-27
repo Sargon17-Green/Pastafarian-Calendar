@@ -1,13 +1,14 @@
-name: APL German native chunked Stage 1 exact 95 FX (NO Stage2)
+name: APL German authorized one-line fix native Stage 1 (NO Stage2)
 on:
   push:
     branches:
       - qa/apl-german-nars-interface-20261116
     paths:
       - '.github/workflows/apl-german-stage01-chunked-native.yml'
-      - 'qa/nars-interface/stage01_chunked_import.py'
-      - 'qa/nars-interface/test_stage01_chunked_import.py'
-      - 'qa/nars-interface/bounded_stage01_chunked.ps1'
+      - 'qa/nars-interface/stage01_authorized_import.py'
+      - 'qa/nars-interface/stage01_authorized_source.py'
+      - 'qa/nars-interface/test_stage01_authorized_import.py'
+      - 'qa/nars-interface/bounded_stage01_authorized.ps1'
   workflow_dispatch:
 permissions:
   contents: read
@@ -37,11 +38,11 @@ jobs:
       - name: Validate locked five source files and Stage 1 marker ordering
         shell: pwsh
         run: |
-          python -m unittest discover -s qa/nars-interface -p 'test_stage01_chunked_import.py' -v
+          python -m unittest discover -s qa/nars-interface -p 'test_stage01_authorized_import.py' -v
           if ($LASTEXITCODE -ne 0) { throw 'STAGE01_CHUNKED_UNIT_TESTS_FAILED' }
       - name: Run native NARS2000 exact 95 function chunks and Stage 1 tests
         shell: pwsh
-        run: ./qa/nars-interface/bounded_stage01_chunked.ps1 -Runtime verified_runtime -Evidence stage01_chunked_evidence
+        run: ./qa/nars-interface/bounded_stage01_authorized.ps1 -Runtime verified_runtime -Evidence stage01_chunked_evidence
       - name: Independently check exact native Stage 1 acceptance receipt
         shell: pwsh
         run: |
@@ -50,15 +51,38 @@ jobs:
           if (-not (Test-Path -LiteralPath $p) -or -not (Test-Path -LiteralPath $candidate)) { throw 'STAGE01_RECEIPTS_MISSING' }
           $r=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json
           $c=Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
-          $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=7161824b9fcbfaca91f20d1ea492417e77003ff4|FILES=5|FX=95|TEST=STAGE01_PASS'
-          if ($r.source_commit -cne '7161824b9fcbfaca91f20d1ea492417e77003ff4' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
+          $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=0f24aae0f2e45b8e816d4ecd27be154afa2fe94f|FILES=5|FX=95|TEST=STAGE01_PASS'
+          if ($r.source_commit -cne '0f24aae0f2e45b8e816d4ecd27be154afa2fe94f' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
+          if ($r.suite_start_exact -ne $true -or $r.suite_status -cne 'RETURNED_SUCCESS' -or $r.qa_commit -cne $env:GITHUB_SHA) { throw 'ORIGINAL_SUITE_EC_NOT_CONFIRMED' }
           if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 23 -or $c.chunk_count -ne 23 -or $c.tail_chunk_size -ne 1 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
           if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) { throw 'STAGE01_CHUNK_MARKER_MISMATCH' }
           $nativeMarker='stage01_chunked_evidence/final_native_marker.txt'
           if (-not (Test-Path -LiteralPath $nativeMarker)) { throw 'STAGE01_NATIVE_MARKER_NOT_ARCHIVED' }
           [byte[]]$actual=[IO.File]::ReadAllBytes((Resolve-Path -LiteralPath $nativeMarker).Path)
           [byte[]]$wanted=[Text.Encoding]::ASCII.GetBytes($token)
-          if ($actual.Length -ne $wanted.Length -or [Convert]::ToBase64String($actual) -cne [Convert]::ToBase64String($wanted)) { throw 'STAGE01_NATIVE_MARKER_BYTES_MISMATCH' }
+          if ($wanted.Length -ne 113 -or $actual.Length -ne 113 -or [Convert]::ToBase64String($actual) -cne [Convert]::ToBase64String($wanted)) { throw 'STAGE01_NATIVE_MARKER_BYTES_MISMATCH' }
+          $ec=[IO.File]::ReadAllText((Resolve-Path 'stage01_chunked_evidence/suite_ec.txt').Path)
+          $start=[IO.File]::ReadAllText((Resolve-Path 'stage01_chunked_evidence/suite_start.txt').Path)
+          if ($ec -notmatch '^\s*[12]\s*
+      - name: Hash all receipts and native markers
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force stage01_chunked_evidence,font_bootstrap_evidence | Out-Null
+          Get-ChildItem stage01_chunked_evidence,font_bootstrap_evidence -Recurse -File | Sort-Object FullName | ForEach-Object {
+            $h=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$h  $($_.FullName)"
+          } | Set-Content -Encoding utf8 stage01_chunked_evidence.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apl-german-stage01-chunked-native-receipts
+          path: |
+            font_bootstrap_evidence/
+            stage01_chunked_evidence/
+            stage01_chunked_evidence.sha256
+          retention-days: 21
+ -or $start -cne ('APL_GERMAN_STAGE01_START|SOURCE='+$r.source_commit)) { throw 'INDEPENDENT_NATIVE_EC_OR_START_MISMATCH' }
           Write-Output 'APL_GERMAN_STAGE01_NATIVE_PASS_EXACT_CHUNKED_95'
       - name: Hash all receipts and native markers
         if: always()

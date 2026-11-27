@@ -223,7 +223,7 @@ try {
     $r['phase_checkpoints']+=@{index=[int]$mk.index;name=[string]$mk.name;exact=[bool]$v.exact;sha256=$v.sha256}
     if(-not $v.exact){$phaseAll=$false}
   }
-  $r['phase_all_exact']=($phaseAll -and $r['phase_checkpoints'].Count -eq 4)
+  $r['phase_all_exact']=($phaseAll -and $r['phase_checkpoints'].Count -eq 5)
 
   foreach($prop in $m.witness.paths.PSObject.Properties){
     $key=$prop.Name
@@ -255,7 +255,7 @@ try {
   $final=ReadExact $marker $m.marker_token (Join-Path $Evidence 'bounded_unrank_final_diagnostic_marker.txt')
   $r['final_marker_exact']=[bool]$final.exact
 
-  $core=@('run_ec_code','output_ec_code','original_ec','original_message_codes','trace_ec','trace_message_codes','paren_ec_code','paren_result','expected_values','expected_shape','expected_rank','expected_type','count_values','count_rank','count_type','trace_args','trace_dp_shape','trace_dp_values','trace_dp_type','trace_log','trace_loop_state','trace_candidate_state','trace_out','trace_rem','trace_rank','trace_result')
+  $core=@('run_ec_code','output_ec_code','original_ec','original_message_codes','trace_ec','trace_message_codes','paren_ec_code','paren_error_type','paren_result','expected_values','expected_shape','expected_rank','expected_type','count_values','count_rank','count_type','trace_args','trace_dp_shape','trace_dp_values','trace_dp_type','trace_log','trace_loop_state','trace_candidate_state','trace_out','trace_rem','trace_rank','trace_result')
   $coreValid=$true
   foreach($key in $core){if(-not $r['witness_files'][$key].valid){$coreValid=$false}}
 
