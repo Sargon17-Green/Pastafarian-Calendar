@@ -32,6 +32,7 @@ fn stage11_patch05_successor_matrix() {
     ];
     let stones = independent_stones();
     for (case, (c, t)) in pairs.iter().enumerate() {
+        println!("STAGE11_INPUT case={case} c={c} t={t}");
         let expected = independent_hidden_values(c, t, &stones);
         let legacy = observe_legacy_hidden_drop(c.clone(), t.clone(), 1).unwrap();
         for slot in 0..8 {
@@ -47,14 +48,22 @@ fn stage11_patch05_successor_matrix() {
             assert_eq!(result.corrected.actual, expected[k]);
             assert_eq!(result.corrected.physical_index, 8 - k);
             assert_eq!(result.backward_storage, legacy.backward_storage);
-            assert_eq!(result.context.discovery05_actual, Some(expected[8 - k].clone()));
+            assert_eq!(
+                result.context.discovery05_actual,
+                Some(expected[8 - k].clone())
+            );
             assert_eq!(result.context.metrics.get("discovery05.builds"), 1);
-            assert_eq!(result.context.metrics.get("discovery05.legacy.direct.read"), 1);
+            assert_eq!(
+                result.context.metrics.get("discovery05.legacy.direct.read"),
+                1
+            );
             assert_eq!(result.context.metrics.get("patch05.corrected.read"), 1);
             assert_eq!(result.context.metrics.get("patch05.applied"), 1);
             println!(
                 "STAGE11_CELL case={case} k={k} slot={} corrected={} legacy={}",
-                result.corrected.physical_index, result.corrected.actual, expected[8 - k]
+                result.corrected.physical_index,
+                result.corrected.actual,
+                result.context.discovery05_actual.as_ref().unwrap()
             );
         }
     }
@@ -63,8 +72,12 @@ fn stage11_patch05_successor_matrix() {
         default.corrected.actual.to_string(),
         "119390830530032782664128530203002080344"
     );
-    assert_ne!(default.context.discovery05_actual, Some(default.corrected.actual));
+    assert_ne!(
+        default.context.discovery05_actual,
+        Some(default.corrected.actual)
+    );
     println!("STAGE11_PATCH05_MATRIX=91 STORAGE=104");
+    println!("STAGE11_STRICT_GREEN_K1=PASS");
 }
 
 #[test]
@@ -112,13 +125,19 @@ fn stage11_patch05_guards_are_atomic() {
         &mut wrong_legacy,
     ] {
         let before = context.clone();
-        assert_eq!(handler.handle(context).unwrap_err().code, MonsterErrorCode::InvalidState);
+        assert_eq!(
+            handler.handle(context).unwrap_err().code,
+            MonsterErrorCode::InvalidState
+        );
         assert_eq!(*context, before);
     }
     let mut valid = legacy.context.clone();
     handler.handle(&mut valid).unwrap();
     let before = valid.clone();
-    assert_eq!(handler.handle(&mut valid).unwrap_err().code, MonsterErrorCode::InvalidState);
+    assert_eq!(
+        handler.handle(&mut valid).unwrap_err().code,
+        MonsterErrorCode::InvalidState
+    );
     assert_eq!(valid, before);
     assert!(legacy.context.patch05_hidden_observation.is_none());
     println!("STAGE11_PATCH05_GUARDS=PASS");

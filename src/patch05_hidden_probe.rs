@@ -95,7 +95,9 @@ impl PhaseHandler for HiddenDropPatch05 {
         }
         let corrected = corrected_hidden_by_nearness(storage, self.requested_k)?;
         if context.discovery05_actual.as_ref() != storage.get(self.requested_k) {
-            return Err(invalid("legacy observation does not match physical direct read"));
+            return Err(invalid(
+                "legacy observation does not match physical direct read",
+            ));
         }
 
         // Commit only after every check. The historical observation is untouched.

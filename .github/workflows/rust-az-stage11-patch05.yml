@@ -1,0 +1,140 @@
+name: Rust Azerbaijani Stage11 PATCH05 Native and independent differential
+
+on:
+  push:
+    branches:
+      - 'Rust\+Azərbaycan-dili'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/stage10_discovery05_hidden_oracle.py'
+      - 'tools/stage11_patch05_hidden_oracle.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'DEVELOPMENT_STAGE.md'
+      - 'audit/STAGE_10_DISCOVERY05_CONTRACT_2026-11-25.md'
+      - '.github/workflows/rust-az-stage11-patch05.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-stage11-patch05:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact SHA
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Rust stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Verify Stage11 candidate scope and formatting
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fxq 'CURRENT_STAGE=10' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_KIND=DISCOVERY05' DEVELOPMENT_STAGE.md
+          grep -Fxq 'CURRENT_PATCH=PATCH04' DEVELOPMENT_STAGE.md
+          if grep -Fxq 'LAST_COMPLETED_STAGE=9' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY05_STAGE10_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+          else
+            grep -Fxq 'LAST_COMPLETED_STAGE=10' DEVELOPMENT_STAGE.md
+            grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY05_STAGE10_ACCEPTED_HOLD_NO_STAGE11' DEVELOPMENT_STAGE.md
+          fi
+          grep -Fxq 'STAGE10_SCOPE=BACKWARD_HIDDEN_STORAGE_DISCOVERY' audit/STAGE_10_DISCOVERY05_CONTRACT_2026-11-25.md
+          grep -Fxq 'STAGE09_CLOSURE=ACCEPTED' audit/STAGE_09_PATCH04_ACCEPTANCE_2026-11-25.md
+          grep -Fq 'pub mod discovery05_hidden_probe;' src/lib.rs
+          grep -Fq 'pub struct LegacyHiddenDropDiscovery05 {' src/discovery05_hidden_probe.rs
+          grep -Fq 'pub fn calendar_hidden_spaghetti(' src/discovery05_hidden_probe.rs
+          grep -Fq 'pub mod patch05_hidden_probe;' src/lib.rs
+          cargo fmt --all -- --check
+      - name: Self-test independent Stage10 oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 tools/stage10_discovery05_hidden_oracle.py --self-test | tee evidence/stage10_oracle_self_test.txt
+          grep -Fxq 'STAGE10_DISCOVERY05_ORACLE_SELF_TEST=PASS' evidence/stage10_oracle_self_test.txt
+          python3 tools/stage11_patch05_hidden_oracle.py --self-test | tee evidence/stage11_oracle_self_test.txt
+      - name: Native Stage01 to Stage10 and independent oracles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 900s cargo test --all-targets -- --nocapture --skip stage10_strict_red_k1_must_not_match > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          if [ "$code" -ne 0 ]; then
+            cat evidence/stderr.txt >&2
+            exit "$code"
+          fi
+          for marker in \
+            'STAGE05_WRAPPER_RECONCILIATION=69 RED_SCAR=34 CONTROL=35 GUARDS=69' \
+            'STAGE06_DISTANCE_EXPECTED_RED=153 CONTROL=16 UNEXPECTED=0 GUARDS=170' \
+            'STAGE07_PATCH03_ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226' \
+            'STAGE08_DISCOVERY04_EXPECTED_RED=224 MATCH=1 UNEXPECTED=0 GUARDS=4' \
+            'STAGE09_CORRECTED_GREEN=230/230' \
+            'STAGE09_PRESERVED_DISCOVERY04_RED=224 MATCH=1 UNEXPECTED=0' \
+            'STAGE10_BACKWARD_STORAGE_PASS_7' \
+            'STAGE10_PATCH04_ROWS_GREEN_230' \
+            'STAGE10_PRODUCTION_WRONG_K1_PASS' \
+            'STAGE10_EXPECTED_RED_6_MATCH_1' \
+            'STAGE10_KOTLIN_SUBSET_RED_4_MATCH_1' \
+            'STAGE10_V_SUBSET_RED_4_MATCH_1' \
+            'STAGE10_CONTEXT_GUARDS_REPLAY_PASS' \
+            'STAGE10_BIGINT_INDEPENDENT_PASS_35' \
+            'STAGE10_BIGINT_PATCH04_STONES_GREEN_175' \
+            'STAGE10_EARLIER_ROUTES_PASS' \
+            'STAGE10_COMPLETE_EXPECTED_RED'; do
+            grep -Fq "$marker" evidence/stdout.txt
+          done
+          if grep -E 'test result: FAILED|test.*FAILED|panic' evidence/stdout.txt evidence/stderr.txt; then
+            exit 1
+          fi
+          python3 tools/stage06_discovery03_distance_oracle.py evidence/stdout.txt | tee evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE06_DISCOVERY03_DISTANCE_ORACLE=PASS ROWS=169 RED=153 CONTROL=16 GUARDS=170' evidence/stage06_distance_oracle.txt
+          grep -Fxq 'STAGE05_PATCH02_WRAPPER_ORACLE=PASS ROWS=69 RED_SCAR=34 CONTROL=35 GUARDS=69' evidence/stage06_distance_oracle.txt
+          python3 tools/stage07_patch03_distance_oracle.py evidence/stdout.txt | tee evidence/stage07_distance_oracle.txt
+          grep -Fxq 'STAGE07_PATCH03_ORACLE=PASS ROWS=225 MISMATCH=204 MATCH=21 GUARDS=226' evidence/stage07_distance_oracle.txt
+          python3 tools/stage08_discovery04_stone_oracle.py evidence/stdout.txt | tee evidence/stage08_distance_oracle.txt
+          grep -Fxq 'STAGE08_DISCOVERY04_ORACLE=PASS ROWS=225 RED=224 MATCH=1 GUARDS=4' evidence/stage08_distance_oracle.txt
+          python3 tools/stage09_patch04_stone_oracle.py evidence/stdout.txt | tee evidence/stage09_distance_oracle.txt
+          grep -Fxq 'STAGE09_PATCH04_ORACLE=PASS CORRECTED=230/230 GARBAGE=225 RED=180 MATCH=45 LEGACY=225 RED=224 MATCH=1' evidence/stage09_distance_oracle.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 120s env CARGO_TERM_COLOR=never cargo test --test stage10_strict_red stage10_strict_red_k1_must_not_match -- --exact --nocapture --ignored > evidence/stage10_strict_red.txt 2>&1
+          strict_code=$?
+          set -e
+          printf '%s\n' "$strict_code" > evidence/stage10_strict_red_exit.txt
+          if [ "$strict_code" -ne 101 ]; then
+            echo 'Strict GREEN assertion unexpectedly passed; expected RED was hidden.' >&2
+            exit 1
+          fi
+          grep -Fq 'test stage10_strict_red_k1_must_not_match ... FAILED' evidence/stage10_strict_red.txt
+          grep -Fq 'strict RED witness must remain RED' evidence/stage10_strict_red.txt
+          printf 'STAGE10_STRICT_RED_CONFIRMED=PASS\n' | tee -a evidence/stdout.txt
+          python3 tools/stage10_discovery05_hidden_oracle.py evidence/stdout.txt | tee evidence/stage10_distance_oracle.txt
+          grep -Fxq 'STAGE10_DISCOVERY05_ORACLE=PASS CELLS=35 RED=30 MATCH=5 STORAGE=8' evidence/stage10_distance_oracle.txt
+          python3 tools/stage11_patch05_hidden_oracle.py evidence/stdout.txt | tee evidence/stage11_oracle.txt
+          grep -Fxq 'STAGE11_PATCH05_ORACLE=PASS INPUTS=13 CELLS=91 STORAGE=104' evidence/stage11_oracle.txt
+          printf 'STAGE11_NATIVE=PASS\nSTAGE11_DIFFERENTIAL=PASS\nSTAGE10_STRICT_RED=CONFIRMED\nSTAGE11_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+          cat evidence/result.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-stage11-patch05-native
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 30
