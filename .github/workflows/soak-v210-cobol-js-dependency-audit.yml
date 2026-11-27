@@ -1,0 +1,123 @@
+name: Soak v210 COBOL helper and authoritative JS dependency audit (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v210-cobol-js-dependency-audit.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify activation and restore v209 evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "4d1aa56c2f728b2dffaf0ea35f24d43c96216671"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v210-cobol-js-dependency-audit.yml"
+          mkdir -p evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15213499464/zip > evidence/v209.zip
+          echo "d554b52dc4eebd56420d6120a9fa779cb6a4b898bd779a2fde8d2985b6747e6d  evidence/v209.zip" | sha256sum -c -
+      - name: Verify pinned dependency and recurrence evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64,hashlib,json,re,subprocess,zipfile
+          from pathlib import Path
+          e=Path("evidence")
+          with zipfile.ZipFile(e/"v209.zip") as z:
+              assert z.testzip() is None
+              names=[n for n in z.namelist() if n.endswith("result.json")]
+              assert len(names)==1
+              old=json.loads(z.read(names[0]))
+          assert old["exact_blob_matches"]==10 and old["anchor_checks"]==64 and old["shared_recurrence_review_records"]==8
+          assert old["native_date_calls"]==old["whole_year_credit"]==0
+          repo="Sargon17-Green/pastafari-calendar"
+          ref=old["v131_observed_head"]
+          assert ref=="cc2cf0b422757a5e7c33218ce30cffa8f99c6786"
+          def api(path):
+              return json.loads(subprocess.check_output(["gh","api",path]))
+          tree=api(f"repos/{repo}/git/trees/{ref}?recursive=1")
+          assert not tree["truncated"]
+          tree={x["path"]:x for x in tree["tree"] if x["type"]=="blob"}
+          locks={
+              "implementations/cobol/src/pastafari-engine.cob":"0751f5abba43610be16d2cc11f486c9b8b300601",
+              "implementations/cobol/runtime/pastafari_bigint.c":"01938d986c235c84a64da8a0649eaff33b8ce4c9",
+              "implementations/cobol/runtime/pastafari_bigint.h":"2e51994b210404d14c3ef13b4fa1949cabae5b4c",
+              "implementations/cobol/Makefile":"f7436998eb6b1b8b089f395c59c8d86167797547",
+              "implementations/cobol/copybook/pastafari-engine.cpy":"de12346d4bcb2764fbb6521b889625087c012d3b",
+              "implementations/cobol/test/pastafari-batch.cob":"5e6eab68765f9ad82484b3ebfc810675ac56d2a8",
+              "browser/pastafari-calendar-core.js":"3b349037967550b0253db6235db5044ac9703466",
+              "browser/pastafari-calendar-core-chronicle.js":"0cc8620e4c3e75bdfd887881c287f335346a348a",
+              "browser/month-weaving-domain-detour.js":"f6b95731713a2a3180d5ac8d52783e07f665fc9d",
+              "browser/pastafari-calendar-core-1.js":"699ee2c56c9cb8e957a8acb0ee8362a26e128c67",
+              "browser/pastafari-calendar-core-2.js":"7bdd5fa2279d67dc812e1514f4f402f53e577174"
+          }
+          sources={}
+          inventory={}
+          for p,h in locks.items():
+              assert tree[p]["sha"]==h
+              inventory[p]={"git_blob":h,"bytes":tree[p]["size"],"bytes_read":False}
+              # Do not retrieve or execute the two ~15 MB sealed modules in this gate.
+              if tree[p]["size"]>1000000: continue
+              d=api(f"repos/{repo}/git/blobs/{h}")
+              b=base64.b64decode(d["content"])
+              assert len(b)==tree[p]["size"] and hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              sources[p]=b.decode("utf-8")
+              inventory[p].update(bytes_read=True,sha256=hashlib.sha256(b).hexdigest())
+              (e/(Path(p).name+".source.txt")).write_bytes(b)
+          def anchors(s,items):
+              flat=re.sub(r"\s+","",s)
+              assert all(re.sub(r"\s+","",a) in flat for a in items),[a for a in items if re.sub(r"\s+","",a) not in flat]
+              return len(items)
+          cob=sources["implementations/cobol/src/pastafari-engine.cob"]
+          c=sources["implementations/cobol/runtime/pastafari_bigint.c"]
+          make=sources["implementations/cobol/Makefile"]
+          calls=sorted(set(re.findall(r'\bCALL\s+"([^"]+)"',cob,re.I)))
+          assert len(calls)==23 and all(n.startswith(("pfbi_","pfci_","pfcu_")) for n in calls)
+          assert all(re.search(r"\b"+n+r"\s*\(",c) for n in calls)
+          n=anchors(c,[
+              "Mirror the JavaScript implementation's bounded look-ahead cache.",
+              "needed[i + 1] = needed[i] + c->lengths[i + 1] - 1",
+              "mpz_mul(term, weight, next[n + r])",
+              "mpz_divexact_ui(weight, weight, (unsigned long)(r + 1))",
+              "int retain = i <= start + 7",
+              "mpz_mul_ui(suffix_pm1[off], suffix_pm1[off + 1], (unsigned long)(prefix[off] - 1))",
+              "if (remaining == 1 && k != low) continue",
+              "mpz_divexact(next_base, tmp, denominator)",
+              "mpz_sub(rank, rank, block)",
+              "mpz_bin_uiui(tmp, (unsigned long)(active_total + new_remaining - 1)",
+              "int pfci_count(",
+              "int pfci_unrank("
+          ])
+          n+=anchors(cob,['CALL "pfci_count"','CALL "pfci_unrank"','CALL "pfcu_unrank_composition"','CALL "pfcu_unrank_permutation"','CALL "pfcu_bounded_count"','CALL "pfcu_unrank_bounded"'])
+          n+=anchors(make,["runtime/pastafari_bigint.c","src/pastafari-engine.cob $(RUNTIME_OBJ) -lgmp"])
+          n+=anchors(sources["implementations/cobol/test/pastafari-batch.cob"],['CALL "PASTAFARI-ENGINE"'])
+          facade=sources["browser/pastafari-calendar-core.js"]
+          chron=sources["browser/pastafari-calendar-core-chronicle.js"]
+          det=sources["browser/month-weaving-domain-detour.js"]
+          n+=anchors(facade,['from "./pastafari-calendar-core-chronicle.js"','installMonthWeavingGhostDetour(MonthWeavingCounter, comb)','export * from "./pastafari-calendar-core-chronicle.js"'])
+          n+=anchors(chron,['from "./pastafari-calendar-core-1.js"','from "./pastafari-calendar-core-2.js"','_pastafariStage5M6Transform'])
+          n+=anchors(det,['Object.getOwnPropertyDescriptor(prototype, "count")','Object.getOwnPropertyDescriptor(prototype, "unrank")','!this.lengths.includes(1)','return legacyCount','return legacyUnrank.call(this, rank)','return unrankPoisoned(ledger, legacyUnrank, rank)'])
+          shared=[r["id"] for r in old["records"] if r.get("v131_same_pattern_verified")]+["MAIN-COBOL"]
+          assert len(set(shared))==9
+          report={"schema":"SOAK_V210_DEPENDENCY_LINEAGE/1","historical_commit":ref,"source_inventory":inventory,"source_bytes_verified":len(sources),"tree_only_large_modules":2,"cobol_static_calls":calls,"cobol_explicit_js_cache_lineage":True,"shared_weave_component_records":shared,"shared_weave_count":9,"authoritative_js":{"status":"UNRESOLVED_TRANSITIVE_SEALED_IMPLEMENTATION","facade_installs_weave_detour":True,"legacy_path_for_non_singleton_lengths":True,"complete_dependency_closure_verified":False},"anchor_checks":n,"native_calls":0,"builds":0,"independent_engines_certified":0,"duplicate_decisions":0,"whole_year_credit":0,"soak_dispatch_authorized":False}
+          (e/"result.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v210-dependencies-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
