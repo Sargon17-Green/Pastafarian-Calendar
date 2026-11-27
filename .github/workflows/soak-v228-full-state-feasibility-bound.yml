@@ -1,0 +1,113 @@
+name: Soak v228 full-state oracle feasibility lower bound (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v228-full-state-feasibility-bound.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind historical sources and archived year 5000 structure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "7242b874edd493ecdf0e4bcf30a1863baa4b6af4"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v228-full-state-feasibility-bound.yml"
+          mkdir -p evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15226152462/zip > evidence/v227.zip
+          echo "0c53890ac61c3ee28a1b9161d0a88adfd34ef6487e04fbcde94f3f0e7b85d4ad  evidence/v227.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          def load(p,name,h):
+              raw=Path(p).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==h
+              with zipfile.ZipFile(p) as z:
+                  assert z.testzip() is None
+                  matches=[n for n in z.namelist() if n==name or n.endswith("/"+name)]
+                  assert len(matches)==1
+                  return json.loads(z.read(matches[0]))
+          prior=load("evidence/v227.zip","result.json","0c53890ac61c3ee28a1b9161d0a88adfd34ef6487e04fbcde94f3f0e7b85d4ad")
+          assert (prior["vectors"],prior["states"],prior["transitions"],prior["fixed_rail_strict_subfamily_cases"])==(42,6888,17809,42)
+          assert prior["full_family_count_disagreements"]==prior["native_date_calls"]==prior["whole_year_credit"]==0
+          assert not prior["soak_dispatch_authorized"]
+          rows={r["record_id"]:r for r in load("qa/soak/archive/v225/v131.zip","v131-lineage-screen.json","383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2")["records"]}
+          lengths=load("qa/issue29/archive/v207/v201.zip","result.json","fc9828a2722fa6c84c82d442d6ec409e7e34a2bb9c81de211fd04fdad0095f22")
+          assert lengths["schema"]=="ISSUE29_V201_LENGTHS/1" and lengths["matched"]==45
+          assert lengths["actual"]==lengths["expected"] and all(lengths["checks"].values())
+          assert lengths["year_length_input_frozen"] and lengths["calendar_calls"]==lengths["whole_year_credit"]==0
+          Path("evidence/lengths.json").write_text(json.dumps(lengths,indent=2)+"\n")
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          specs=[
+            ("REF-09","6d242944226adc6242e632718cefbdc143fa2f15","test/pastafari/normative_oracle.clj","5b2f486a12aeb8ff3cea0d762ba26882d67fb4cc",["memo (atom {})","initial {:remaining lengths :opened-up-to 0 :closed-up-to 0}","(find @memo state)","(count-weavings (apply-weave-move state month-id lengths))","block (count-weavings next-state)"]),
+            ("REF-13","28a0209c7adfa01b67291c80cb384c0cdedff8ba","test_support/normative_reference.dart","739dda95e50479676ba3c8afe9279f1e6b26f06d",["final class _WeavingCounter","final key = state.key()","total += count(_apply(state, monthId))","final block = count(next)","final family = _WeavingCounter(monthLengths)"]),
+            ("REF-29","55bdd095b0d3569e98e95b55ff4d77805007a6a9","test/normative_oracle.lua","8fab731dff7011b1a4c3a241c5d1cdefef1c2f1d",["function O.makeWeavingCounter(lengths)","local key=stateKey(remaining,a,b); if memo[key] then return memo[key] end","total=total+Count(nr,na,nb)","local block=Count(nr,na,nb)","local family=O.makeWeavingCounter(monthLengths)"])
+          ]
+          pins={}
+          for rid,ref,p,h,anchors in specs:
+              q=rows[rid]
+              assert q["historical_head_commit"]==ref and q["observed_source_path"]==p and q["git_blob_sha1"]==h
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              assert hashlib.sha256(b).hexdigest()==q["source_sha256"]
+              s=b.decode("utf-8")
+              assert all(a in s for a in anchors),(rid,[a for a in anchors if a not in s])
+              Path("evidence",rid+".source.txt").write_bytes(b)
+              pins[rid]={"historical_commit":ref,"path":p,"blob":h,"sha256":q["source_sha256"],"anchors":anchors,"weave_model":"FULL_REMAINING_VECTOR_MEMO"}
+          Path("evidence/source-pins.json").write_text(json.dumps(pins,indent=2)+"\n")
+          PY
+      - name: Prove and test reachable all-open state cube
+        run: |
+          set -euo pipefail
+          ulimit -v 524288
+          timeout -k 5s 90s python3 - <<'PY'
+          from itertools import product
+          from math import prod
+          from pathlib import Path
+          import json
+          def step(L,s,i):
+              r,o,c=s
+              n=r[i]
+              assert n>0 and (n!=L[i] or i==o) and (n!=1 or i==c)
+              q=list(r);q[i]-=1
+              return tuple(q),o+(n==L[i]),c+(n==1)
+          cases=states=0
+          for m in range(1,5):
+              for L in product(range(2,6),repeat=m):
+                  if sum(L)>16:continue
+                  cases+=1
+                  reached=set()
+                  for target in product(*(range(1,x) for x in L)):
+                      s=(L,0,0)
+                      for i in range(m):s=step(L,s,i)
+                      for i in range(m):
+                          for _ in range(L[i]-1-target[i]):s=step(L,s,i)
+                      assert s==(target,m,0)
+                      reached.add(s)
+                  assert len(reached)==prod(x-1 for x in L)
+                  states+=len(reached)
+          d=json.loads(Path("evidence/lengths.json").read_text())
+          L=d["actual"]
+          assert len(L)==45 and sum(L)==4244 and all(4<=n<=123 for n in L)
+          bound=prod(n-1 for n in L)
+          assert str(bound)=="3991035906815373105625242639483993147254913074560959521179023099422632606433280000000000"
+          out={"schema":"SOAK_V228_FULL_STATE_FEASIBILITY_BOUND/1","records":["REF-09","REF-13","REF-29"],"source_model":"FULL_REMAINING_VECTOR_MEMO","proof":"Open every label in order exactly once; then consume L_i-1-r_i further copies of each label without closing any. For every 1<=r_i<=L_i-1 this yields a distinct reachable nonterminal state with all labels opened and none closed. Exhaustive count without pruning visits every such state.","small_vector_constructive_checks":cases,"small_cube_states_checked":states,"archived_lengths_source":"v201 component evidence; not an original F execution","month_count":len(L),"year_days":sum(L),"reachable_state_lower_bound_decimal":str(bound),"lower_bound_digits":len(str(bound)),"hypothetical_states_per_second":10**12,"hypothetical_minimum_years_floor_at_that_rate":str(bound//(10**12*31557600)),"measured_runtime":None,"conclusion":"Mathematical infeasibility of exhaustive traversal at this frozen length vector, not measured resource exhaustion or branch-wide failure.","evidence_class":"SOURCE_STATIC_AND_SOURCE_MODEL","original_converter_executions":0,"native_date_calls":0,"whole_year_credit":0,"admitted_engines":0,"full_dependency_closure_verified":False,"soak_dispatch_authorized":False}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v228-feasibility-bound-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
