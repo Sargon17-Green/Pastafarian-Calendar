@@ -1,4 +1,4 @@
-name: MATLAB Stage55 Certified Factored Suffix 265 to 4244 (QA)
+name: MATLAB Stage55 Actual Source Weaving Rank Certificate (QA)
 on:
   push:
     branches:
@@ -120,9 +120,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15176860264/zip > "$RUNNER_TEMP/prior-prefix.zip"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15177965281/zip > "$RUNNER_TEMP/prior-prefix.zip"
           gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15057540500/zip > "$RUNNER_TEMP/independent-cxx.zip"
-          echo "077c12f233902657a125da4b82e5a2f65446d66c55c2a0b3c93060d3a382f590  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
+          echo "4a9e08c39af34421488101811c5ced36cba7c2ad079c2642cfd10e0e8a8d7c6f  $RUNNER_TEMP/prior-prefix.zip" | sha256sum -c -
           echo "8863bb2ae94e3ffb1425d43156d868074bf8d1837937f87b08d3df575039fc5e  $RUNNER_TEMP/independent-cxx.zip" | sha256sum -c -
           python3 - <<'PY'
           import gzip, hashlib, json, os, shutil, sys, zipfile
@@ -134,10 +134,10 @@ jobs:
           dec_hash=lambda n: digest(str(n).encode("ascii"))
           with zipfile.ZipFile(tmp/"prior-prefix.zip") as z:
               assert z.testzip() is None
-              prior=z.read("prefix-0265-result.json")
+              prior=z.read("latest-suffix-cursor.json")
               optimized=z.read("BigInt-QA-overlay.m.txt")
               # Entire immutable archive is hash-locked; cursor also checked against C++ below.
-              assert json.loads(prior)["prefix_symbols_matched"]==265
+              assert json.loads(prior)["prefix_symbols_matched"]==4244 and json.loads(prior)["full_word_verified"]
               assert digest(optimized)=="22df597bf9174e38e38b968e8b80fe456882029a94c526f199fd030f03e0980d"
               (ev/"prior-prefix-result.json").write_bytes(prior)
               (ev/"BigInt-QA-overlay.m.txt").write_bytes(optimized)
@@ -157,6 +157,7 @@ jobs:
               assert dec_hash(root_count)=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
               assert dec_hash(R)=="cd5ce4036fc8e99355a4bab5d48c3db473422083d035df5e0af25297be1be3b6"
               assert R==root_count//2+1
+              (ev/"root-count.txt").write_text(str(root_count)+"\n")
               trace=[json.loads(x) for x in gzip.decompress(z.read(base+"prefix_intervals.jsonl.gz")).splitlines()]
           assert len(trace)==len(word)==4244 and word.index(44)+1==202 and word.index(45)+1==245
           lengths=fixture["month_lengths"]
@@ -175,10 +176,10 @@ jobs:
               rank=R-a+1; count=b-a+1
               if i<=4244:
                   hashes.append(dict(position=i,symbol=word[i-1],rank_sha256=dec_hash(rank),count_sha256=dec_hash(count)))
-              if i==265:
-                  assert p["prefix"]==word[:265] and p["remaining"]==remaining
+              if i==4244:
+                  assert p["prefix"]==word and p["remaining"]==remaining
                   assert int(p["rank_decimal"])==rank and int(p["count_decimal"])==count
-                  assert p["opened_up_to"]==45 and p["closed_up_to"]==0
+                  assert p["opened_up_to"]==45 and p["closed_up_to"]==45
           assert lo==hi==R and remaining==[0]*45
           (ev/"interval-hashes.json").write_text(json.dumps(hashes,separators=(",",":"))+"\n")
           overlay=tmp/"qa-arithmetic-overlay"
@@ -187,7 +188,7 @@ jobs:
           for source in Path("src").rglob("*"):
               if source.is_file() and source.as_posix()!="src/+pastafari/BigInt.m":
                   assert source.read_bytes()==(overlay/source.relative_to("src")).read_bytes()
-          print("QA_CERTIFICATE_LOCK_PASS INTERVALS=4244 PRIOR_PREFIX=265 TARGET=4244")
+          print("QA_CERTIFICATE_LOCK_PASS INTERVALS=4244 PRIOR_PREFIX=4244 SOURCE_RANK_PROBE=1")
           PY
           echo "PASTAFARI_QA_OVERLAY=$RUNNER_TEMP/qa-arithmetic-overlay" >> "$GITHUB_ENV"
           git diff --exit-code -- src
@@ -197,8 +198,8 @@ jobs:
         with:
           release: R2026a
 
-      - name: Resume 266 through 4244 with exact factored suffix
-        timeout-minutes: 105
+      - name: Derive actual source weaving rank using native sauce and ring
+        timeout-minutes: 35
         uses: matlab-actions/run-command@v3
         with:
           command: >-
@@ -207,7 +208,7 @@ jobs:
             try;
               fprintf('MATLAB_NATIVE_VERSION=%s\n',version);
               addpath('tests');
-              run_stage55_polynomial_real_year_middle_rank(4244);
+              run_stage55_polynomial_real_year_middle_rank(5000);
               diary off;
             catch ME;
               disp(getReport(ME,'extended','hyperlinks','off'));
@@ -216,50 +217,55 @@ jobs:
               rethrow(ME);
             end
 
-      - name: Independently audit completed suffix ledger
+      - name: Independently derive ring and rank in Python from native bowls
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json
+          import hashlib,json,sys
           from pathlib import Path
+          sys.set_int_max_str_digits(0)
           ev=Path("evidence")
-          cert=json.loads((ev/"interval-hashes.json").read_text())
-          rows=[json.loads(x) for x in (ev/"suffix-ledger.jsonl").read_text().splitlines()]
-          summary=json.loads((ev/"full-word-summary.json").read_text())
-          end=json.loads((ev/"latest-suffix-cursor.json").read_text())
-          assert len(rows)==3979 and len(cert)==4244
-          lengths=json.loads(Path("tests/fixtures/stage55_year5000_appendix_a_metadata.json").read_text())["month_lengths"]
-          prior=json.loads((ev/"prior-prefix-result.json").read_text())
-          word=list(prior["prefix"])
-          remaining=list(prior["remaining"])
-          closed=0
-          for i,row in enumerate(rows,266):
-              assert row["position"]==i and row["opened"]==45
-              for k in ("position","symbol","rank_sha256","count_sha256"):
-                  assert row[k]==cert[i-1][k], (i,k)
-              symbol=row["symbol"]
-              remaining[symbol-1]-=1
-              assert remaining[symbol-1]>=0
-              if remaining[symbol-1]==0:
-                  assert symbol==closed+1
-                  closed+=1
-              assert row["closed"]==closed
-              word.append(symbol)
-          assert word==json.loads(Path("tests/fixtures/stage55_year5000_middle_word.json").read_text())
-          assert remaining==[0]*45 and closed==45
-          assert end["prefix"]==word and end["rank_decimal"]==end["count_decimal"]=="1"
-          assert end["remaining"]==remaining and end["full_word_verified"]
-          assert summary["full_word_verified"] and summary["symbols_matched"]==4244
-          assert summary["full_converter_calls"]==0 and not summary["stage55_accepted"]
-          print("QA_FULL_SUFFIX_LEDGER_PASS NEW=3979 TOTAL=4244 CLOSED=45")
+          d=json.loads((ev/"source-weave-rank.json").read_text())
+          N=int(d["root_count"])
+          assert hashlib.sha256(str(N).encode()).hexdigest()=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
+          assert d["calculation_day"]==-15055671 and d["structure_target_day"]==-15057702
+          M=2**127-1
+          bowls=list(map(int,d["bowls"])); order=d["order"]
+          assert len(bowls)==6 and sorted(order)==list(range(1,7))
+          successor=order[(order.index(4)+1)%6]
+          save=lambda x:x%M or M
+          first=save((bowls[3]+32+181)**2+179*bowls[successor-1]+32)
+          direction=1 if save((first+32+1+193)**2+193*first+197*bowls[5])%2 else -1
+          assert first==int(d["ring_first"]) and direction==d["direction"]
+          space=M; places=1
+          while space<N:
+              space*=M; places+=1
+          digits=[(first-1+direction*j)%M for j in range(places)]
+          wide=1+sum(x*M**j for j,x in enumerate(digits))
+          limit=space//N*N
+          if wide<=limit: accepted,steps=wide,0
+          elif direction==1: accepted,steps=1,space-wide+1
+          else: accepted,steps=limit,wide-limit
+          rank=(accepted-1)%N+1
+          assert d["places"]==places and list(map(int,d["digits"]))==digits
+          for k,v in dict(wide=wide,space=space,acceptance_limit=limit,accepted=accepted,rejection_steps=steps,rank=rank).items():
+              assert int(d[k])==v,k
+          assert d["native_selector_executed"]==(steps==0)
+          assert d["full_converter_calls"]==0 and not d["stage55_accepted"]
+          out=dict(schema="STAGE55_SOURCE_WEAVE_RANK_ORACLE/1",rank=str(rank),rank_sha256=hashlib.sha256(str(rank).encode()).hexdigest(),
+                   count_sha256=hashlib.sha256(str(N).encode()).hexdigest(),places=places,rank_digits=len(str(rank)),
+                   rejection_steps=str(steps),native_selector_executed=d["native_selector_executed"],
+                   source_bowls_native_only=True,full_converter_calls=0,stage55_accepted=False)
+          (ev/"source-weave-rank-oracle.json").write_text(json.dumps(out,indent=2)+"\n")
+          print("QA_SOURCE_WEAVE_RANK_ORACLE_PASS",json.dumps({k:v for k,v in out.items() if k!="rank"},sort_keys=True))
           PY
 
       - name: Upload evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage55-polynomial-full-factored-word-${{ github.run_id }}
+          name: stage55-polynomial-source-weave-rank-${{ github.run_id }}
           path: evidence/
           if-no-files-found: warn
           retention-days: 30

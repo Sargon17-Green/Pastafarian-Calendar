@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265 4244]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265 4244 5000]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,79 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==5000
+    % Source-derived rank only, NOT a date conversion or a full weaving.
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay)); addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')));
+    % All source functions except the tested arithmetic overlay remain exact.
+    N=pastafari.BigInt(strtrim(fileread(fullfile(root,'evidence','root-count.txt'))));
+    assert(strcmp(sha256Ascii(char(N)), ...
+        'c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8'));
+    c=pastafari.BigInt(metadata.calculation_day);
+    firstDay=pastafari.BigInt(metadata.first_day);
+    sauce=pastafari.sauceWithCurrentScars(c,firstDay);
+    assert(sauce.calculationDay==c && sauce.targetDay==firstDay);
+    order=double(sauce.orderAt46Latch(:).');
+    assert(isequal(sort(order),1:6));
+    stream=pastafari.buildMonthWeavingAnswerRing(sauce);
+    bowls=cell(1,6);
+    for i=1:6, bowls{i}=char(sauce.bowls{i}); end
+    one=pastafari.BigInt(1);
+    M=pastafari.BigInt('170141183460469231731687303715884105727');
+    space=M; places=1;
+    while space<N
+        space=space*M; places=places+1;
+        assert(places<=200);
+    end
+    assert(places>1);
+    wide=one; weight=one; digits=cell(1,places);
+    for j=0:places-1
+        digit=pastafari.AnswerRingStreamFactory.answerAt(stream,pastafari.BigInt(j))-one;
+        assert(digit>=pastafari.BigInt(0) && digit<M);
+        digits{j+1}=char(digit);
+        wide=wide+digit*weight; weight=weight*M;
+    end
+    fprintf('QA_SOURCE_WEAVE_RING_PASS PLACES=%d\n',places);
+    data=struct('schema','STAGE55_SOURCE_WEAVE_RANK/1', ...
+        'calculation_day',metadata.calculation_day,'structure_target_day',metadata.first_day, ...
+        'bowls',{bowls},'order',order,'ring_first',char(stream.first), ...
+        'direction',stream.directionStep,'digits',{digits},'root_count',char(N), ...
+        'wide',char(wide),'places',places,'space',char(space), ...
+        'full_converter_calls',0,'stage55_accepted',false);
+    file=fullfile(root,'evidence','source-weave-rank.json');
+    fid=fopen(file,'w'); assert(fid>=0);
+    fwrite(fid,jsonencode(data),'char'); fwrite(fid,newline,'char'); fclose(fid);
+    % Exact bounded rejection calculation. The historical selector's loop
+    % is called only if it will terminate at the first iteration.
+    limit=space.floorDiv(N)*N;
+    if wide<=limit
+        [rank,nativeWide,accepted,nativePlaces,nativeSpace,nativeLimit,steps]= ...
+            pastafari.WideSelectionDetourPatch.apply(stream,N);
+        assert(nativeWide==wide && accepted==wide && nativePlaces==places && ...
+            nativeSpace==space && nativeLimit==limit && steps.iszero());
+        selectorNative=true;
+    else
+        if stream.directionStep==1
+            accepted=one; steps=space-wide+one;
+        else
+            accepted=limit; steps=wide-limit;
+        end
+        rank=(accepted-one).regularMod(N)+one;
+        selectorNative=false;
+    end
+    assert(rank>=one && rank<=N);
+    data.rank=char(rank); data.acceptance_limit=char(limit);
+    data.accepted=char(accepted); data.rejection_steps=char(steps);
+    data.native_selector_executed=selectorNative;
+    fid=fopen([file,'.part'],'w'); assert(fid>=0);
+    fwrite(fid,jsonencode(data),'char'); fwrite(fid,newline,'char'); fclose(fid);
+    movefile([file,'.part'],file,'f');
+    fprintf('QA_SOURCE_WEAVE_RANK_PASS PLACES=%d RANK_DIGITS=%d NATIVE_SELECTOR=%d\n', ...
+        places,numel(char(rank)),selectorNative);
+    return
+end
 
 if prefixLimit==4244
     overlay=getenv('PASTAFARI_QA_OVERLAY');
