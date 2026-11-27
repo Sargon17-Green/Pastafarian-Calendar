@@ -34,9 +34,9 @@ function Fixture44([int]$count) {
         $p='STAGE44_'+$names[$i]+'_'
         $fields=@{
             ASSERTIONS_PASSED='5027';ASSERTIONS_FAILED='0';ENDPOINTS='720';RECTANGLES='320';STRUCTURAL_GUARDS='67'
-            SOURCE_CONTEXTS='72';ORACLE_CONTEXTS='72';CANONICAL_JOBS='17_OF_17_SUCCESS';STAGE43_ASSERTIONS='2215'
+            SOURCE_CONTEXTS='72';ORACLE_CONTEXTS='72';CANONICAL_JOBS='18_OF_18_SUCCESS';STAGE43_ASSERTIONS='2215'
             FINALIZER_IDEMPOTENCY='PASS';CANONICAL_VERIFY='SUCCESS';CI_SHA=([string]($i+1)*40)
-            DEDICATED_RUN=[string](100+$i*10);DEDICATED_JOB=[string](101+$i*10);CANONICAL_RUN=[string](102+$i*10)
+            DEDICATED_RUN=[string](100+$i*10);DEDICATED_JOB=[string](101+$i*10);CANONICAL_RUN=[string](100+$i*10)
             DEDICATED_ARTIFACT=[string](103+$i*10);DEDICATED_ARTIFACT_SHA256=('a'*64)
             FINALIZER_ARTIFACT=[string](104+$i*10);FINALIZER_SHA256=('b'*64);RUNTIME='5.1.12345.1'
         }
@@ -68,11 +68,20 @@ foreach($n in 1..3){
     }
     $bad=Copy44 $m;[void]$bad.Remove('STAGE44_PREFLIGHT_RUNTIME');$bad.Add('STAGE44_PREFLIGHT_UNKNOWN','5.1.12345')
     Check44State (-not (State44 $bad).Success) 'same-cardinality substitution'
-    $bad=Copy44 $m;$bad['STAGE44_PREFLIGHT_CANONICAL_RUN']=$bad['STAGE44_PREFLIGHT_DEDICATED_RUN']
-    Check44State (-not (State44 $bad).Success) 'same-run reuse'
+    $bad=Copy44 $m;$bad['STAGE44_PREFLIGHT_CANONICAL_RUN']='999999'
+    $badState=State44 $bad
+    Check44State (-not $badState.Success -and $badState.ReasonCode -ceq 'RUN_TOPOLOGY_MISMATCH') 'split-run rejection'
+    $bad=Copy44 $m;$bad['STAGE44_PREFLIGHT_CANONICAL_JOBS']='17_OF_17_SUCCESS'
+    Check44State (-not (State44 $bad).Success) 'stale canonical count'
+    $bad=Copy44 $m;$bad['STAGE44_PREFLIGHT_FINALIZER_ARTIFACT']=$bad['STAGE44_PREFLIGHT_DEDICATED_ARTIFACT']
+    Check44State (-not (State44 $bad).Success) 'same-phase artifact reuse'
     if($n -gt 1){
         $bad=Copy44 $m;$bad['STAGE44_NATIVE_CI_SHA']=$bad['STAGE44_PREFLIGHT_CI_SHA']
         Check44State (-not (State44 $bad).Success) 'cross-phase SHA reuse'
+        $bad=Copy44 $m;$bad['STAGE44_NATIVE_CANONICAL_RUN']=$bad['STAGE44_PREFLIGHT_CANONICAL_RUN'];$bad['STAGE44_NATIVE_DEDICATED_RUN']=$bad['STAGE44_PREFLIGHT_DEDICATED_RUN']
+        Check44State (-not (State44 $bad).Success) 'cross-phase run reuse'
+        $bad=Copy44 $m;$bad['STAGE44_NATIVE_DEDICATED_JOB']=$bad['STAGE44_PREFLIGHT_DEDICATED_JOB']
+        Check44State (-not (State44 $bad).Success) 'cross-phase job reuse'
         $bad=Copy44 $m;$bad['STAGE44_NATIVE_DEDICATED_ARTIFACT']=$bad['STAGE44_PREFLIGHT_FINALIZER_ARTIFACT']
         Check44State (-not (State44 $bad).Success) 'cross-phase artifact reuse'
     }

@@ -81,7 +81,7 @@ function Get-Stage44MetadataState {
         $expected.Add('STAGE44_SEAL_COMMIT_NATIVE_RECHECK',$seal)
         $fixed=@{
             ASSERTIONS_PASSED='5027'; ASSERTIONS_FAILED='0'; ENDPOINTS='720'; RECTANGLES='320'
-            STRUCTURAL_GUARDS='67'; SOURCE_CONTEXTS='72'; ORACLE_CONTEXTS='72'; CANONICAL_JOBS='17_OF_17_SUCCESS'
+            STRUCTURAL_GUARDS='67'; SOURCE_CONTEXTS='72'; ORACLE_CONTEXTS='72'; CANONICAL_JOBS='18_OF_18_SUCCESS'
             STAGE43_ASSERTIONS='2215'; FINALIZER_IDEMPOTENCY='PASS'; CANONICAL_VERIFY='SUCCESS'
         }
         $patterns=@{
@@ -101,7 +101,9 @@ function Get-Stage44MetadataState {
                 if (-not $v.ContainsKey($full) -or $v[$full] -cnotmatch $patterns[$key]) { return New-Stage44Result $false ('INVALID_FIELD:'+$full) }
                 $expected.Add($full,$v[$full])
             }
-            if (-not $shas.Add($v[$prefix+'CI_SHA']) -or -not $runs.Add($v[$prefix+'DEDICATED_RUN']) -or -not $runs.Add($v[$prefix+'CANONICAL_RUN']) -or -not $jobs.Add($v[$prefix+'DEDICATED_JOB']) -or -not $artifacts.Add($v[$prefix+'DEDICATED_ARTIFACT']) -or -not $artifacts.Add($v[$prefix+'FINALIZER_ARTIFACT'])) { return New-Stage44Result $false 'REUSED_EVIDENCE_IDENTITY' }
+            # The reusable Stage44 job belongs to the canonical run; only cross-phase run reuse is forbidden.
+            if ($v[$prefix+'DEDICATED_RUN'] -cne $v[$prefix+'CANONICAL_RUN']) { return New-Stage44Result $false 'RUN_TOPOLOGY_MISMATCH' }
+            if (-not $shas.Add($v[$prefix+'CI_SHA']) -or -not $runs.Add($v[$prefix+'CANONICAL_RUN']) -or -not $jobs.Add($v[$prefix+'DEDICATED_JOB']) -or -not $artifacts.Add($v[$prefix+'DEDICATED_ARTIFACT']) -or -not $artifacts.Add($v[$prefix+'FINALIZER_ARTIFACT'])) { return New-Stage44Result $false 'REUSED_EVIDENCE_IDENTITY' }
         }
         if ($expected.Count -ne (813+20*$phases.Count) -or $v.Count -ne $expected.Count) { return New-Stage44Result $false 'KEY_COUNT_MISMATCH' }
         foreach ($key in $expected.Keys) {
