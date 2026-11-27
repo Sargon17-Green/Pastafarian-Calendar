@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: stage1-native-h-pinned-a2ff17df
+  group: stage1-native-h-pinned-65224e54
   cancel-in-progress: false
 jobs:
   native-h-transfer:
@@ -15,14 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: a2ff17df329b2f4b7628d5e8d0a55be51a631d1f
+          ref: 65224e549190167995d6022ed4c3f58a76e231a8
           persist-credentials: false
       - name: Verify exact source and fresh inputs
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = a2ff17df329b2f4b7628d5e8d0a55be51a631d1f
+          test "$(git rev-parse HEAD)" = 65224e549190167995d6022ed4c3f58a76e231a8
           test "$(git rev-parse HEAD:tests/tb_weave_native_lex_fast.sv)" = d8ee4b4ab7de7ed78baa28486e220c55a885b703
+          test "$(git rev-parse HEAD:tests/tb_weave_native_lex_prefix.sv)" = b441128efe336db9cbd98378d6b9cb6f4a942754
           test "$(git rev-parse HEAD:scripts/verify_native_H_transfer.sh)" = acd26d7cb32496d31d463ace3c7aca42d95cf673
           test "$(git rev-parse HEAD:scripts/verify_native_lex_full.sh)" = 9bf30edc300ce108df01d955a98d1eb083f1f6ce
           test -z "$(git status --porcelain=v1)"
@@ -51,7 +52,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage1-native-h-pinned-a2ff17df
+          name: stage1-native-h-pinned-65224e54
           path: |
             build/native_ci_*
             build/native_H_*.log
