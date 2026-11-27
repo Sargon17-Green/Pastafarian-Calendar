@@ -10,7 +10,7 @@ permissions:
 jobs:
   bounded-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,7 +21,7 @@ jobs:
           set -euo pipefail
           mkdir -p evidence build-int02
           {
-            printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\nSOURCE_LOCK=38ab6a7d71e9c1a971d5b3ff7c48b67cf4a59d15\n' "$GITHUB_SHA"
+            printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\nSOURCE_LOCK=4177479dea3f7662df383148a471a411f6419a0c\n' "$GITHUB_SHA"
             test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
             while read -r expected path; do
               actual="$(git rev-parse "HEAD:$path")"
@@ -43,6 +43,14 @@ jobs:
           3b9e6ea45c08c819c676409a5d9c88eb2a9e36f1 test/int02_gap_window_tests.cob
           824a8e920e1312730302373d6cebe1d1863abdd5 test/int02_normative_gap_vectors.mjs
           f250dfeff812f8a5349a68d645c1ffd72a1fc8c9 test/int02_normative_gap_vectors.json
+          0304043610542db8041ac1307c328e91fa85f0d0 src/calendar_short_rank.cob
+          f5209a845218cc03f57318f34bd0f1dad6608dd0 src/calendar_seal10.cob
+          82fca0f5dbc0c8a1a5bdecc7ab86b784e2a68452 src/calendar_select_year.cob
+          3b968c1a01b188823c913950b79c000690054c52 test/int02_generated_year_vectors.json
+          1e528b04de7b755d7a8531a0f7bdf12ff04ee786 test/int02_generated_year_diff.mjs
+          d79ee969419f9fed7a71b2d0b820f6350664713d test/int02_select_year_driver.cob
+          3b77d72ec5077536c1a026edd965b1da0898ebb3 test/int02_short_rank_driver.cob
+          0f073fffe7a883f04b8fa47ded9f685b8da3e493 test/int02_short_rank_diff.mjs
           LOCK
           } 2>&1 | tee evidence/source-lock.log
       - name: Install compiler from Ubuntu sources only
@@ -57,7 +65,7 @@ jobs:
             cobc -V
             node --version
           } 2>&1 | tee evidence/toolchain.log
-      - name: Execute only the four unaccepted INT-02 gates independently
+      - name: Execute only the six unaccepted INT-02 gates independently
         shell: bash
         run: |
           set -uo pipefail
@@ -78,6 +86,8 @@ jobs:
                 candidates) grep -Fxq 'INT02_YEAR_CANDIDATES_CASES=58 GATE=PASS_BOUNDED_CANDIDATES_ONLY' "evidence/$name.log" ;;
                 wide) grep -Fxq '{"cases":1051,"statusCounts":{"0":702,"22":3,"24":346},"scope":"NATIVE_WIDE_ONLY","gate":"MATCH"}' "evidence/$name.log" ;;
                 gap-window) grep -Eq '^GAP_WINDOW_CHECKS=0*27$' "evidence/$name.log" && grep -Fxq 'GAP_WINDOW_GATE=PASS' "evidence/$name.log" ;;
+                short-rank) grep -Fxq 'INT02_SHORT_RANK_CASES=196009 INVALID=9 REJECTED_TAIL=39198 GATE=MATCH_NATIVE_RANK_ONLY' "evidence/$name.log" ;;
+                generated-year) grep -Fxq 'INT02_GENERATED_YEAR_CASES=11 GATE=MATCH_NATIVE_BOUNDED_ONLY' "evidence/$name.log" ;;
               esac
               rc=$?
             fi
@@ -89,6 +99,8 @@ jobs:
           gate candidates test/int02_year_candidates_driver.cob src/calendar_year_candidates.cob 300s node test/int02_year_candidates_diff.mjs "$(pwd)/build-int02/candidates" || failures=$((failures+1))
           gate wide test/int02_wide_driver.cob src/calendar_wide.cob 300s node test/int02_wide_diff.mjs "$(pwd)/build-int02/wide" || failures=$((failures+1))
           gate gap-window test/int02_gap_window_tests.cob 'src/calendar_sauce.cob src/calendar_gap.cob src/calendar_gate_window.cob src/calendar_wide.cob src/calendar_save.cob' 600s ./build-int02/gap-window || failures=$((failures+1))
+          gate short-rank test/int02_short_rank_driver.cob src/calendar_short_rank.cob 150s node test/int02_short_rank_diff.mjs "$(pwd)/build-int02/short-rank" || failures=$((failures+1))
+          gate generated-year test/int02_select_year_driver.cob 'src/calendar_select_year.cob src/calendar_seal10.cob src/calendar_short_rank.cob src/calendar_year_candidates.cob src/calendar_sauce.cob src/calendar_gap.cob src/calendar_gate_window.cob src/calendar_wide.cob src/calendar_save.cob' 1800s node test/int02_generated_year_diff.mjs "$(pwd)/build-int02/generated-year" || failures=$((failures+1))
           printf 'FAILED_GATES=%s\n' "$failures" | tee -a evidence/status.log
           test "$failures" = 0
       - name: Hash logs
