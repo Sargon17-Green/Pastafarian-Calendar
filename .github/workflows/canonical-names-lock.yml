@@ -1067,6 +1067,27 @@ jobs:
             stage-metadata-state-transcript.txt
             DEVELOPMENT_STAGE.md
           if-no-files-found: error
+      - name: Stage44 strict metadata classifier synthetic regression (not activation)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $head = ((& git rev-parse HEAD) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $head -cne $env:GITHUB_SHA) { throw 'Stage44 classifier checkout mismatch' }
+          Start-Transcript -Path stage44-classifier-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage44MetadataState.Tests.ps1
+            if (-not $?) { throw 'Stage44 classifier regression failed' }
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Retain Stage44 synthetic classifier evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage44-classifier-regression
+          path: stage44-classifier-transcript.txt
+          if-no-files-found: error
       - name: Verify exact-SHA Windows PowerShell 5.1 Stage43 lifecycle profile and bounded oracle
         shell: powershell
         run: |
