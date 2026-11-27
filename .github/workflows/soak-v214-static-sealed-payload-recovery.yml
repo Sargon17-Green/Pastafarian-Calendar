@@ -1,0 +1,182 @@
+name: Soak v214 reconstruct sealed JS text as data (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v214-static-sealed-payload-recovery.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock activation and source bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "888f9f2dbbd1551a674e8623ef0de05e71dab686"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v214-static-sealed-payload-recovery.yml"
+          mkdir -p evidence source
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15218001028/zip > evidence/v212.zip
+          echo "c1ddaf1343514cb067cb8f0a3c49d51a73cf5144324fa6126c3002fe121ace2c  evidence/v212.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,zipfile,hashlib,subprocess
+          from pathlib import Path
+          with zipfile.ZipFile("evidence/v212.zip") as z:
+              assert z.testzip() is None
+              n=[n for n in z.namelist() if n.endswith("result.json")]
+              assert len(n)==1
+              d=json.loads(z.read(n[0]))
+          assert d["sealed_bytes_verified"]==29715577 and d["native_date_calls"]==0
+          assert d["commit"]=="cc2cf0b422757a5e7c33218ce30cffa8f99c6786"
+          for p in ["browser/pastafari-calendar-core-1.js","browser/pastafari-calendar-core-2.js","browser/pastafari-calendar-core-chronicle.js"]:
+              lock=d["sources"][p]
+              f=Path("source")/Path(p).name
+              with f.open("wb") as out:
+                  subprocess.run(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/pastafari-calendar/contents/{p}?ref={d['commit']}"],stdout=out,check=True,timeout=90)
+              b=f.read_bytes()
+              assert len(b)==lock["bytes"] and hashlib.sha256(b).hexdigest()==lock["sha256"]
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==lock["git_blob"]
+          PY
+      - name: Independently implement data-only decoding; never evaluate recovered text
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -v 2097152
+          timeout -k 5s 180s node --max-old-space-size=512 --input-type=module <<'JS'
+          import fs from "node:fs";
+          import crypto from "node:crypto";
+          import assert from "node:assert/strict";
+          const read = p => fs.readFileSync("source/"+p,"utf8");
+          const loader=read("pastafari-calendar-core-chronicle.js");
+          const orderMatches=[...loader.matchAll(/_590ac4c438e25f=\[([^\]]+)\]/g)];
+          assert.equal(orderMatches.length,1);
+          const order=orderMatches[0][1].split(",").map(x=>x.trim());
+          assert.equal(order.length,193);
+          assert.equal(new Set(order).size,193);
+          assert(order.every(x=>/^_[0-9a-f]+$/.test(x)));
+          const wanted=new Set(order), rows=new Map();
+          const layouts=[], failures=[];
+          const token=String.raw`(?:\d+|"[A-Za-z0-9_-]+"|'[A-Za-z0-9_-]+')`;
+          const literal=new RegExp("^\\s*(?:"+token+"\\s*,\\s*){7}"+token+"\\s*,?\\s*$");
+          function redact(s){return s.replace(/(["'])([A-Za-z0-9_-]{40,})\1/g,(_,q,v)=>q+"<encoded:"+v.length+">"+q);}
+          for(const p of ["pastafari-calendar-core-1.js","pastafari-calendar-core-2.js"]){
+            const body=read(p);
+            const starts=[...body.matchAll(/^\s*const\s+(_[0-9a-f]+)\s*=/gm)].filter(m=>wanted.has(m[1]));
+            const exportStart=body.lastIndexOf("export {");
+            let count=0;
+            for(let k=0;k<starts.length;k++){
+              const m=starts[k],end=k+1<starts.length?starts[k+1].index:(exportStart>m.index?exportStart:body.length);
+              const block=body.slice(m.index,end);
+              const matches=[...block.matchAll(/\[([^\[\]]*)\]/g)].filter(x=>literal.test(x[1]));
+              const masked=redact(block);
+              const description={id:m[1],file:p,candidate_arrays:matches.length,wrapper_start:masked.slice(0,550),wrapper_end:masked.slice(-400)};
+              if(matches.length!==1){failures.push(description);continue;}
+              const arr=matches[0][1].trim().replace(/,$/,"").split(",").map(x=>{
+                x=x.trim();
+                return /^\d+$/.test(x)?Number(x):x.slice(1,-1);
+              });
+              if(arr.length!==8||typeof arr[0]!=="number"||arr.filter(x=>typeof x==="number").length!==5||!arr.filter(x=>typeof x==="number").every(x=>Number.isInteger(x)&&x>=0&&x<=0xffffffff)||!arr.filter(x=>typeof x==="string").every(x=>x.length>0&&x.length%4===0)){
+                failures.push({...description,reason:"literal shape mismatch"});continue;
+              }
+              assert(!rows.has(m[1]),"duplicate literal "+m[1]);
+              rows.set(m[1],arr);count++;
+              layouts.push(description);
+            }
+            console.log("MODULE_LAYOUT",p,starts.length,count);
+          }
+          fs.writeFileSync("evidence/literal-layout.json",JSON.stringify({parsed:layouts,failures},null,2));
+          console.log("STATIC_LITERAL_EXTRACTION",rows.size,JSON.stringify(failures.slice(0,3)));
+          assert.equal(rows.size,193,"unsupported sealed literal representation");
+          const data=order.map(n=>rows.get(n));
+          const constants=[3424380960,580176430,1378151104,3301754935,2328180054,2290893233,1233051510,4175454247];
+          assert(loader.includes("_f5cf225d3e214a=["+constants.join(",")+"]"));
+          const U=x=>x>>>0;
+          function mix(x){x=U(x^0xa3c59ac3);x=Math.imul(x^(x>>>16),0x7feb352d);x=Math.imul(x^(x>>>15),0x846ca68b);return U(x^(x>>>16));}
+          function step(x){x=U(x||0x6d2b79f5);x^=x<<13;x^=x>>>17;x^=x<<5;return U(x);}
+          const rot=(x,n)=>U((x<<n)|(x>>>(32-n)));
+          const indexes=[[[1,2,3,4],[5,6,7]],[[4,7,2,6],[3,1,5]],[[5,3,6,1],[7,4,2]],[[7,2,5,3],[1,6,4]]];
+          const parts=data.map(a=>indexes[a[0]&3].map(ix=>ix.map(i=>a[i])));
+          assert(parts.every(([n,s])=>n.every(x=>typeof x==="number")&&s.every(x=>typeof x==="string")));
+          const key=constants.slice();let cursor=0;
+          for(let i=0;i<data.length;i++)for(const n of [data[i][0],...parts[i][0]]){
+            const k=cursor&7;
+            key[k]=mix(key[k]^n^Math.imul(cursor+1,0x9e3779b1));
+            key[(k+3)&7]=U(key[(k+3)&7]+rot(key[k],cursor%29+1));cursor++;
+          }
+          for(let round=0;round<19;round++)for(let i=0;i<8;i++)key[i]=mix(U(key[i]+key[(i+1)&7]+Math.imul(round+1,constants[(i+round)&7]|1)));
+          const nonce=[mix(key[1]^constants[5]^data.length),mix(key[4]^constants[2]^cursor),mix(key[7]^constants[0]^Math.imul(data.length,0x45d9f3b))];
+          function perm(a,seed){for(let i=a.length-1;i>0;i--){seed=step(seed);const j=seed%(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+          const permutations=[0,1,2].map(lane=>perm(Array.from({length:data.length},(_,i)=>i),mix(key[lane]^constants[(lane+1)&7]^Math.imul(lane+7,0x9e3779b1))));
+          const alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+          function decode(s,seed){
+            const shuffled=perm([...alphabet],seed);
+            const map=new Uint8Array(128);map.fill(255);
+            shuffled.forEach((ch,i)=>map[ch.charCodeAt(0)]=i);
+            const b=Buffer.alloc(s.length/4*3);let j=0;
+            for(let i=0;i<s.length;i+=4){
+              const a=map[s.charCodeAt(i)],c=map[s.charCodeAt(i+1)],d=map[s.charCodeAt(i+2)],e=map[s.charCodeAt(i+3)];
+              assert((a|c|d|e)<64);
+              const n=(a<<18)|(c<<12)|(d<<6)|e;
+              b[j++]=n>>>16;b[j++]=n>>>8;b[j++]=n;
+            }return b;
+          }
+          const lanes=[[],[],[]];
+          for(let i=0;i<data.length;i++){
+            const placement=perm([0,1,2],mix(data[i][0]^key[5]^Math.imul(i+1,constants[3]|1)));
+            for(let j=0;j<3;j++){
+              const lane=placement[j],slot=permutations[lane][i];
+              const seed=mix(data[i][0]^key[(lane+2)&7]^Math.imul(slot+1,constants[(lane+4)&7]|1)^Math.imul(lane+11,0x27d4eb2d));
+              assert(lanes[lane][slot]===undefined);
+              lanes[lane][slot]=decode(parts[i][1][j],seed);
+            }
+          }
+          const chunk=lanes[0][0].length;
+          assert(chunk>0&&chunk*data.length<=20000000);
+          const buf=Buffer.alloc(chunk*data.length);
+          for(let i=0;i<data.length;i++){
+            const [a,b,c]=lanes.map(x=>x[i]);
+            assert(a.length===chunk&&b.length===chunk&&c.length===chunk);
+            for(let j=0;j<chunk;j++)buf[i*chunk+j]=a[j]^b[j]^c[j];
+          }
+          const head=[mix(constants[0]^key[6]),mix(constants[3]^nonce[1]),mix(constants[5]^key[2]),mix(constants[7]^nonce[0])];
+          const rotations=[0,2,4,6].map(i=>5+constants[i]%22);
+          const rounds=7+constants[6]%5;
+          function qr(v,a,b,c,d){v[a]=U(v[a]+v[b]);v[d]=rot(v[d]^v[a],rotations[0]);v[c]=U(v[c]+v[d]);v[b]=rot(v[b]^v[c],rotations[1]);v[a]=U(v[a]+v[b]);v[d]=rot(v[d]^v[a],rotations[2]);v[c]=U(v[c]+v[d]);v[b]=rot(v[b]^v[c],rotations[3]);}
+          for(let offset=0,counter=1;offset<buf.length;offset+=64,counter=U(counter+1)){
+            const initial=[...head,...key,counter,...nonce],v=initial.slice();
+            for(let round=0;round<rounds;round++){
+              qr(v,0,4,8,12);qr(v,1,5,9,13);qr(v,2,6,10,14);qr(v,3,7,11,15);
+              qr(v,0,5,10,15);qr(v,1,6,11,12);qr(v,2,7,8,13);qr(v,3,4,9,14);
+            }
+            for(let j=0;j<16;j++)v[j]=U(v[j]+initial[j]);
+            for(let j=0;j<64&&offset+j<buf.length;j++)buf[offset+j]^=(v[j>>>2]>>>((j&3)*8))&255;
+          }
+          const length=buf.readUInt32LE(0),expected=buf.readUInt32LE(4);
+          assert(length>0&&length<=buf.length-8,"decoded length invalid");
+          const payload=buf.subarray(8,8+length);
+          let actual=0x811c9dc5;
+          for(const b of payload)actual=Math.imul(actual^b,0x01000193);
+          actual=U(actual);
+          assert.equal(actual,expected,"original loader FNV checksum mismatch");
+          const decoded=new TextDecoder("utf-8",{fatal:true}).decode(payload);
+          const sha=crypto.createHash("sha256").update(payload).digest("hex");
+          // No decoded source written to artifacts. Record bounded textual signals only.
+          const signals=["MonthWeavingCounter","PastafariCalendar","suffix","unrank","comb","prototype","BigInt","start + 7"].map(s=>({literal:s,count:decoded.split(s).length-1}));
+          const report={schema:"SOAK_V214_DATA_ONLY_PAYLOAD_RECOVERY/1",literal_fragments:rows.size,prior_failed_run:46037066831,prior_failure:"direct array assignment assumption; actual named IIFE wrappers",chunk_bytes:chunk,reconstructed_bytes:length,original_fnv32:actual,sha256:sha,utf8_valid:true,text_signals:signals,decoded_payload_recovered:true,source_transforms_applied:false,effective_algorithm_reviewed:false,original_module_imports:0,original_payload_executions:0,native_date_calls:0,whole_year_credit:0,soak_dispatch_authorized:false};
+          fs.writeFileSync("evidence/result.json",JSON.stringify(report,null,2)+"\n");
+          console.log(JSON.stringify(report));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v214-static-recovery-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
