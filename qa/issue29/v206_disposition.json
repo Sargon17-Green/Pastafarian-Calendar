@@ -1,0 +1,318 @@
+{
+  "schema": "ISSUE29_CORRECTED_ADA_FOCUSED_DISPOSITION/1",
+  "as_of": "2026-11-27",
+  "issue": 29,
+  "parent_issue": 27,
+  "disposition": "CORRECTED_VERSION_FOCUSED_REGRESSION_PASS_NOT_SOAK_ADMITTED",
+  "historical_original": {
+    "commit": "a2fb6811ce8c1c4aa3e2d0dffc9f2ea549803b72",
+    "c": -15055671,
+    "t": -15055671,
+    "actual": [
+      5000,
+      10,
+      503,
+      30,
+      52
+    ],
+    "reference": [
+      5000,
+      10,
+      503,
+      20,
+      56
+    ],
+    "run": 44394781099,
+    "artifact": 14472835490,
+    "sha256": "3d8c594ae761aa6eeb8c11b241755b2f11ef472d41483ffb5be0c1cdc2bd8cbe",
+    "status": "CONFIRMED_ORIGINAL_SOURCE_MISMATCH_IMMUTABLE"
+  },
+  "corrected": {
+    "branch": "Ada+తెలుగు",
+    "head": "d10d50383025d73ad2ce11d19d5759221d70f730",
+    "source_tree": "a39f73fa2f371e80b5e7ea4156583f3ec34042df",
+    "historical_test_base": "1160096aa847c54cbef27c232771ce1549d7ba8f",
+    "normative_oracle_blob": "0be8f8ab4ddef26d34963d5567707a511ebda50b",
+    "weave_body_blob": "845bd8905943a54e63d6aba0334404a5051fe666",
+    "correction": "full legal weave family with single global rank and GMP Count/Unrank replaces restricted fixed-rail per-interior-ticket choice; legacy month_weaving package retained",
+    "scope": "focused corrected-source regression, not global proof"
+  },
+  "evidence": [
+    {
+      "version": "v188",
+      "run": 45271645185,
+      "artifact": 14864708206,
+      "class": "ORIGINAL_F_NATIVE",
+      "pairs": 1,
+      "reference": "fresh pinned Python F"
+    },
+    {
+      "version": "v193",
+      "run": 45509024124,
+      "artifact": 14974288368,
+      "class": "ORIGINAL_F_NATIVE",
+      "pairs": 6,
+      "reference": "fresh pinned Python F"
+    },
+    {
+      "version": "v204",
+      "run": 46024534551,
+      "artifact": 15212166434,
+      "class": "ORIGINAL_F_NATIVE",
+      "pairs": 1,
+      "reference": "frozen independently checked year projection"
+    },
+    {
+      "version": "v205",
+      "run": 46025266256,
+      "artifact": 15212082304,
+      "class": "ORIGINAL_F_NATIVE",
+      "pairs": 8,
+      "reference": "three archived cross-engine anchors and five derived year projections"
+    },
+    {
+      "version": "v203",
+      "run": 46021352708,
+      "class": "COMPONENT_NATIVE",
+      "rows": 4244,
+      "fields": 21220,
+      "calendar_calls": 0,
+      "whole_year_credit": 0
+    },
+    {
+      "version": "v206",
+      "run": 46028471318,
+      "artifact": 15213451206,
+      "artifact_sha256": "a19b2f623af1723e52eb903cb60294949a9623711b711e4b02a9858f02f38e34",
+      "class": "EVIDENCE_AUDIT",
+      "calendar_calls": 0,
+      "retention_until": "2027-02-25",
+      "whole_year_credit": 0
+    }
+  ],
+  "reconciled": {
+    "schema": "ISSUE29_V206_RECEIPT_RECONCILIATION/1",
+    "unique_native_pairs": 16,
+    "matched_fields": 80,
+    "calculation_days": 4,
+    "years": [
+      4999,
+      5000,
+      5001
+    ],
+    "calendar_calls": 0,
+    "whole_year_credit": 0,
+    "soak": false,
+    "records": [
+      {
+        "source": "v188",
+        "c": -15055671,
+        "t": -15055671,
+        "fields": [
+          5000,
+          10,
+          503,
+          20,
+          56
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055671,
+        "t": -15057703,
+        "fields": [
+          4999,
+          15,
+          433,
+          32,
+          121
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055671,
+        "t": -15053459,
+        "fields": [
+          5000,
+          13,
+          218,
+          26,
+          105
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055671,
+        "t": -15053458,
+        "fields": [
+          5001,
+          9,
+          1,
+          41,
+          1
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055672,
+        "t": -15055671,
+        "fields": [
+          5000,
+          9,
+          503,
+          36,
+          6
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055670,
+        "t": -15055671,
+        "fields": [
+          5000,
+          10,
+          503,
+          40,
+          99
+        ]
+      },
+      {
+        "source": "v193",
+        "c": -15055629,
+        "t": -15055629,
+        "fields": [
+          5000,
+          3,
+          42,
+          43,
+          2
+        ]
+      },
+      {
+        "source": "v204",
+        "c": -15055671,
+        "t": -15057695,
+        "fields": [
+          5000,
+          15,
+          8,
+          28,
+          2
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15055658,
+        "fields": [
+          5000,
+          14,
+          13,
+          3,
+          69
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15056671,
+        "fields": [
+          5000,
+          17,
+          273,
+          20,
+          29
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15054671,
+        "fields": [
+          5000,
+          14,
+          1000,
+          23,
+          36
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15057702,
+        "fields": [
+          5000,
+          15,
+          1,
+          18,
+          1
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15057696,
+        "fields": [
+          5000,
+          15,
+          7,
+          6,
+          1
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15056944,
+        "fields": [
+          5000,
+          15,
+          759,
+          16,
+          20
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15056943,
+        "fields": [
+          5000,
+          17,
+          1,
+          40,
+          12
+        ]
+      },
+      {
+        "source": "v205",
+        "c": -15055671,
+        "t": -15055670,
+        "fields": [
+          5000,
+          14,
+          1,
+          29,
+          38
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Seven of sixteen cases have fresh pinned Python F comparison; nine are checked against frozen year projection, including archived cross-engine anchors.",
+    "No complete fixed-c year from separate F calls; no independent-engine lineage certification.",
+    "Separate maximum-index API defect RED/GREEN candidate is not in live source and is outside this date-regression disposition.",
+    "Full native raw artifact bytes remain subject to artifact retention; tracked receipt is not a replacement for durable raw archive.",
+    "No authorization to close issue 29 or remove dispatch hold."
+  ],
+  "gates": {
+    "issue29": "OPEN",
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "whole_year_credit": 0,
+    "target_years": 10000,
+    "main": "56bc4173aae4975ded019ef5ab5a36249f1424df",
+    "stage42_opened": false,
+    "release_created": false
+  },
+  "next": "Resume read-only master readiness audit; resolve remaining admission gates and durable evidence retention before any broad dispatch."
+}
