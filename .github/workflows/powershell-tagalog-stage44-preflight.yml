@@ -1,0 +1,57 @@
+name: PowerShell Tagalog Stage44 preflight
+on:
+  push:
+    branches:
+      - 'PowerShell+Tagalog'
+permissions:
+  contents: read
+jobs:
+  stage44-preflight:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Exact-SHA Stage44 bounded oracle preflight
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $sha -cne $env:GITHUB_SHA) { throw 'Checkout SHA mismatch' }
+          $blob = ((& git rev-parse HEAD:DEVELOPMENT_STAGE.md) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $blob -cne '91f8dd0237903bc4db9131ba506bc398c92c3258') { throw 'Stage43 metadata blob mismatch; preflight only' }
+          @(
+            'PROJECT_ID=PC-BRANCH-POWERSHELL-TAGALOG',
+            ('STAGE44_CHECKED_OUT_SHA=' + $sha),
+            ('STAGE44_RUNTIME=' + $PSVersionTable.PSVersion.ToString()),
+            ('STAGE43_METADATA_BLOB=' + $blob),
+            'STAGE44_PLANNED_ASSERTIONS=5027',
+            'STAGE44_ACTIVATION=NOT_ACTIVATED'
+          ) | Set-Content stage44-metadata.txt -Encoding UTF8
+          Start-Transcript -Path stage44-transcript.txt | Out-Null
+          try {
+            & .\tests\Stage44.Tests.ps1
+            if ($LASTEXITCODE -ne 0) { throw 'Stage44 preflight failed' }
+            Add-Content stage44-metadata.txt 'STAGE44_PREFLIGHT_RESULT=BOUNDED_ORACLE_PASS' -Encoding UTF8
+          } finally {
+            Stop-Transcript | Out-Null
+          }
+      - name: Require evidence files
+        if: always()
+        shell: powershell
+        run: |
+          foreach ($path in @('stage44-metadata.txt','stage44-transcript.txt','DEVELOPMENT_STAGE.md')) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw ('Missing evidence: ' + $path) }
+          }
+      - name: Retain Stage44 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powershell-tagalog-stage44-moving-gate-preflight
+          path: |
+            stage44-metadata.txt
+            stage44-transcript.txt
+            DEVELOPMENT_STAGE.md
+          if-no-files-found: error
