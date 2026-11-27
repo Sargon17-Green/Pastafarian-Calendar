@@ -1,3 +1,40 @@
+# Stage 1 actual weaving acceptance contract — canonical reconciliation
+
+PROJECT_ID: PC-BRANCH-FORTRAN-ENGLISH
+Reviewed evidence commit: `ce900e8d7a0b8805a8a59a2183e0aa8eae374c0f` (Fortran+English).
+Review date: 2026-11-27.
+Disposition: canonical full-year projection/count/rank gate PASS; Stage 1 NOT ACCEPTED. QA-only; no production algorithm, Stage 2, main, merge or publication.
+
+## Authority and independent review
+
+The governing Hebrew Scroll, Megilat_HaItim_Yehuda_FINAL_2026-09-18.md, was recovered from the Library and hashed again as 82,877 raw bytes: SHA-256 `7b834f4a444e021bb65164282b851af960a6dbc0be3d458c2412181773b9db7b`. Exact match. Lines 1509–1660 require exact month lengths, both strict endpoint orders, lexicographic whole-weave selection; lines 1806–1885 require building the year once with its first day as the construction target, and counting occurrences inclusively for the five-field projection. This is separate out-of-band source-byte verification; the CI JSON source_bytes_verified=false remains truthful. See STAGE01_CANONICAL_SCROLL_AUDIT.md for source/component crosswalk and the shared old Python post-stir defect. The legacy 45/4244 structure is superseded, not an expected canonical value.
+
+Both exact-SHA automatic push runs 45913529700 and 45913529675, attempt 1, completed success. Job logs and artifact metadata were rechecked; the following three ZIPs were downloaded, SHA-256 matched to GitHub metadata and CRC checked:
+- Full year, job 140227224366, artifact 15161372382, b6a257ce71e84ce5a7c729841e617cfeb0e567ba17557ec2437737446b03fb32. Native/diff exit 0/0. Report/raw SHA matched; all actual/expected rows and all rank arrays equal, 4399 month IDs, 21995 date fields, exact 7021-digit count, 17596 IDs over ranks 1,2,N-1,N. Earlier independent reverse-endpoint and occurrence-poset replay retained. Five frequency/order checks. Original build_year_structure once, project_calendar_date for every day, count_weavings and unrank_weaving original routines; not 4399 calls to normative_calendar_date.
+- Direct date, job 140227398997, artifact 15161384119, daaad432c128a2129d021805d5169092623b24cad2c8fb97d1ef63fc829e6157. Rechecked all 36 JSON records/180 fields, 33 unique input pairs; actual=expected. The probe calls original normative_calendar_date and resets cache.
+- Cache, job 140232358874, artifact 15161689587, aa167d7040fe7218b8791a96044250bf53d9d53fe7326e076b6c5f649d4da6cc. Rechecked all 48 records against same-run direct-date artifact expected pairs (24 warm, 24 reset-each, 240 fields). Probe calls original normative_calendar_date in one process per mode.
+- Component job 140227223611, artifact 15161078807; Seal32 job 140227224334, artifact 15161585771 (prior byte/CRC and independent replay evidence, current metadata and logs rechecked). Gate-cache job 140227224295 zero failures; full-mode job 140227224356 and native-compile job 140227224299 success. Seven legacy failures retained as diagnostics, not canonical passes.
+
+## Actual remaining direct-entry coverage gap
+
+The old contract specifically required eight novel direct dates drawn from first/last occurrences of four dispersed month IDs of the actual year. The canonical replacement direct suite reused eight old target offsets: -2022, 2161, -2011, 2175, -1995, 2189, -1777, 2179. Cross-check against exact canonical full-year artifact: four positive offsets are outside year 5000 (canonical offsets -4021..377); four negative offsets are interior occurrences of month IDs 5,4,28,31, respectively. None of the 36 direct-date records at calculation offset zero hits any actual month first/last occurrence. Full-year projection covers those endpoints but does not establish direct entrypoint coverage. This is a coverage gap, not an observed conversion defect.
+
+Retain the original eight-direct-date intent, without adding a requirement for thousands of direct calls. Select dispersed actual month IDs 1,15,30,44 (positional IDs, not canonical name indices). Eight distinct new inputs, calculation offset 0, expected five fields independently available from canonical artifact 15161372382:
+| Month ID | Target offset | Expected year, cutlet name index, cutlet day, month name index, month day |
+|---|---:|---|
+| 1 | -4021 | 5000,10,1,26,1 |
+| 1 | -50 | 5000,4,712,26,114 |
+| 15 | -4005 | 5000,10,17,7,1 |
+| 15 | 335 | 5000,3,335,7,118 |
+| 30 | -3974 | 5000,10,48,1,1 |
+| 30 | 359 | 5000,3,359,1,88 |
+| 44 | -3852 | 5000,10,170,29,1 |
+| 44 | 377 | 5000,3,377,29,108 |
+
+NEXT: implement an isolated canonical actual-month endpoint suite using the existing independent Scroll full-date oracle (regenerate expected results, do not use Fortran output as oracle); validate eight unique cases and the endpoint selection against canonical month IDs/frequencies, original direct-entry calls, 8/8 cases and 40/40 fields, bounded execution and exact-SHA log/artifact evidence. No rerun of accepted same-SHA gates merely for review. Then complete remaining Stage 1 acceptance review against the existing bootstrap contract. This is not a production converter: README states the clean oracle is test-only and the production skeleton has no calendar algorithm. No new Stage 2 authorization.
+
+## Historical contract (superseded reference values; preserved verbatim)
+
 # Stage1 normative interleaving: explicit coverage boundary
 
 PROJECT_ID: PC-BRANCH-FORTRAN-ENGLISH
