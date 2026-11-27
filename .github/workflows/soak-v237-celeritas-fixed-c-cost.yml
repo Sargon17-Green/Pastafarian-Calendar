@@ -1,0 +1,174 @@
+name: Soak v237 Celeritas fixed-c adjacent-day cache cost (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v237-celeritas-fixed-c-cost.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind accepted component and exact candidate source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "37337c8e5b5794a2b9acad5773d52cad5234aded"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v237-celeritas-fixed-c-cost.yml"
+          test "$(git rev-parse HEAD:qa/soak/v234_short_rejection_component_probe.cpp)" = "71429208378c21560042c66bf6b7b155230194aa"
+          mkdir -p evidence candidate/include/pastafari candidate/src
+          test -n "$GH_TOKEN"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231834031/zip > evidence/v236.zip
+          echo "711a95ca9d0d2e24ae128556fc967ddcd653e2803c1395e259ec46b9ef12d841  evidence/v236.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231492525/zip > evidence/v235-failed.zip
+          echo "9ff8d08d98fde45aa2c124137b6cd8d0e8d9ab3aac13a596a836565d293c209c  evidence/v235-failed.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15230524197/zip > evidence/v234.zip
+          echo "059f89e5cf45c86a3165c3c5a2005074d69bcb121a11ad0467eb50840fb0fe9e  evidence/v234.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          ref="97f661ff17aa035fbd7721c690164f007a44dfc6"
+          base="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          def api(p):return subprocess.check_output(["gh","api",p],timeout=45)
+          c=json.loads(api(f"repos/{repo}/compare/{base}...{ref}"))
+          assert c["ahead_by"]==1 and c["behind_by"]==0
+          assert [(f["filename"],f["additions"],f["deletions"]) for f in c["files"]]==[("src/monster.cpp",12,0)]
+          with zipfile.ZipFile("evidence/v234.zip") as z:
+              assert z.testzip() is None
+              r=json.loads(z.read("result.json"))
+              assert r["classification"]=="COMPONENT_NATIVE_CANDIDATE_PASS"
+              assert r["component_checks_verified"]==53 and r["invalid_inputs_rejected"]==3
+              with zipfile.ZipFile(__import__("io").BytesIO(z.read("v233.zip"))) as old:
+                  assert old.testzip() is None
+                  prev=json.loads(old.read("result.json"))
+                  expected=json.loads(old.read("expected-v5.json"))["rows"]
+          with zipfile.ZipFile("evidence/v236.zip") as z:
+              assert z.testzip() is None
+              v236=json.loads(z.read("result.json"))
+          assert v236["schema"]=="SOAK_V236_CELERITAS_VERSIONED_CANDIDATE/1"
+          assert v236["source_commit"]==ref and len(v236["cases"])==3 and all(x["matched"] for x in v236["cases"])
+          assert v236["whole_year_credit"]==0
+          pins={"src/monster.cpp":"10e075c67f619e6685fe8d4c00439916bd9e2372","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("candidate",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          assert all(prev["cases"][i]["observed_fields"]==expected[k]["fields"] for i,k in enumerate(["control_000000","timeout_000371","timeout_000385"]))
+          Path("evidence/expected.json").write_text(json.dumps(expected,indent=2)+"\n")
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"base":base,"sources":inv,"source_diff":"+12 lines, no deletions","v234_run":46066864605},indent=2)+"\n")
+          PY
+      - name: Build unmodified exact candidate with fixed-c timing driver
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          cat > candidate/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace pastafari;
+          using Clock=std::chrono::steady_clock;
+          void require(bool x,const char* msg){if(!x)throw std::runtime_error(msg);}
+          std::size_t ci(const std::string& name){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& name){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("month");}
+          int main(){
+            const Integer c{739617};
+            const std::vector<Integer> targets{c,c,c+1};
+            std::vector<SpaghettiDateFive> results;
+            resetPersistentScarVaultsDiagnostic();
+            setAccelerationScarsEnabled(true);
+            setFullHistoricalAccelerationValidation(false);
+            for(std::size_t i=0;i<targets.size();++i){
+              const auto before=persistentScarMetricsDiagnostic();
+              auto start=Clock::now();
+              std::cerr<<"BEGIN "<<i<<" "<<c<<" "<<targets[i]<<std::endl;
+              const auto a=calendarDateSpaghetti(c,targets[i]);
+              auto seconds=std::chrono::duration<double>(Clock::now()-start).count();
+              const auto after=persistentScarMetricsDiagnostic();
+              std::cout<<"DATE\t"<<i<<"\t"<<c<<"\t"<<targets[i]<<"\t"<<seconds<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<"\t"<<after.patch39FinalResultHit-before.patch39FinalResultHit<<"\t"<<after.patch27AncestralHit-before.patch27AncestralHit<<std::endl;
+              results.push_back(a);
+            }
+            const auto& a=results[0];const auto& b=results[1];
+            require(a.yearNumber==5000&&ci(a.cutletName)==13&&a.dayInCutlet==89&&mi(a.monthName)==47&&a.dayInMonth==3,"frozen control");
+            require(a.yearNumber==b.yearNumber&&a.cutletName==b.cutletName&&a.dayInCutlet==b.dayInCutlet&&a.monthName==b.monthName&&a.dayInMonth==b.dayInMonth,"repeat mismatch");
+            // Check adjacent-day projection against same-source report only; not an independent oracle.
+            std::cerr<<"BEGIN SAME_SOURCE_STRUCTURE_PROJECTION"<<std::endl;
+            BaseMonsterManager manager;
+            const auto report=manager.executeFinalIntegrationStage56(c,c);
+            require(report.ready,"report not ready");
+            const auto& y=report.targetYear;const auto& s=report.structure;
+            const Integer t=targets[2];
+            require(y.openGateDay<t&&t<=y.closeGateDay,"adjacent target outside year");
+            const std::size_t pos=(t-y.openGateDay-1).convert_to<std::size_t>();
+            const int m=s.monthWeaving.at(pos);
+            require(m>=1&&m<=s.monthCount,"month id");
+            int occurrences=0;
+            for(std::size_t i=0;i<=pos;++i)if(s.monthWeaving[i]==m)++occurrences;
+            const auto& z=results[2];
+            bool cutletMatch=false;
+            for(const auto& k:s.cutlets)if(k.firstDay<=t&&t<=k.lastDay){
+              require(ci(z.cutletName)==static_cast<std::size_t>(k.canonicalIndex)&&z.dayInCutlet==t-k.firstDay+1,"cutlet projection");
+              cutletMatch=true;
+            }
+            require(cutletMatch&&z.yearNumber==y.number&&mi(z.monthName)==static_cast<std::size_t>(s.monthNameIndices.at(m-1))&&z.dayInMonth==occurrences,"month projection");
+            std::cout<<"FIXED_C_TIMING_PASS native_F_calls=3 same_source_projection=1 independent_adjacent_oracle=0"<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I candidate/include candidate/src/monster.cpp candidate/driver.cpp -o candidate/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum candidate/probe candidate/driver.cpp > evidence/build.sha256
+      - name: Measure exact repeated pair and new adjacent pair in one process
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 3145728; /usr/bin/time -v -o evidence/time.txt timeout -k 5s 240s candidate/probe) > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/exit.txt
+          cat evidence/stdout.txt evidence/stderr.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          code=int(Path("evidence/exit.txt").read_text())
+          ls=Path("evidence/stdout.txt").read_text().splitlines()
+          rows=[]
+          for l in ls:
+              if not l.startswith("DATE\t"):continue
+              p=l.split("\t")
+              assert len(p)==14
+              rows.append({"i":int(p[1]),"c":int(p[2]),"t":int(p[3]),"seconds":float(p[4]),"fields":list(map(int,p[5:10])),"raw_names":p[10:12],"final_result_cache_hits":int(p[12]),"structure_cache_hits":int(p[13])})
+          ok=code==0 and len(rows)==3 and ls[-1]=="FIXED_C_TIMING_PASS native_F_calls=3 same_source_projection=1 independent_adjacent_oracle=0"
+          if ok:
+              assert [(r["c"],r["t"]) for r in rows]==[(739617,739617),(739617,739617),(739617,739618)]
+              assert rows[0]["fields"]==rows[1]["fields"]==[5000,13,89,47,3]
+              assert rows[1]["final_result_cache_hits"]==1
+          out={"schema":"SOAK_V237_CELERITAS_FIXED_C_COST/1","source_commit":"97f661ff17aa035fbd7721c690164f007a44dfc6","exit":code,"rows":rows,"timing_probe_completed":ok,"independently_compared_unique_pairs":1 if ok else 0,"adjacent_same_source_projection":1 if ok else 0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v237-fixed-c-cost-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
