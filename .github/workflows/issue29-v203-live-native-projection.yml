@@ -1,0 +1,276 @@
+name: Issue29 v203 exact Ada Calendar_Date projection block (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v203-live-native-projection.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  structure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock exact live sources and independent reference
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "7a14c941949a6ac1ee65c5f0bfb70c179fcfb105"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v203-live-native-projection.yml"
+          mkdir -p evidence "$RUNNER_TEMP/live"
+          git rev-parse HEAD > evidence/QA_HEAD.txt
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730 149e677af1cef63f1a47cd99ed7953c16ef6bb24
+          test "$(git rev-parse d10d50383025d73ad2ce11d19d5759221d70f730:src/normative_oracle.adb)" = "0be8f8ab4ddef26d34963d5567707a511ebda50b"
+          test "$(git rev-parse d10d50383025d73ad2ce11d19d5759221d70f730:src/normative_oracle.ads)" = "c4588566076798dd394feeab580ebc3d38c09744"
+          git archive d10d50383025d73ad2ce11d19d5759221d70f730 src | tar -x -C "$RUNNER_TEMP/live"
+          git ls-tree -r d10d50383025d73ad2ce11d19d5759221d70f730 src > evidence/source-blobs.txt
+          echo "d10d50383025d73ad2ce11d19d5759221d70f730" > evidence/LIVE_HEAD.txt
+          test "$(git rev-parse 149e677af1cef63f1a47cd99ed7953c16ef6bb24:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          git show 149e677af1cef63f1a47cd99ed7953c16ef6bb24:tests/fixtures/stage55_year5000_appendix_a_metadata.json > evidence/reference-metadata.json
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15199677578/zip > "$RUNNER_TEMP/projection.zip"
+          echo "937dc0962d77c4e66f28bbde731716b08612cfb5a304b948ad02543b0af25e50  $RUNNER_TEMP/projection.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import csv,hashlib,json,os,zipfile
+          from pathlib import Path
+          e=Path("evidence")
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"projection.zip") as z:
+              assert z.testzip() is None
+              def get(suffix):
+                  matches=[x for x in z.namelist() if x.endswith(suffix)]
+                  assert len(matches)==1,(suffix,matches)
+                  return z.read(matches[0])
+              data=get("oracle/STAGE55_YEAR5000_CANDIDATE.csv")
+              assert data==get("STAGE55_YEAR5000_CANDIDATE_RUN1.csv")==get("STAGE55_YEAR5000_CANDIDATE_RUN2.csv")
+              summary=json.loads(get("projection-summary.json"))
+              word=get("native-word.json")
+          assert hashlib.sha256(data).hexdigest()==summary["projection_sha256"]
+          assert summary["matched_rows"]==8488 and summary["full_converter_calls"]==0
+          assert hashlib.sha256(word).hexdigest()=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+          assert len(list(csv.DictReader(data.decode("ascii").splitlines())))==4244
+          (e/"reference-projection.csv").write_bytes(data)
+          (e/"reference-word.json").write_bytes(word)
+          PY
+      - name: Add diagnostic wrapper in temporary source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          spec=Path("src/normative_oracle.ads")
+          body=Path("src/normative_oracle.adb")
+          for p in (spec,body):
+              original=p.read_bytes()
+              Path(str(p)+".original").write_bytes(original)
+          spec_marker="end Normative_Oracle;"
+          s=spec.read_text()
+          assert s.count(spec_marker)==1
+          spec.write_text(s.replace(spec_marker,"   procedure QA_V203_Structure;\n"+spec_marker))
+          wrapper="""   procedure QA_V203_Structure is
+             C : constant Big_Integer := Foundation_Day;
+             Gates : Gate_State;
+             procedure Report (Label_Text : String; Value : Big_Integer) is
+             begin
+                Ada.Text_IO.Put_Line (Label_Text & "=" & To_String (Value));
+                Ada.Text_IO.Flush;
+             end Report;
+          begin
+             Initialize_Gates (Gates);
+             declare
+                Y : constant Year_Record := Find_Target_Year (Gates, C, C);
+                First_Day : constant Big_Integer := Y.Open_Day + B (1);
+                R : constant Sauce_Result := Sauce (C, First_Day);
+                Gap_Count : constant Natural := To_Natural_Checked (Y.Close_Index - Y.Open_Index, 1_000);
+                Cutlet_Max : constant Natural := Natural'Min (17, Gap_Count);
+                Choices : constant Natural := Cutlet_Max - 5;
+                K : constant Positive := Positive (5 + To_Natural_Checked
+                  (Choose_Rank (Ask_Bowl (R, 2, Seal_Cutlet_Count), B (Choices)), Choices));
+                Partition : constant Natural_Array := Choose_Cutlet_Partition (Gates, C, Y, R, K);
+                CN : constant Natural_Array := Unrank_Distinct
+                  (17, K, Choose_Rank (Ask_Bowl (R, 5, Seal_Cutlet_Names), Falling_Factorial (17, K)));
+                Total : constant Natural := To_Natural_Checked (Y.Close_Day - Y.Open_Day, 5_778);
+                Low : constant Natural := (Total + 122) / 123;
+                High : constant Natural := Natural'Min (47, Total / 4);
+                Slots : constant Positive := Positive (Low - 1 + To_Natural_Checked
+                  (Choose_Rank (Ask_Bowl (R, 3, Seal_Month_Count), B (High - Low + 1)), High - Low + 1));
+                MN : constant Natural_Array := Unrank_Distinct
+                  (47, Slots, Choose_Rank (Ask_Bowl (R, 5, Seal_Month_Names), Falling_Factorial (47, Slots)));
+                L : Natural_Array (1 .. Slots);
+                Cursor : Big_Integer := Y.Open_Index;
+             begin
+                Report ("YEAR", Y.Number);
+                Report ("OPEN_INDEX", Y.Open_Index);
+                Report ("CLOSE_INDEX", Y.Close_Index);
+                Report ("FIRST_DAY", First_Day);
+                Report ("LAST_DAY", Y.Close_Day);
+                Report ("YEAR_LENGTH", B (Total));
+                Report ("CUTLET_COUNT", B (K));
+                Report ("MONTH_COUNT", B (Slots));
+                for I in Partition'Range loop
+                   Report ("PARTITION", B (Partition (I)));
+                   Report ("CUTLET_LENGTH", Gate_At (Gates, Cursor + B (Partition (I))) - Gate_At (Gates, Cursor));
+                   Report ("CUTLET_NAME", B (CN (I)));
+                   Cursor := Cursor + B (Partition (I));
+                end loop;
+                Choose_Month_Lengths (R, Total, Slots, L);
+                for I in L'Range loop
+                   Report ("MONTH_LENGTH", B (L (I)));
+                   Report ("MONTH_NAME", B (MN (I)));
+                end loop;
+                declare
+                   Weave : constant Natural_Array := Choose_Month_Weaving (R, L);
+                   Month_Names : constant Natural_Array := MN;
+                   Cutlet_Names : constant Natural_Array := CN;
+                   Year_Length : constant Natural := Total;
+                   function Project (Target_Day : Big_Integer) return Calendar_Result is
+                      Cutlet_Id : Positive := 1;
+                      Day_In_Cutlet : Big_Integer := B (0);
+                      __PROJECTION_DECLS__
+                   begin
+                      __PROJECTION_BODY__
+                   end Project;
+                begin
+                   for I in Weave'Range loop
+                      Report ("WORD", B (Weave (I)));
+                   end loop;
+                   for I in 0 .. Year_Length - 1 loop
+                      declare
+                         D : constant Calendar_Result := Project (First_Day + B (I));
+                      begin
+                         Report ("DATE_YEAR", D.Year_Number);
+                         Report ("DATE_CUTLET_NAME", B (D.Cutlet_Canonical));
+                         Report ("DATE_CUTLET_DAY", D.Day_In_Cutlet);
+                         Report ("DATE_MONTH_NAME", B (D.Month_Canonical));
+                         Report ("DATE_MONTH_DAY", D.Day_In_Month);
+                      end;
+                   end loop;
+                end;
+             end;
+             Ada.Text_IO.Put_Line ("V203_STRUCTURE_COMPLETE ZERO_F=1");
+          end QA_V203_Structure;
+
+          """
+          b=body.read_text()
+          start=b.index("   function Calendar_Date\n")
+          end=b.index("   end Calendar_Date;",start)
+          production=b[start:end]
+          decl_start=production.index("            Cursor : Big_Integer := Y.Open_Index;")
+          decl_end=production.index("         begin\n",decl_start)
+          decls=production[decl_start:decl_end]
+          block_start=production.index("            for C in 1 .. K loop",decl_end)
+          block_end=production.index("         end;\n",production.index("Day_In_Month => B (Day_In_Month));",block_start))
+          block=production[block_start:block_end]
+          assert "Offset_0" in decls and "Month_Id" in decls and "return" in block
+          assert wrapper.count("__PROJECTION_DECLS__")==wrapper.count("__PROJECTION_BODY__")==1
+          wrapper=wrapper.replace("__PROJECTION_DECLS__",decls).replace("__PROJECTION_BODY__",block)
+          Path("projection-declarations.txt").write_text(decls)
+          Path("projection-body.txt").write_text(block)
+          assert b.count(spec_marker)==1
+          assert "Calendar_Date (" not in wrapper and "Find_Target_Year" in wrapper
+          body.write_text(b.replace(spec_marker,wrapper+spec_marker))
+          assert body.read_text().replace(wrapper,"",1)==b
+          assert spec.read_text().replace("   procedure QA_V203_Structure;\n","",1)==s
+          PY
+          diff -u src/normative_oracle.adb.original src/normative_oracle.adb > "$GITHUB_WORKSPACE/evidence/body-wrapper.diff" || test "$?" = 1
+          diff -u src/normative_oracle.ads.original src/normative_oracle.ads > "$GITHUB_WORKSPACE/evidence/spec-wrapper.diff" || test "$?" = 1
+          cp projection-declarations.txt projection-body.txt "$GITHUB_WORKSPACE/evidence/"
+          sha256sum src/normative_oracle.ad* > "$GITHUB_WORKSPACE/evidence/build-source.sha256"
+      - name: Install GNAT and GMP bindings
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Run native live structural functions without calling Calendar_Date
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live"
+          mkdir tests
+          cat > structure.gpr <<'GPR'
+          with "gnatcoll_gmp.gpr";
+          project Structure is
+             for Source_Dirs use ("src", "tests");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("issue29_v203_structure.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata", "-gnato");
+             end Compiler;
+          end Structure;
+          GPR
+          cat > tests/issue29_v203_structure.adb <<'ADA'
+          with Normative_Oracle;
+          procedure Issue29_V203_Structure is
+          begin
+             Normative_Oracle.QA_V203_Structure;
+          end Issue29_V203_Structure;
+          ADA
+          timeout -k 5s 180s gprbuild -p -j2 -P structure.gpr > "$GITHUB_WORKSPACE/evidence/build.log" 2>&1
+          sha256sum bin/issue29_v203_structure > "$GITHUB_WORKSPACE/evidence/binary.sha256"
+          set +e
+          (ulimit -v 2097152; ulimit -t 600; timeout -k 5s 630s /usr/bin/time -v -o "$GITHUB_WORKSPACE/evidence/time.txt" bin/issue29_v203_structure) > "$GITHUB_WORKSPACE/evidence/stdout.txt" 2> "$GITHUB_WORKSPACE/evidence/stderr.txt"
+          code=$?
+          set -e
+          echo "$code" > "$GITHUB_WORKSPACE/evidence/exit.txt"
+          grep -vE '^(WORD|DATE_[A-Z_]+)=' "$GITHUB_WORKSPACE/evidence/stdout.txt"
+          test "$code" = 0
+      - name: Compare independently generated structure and project every day
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+          e=Path("evidence")
+          f=json.loads((e/"reference-metadata.json").read_text())
+          out=(e/"stdout.txt").read_text()
+          assert "V203_STRUCTURE_COMPLETE ZERO_F=1" in out
+          d=defaultdict(list)
+          for line in out.splitlines():
+              if line.startswith("V203_"): continue
+              k,v=line.split("=",1)
+              d[k].append(int(v))
+          scalars={"YEAR":f["year"],"OPEN_INDEX":f["open_gate_index"],"CLOSE_INDEX":f["close_gate_index"],"FIRST_DAY":f["first_day"],"LAST_DAY":f["last_day"],"YEAR_LENGTH":f["last_day"]-f["first_day"]+1,"CUTLET_COUNT":f["cutlet_count"],"MONTH_COUNT":f["months"]}
+          vectors={"PARTITION":f["cutlet_gate_partition"],"CUTLET_LENGTH":f["cutlet_day_lengths"],"CUTLET_NAME":f["cutlet_name_indices"],"MONTH_LENGTH":f["month_lengths"],"MONTH_NAME":f["month_name_indices"],"WORD":json.loads((e/"reference-word.json").read_text())}
+          checks={k:d[k]==[v] for k,v in scalars.items()}
+          checks.update({k:d[k]==v for k,v in vectors.items()})
+          rows=[]
+          cutlets=[(n,j) for n,l in zip(d["CUTLET_NAME"],d["CUTLET_LENGTH"]) for j in range(1,l+1)]
+          seen=defaultdict(int)
+          for i,m in enumerate(d["WORD"]):
+              seen[m]+=1
+              cn,cd=cutlets[i]
+              rows.append([d["YEAR"][0],cn,cd,d["MONTH_NAME"][m-1],seen[m]])
+          fields=["YEAR","CUTLET_INDEX","CUTLET_DAY","MONTH_INDEX","MONTH_DAY"]
+          reference=[[int(row[k]) for k in fields] for row in csv.DictReader((e/"reference-projection.csv").open())]
+          mismatches=[{"offset":i,"actual":a,"expected":b} for i,(a,b) in enumerate(zip(rows,reference)) if a!=b]
+          checks["projection"]=len(rows)==len(reference)==4244 and not mismatches
+          keys=["DATE_YEAR","DATE_CUTLET_NAME","DATE_CUTLET_DAY","DATE_MONTH_NAME","DATE_MONTH_DAY"]
+          assert all(len(d[k])==4244 for k in keys)
+          native_rows=[list(r) for r in zip(*(d[k] for k in keys))]
+          checks["native_projection"]=native_rows==rows==reference
+          native_mismatches=[{"offset":i,"actual":a,"expected":b} for i,(a,b) in enumerate(zip(native_rows,reference)) if a!=b]
+          with (e/"native-projection.csv").open("w",newline="") as fp:
+              w=csv.writer(fp);w.writerow(fields);w.writerows(native_rows)
+          with (e/"actual-projection.csv").open("w",newline="") as fp:
+              w=csv.writer(fp);w.writerow(fields);w.writerows(rows)
+          result={"schema":"ISSUE29_V203_STRUCTURE/1","checks":checks,"matched_rows":sum(a==b for a,b in zip(rows,reference)),"rows":len(rows),"first_mismatches":mismatches[:10],"matched_word_symbols":sum(a==b for a,b in zip(d["WORD"],vectors["WORD"])),"native_matched_rows":sum(a==b for a,b in zip(native_rows,reference)),"native_mismatches":native_mismatches[:10],"calendar_calls":0,"whole_year_credit":0,"scope":"native private structure and mechanically extracted Calendar_Date projection statements; cached structure, not full Calendar_Date"}
+          (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps(result))
+          assert all(checks.values())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v203-structure-${{ github.run_id }}
+          path: evidence/
+          retention-days: 30
