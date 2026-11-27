@@ -1,0 +1,208 @@
+name: Soak v231 focused C++ structure subphase and rejection diagnosis (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v231-cpp-structure-subphase-diagnostic.yml
+permissions:
+  contents: read
+jobs:
+  focused-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Install missing ephemeral runner build prerequisite
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          (
+            set -e
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -
+            dpkg-query -W libboost-dev
+          ) > evidence/prerequisites.log 2>&1 || { cat evidence/prerequisites.log; exit 1; }
+      - name: Bind exact source and prepare diagnostic copy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "74bf73dbdb2b418c7e69ba8a0b0c80e4b496acc4"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v231-cpp-structure-subphase-diagnostic.yml"
+          mkdir -p evidence original/include/pastafari original/src diagnostic
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15227517524/zip > evidence/v229-failed.zip
+          echo "7f1ccd48fd670ab02641c79d0927c7cc6a405091b486e8e6f1b014e41214e004  evidence/v229-failed.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15228529199/zip > evidence/v230.zip
+          echo "3d2ba16b3875873541d4001da0f013b0c0a59fa812e9b480b56eb699f0278c98  evidence/v230.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,subprocess,json
+          from pathlib import Path
+          import zipfile
+          with zipfile.ZipFile("evidence/v229-failed.zip") as z:
+              assert z.testzip() is None and b"boost/multiprecision/cpp_int.hpp: No such file or directory" in z.read("build.log")
+          with zipfile.ZipFile("evidence/v230.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+          assert prior["schema"]=="SOAK_V230_CPP_TIMEOUT_PHASE_DIAGNOSTIC/1"
+          assert [(x["jdn"],x["classification"]) for x in prior["cases"]]==[(2461042,"DIAGNOSTIC_COMPLETED"),(1344188,"DIAGNOSTIC_TIMEOUT"),(8597418,"DIAGNOSTIC_TIMEOUT")]
+          assert all(x["last_trace"]["event"]=="TRACE_FINAL_STAGE 40" for x in prior["cases"][1:])
+          ref="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          pins={"src/monster.cpp":"a9cb83e67fc962fdf5560ad0b2cdf5354148e6a9","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("original",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          p=Path("original/src/monster.cpp")
+          s=p.read_text()
+          # Only observation at exact control-flow anchors; no change to return values,
+          # ranks, input, cache mode or algorithms.
+          replacements={
+              'FINAL_MAIN_DISPATCH:\n    ctx.subPhase = stage;':'FINAL_MAIN_DISPATCH:\n    std::cerr << "TRACE_FINAL_STAGE " << stage << std::endl;\n    ctx.subPhase = stage;',
+              'const Integer legalFamilyCount = exactLegalMonthWeavingCount(lengths);':'std::cerr << "TRACE_WEAVE_COUNT_BEGIN" << std::endl;\n    const Integer legalFamilyCount = exactLegalMonthWeavingCount(lengths);\n    std::cerr << "TRACE_WEAVE_COUNT_END" << std::endl;',
+              'const std::vector<int> correct = DPUnrankLegalWeaving(lengths, wantedRank);':'std::cerr << "TRACE_WEAVE_UNRANK_BEGIN" << std::endl;\n    const std::vector<int> correct = DPUnrankLegalWeaving(lengths, wantedRank);\n    std::cerr << "TRACE_WEAVE_UNRANK_END" << std::endl;',
+              'const std::vector<int> replayCorrect = DPUnrankLegalWeaving(':'std::cerr << "TRACE_VALIDATION_UNRANK_BEGIN" << std::endl;\n    const std::vector<int> replayCorrect = DPUnrankLegalWeaving(',
+              'if (replayCorrect != ctx.patch24CorrectWeaving) {':'std::cerr << "TRACE_VALIDATION_UNRANK_END" << std::endl;\n    if (replayCorrect != ctx.patch24CorrectWeaving) {'
+          }
+          # Every insertion is a reversible prefix at a unique source anchor.
+          subphases=[
+              ("const Patch20StructureSauceResult structurePatch = structureSaucePatch(", "STRUCTURE_SAUCE"),
+              ("const int gapCount = (year.closeGateIndex - year.openGateIndex).convert_to<int>();", "CUTLET_COUNT"),
+              ("const LegacyAnswerRing partitionRing = finalIntegrationAnswerRing(", "CUTLET_PARTITION"),
+              ("Integer calculationGateIndex = 0;", "INTERNAL_GATE"),
+              ("const Patch21CutletPartitionResult partitionDecision = partitionWrapper.repair(", "PARTITION_REPAIR"),
+              ("const std::vector<int> cutletMaster = finalIntegrationMasterList(17);", "CUTLET_NAMES"),
+              ("Integer cursorGate = year.openGateIndex;", "CUTLET_BOUNDARIES"),
+              ("const int yearLength = (year.closeGateDay - year.openGateDay).convert_to<int>();", "MONTH_COUNT"),
+              ("const Integer rawMonthLengthCount = legacyMonthLengthConcreteFamilyCountProof(", "MONTH_LENGTH_PROOF"),
+              ("const MonthLengthMaterializationPatchDecision materializationDecision =", "MONTH_LENGTH_REPAIR"),
+              ("VirtualLegacyList monthLengthList(yearLength, out.monthCount);", "MONTH_LENGTH_VIRTUAL"),
+              ("const Integer monthLengthRank = finalIntegrationChooseRank(", "MONTH_LENGTH_RANK"),
+              ("out.monthLengths = monthLengthList.itemAt1(monthLengthRank);", "MONTH_LENGTH_UNRANK"),
+              ("const LegacyMonthWeavingInspection weavingGhost = weavingAdapter.call(", "LEGACY_WEAVING"),
+              ("const MonthWeavingPatchDecision weavingDecision = weavingWrapper.repair(", "EXACT_WEAVING"),
+              ("const std::vector<int> monthMaster = finalIntegrationMasterList(47);", "MONTH_NAMES")
+          ]
+          # Scope to this function; anchors may appear elsewhere in the same translation unit.
+          begin=s.index("SpaghettiYearStructure buildFinalYearStructure(")
+          end=s.index("\n} // namespace",begin)
+          original_structure=s[begin:end]
+          structure=original_structure
+          for anchor,phase in subphases:
+              assert structure.count(anchor)==1,(phase,structure.count(anchor))
+              structure=structure.replace(anchor,'std::cerr << "TRACE_STRUCTURE '+phase+'" << std::endl;\n    '+anchor)
+          replacements[original_structure]=structure
+          # Only log large cold rejection paths. Calculate exact skipped steps without altering the loop.
+          short_anchor="    Integer offset = 0;\n    for (;;) {\n        const Integer x = ringAnswer(stream, offset);"
+          replacements[short_anchor]='''    {
+                  const Integer diagnosticFirst = ringAnswer(stream, Integer{0});
+                  if (diagnosticFirst > acceptanceLimit &&
+                      (stream.directionStep == -1 || stream.directionStep == 1)) {
+                      Integer diagnosticSteps;
+                      if (stream.directionStep == -1) diagnosticSteps = diagnosticFirst - acceptanceLimit;
+                      else diagnosticSteps = M_OLD - diagnosticFirst + 1;
+                      if (diagnosticSteps >= 1000000) {
+                          std::cerr << "TRACE_SHORT_REJECTION N=" << N
+                                    << " FIRST=" << diagnosticFirst << " LIMIT=" << acceptanceLimit
+                                    << " DIR=" << stream.directionStep
+                                    << " EXACT_STEPS=" << diagnosticSteps << std::endl;
+                      }
+                  }
+              }
+              Integer offset = 0;
+              for (;;) {
+                  const Integer x = ringAnswer(stream, offset);'''
+          # Apply outer structure replacement first to avoid nested-anchor interference.
+          replacements={original_structure:replacements.pop(original_structure),**replacements}
+          for a,b in replacements.items():
+              assert s.count(a)==1,(a,s.count(a))
+              s=s.replace(a,b)
+          s="#include <iostream>\n"+s
+          Path("diagnostic/monster.cpp").write_text(s)
+          # Prove reversibility of instrumentation.
+          restored=s.removeprefix("#include <iostream>\n")
+          for a,b in reversed(list(replacements.items())):restored=restored.replace(b,a)
+          assert restored==p.read_text()
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"sources":inv,"diagnostic_sha256":hashlib.sha256(Path("diagnostic/monster.cpp").read_bytes()).hexdigest(),"instrumentation_reversible":True,"source_class":"INSTRUMENTED_DIAGNOSTIC_NOT_ORIGINAL_F"},indent=2)+"\n")
+          PY
+          cat > diagnostic/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include <iostream>
+          #include <stdexcept>
+          using pastafari::Integer;
+          int main(int argc,char** argv) {
+            if(argc!=2) return 2;
+            const Integer d{argv[1]};
+            pastafari::BaseMonsterManager manager;
+            std::cerr<<"TRACE_PUBLIC_BEGIN "<<d<<std::endl;
+            const auto a=pastafari::calendarDateSpaghetti(d,d);
+            std::cerr<<"TRACE_PUBLIC_END"<<std::endl;
+            std::cout<<"PUBLIC "<<a.yearNumber<<" "<<a.cutletName<<" "<<a.dayInCutlet<<" "<<a.monthName<<" "<<a.dayInMonth<<std::endl;
+            std::cerr<<"TRACE_REPORT_BEGIN"<<std::endl;
+            const auto r=manager.executeFinalIntegrationStage56(d,d);
+            std::cerr<<"TRACE_REPORT_END"<<std::endl;
+            const auto& b=r.result;
+            if(!r.ready || a.yearNumber!=b.yearNumber || a.cutletName!=b.cutletName || a.dayInCutlet!=b.dayInCutlet || a.monthName!=b.monthName || a.dayInMonth!=b.dayInMonth) return 3;
+            std::cout<<"REPORT_MATCH "<<r.structure.monthWeaving.size()<<std::endl;
+          }
+          CPP
+          g++ --version > evidence/compiler.txt
+          dpkg-query -W libboost-dev >> evidence/compiler.txt || true
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I original/include diagnostic/monster.cpp diagnostic/driver.cpp -o diagnostic/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum diagnostic/probe diagnostic/driver.cpp diagnostic/monster.cpp > evidence/build.sha256
+      - name: Run only one matching control and two prior timeout witnesses with phase timestamps
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess,time,json,os,signal,threading
+          from pathlib import Path
+          out=[]
+          cases=[("control_000000",2461042,120),("timeout_000371",1344188,180),("timeout_000385",8597418,180)]
+          for name,jdn,limit in cases:
+              d=jdn-1721425
+              start=time.monotonic()
+              p=subprocess.Popen(["bash","-c",'ulimit -v 3145728; exec "$@"',"probe","diagnostic/probe",str(d)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True,text=True,bufsize=1)
+              traces=[]
+              def collect(stream,kind):
+                  with Path("evidence",name+"."+kind+".log").open("w") as f:
+                      for line in stream:
+                          elapsed=time.monotonic()-start
+                          f.write(f"{elapsed:.6f} {line}");f.flush()
+                          if kind=="stderr" and line.startswith("TRACE_"):traces.append({"seconds":round(elapsed,6),"event":line.strip()})
+              threads=[threading.Thread(target=collect,args=(p.stdout,"stdout")),threading.Thread(target=collect,args=(p.stderr,"stderr"))]
+              for t in threads:t.start()
+              peak=0;timed=False
+              while p.poll() is None:
+                  try:
+                      for line in Path(f"/proc/{p.pid}/status").read_text().splitlines():
+                          if line.startswith("VmRSS:"):peak=max(peak,int(line.split()[1]))
+                  except FileNotFoundError:pass
+                  if time.monotonic()-start>=limit:
+                      timed=True
+                      try:os.killpg(p.pid,signal.SIGTERM)
+                      except ProcessLookupError:pass
+                      try:p.wait(timeout=5)
+                      except subprocess.TimeoutExpired:os.killpg(p.pid,signal.SIGKILL);p.wait()
+                      break
+                  time.sleep(0.25)
+              for t in threads:t.join(timeout=5)
+              assert not any(t.is_alive() for t in threads)
+              r={"case_id":name,"jdn":jdn,"calculation_day":d,"target_day":d,"diagnostic_limit_seconds":limit,"wall_seconds":round(time.monotonic()-start,3),"peak_sampled_rss_kib":peak,"exit":p.returncode,"classification":"DIAGNOSTIC_TIMEOUT" if timed else "DIAGNOSTIC_COMPLETED" if p.returncode==0 else "DIAGNOSTIC_ERROR","last_trace":traces[-1] if traces else None,"traces":traces}
+              out.append(r)
+              Path("evidence/result.json").write_text(json.dumps({"schema":"SOAK_V231_CPP_STRUCTURE_SUBPHASE_DIAGNOSTIC/1","source_commit":"32ad50c8177233adc87eed1721c1e6f34f24ced1","cases":out,"instrumented_qa_copy":True,"original_f_credit":0,"whole_year_credit":0,"broad_soak_dispatch":False,"STOP_NEW_NATIVE_SOAK_DISPATCH":True},indent=2)+"\n")
+              print(json.dumps(r),flush=True)
+          assert len(out)==3
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v231-cpp-subphase-diagnostic-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
