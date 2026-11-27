@@ -189,7 +189,10 @@ initial begin
         $fatal(1,"NATIVE_LEX_RANK_RANGE");
     fd=$fopen("build/native_H_table.hex","r");
     if(fd==0) $fatal(1,"NATIVE_LEX_MISSING_NATIVE_H_TABLE");
-    out=$fopen("build/native_lex_prefix.bin","wb");
+    if(mutate_old_h)
+        out=$fopen("build/native_lex_prefix_mutant.bin","wb");
+    else
+        out=$fopen("build/native_lex_prefix.bin","wb");
     if(out==0) $fatal(1,"NATIVE_LEX_OUTPUT_OPEN");
     $fwrite(out,"%c",8'd1);
     started=1;remaining[1]=lengths[1]-1;n=remaining[1];
