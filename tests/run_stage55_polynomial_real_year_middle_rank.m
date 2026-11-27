@@ -1,6 +1,6 @@
 function run_stage55_polynomial_real_year_middle_rank(prefixLimit)
 if nargin==0, prefixLimit=0; end
-assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265]), 'Invalid diagnostic prefix limit.');
+assert(isscalar(prefixLimit) && any(prefixLimit==[0 2 6 12 202 265 4244]), 'Invalid diagnostic prefix limit.');
 % QA-only Native MATLAB test for the experimental polynomial whole-weave
 % family. It does NOT call the production calendar converter F(c,t).
 % The target is the exact 45-month / 4244-day middle-rank word independently
@@ -44,6 +44,92 @@ assert(contains(wrapper,'pastafari.MonthWeavingDPPatchWrapper.callWithRing(') &&
     'QA must leave the historic production wrapper untouched.');
 fprintf('INPUT_FIXTURES_PASS MONTHS=45 DAYS=4244 MIN=25 MAX=122\n');
 fprintf('PRODUCTION_WRAPPER_STILL_HISTORIC=1 FULL_CONVERTER_CALLS=0\n');
+
+if prefixLimit==4244
+    overlay=getenv('PASTAFARI_QA_OVERLAY');
+    assert(isfolder(overlay));
+    addpath(overlay,'-begin');
+    assert(strcmp(which('pastafari.BigInt'),fullfile(overlay,'+pastafari','BigInt.m')));
+    qaFactoredSmallOracle();
+    prior=jsondecode(fileread(fullfile(root,'evidence','prior-prefix-result.json')));
+    certificate=jsondecode(fileread(fullfile(root,'evidence','interval-hashes.json')));
+    assert(numel(certificate)==4244 && prior.prefix_symbols_matched==265 && ...
+        prior.full_converter_calls==0 && ~prior.full_word_verified && ~prior.stage55_accepted);
+    prefix=zeros(1,4244);
+    prefix(1:265)=double(prior.prefix(:).');
+    remaining=double(prior.remaining(:).');
+    opened=prior.opened_up_to; closed=prior.closed_up_to;
+    assert(isequal(prefix(1:265),expected(1:265)) && opened==45 && closed==0);
+    expectedRemaining=L;
+    for i=1:265, expectedRemaining(prefix(i))=expectedRemaining(prefix(i))-1; end
+    assert(isequal(remaining,expectedRemaining));
+    rank=pastafari.BigInt(prior.rank_decimal); count=pastafari.BigInt(prior.count_decimal);
+    assert(strcmp(sha256Ascii(char(rank)),certificate(265).rank_sha256) && ...
+        strcmp(sha256Ascii(char(count)),certificate(265).count_sha256));
+    one=pastafari.BigInt(1);
+    ledger=fopen(fullfile(root,'evidence','suffix-ledger.jsonl'),'w');
+    assert(ledger>=0); ledgerClose=onCleanup(@() fclose(ledger)); %#ok<NASGU>
+    totalSeconds=0;
+    fprintf('QA_FULL_SUFFIX_BEGIN START=265 TARGET=4244\n');
+    for position=266:4244
+        stepTimer=tic;
+        [piece,cursor]=qaFactoredStep(L,remaining,opened,closed,rank,count);
+        elapsed=toc(stepTimer); totalSeconds=totalSeconds+elapsed;
+        assert(cursor.initialCount==count && isscalar(piece) && piece==expected(position));
+        assert(certificate(position).position==position && certificate(position).symbol==piece);
+        prefix(position)=piece;
+        oldClosed=closed;
+        remaining(piece)=remaining(piece)-1;
+        assert(isequal(double(cursor.remaining(:).'),remaining));
+        opened=cursor.openedUpTo; closed=cursor.closedUpTo;
+        assert(opened==45 && closed>=oldClosed && closed<=oldClosed+1);
+        assert(all(remaining(1:closed)==0) && all(remaining(closed+1:end)>0));
+        assert(sum(remaining)==4244-position && cursor.done==(position==4244));
+        rank=cursor.rank; count=cursor.count;
+        rHash=sha256Ascii(char(rank)); cHash=sha256Ascii(char(count));
+        assert(rank>=one && rank<=count);
+        assert(strcmp(rHash,certificate(position).rank_sha256) && ...
+            strcmp(cHash,certificate(position).count_sha256),'Independent exact interval mismatch.');
+        row=struct('position',position,'symbol',piece,'opened',opened,'closed',closed, ...
+            'rank_sha256',rHash,'count_sha256',cHash,'step_seconds',elapsed);
+        fprintf(ledger,'%s\n',jsonencode(row));
+        % Compact ledger plus periodically atomically replaced checkpoint.
+        if mod(position,25)==0 || closed~=oldClosed || position==4244
+            result=struct('schema','STAGE55_POLYNOMIAL_PREFIX_DIAGNOSTIC/1', ...
+                'prefix_only',position~=4244,'prefix_symbols_matched',position,'days',4244, ...
+                'prefix',prefix(1:position),'remaining',remaining,'opened_up_to',opened, ...
+                'closed_up_to',closed,'rank_decimal',char(rank),'count_decimal',char(count), ...
+                'rank_sha256',rHash,'count_sha256',cHash, ...
+                'initial_count_sha256',prior.initial_count_sha256, ...
+                'original_rank_sha256',prior.original_rank_sha256, ...
+                'prior_native_run',45948885720,'reference_cxx_inverse_run_id',45686680226, ...
+                'step_seconds',elapsed,'qa_arithmetic_overlay',true, ...
+                'full_word_verified',position==4244,'full_converter_calls',0,'stage55_accepted',false);
+            file=fullfile(root,'evidence','latest-suffix-cursor.json');
+            fid=fopen([file,'.part'],'w'); assert(fid>=0);
+            fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+            movefile([file,'.part'],file,'f');
+            fprintf('QA_FULL_SUFFIX_PROGRESS PREFIX=%d CLOSED=%d SECONDS=%.3f\n',position,closed,totalSeconds);
+        end
+    end
+    assert(isequal(prefix,expected) && all(remaining==0) && opened==45 && closed==45);
+    assert(rank==one && count==one && cursor.done);
+    first=zeros(1,45); last=zeros(1,45);
+    for k=1:45
+        ix=find(prefix==k);
+        assert(numel(ix)==L(k));
+        first(k)=ix(1); last(k)=ix(end);
+    end
+    assert(all(diff(first)>0) && all(diff(last)>0));
+    result=struct('schema','STAGE55_QA_FACTORED_FULL_WORD/1','full_word_verified',true, ...
+        'prefix_previous',265,'new_symbols',3979,'symbols_matched',4244, ...
+        'closed_months',45,'final_rank',char(rank),'final_count',char(count), ...
+        'suffix_compute_seconds',totalSeconds,'full_converter_calls',0,'stage55_accepted',false);
+    fid=fopen(fullfile(root,'evidence','full-word-summary.json'),'w'); assert(fid>=0);
+    fwrite(fid,jsonencode(result),'char'); fwrite(fid,newline,'char'); fclose(fid);
+    fprintf('QA_FULL_WORD_PASS MATCHED=4244 CLOSED=45 RANK=1 COUNT=1 FULL_CONVERTER_CALLS=0\n');
+    return
+end
 
 if prefixLimit==265
     overlay=getenv('PASTAFARI_QA_OVERLAY');
