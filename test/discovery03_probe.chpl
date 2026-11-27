@@ -1181,6 +1181,48 @@ proc probeSixSlotBoundedCompositions() {
   }
 }
 
+// Шість додатних частин: N=5..10, B=-1 або кожна внутрішня межа.
+// Незалежний оракул: п'ять строго зростаючих роздільників у 1..N-1.
+// Повні лексикографічні списки звірено також прямим перебором кортежів.
+// C(N-1,5) без межі, C(N-2,4) з межею; нуль при N<6.
+// 45 родин, 1260 рангів, 1305 тверджень; очікувано 7116 загалом.
+// Дослідження, не історичний Legacy witness і не приймання Stage 6.
+proc probeSixCutletPartitions() {
+  for total in 5..10 {
+    for boundary in -1..(total-1) {
+      if boundary == 0 then continue;
+      var tested: CutletPartitionCounter;
+      tested.totalGaps = total;
+      tested.slotsTotal = 6;
+      tested.requiredBoundary = boundary;
+      var enumerated = 0;
+      for i in 1..(total-5) {
+        for j in (i+1)..(total-4) {
+          for k in (j+1)..(total-3) {
+            for m in (k+1)..(total-2) {
+              for p in (m+1)..(total-1) {
+                if boundary >= 0 && boundary != i && boundary != j &&
+                   boundary != k && boundary != m && boundary != p then continue;
+                enumerated += 1;
+                const actual = tested.unrank1(new bigint(enumerated));
+                check(actual.size == 6 && actual[0] == i &&
+                      actual[1] == j-i && actual[2] == k-j &&
+                      actual[3] == m-k && actual[4] == p-m &&
+                      actual[5] == total-p,
+                      "Шість котлет: N=" + total:string +
+                      ", B=" + boundary:string + ", ранг=" + enumerated:string);
+              }
+            }
+          }
+        }
+      }
+      check(tested.countAll() == enumerated,
+            "Шість котлет: потужність N=" + total:string +
+            ", B=" + boundary:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1188,6 +1230,7 @@ proc main() {
   probeCutletCompositions(9, -1);
   probeFourCutletPartitions();
   probeFiveCutletPartitions();
+  probeSixCutletPartitions();
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
   probeFiveSlotBoundedCompositions();
