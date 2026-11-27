@@ -3,6 +3,7 @@ import pathlib
 import unittest
 
 from stage01_authorized_import import (
+    POST_STIR_PROBES, POST_STIR_KEYS,
     CHUNK_SIZE, TAIL_START, TAIL_CHUNK_SIZE, EXPECTED_CHUNK_BOUNDARIES,
     STAGE01_MARKER, TRACE_HEADER, TRACE_GROUPS, build_stage01_chunked, build_trace_definition,
 )
@@ -76,7 +77,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(receipt["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(receipt["final_expression"], "SAME_EC_AFTER_TEST")
         _, outer, programs = self.decode(candidate)
-        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"])
+        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"] + 4 * len(POST_STIR_PROBES))
         self.assertEqual(outer.count("⎕EC ⎕UCS "), len(programs))
         self.assertNotIn("←", outer)
         self.assertNotIn("QAS01FinalEC", outer)
@@ -98,7 +99,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(programs[-1].count("⎕NAPPEND"), 1)
         self.assertEqual(set(receipt["suite_paths"]), {"start", "return", "ec", "et", "payload", "done",
             "trace_helper_fx", "trace_main_fx", "trace_run_fx", "trace", "trace_ec", "trace_et", "trace_payload",
-            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"})
+            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"} | set(POST_STIR_KEYS))
         self.assertEqual(len(STAGE01_MARKER.encode("ascii")), 113)
         self.assertEqual(receipt["final_inner_sha256"], hashlib.sha256(final.encode("utf-8")).hexdigest())
         self.assertEqual(sum(program.count(" Stage01PrefixFix ") for program in programs), 95)
@@ -148,6 +149,16 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(run, end + 7)
         for index, slot in enumerate((1, 2, 3), run + 1):
             self.assertIn(f"QAS01DiagEC[{slot}]", programs[index])
+        self.assertEqual(POST_STIR_PROBES[-1][1], source[231 - 171].strip())
+        offset = run + 4
+        for index, (name, expression) in enumerate(POST_STIR_PROBES):
+            var = f"QAS01Probe{index}"
+            capture = programs[offset + 4 * index]
+            prefix = var + "←⎕EC ⎕UCS "
+            self.assertTrue(capture.startswith(prefix))
+            self.assertEqual("".join(chr(int(n)) for n in capture[len(prefix):].split()), expression)
+            for slot in (1, 2, 3):
+                self.assertIn(f"{var}[{slot}]", programs[offset + 4 * index + slot])
         self.assertNotIn(STAGE01_MARKER, "".join(programs[27:]))
         self.assertEqual(receipt["stage01"], "NOT_ACCEPTED")
 
@@ -177,7 +188,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         serialized, outer, _ = self.decode(candidate)
         self.assertTrue(serialized.isascii())
         self.assertNotIn("⋄", serialized)
-        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"])
+        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"] + 4 * len(POST_STIR_PROBES))
         self.assertEqual(receipt["outer_lx_chars"], len(outer))
         self.assertEqual(receipt["outer_lx_sha256"], hashlib.sha256(outer.encode("utf-8")).hexdigest())
         self.assertIn("0=foo=:3", candidate.decode("cp1252"))

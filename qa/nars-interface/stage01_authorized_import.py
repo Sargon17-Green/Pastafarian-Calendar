@@ -50,6 +50,18 @@ TRACE_HELPER = [
 ]
 
 
+# Diagnostic only: separate native EC receipts for the exact line 231 witness.
+POST_STIR_PROBES = (
+    ("actual", "PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
+    ("rank", "⍴⍴PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
+    ("type", "⎕DR PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
+    ("match", "FIX_POST_STIR_A1_SUM≡PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
+    ("explicit", "PostStirSavedSum ((⊂1x 2x 3x 4x 5x 6x),(⊂1))"),
+    ("assert", "AssertEqual (⊂FIX_POST_STIR_A1_SUM) (⊂PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1) (⊂'Die A1-Lesart speichert Summe plus 149 mal Rührnummer als einen einzigen Wert')"),
+)
+POST_STIR_KEYS = tuple(f"probe_{name}_{slot}" for name, _ in POST_STIR_PROBES for slot in ("ec", "et", "payload"))
+
+
 def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
     if (block["name"], block["path"], block["start_line"], block["end_line"]) != (
         "RunStage01Tests", "test/stage01_tests.apl", 171, 328
@@ -147,7 +159,7 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
                    for name in ("start", "return", "ec", "et", "payload", "done",
                                 "trace_helper_fx", "trace_main_fx", "trace_run_fx",
                                 "trace", "trace_ec", "trace_et", "trace_payload",
-                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload")}
+                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload") + POST_STIR_KEYS}
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
@@ -205,7 +217,15 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01DiagEC[2]", suite_paths["trace_et"]),
         write_expr("⊃QAS01DiagEC[3]", suite_paths["trace_payload"]),
     ]
-    receipt_programs += diagnostic_programs + [
+    # No probe can write the acceptance marker or alter any locked function.
+    # Capture each EC independently, so failure in one witness cannot hide the next.
+    probe_programs = []
+    for index, (name, expression) in enumerate(POST_STIR_PROBES):
+        var = f"QAS01Probe{index}"
+        probe_programs.append(var + "←⎕EC ⎕UCS " + _codes(expression))
+        for slot, key in enumerate(("ec", "et", "payload"), 1):
+            probe_programs.append(write_expr(f"⊃{var}[{slot}]", suite_paths[f"probe_{name}_{key}"]))
+    receipt_programs += diagnostic_programs + probe_programs + [
         marker_write(f"APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE={SOURCE_COMMIT}", suite_paths["done"]),
     ]
     programs = chunk_programs + [final_program] + receipt_programs
