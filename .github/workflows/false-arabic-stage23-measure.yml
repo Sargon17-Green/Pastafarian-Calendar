@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/false-arabic-stage23-measure.yml'
       - 'tools/stage23_measure.py'
+      - 'src/monster_bootstrap.false'
+      - 'src/bigint.false'
 permissions:
   contents: read
 jobs:
