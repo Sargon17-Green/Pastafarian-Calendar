@@ -1,0 +1,131 @@
+{
+  "schema": "SOAK_V208_STATIC_MAIN_REPOSITORY_LINEAGE_REVIEW/1",
+  "governing_issue": 27,
+  "source_roster": {
+    "ref": "9bdd8606958b478e99ec4b7aafc69465795ca7a9",
+    "path": "soak/control/source_roster_archived_v21_v127_provenance.json",
+    "blob": "ec3fb32b4f0464ec7749a49786fde8b77dee6270",
+    "records_total": 91
+  },
+  "scope": {
+    "repository": "Sargon17-Green/pastafari-calendar",
+    "snapshot": "6b580f9fe914968c57470bec9d8cf3903c463483",
+    "snapshot_basis": "explicit REF-57 and REF-58 roster source URLs; audit all ten colocated records at this single historical revision, not assertion that this equals v129/v131 observed head or current main",
+    "evidence_class": "SOURCE_STATIC",
+    "calendar_calls": 0,
+    "builds": 0
+  },
+  "records": [
+    {
+      "id": "REF-57",
+      "path": "verification/reference-oracle/reference.mjs",
+      "blob": "8c8f092cb43fbaa76a9e7b33aaee1f19266ba516",
+      "role": "SPEC_REFERENCE_CANDIDATE",
+      "observed": "lines 1–19 declare scroll hash and no project implementation imports; class ReferenceInterleavingCounter line 953 and exported counting function line 998",
+      "lineage": "UNASSESSED"
+    },
+    {
+      "id": "REF-58",
+      "path": "implementations/tests/generate_spec_canonical.py",
+      "blob": "7c0947885632c84963a189eed43e8038b08492fa",
+      "role": "HISTORICAL_GENERATOR_WITNESS_NOT_NORMATIVE",
+      "observed": "lines 1–23 explicitly deny normative oracle authority and production imports; InterleavingCounter lines 592 onward; suffix products lines 659–676",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-AUTH-JS",
+      "path": "browser/pastafari-calendar-core.js",
+      "blob": "3b349037967550b0253db6235db5044ac9703466",
+      "role": "FACADE_WITH_DETOURS",
+      "observed": "imports chronicle and detour modules; reexports chronicle at line 81; chronicle blob 0cc8620e4c3e75bdfd887881c287f335346a348a imports core-1.js and core-2.js and applies source-string transformations",
+      "lineage": "TRANSITIVE_DYNAMIC_SOURCE_REVIEW"
+    },
+    {
+      "id": "MAIN-FAST-JS",
+      "path": "browser/pastafari-calendar-fast.js",
+      "blob": "014eca6908ed726c6c760204580bf18119015bbc",
+      "role": "CALENDAR_IMPLEMENTATION_CANDIDATE",
+      "observed": "diagnostics import lines 3–12; InterleavingCounter line 862; suffix products 940–960; PastafariCalendar class line 1322; diagnostics blob 42637e8d83b373ef128b364d1ad62de3bfc81a09",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-PY",
+      "path": "implementations/python/pastafari_calendar/core.py",
+      "blob": "e99f6a6b2413bed2f972ef24360a466df59e34cd",
+      "role": "CALENDAR_IMPLEMENTATION_CANDIDATE",
+      "observed": "ordered calculation_jdn,target_jdn lines 3–6; stdlib imports 17–24; InterleavingCounter 820; suffix products 900–917",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-RUBY",
+      "path": "implementations/ruby/pastafari_calendar.rb",
+      "blob": "ed45d86b647693a74f596775a686188eee75910c",
+      "role": "CALENDAR_IMPLEMENTATION_CANDIDATE",
+      "observed": "self-description no FFI/subprocess lines 4–6 not dynamic proof; InterleavingCounter 665, suffix products 741–759, Calendar 987",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-JAVA",
+      "path": "implementations/java/src/main/java/org/appointedtimes/PastafariCalendar.java",
+      "blob": "ccc83664a0d7ad7a4854d0ddb34eac07bdfda8f7",
+      "role": "CALENDAR_IMPLEMENTATION_CANDIDATE",
+      "observed": "JDK BigInteger import line 5, suffixP/suffixPm1 arrays lines 1211–1213, source claim no native bridge line 35",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-C",
+      "path": "implementations/c/src/calendar_core.c",
+      "blob": "b52e752922907a1e0036c46682acada5a614e812",
+      "role": "CALENDAR_IMPLEMENTATION_WITH_BUILD_DEPENDENCIES",
+      "observed": "calendar_core.h and wideint.h lines 1–2, gate_checkpoints.h line 680; suffix arrays lines 1710–1823; Makefile blob 52725a44fc25f75c9adeb5cd91099536929aeb01 builds pastafari_core.c with source dependencies and src/main.c",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-CPP",
+      "path": "implementations/cpp/src/calendar.cpp",
+      "blob": "c26e5657b950306b5af2b4c769b91269ec4dbef4",
+      "role": "CALENDAR_IMPLEMENTATION_WITH_BUILD_DEPENDENCIES",
+      "observed": "pastafari/calendar.hpp include line 1, InterleavingCounter 914 and suffix vector 1011; CMakeLists blob 901229066ea21b4724d2bba848de45475f35f6a6 links OpenSSL Crypto and CLI src/main.cpp",
+      "lineage": "SHARED_RECURRENCE_REVIEW"
+    },
+    {
+      "id": "MAIN-COBOL",
+      "path": "implementations/cobol/src/pastafari-engine.cob",
+      "blob": "0751f5abba43610be16d2cc11f486c9b8b300601",
+      "role": "COBOL_CALENDAR_WITH_C_GMP_ARITHMETIC",
+      "observed": "COPY line 276 and pfbi_new calls from 365; Makefile f7436998eb6b1b8b089f395c59c8d86167797547 builds runtime/pastafari_bigint.c and links -lgmp with COBOL engine; not evidence of calling MAIN-C calendar",
+      "lineage": "ARITHMETIC_HELPER_DEPENDENCY_REVIEW"
+    }
+  ],
+  "findings": {
+    "reviewed_records": 10,
+    "remaining_historical_records_outside_this_review": 81,
+    "shared_suffix_product_pattern_record_ids": [
+      "REF-58",
+      "MAIN-FAST-JS",
+      "MAIN-PY",
+      "MAIN-RUBY",
+      "MAIN-JAVA",
+      "MAIN-C",
+      "MAIN-CPP"
+    ],
+    "shared_pattern_is_not_proof_of_common_origin": true,
+    "arithmetic_library_is_not_calendar_engine_dependency_by_itself": true,
+    "distinct_calendar_algorithms_certified": 0,
+    "duplicate_of_decisions": 0,
+    "admitted_engines": 0
+  },
+  "next": "Reconcile exact v131 observed snapshot and compare normalized recurrence and unrank transitions among seven flagged sources; audit transitive chronicle and C/GMP helper closure separately.",
+  "gates": {
+    "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+    "whole_year_credit": 0,
+    "main_changes": false,
+    "release": false
+  },
+  "archive": {
+    "commit": "0ed064fdce2fd2295718c9bd0404750a73989c18",
+    "run": 46029712880,
+    "archives": 7,
+    "bytes": 484516
+  }
+}
