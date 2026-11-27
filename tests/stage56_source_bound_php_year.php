@@ -170,10 +170,7 @@ function s56Main(array $args): int {
     $start=hrtime(true);
     echo "STAGE56_PHP_REAL_YEAR_BEGIN year={$args[5]} source_commit=" . S56_SOURCE . "\n";
     flush();
-    $mode=getenv('STAGE56_QA_FUSED');
-    s56Require($mode === false || $mode === '0' || $mode === '1', 'FUSED_MODE');
-    $fusedExperiment=$mode === '1';
-    $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE, $fusedExperiment);
+    $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE);
     $profilePath = $args[6] . '.profile.jsonl';
     @unlink($profilePath);
     $dpProfilePath = $args[6] . '.dp.jsonl';
@@ -276,8 +273,7 @@ function s56Main(array $args): int {
         $years[$idx]['closeGateIndex']-$years[$idx]['openGateIndex'] &&
         count($structure['cutlets']) === $structure['cutletCount'],
         'PHP_CUTLET_COVERAGE');
-    // Independent fresh ranker: never share provider's cache.
-    $ranker=new MonthWeavingRanker56(null, $fusedExperiment);
+    $ranker=new MonthWeavingRanker56();
     // Timeout-safe QA evidence: record which independent round-trip operation
     // was still running, without altering the underlying count/rank/unrank.
     $measureRoundtrip=static function(string $stage,callable $operation) use($profile):mixed {
@@ -325,9 +321,6 @@ function s56Main(array $args): int {
         'calculation_jdn'=>S56_JDN, 'year_record'=>$years[$idx],
         'structure'=>$structure, 'rank_digits'=>strlen($rank->toString()),
         'count_digits'=>strlen($count->toString()),
-        'qa_engine'=>$fusedExperiment?'fused':'default',
-        'count_sha256'=>hash('sha256',$count->toString()),
-        'rank_sha256'=>hash('sha256',$rank->toString()),
         'provider_seconds'=>$providerSeconds,
         'cutlet_oracle_seconds'=>$cutletOracleSeconds,
         'cutlet_oracle'=>$cutletReport,

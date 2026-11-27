@@ -21,9 +21,8 @@ final class MonthWeavingRanker56
     /** @var list<int>|null */
     private ?array $fastCounts = null;
 
-    public function __construct(?MonthWeavingAdjoint56 $adjoint = null, private readonly bool $fusedExperiment = false)
+    public function __construct(?MonthWeavingAdjoint56 $adjoint = null)
     {
-        if ($adjoint !== null && $fusedExperiment) throw new InvalidArgumentException('STAGE56_FUSED_LEGACY');
         $this->forceLegacy = $adjoint !== null;
         $this->adjoint = $adjoint ?? new MonthWeavingAdjoint56();
     }
@@ -152,7 +151,7 @@ final class MonthWeavingRanker56
     private function fastEngineFor(array $counts): MonthWeavingInterleaving56
     {
         if ($this->fastEngine === null || $this->fastCounts !== $counts) {
-            $this->fastEngine = new MonthWeavingInterleaving56($counts, false, $this->fusedExperiment);
+            $this->fastEngine = new MonthWeavingInterleaving56($counts);
             $this->fastCounts = array_values($counts);
         }
         return $this->fastEngine;

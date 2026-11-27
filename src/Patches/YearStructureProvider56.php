@@ -18,15 +18,14 @@ final class YearStructureProvider56
 
     public function __construct(
         private readonly BootstrapKernel $kernel,
-        private readonly ?string $sourceCommit = null,
-        bool $fusedExperiment = false
+        private readonly ?string $sourceCommit = null
     ) {
         // Explicit opt-in only. Reject unpinned source identity at construction.
         if ($sourceCommit !== null) {
             CanonicalJdnBoundary56::toPhpJdn(0, $sourceCommit);
         }
         $this->slices=new YearStructureSlices56();
-        $this->ranker=new MonthWeavingRanker56(null, $fusedExperiment);
+        $this->ranker=new MonthWeavingRanker56();
         $this->chooser=new UnboundedUniformChoice56();
         $this->binder=new ContextualYear5000Anchor56();
     }
