@@ -1,0 +1,108 @@
+name: Soak v234 C++ short rejection native component (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v234-cpp-short-rejection-component.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  component:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind v233 evidence and reconstruct only the tested offset bypass
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "631939b4beac411abb1537c5393bcaa71b2bf1f6"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v234-cpp-short-rejection-component.yml"
+          test "$(git rev-parse HEAD:qa/soak/v234_short_rejection_component_probe.cpp)" = "71429208378c21560042c66bf6b7b155230194aa"
+          mkdir -p evidence original/include/pastafari original/src candidate
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15229943942/zip > evidence/v233.zip
+          echo "1843e018caafc298051e9bb860adb0dc52e4ebb398f8c7b735bdb6b114644a4b  evidence/v233.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,subprocess,json,zipfile
+          from pathlib import Path
+          ref="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          with zipfile.ZipFile("evidence/v233.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+              patch=z.read("candidate-diff.txt").decode("utf-8")
+              model=json.loads(z.read("v232-model.json"))
+          assert prior["schema"]=="SOAK_V233_CPP_SHORT_REJECTION_CANDIDATE/1"
+          assert prior["source_commit"]==ref and len(prior["cases"])==3
+          assert all(c["classification"]=="DIAGNOSTIC_COMPLETED" and c["v5_fields_match"] and c["v5_year_length_match"] for c in prior["cases"])
+          assert model["mismatches"]==model["native_calls"]==0
+          assert model["small_exhaustive_cases"]==599072 and model["actual_modulus_certificate_cases"]==121492
+          pins={"src/monster.cpp":"a9cb83e67fc962fdf5560ad0b2cdf5354148e6a9","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("original",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          # Exact v233 candidate insert; omit all other phase instrumentation.
+          src=Path("original/src/monster.cpp").read_text()
+          anchor="    Integer offset = 0;\n    for (;;) {\n        const Integer x = ringAnswer(stream, offset);"
+          assert src.count(anchor)==1
+          assert "accelerationsOn() && !fullHistoricalValidationOn()" in patch
+          assert "offset = first - acceptanceLimit;" in patch and "offset = M_OLD - first + 1;" in patch
+          assert patch.count("for (;;)")==1 and patch.count("const Integer x = ringAnswer(stream, offset);")==1
+          candidate=src.replace(anchor,patch)
+          assert candidate.replace(patch,anchor)==src
+          candidate="#include <iostream>\n"+candidate
+          p=Path("candidate/monster.cpp")
+          p.write_text(candidate)
+          Path("evidence/candidate-diff.txt").write_text(patch)
+          Path("evidence/source-pins.json").write_text(json.dumps({"original_commit":ref,"sources":inv,"candidate_sha256":hashlib.sha256(p.read_bytes()).hexdigest(),"exact_v233_insert_sha256":hashlib.sha256(patch.encode()).hexdigest(),"probe_blob":"71429208378c21560042c66bf6b7b155230194aa","v233_run":46065599661,"v233_artifact":15229943942,"v233_archive_sha256":"1843e018caafc298051e9bb860adb0dc52e4ebb398f8c7b735bdb6b114644a4b","other_v233_instrumentation_removed":True},indent=2)+"\n")
+          PY
+      - name: Prepare temporary Boost and compile exact native component
+        run: |
+          set -euo pipefail
+          (
+            set -e
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1 || { cat evidence/compiler.txt; exit 1; }
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I original/include candidate/monster.cpp qa/soak/v234_short_rejection_component_probe.cpp -o candidate/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum candidate/probe candidate/monster.cpp qa/soak/v234_short_rejection_component_probe.cpp > evidence/build.sha256
+      - name: Native cold cached historical and invalid-input regression
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 524288; /usr/bin/time -v -o evidence/time.txt timeout -k 5s 30s candidate/probe) > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/exit.txt
+          cat evidence/stdout.txt evidence/stderr.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          code=int(Path("evidence/exit.txt").read_text())
+          lines=Path("evidence/stdout.txt").read_text().splitlines()
+          err=Path("evidence/stderr.txt").read_text().splitlines()
+          expected=["HUGE maximum_minus OFFSET 85070591730234615865843651857942052863","HUGE maximum_plus OFFSET 85070591730234615865843651857942052863","HUGE V5_000371 OFFSET 14817259350062209418795165142640937940","HUGE V5_000385 OFFSET 57306062062458103373742487983320652409","PATCH13_COMPONENT_PASS checks=53 rejected=3 original_F_calls=0"]
+          ok=code==0 and lines==expected and err==["TRACE_SHORT_DIRECT_OFFSET "+x.split()[-1] for x in expected[:4]]
+          out={"schema":"SOAK_V234_CPP_SHORT_REJECTION_COMPONENT/1","original_source_commit":"32ad50c8177233adc87eed1721c1e6f34f24ced1","exit":code,"component_checks_verified":53 if ok else 0,"invalid_inputs_rejected":3 if ok else 0,"huge_cold_cache_cases":4 if ok else 0,"stdout_exact":lines==expected,"stderr_exact":err==["TRACE_SHORT_DIRECT_OFFSET "+x.split()[-1] for x in expected[:4]],"classification":"COMPONENT_NATIVE_CANDIDATE_PASS" if ok else "COMPONENT_NOT_ACCEPTED","native_date_calls":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v234-cpp-short-component-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
