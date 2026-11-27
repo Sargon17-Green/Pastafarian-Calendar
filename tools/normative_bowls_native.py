@@ -104,7 +104,7 @@ def math_check():
         assert len(set(trace[0]["order"]))==6 and all(1<=v<=M for v in out)
     # Exhaust the full rank space, including the two wrap endpoints.
     for rank in range(1,721):
-        assert batch([rank+571,1,1,1,1,1],1)[1][0]["rank"] == rank
+        assert batch([rank+566,1,1,1,1,1],1)[1][0]["rank"] == rank
     return {"random_batch_properties":384,"rank_space":720,"stage_acceptance":False}
 
 def main():
