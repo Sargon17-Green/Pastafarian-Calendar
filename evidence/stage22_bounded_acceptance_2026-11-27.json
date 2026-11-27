@@ -1,0 +1,48 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "branch": "FALSE+العربية",
+  "stage": 22,
+  "reference_operation": 56,
+  "production_operation": 39,
+  "acceptance": "ACCEPTED_BOUNDED",
+  "source_pin": "f9659b9cf0b0a016e15a5f5b379e0c6a9864f17a",
+  "source_tree": "4f58d3c965726b71d4c49d527b668b0dcfabd9e7",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "run_id": 45913577333,
+  "job_id": 140227374442,
+  "verify_job_id": 140227374293,
+  "run_conclusion": "success",
+  "native": {
+    "positive": 10,
+    "assertions": 1706,
+    "semantic_invalids": 16,
+    "numeric_mutants": 5
+  },
+  "offline_audit": "PASS",
+  "external_readback": {
+    "artifact_id": 15161002964,
+    "artifact_sha256": "933de2222f575036e7794d19239365ddd4567c7c2bcb194d6d65368db1073c7c",
+    "outer_entries": 185,
+    "outer_crc": "PASS",
+    "bundle_sha256": "8642e85476b5276e40ec7e116ca7de20f407d256e98257871ab73069210d52c0",
+    "bundle_entries": 183,
+    "bundle_crc": "PASS",
+    "inner_outer_byte_identity": true,
+    "source_blobs_live_tree_verified": 12,
+    "program_stdout_stderr_hashes_verified": 93,
+    "independent_values_verified": 60,
+    "independent_model": "lexicographic permutations and positive modular reduction",
+    "intentional_abort_diagnostics_verified": 21,
+    "mutant_markers_predicted": 5,
+    "replay_byte_identical": true,
+    "evidence_sha256": "a510c79939084aa3e7ad28d5bbebdc2b637f092a94848d32723b02efda9f53df",
+    "audit_sha256": "b97ea1eefef802d6cc9b6124d106e77210646392fa8ae6c862c6e2cae4f3bd04"
+  },
+  "physical_pointer_safety_assessed": false,
+  "scope_exclusions": [
+    "unallocated pointers",
+    "physically truncated allocations"
+  ],
+  "stage23_started": false,
+  "main_merge": false
+}
