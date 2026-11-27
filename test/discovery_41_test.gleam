@@ -162,14 +162,15 @@ fn deficit_oracle(
   case pairs == 0 {
     True -> #(0, 1)
     False -> {
-      let missing = list.fold(ls, 0, fn(acc, a) {
-        list.fold(rs, acc, fn(inner, b) {
-          case !member(right, a) && !member(left, b) {
-            True -> inner + 1
-            False -> inner
-          }
+      let missing =
+        list.fold(ls, 0, fn(acc, a) {
+          list.fold(rs, acc, fn(inner, b) {
+            case !member(right, a) && !member(left, b) {
+              True -> inner + 1
+              False -> inner
+            }
+          })
         })
-      })
       fraction(missing, pairs)
     }
   }
@@ -357,22 +358,37 @@ fn verify(
   )
   deficit |> should.equal(deficit_oracle(windows, left_bands, right_bands))
   let #(n, d) = deficit
-  { n == 0 } |> should.equal(intersection == left_count || intersection == right_count)
-  { n == d } |> should.equal(left_count > 0 && right_count > 0 && intersection == 0)
+  { n == 0 }
+  |> should.equal(intersection == left_count || intersection == right_count)
+  { n == d }
+  |> should.equal(left_count > 0 && right_count > 0 && intersection == 0)
   { n * left_denominator <= { left_denominator - left_numerator } * d }
   |> should.equal(True)
   { n * right_denominator <= { right_denominator - right_numerator } * d }
   |> should.equal(True)
   n * mean_denominator * joint_denominator
   |> should.equal(
-    { mean_denominator * joint_denominator
-      - 2 * mean_numerator * joint_denominator
-      + joint_numerator * mean_denominator } * d,
+    {
+      mean_denominator
+      * joint_denominator
+      - 2
+      * mean_numerator
+      * joint_denominator
+      + joint_numerator
+      * mean_denominator
+    }
+    * d,
   )
   let square_n =
-    4 * { mean_denominator - mean_numerator } * { mean_denominator - mean_numerator }
-    * signed_denominator * signed_denominator
-    - signed_numerator * signed_numerator * mean_denominator * mean_denominator
+    4
+    * { mean_denominator - mean_numerator }
+    * { mean_denominator - mean_numerator }
+    * signed_denominator
+    * signed_denominator
+    - signed_numerator
+    * signed_numerator
+    * mean_denominator
+    * mean_denominator
   n * signed_identity_denominator |> should.equal(square_n * d)
 
   #(left_count, right_count, deficit)

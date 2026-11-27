@@ -76,8 +76,11 @@ pub fn dispatch_discovery_41(
       let jn = previous.joint_coverage_numerator
       let jd = previous.joint_coverage_denominator
       let counts_ok =
-        i >= 0 && i <= l && i <= r
-        && l <= base.total_windows && r <= base.total_windows
+        i >= 0
+        && i <= l
+        && i <= r
+        && l <= base.total_windows
+        && r <= base.total_windows
         && l + r - i <= base.total_windows
         && base.combined_windows == l + r - i
       let fractions_ok =
@@ -105,13 +108,10 @@ pub fn dispatch_discovery_41(
           }
           let zero_ok = { n == 0 } == { i == l || i == r }
           let one_ok = { n == d } == { l > 0 && r > 0 && i == 0 }
-          let bounds_ok = n * ld <= { ld - ln } * d
-            && n * rd <= { rd - rn } * d
-          let linear_ok =
-            n * md * jd == { md * jd - 2 * mn * jd + jn * md } * d
+          let bounds_ok = n * ld <= { ld - ln } * d && n * rd <= { rd - rn } * d
+          let linear_ok = n * md * jd == { md * jd - 2 * mn * jd + jn * md } * d
           let square_n =
-            4 * { md - mn } * { md - mn } * sd * sd
-            - sn * sn * md * md
+            4 * { md - mn } * { md - mn } * sd * sd - sn * sn * md * md
           let square_d = 4 * md * md * sd * sd
           case
             valid_fraction(n, d)
