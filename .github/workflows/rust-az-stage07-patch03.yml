@@ -9,6 +9,7 @@ on:
       - 'tests/**'
       - 'tools/stage07_patch03_distance_oracle.py'
       - 'Cargo.toml'
+      - 'DEVELOPMENT_STAGE.md'
       - 'audit/STAGE_07_PATCH03_DISTANCE_CONTRACT_2026-11-25.md'
       - '.github/workflows/rust-az-stage07-patch03.yml'
   workflow_dispatch:
@@ -70,6 +71,15 @@ jobs:
             else
               grep -Fxq 'LAST_COMPLETED_STAGE=10' DEVELOPMENT_STAGE.md
               grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY05_STAGE10_ACCEPTED_HOLD_NO_STAGE11' DEVELOPMENT_STAGE.md
+            fi
+          elif grep -Fxq 'CURRENT_STAGE=11' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=PATCH05' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH05' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=10' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=11' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12' DEVELOPMENT_STAGE.md
             fi
           else
             echo 'Unexpected successor stage' >&2
