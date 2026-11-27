@@ -276,7 +276,7 @@ pub fn discovery_42_wide_inverted_and_error_priority_test() {
   let _ = verify([3, 5, 2, 4], left, right)
 
   let context = bootstrap.new_context(11, 21)
-  discovery_42_mixed_directional_coverage.dispatch_discovery_41(
+  discovery_42_mixed_directional_coverage.dispatch_discovery_42(
     context,
     [7],
     [],
@@ -285,7 +285,7 @@ pub fn discovery_42_wide_inverted_and_error_priority_test() {
   |> should.equal(Error(discovery_19_interval_value.InvalidBowlId))
 
   let invalid = bootstrap.MonsterContext(..context, retry_budget: -1)
-  discovery_42_mixed_directional_coverage.dispatch_discovery_41(
+  discovery_42_mixed_directional_coverage.dispatch_discovery_42(
     invalid,
     [7],
     [],
@@ -296,7 +296,7 @@ pub fn discovery_42_wide_inverted_and_error_priority_test() {
       bootstrap.InvalidRetryBudget,
     )),
   )
-  discovery_42_mixed_directional_coverage.dispatch_discovery_41(
+  discovery_42_mixed_directional_coverage.dispatch_discovery_42(
     invalid,
     [],
     [],
