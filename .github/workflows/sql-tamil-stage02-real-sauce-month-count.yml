@@ -90,6 +90,24 @@ jobs:
           """
               Path(f"evidence/{lane}.sql").write_text(sql)
           PY
+          # Preserve the locked oracle bytes before its final, unrelated display adapter.
+          # The adapter calls the production name catalog and cannot load in an isolated DB.
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("sql/test/10_normative_reference.sql").read_bytes()
+          marker = b"CREATE OR REPLACE FUNCTION pastafari_sql_tamil_test.calendar_date(p_calculation_day numeric,p_target_day numeric)"
+          assert source.count(marker) == 1
+          prefix, suffix = source.split(marker)
+          assert prefix.rstrip().endswith(b"$$;")
+          assert b"pastafari_sql_tamil." not in prefix
+          assert b"FUNCTION pastafari_sql_tamil_test.sauce(" in prefix
+          assert b"FUNCTION pastafari_sql_tamil_test.choose_month_count(" in prefix
+          assert suffix.count(b"pastafari_sql_tamil.source_name(") == 2
+          assert b"CREATE OR REPLACE FUNCTION" not in suffix
+          assert suffix.rstrip().endswith(b"$$;")
+          Path("evidence/normative-load.sql").write_bytes(prefix)
+          print("NORMATIVE_PROJECTION_BYTES", len(prefix))
+          PY
           sha256sum '.github/workflows/sql-tamil-stage02-real-sauce-month-count.yml' evidence/fixture.json evidence/*.sql >> evidence/source-sha256.txt
       - name: Start isolated PostgreSQL 17.12 and two independent databases
         shell: bash
@@ -119,7 +137,7 @@ jobs:
           failed=0
           for lane in production normative; do
             load=("${args[@]}")
-            if [[ "$lane" = normative ]]; then load=(-f /work/sql/test/10_normative_reference.sql); fi
+            if [[ "$lane" = normative ]]; then load=(-f /work/evidence/normative-load.sql); fi
             set +e
             timeout --kill-after=10s 90s "${pg[@]}" -d "$lane" "${load[@]}" > "evidence/$lane-load.log" 2>&1
             code=$?
