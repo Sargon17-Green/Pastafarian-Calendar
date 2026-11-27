@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 full day-window quotient-zero differential
+name: Logo Stage2 QA D19 reverse day-window exact carry-split differential
 on:
   push:
     branches:
@@ -12,8 +12,6 @@ jobs:
       max-parallel: 2
       matrix:
         include:
-          - direction: forward
-            group: year5000
           - direction: reverse
             group: year5000
     runs-on: ubuntu-24.04
@@ -72,7 +70,7 @@ jobs:
           original = source[start:end]
           assert "bi.small 139" in original and "bi.small 274" in original
           assert "nr.year5000.scan.i" in original and "nr.year.pair.sort" in original
-          replacement = "to ad.year5000.data :calculation\n  ; QA diagnostic: cover actual days, not a fixed index radius.\n  nr.gate.reset\n  localmake \"low bi.sub :calculation bi.small 5778\n  localmake \"high bi.add :calculation bi.small 5778\n  print [ASK_DISPATCH_DIAG_COVER_BEGIN]\n  while [bi.gt (nr.gate.known :NR.MIN.GATE) :low] [\n    ignore nr.gate.extend.backward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_BACKWARD] (bi.digits :NR.MIN.GATE))\n  ]\n  while [bi.lt (nr.gate.known :NR.MAX.GATE) :high] [\n    ignore nr.gate.extend.forward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD] (bi.digits :NR.MAX.GATE))\n  ]\n  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]\n  localmake \"raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation\n  localmake \"candidates nr.year.pair.sort :raw\n  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))\n  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY] stop]\n  localmake \"N bi.small count :candidates\n  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]\n  localmake \"s nr.sauce :calculation :calculation\n  localmake \"stream nr.ask :s 1 10\n  localmake \"rank nr.choose.rank :stream :N\n  localmake \"chosen item bi.to.small :rank :candidates\n  localmake \"year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)\n  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]\n  print (sentence [ASK_DISPATCH_QDIGIT_ZERO_HITS] :AD.QDIGIT.ZERO.HITS)\n  output (list :year :N)\nend\n"
+          replacement = "to ad.year5000.data :calculation\n  ; QA diagnostic: cover actual days, not a fixed index radius.\n  nr.gate.reset\n  localmake \"low bi.sub :calculation bi.small 5778\n  localmake \"high bi.add :calculation bi.small 5778\n  print [ASK_DISPATCH_DIAG_COVER_BEGIN]\n  while [bi.gt (nr.gate.known :NR.MIN.GATE) :low] [\n    ignore nr.gate.extend.backward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_BACKWARD] (bi.digits :NR.MIN.GATE))\n  ]\n  while [bi.lt (nr.gate.known :NR.MAX.GATE) :high] [\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD_START] (bi.digits (bi.add :NR.MAX.GATE bi.small 1)))\n    ignore nr.gate.extend.forward\n    print (sentence [ASK_DISPATCH_DIAG_GATE_FORWARD] (bi.digits :NR.MAX.GATE))\n  ]\n  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] stop]\n  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]\n  localmake \"raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation\n  localmake \"candidates nr.year.pair.sort :raw\n  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))\n  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY] stop]\n  localmake \"N bi.small count :candidates\n  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]\n  localmake \"s nr.sauce :calculation :calculation\n  localmake \"stream nr.ask :s 1 10\n  localmake \"rank nr.choose.rank :stream :N\n  localmake \"chosen item bi.to.small :rank :candidates\n  localmake \"year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)\n  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]\n  print (sentence [ASK_DISPATCH_QDIGIT_ZERO_HITS] :AD.QDIGIT.ZERO.HITS)\n  output (list :year :N)\nend\n"
           source = source[:start] + replacement + source[end:]
           print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
           path.write_text(source, encoding="utf-8")
@@ -93,9 +91,21 @@ jobs:
           p.write_text(s.replace(anchor, replacement), encoding="utf-8")
           print("QA_QDIGIT_ZERO_CANDIDATE=READY")
           PY
+          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "fb96c1b367388a358c21582fe1a3300bd909a30749c05280ca593c873066199b"
+          # Exact bounded carry split: q=(n-r)/10000 is an integer, 0<=r<10000.
+          # No approximate quotient, 32-bit signed safe; leave out-of-range path intact.
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("src/exact_integer.logo")
+          s = p.read_text(encoding="utf-8")
+          anchor = 'to bi.small.split.base :n\n  output bi.small.split.base.work :n 0\nend'
+          replacement = 'to bi.small.split.base :n\n  if and (:n >= 0) (:n < 100000000) [\n    localmake "r remainder :n 10000\n    localmake "q int (quotient (:n - :r) 10000)\n    output (list :q :r)\n  ]\n  output bi.small.split.base.work :n 0\nend'
+          assert s.count(anchor) == 1
+          p.write_text(s.replace(anchor, replacement), encoding="utf-8")
+          print("QA_CARRY_SPLIT_CANDIDATE=READY")
+          PY
           git diff -- src/exact_integer.logo > "$RUNNER_TEMP/candidate.patch"
           test -s "$RUNNER_TEMP/candidate.patch"
-          test "$(sha256sum src/exact_integer.logo | cut -d' ' -f1)" = "fb96c1b367388a358c21582fe1a3300bd909a30749c05280ca593c873066199b"
           test "$(sha256sum "$RUNNER_TEMP/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
           sha256sum src/exact_integer.logo qa/logo_stage2_ask_dispatcher_common.logo > "$RUNNER_TEMP/candidate-hashes.txt"
           cat > "$RUNNER_TEMP/native.logo" <<EOF
@@ -118,6 +128,38 @@ jobs:
           make -j2
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Native carry split differential preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/split-probe.logo" <<'EOF'
+          load "src/exact_integer.logo
+          make "SPLIT.CHECKS 0
+          to ad.split.check :n
+            localmake "got bi.small.split.base :n
+            localmake "want bi.small.split.base.work :n 0
+            if not equalp :got :want [print [SPLIT_NATIVE_FAILURE] bye]
+            make "SPLIT.CHECKS (:SPLIT.CHECKS + 1)
+          end
+          to ad.split.boundary :q
+            ad.split.check (:q * 10000)
+            ad.split.check (:q * 10000 + 1)
+            ad.split.check (:q * 10000 + 9998)
+            ad.split.check (:q * 10000 + 9999)
+          end
+          repeat 11 [ad.split.boundary item repcount [0 1 9 10 99 100 999 1000 5000 9998 9999]]
+          repeat 256 [ad.split.check (remainder (repcount * 390151) 100000000)]
+          ad.split.check 100000000
+          ad.split.check -1
+          print (sentence [SPLIT_NATIVE_CHECKS] :SPLIT.CHECKS)
+          print [SPLIT_NATIVE_PASS]
+          bye
+          EOF
+          echo bye | timeout --signal=TERM --kill-after=5s 90 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/split-probe.logo" > "$RUNNER_TEMP/split-probe.log" 2>&1
+          cat "$RUNNER_TEMP/split-probe.log"
+          grep -Fxq 'SPLIT_NATIVE_CHECKS 302' "$RUNNER_TEMP/split-probe.log"
+          grep -Fxq 'SPLIT_NATIVE_PASS' "$RUNNER_TEMP/split-probe.log"
+          if grep -Eq 'SPLIT_NATIVE_FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with' "$RUNNER_TEMP/split-probe.log"; then exit 1; fi
       - name: Run bounded Native selector group
         shell: bash
         env:
@@ -174,5 +216,7 @@ jobs:
             ${{ runner.temp }}/elapsed.txt
             ${{ runner.temp }}/candidate.patch
             ${{ runner.temp }}/candidate-hashes.txt
+            ${{ runner.temp }}/split-probe.logo
+            ${{ runner.temp }}/split-probe.log
           if-no-files-found: warn
           retention-days: 30
