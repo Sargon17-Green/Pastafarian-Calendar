@@ -13,7 +13,7 @@ logic [WIDTH-1:0] factor,child_factor,child[1:MONTHS],fresh,old_sum;
 logic [WIDTH-1:0] calculated_parent,selected_count,grandchild;
 logic [WIDTH:0] wide_sum;
 integer first_active,accum[1:MONTHS];
-logic [WIDTH-1:0] prefix_factor[1:MONTHS],suffix_factor[1:MONTHS];
+logic [WIDTH-1:0] split_mass;
 logic [WIDTH-1:0] fast_child_factor[1:MONTHS];
 
 function automatic logic [CWIDTH-1:0] exact_div_small(
@@ -52,6 +52,94 @@ function automatic logic [CWIDTH-1:0] choose_exact(
     end
 endfunction
 
+// EXPERIMENTAL v010: exact x*m/d for 0<=m<=d<=DAYS.
+// Reduce gcd; remove powers of two; divide odd part using a base-2^64
+// modular inverse and signed carry. No truncation or non-exact ratios.
+function automatic logic [WIDTH-1:0] split_ratio_exact(
+    input logic [WIDTH-1:0] x,input integer numerator,input integer denominator);
+    logic [WIDTH-1:0] y,q;
+    logic [63:0] m,d,inv,qword,word;
+    logic signed [127:0] carry,u,delta;
+    integer g,a,b,t,words,i,shift;
+    begin
+        if(numerator<0 || denominator<1 || numerator>denominator || denominator>DAYS)
+            $fatal(1,"NATIVE_LEX_RATIO_DOMAIN");
+        if(numerator==0 || x=='0) split_ratio_exact='0;
+        else if(numerator==denominator) split_ratio_exact=x;
+        else begin
+            a=numerator;b=denominator;
+            while(b!=0) begin t=a%b;a=b;b=t;end
+            g=a;m=$unsigned(numerator/g);d=$unsigned(denominator/g);
+            words=WIDTH/64;
+            while(words>0 && x[(words-1)*64+:64]=='0) words=words-1;
+            y=x;shift=0;
+            while(d[0]==0) begin
+                if(y[0]!=0) $fatal(1,"NATIVE_LEX_RATIO_INEXACT_POWER2");
+                y=y>>1;d=d>>1;shift=shift+1;
+            end
+            inv=64'd1;
+            for(i=0;i<6;i=i+1) inv=inv*(64'd2-d*inv);
+            if(64'(d*inv)!=64'd1) $fatal(1,"NATIVE_LEX_RATIO_BAD_INVERSE");
+            q='0;carry=128'sd0;
+            for(i=0;i<words;i=i+1) begin
+                word=y[i*64+:64];
+                u=$signed({64'b0,word})*$signed({64'b0,m})+carry;
+                qword=u[63:0]*inv;
+                delta=u-$signed({64'b0,qword})*$signed({64'b0,d});
+                if(delta[63:0]!=0) $fatal(1,"NATIVE_LEX_RATIO_INTERNAL");
+                carry=delta>>>64;
+                q[i*64+:64]=qword;
+            end
+            if(carry!=128'sd0 || q>x) $fatal(1,"NATIVE_LEX_RATIO_INEXACT");
+            split_ratio_exact=q;
+        end
+    end
+endfunction
+
+// Exact schoolbook product with active 256-bit limbs. Both input widths
+// may be large, but zero/one (including H_45) bypass the limb loops.
+function automatic logic [WIDTH-1:0] mul_checked(
+    input logic [WIDTH-1:0] a,input logic [WIDTH-1:0] b);
+    localparam integer NWORDS=WIDTH/256;
+    logic [WIDTH-1:0] q;
+    logic [255:0] aa,bb,carry;
+    logic [511:0] t;
+    integer na,nb,i,j,k;
+    begin
+        if(a=='0 || b=='0) mul_checked='0;
+        else if(a==WIDTH'(1)) mul_checked=b;
+        else if(b==WIDTH'(1)) mul_checked=a;
+        else begin
+            na=NWORDS;nb=NWORDS;
+            while(na>0 && a[(na-1)*256+:256]=='0) na=na-1;
+            while(nb>0 && b[(nb-1)*256+:256]=='0) nb=nb-1;
+            q='0;
+            for(j=0;j<nb;j=j+1) begin
+                bb=b[j*256+:256];carry='0;
+                if(bb!='0) begin
+                    for(i=0;i<na;i=i+1) begin
+                        aa=a[i*256+:256];k=i+j;
+                        if(k>=NWORDS) begin
+                            if(aa!='0 || carry!='0)
+                                $fatal(1,"NATIVE_LEX_CHUNK_PRODUCT_OVERFLOW");
+                        end else begin
+                            t=aa*bb+{256'b0,q[k*256+:256]}+{256'b0,carry};
+                            q[k*256+:256]=t[255:0];carry=t[511:256];
+                        end
+                    end
+                    k=na+j;
+                    if(carry!='0) begin
+                        if(k>=NWORDS) $fatal(1,"NATIVE_LEX_CHUNK_CARRY_OVERFLOW");
+                        if(q[k*256+:256]!='0) $fatal(1,"NATIVE_LEX_CHUNK_INTERNAL");
+                        q[k*256+:256]=carry;
+                    end
+                end
+            end
+            mul_checked=q;
+        end
+    end
+endfunction
+
 // Completed month labels can be zero only in a leading prefix;
 // otherwise the ascending-last-appearance constraint is violated.
 function automatic logic [WIDTH-1:0] factor_A();
@@ -69,7 +157,7 @@ function automatic logic [WIDTH-1:0] factor_A();
                 saw_positive=1;
                 running=running+copies;
                 if(running>copies)
-                    value=value*WIDTH'(choose_exact(running-1,copies-1));
+                    value=mul_checked(value,WIDTH'(choose_exact(running-1,copies-1)));
             end
         end
         factor_A=value;
@@ -190,42 +278,38 @@ initial begin
     read_big("build/native_lex_rank.bin",rank);
     if(parent==0 || rank==0 || rank>parent)
         $fatal(1,"NATIVE_LEX_RANK_RANGE");
-    fd=$fopen("build/native_H_table.hex","r");
+    fd=$fopen("build/native_H_table.hex","rb");
     if(fd==0) $fatal(1,"NATIVE_LEX_MISSING_NATIVE_H_TABLE");
     out=$fopen("build/native_lex_fast_prefix.bin","wb");
     if(out==0) $fatal(1,"NATIVE_LEX_OUTPUT_OPEN");
     $fwrite(out,"%c",8'd1);
     started=1;remaining[1]=lengths[1]-1;n=remaining[1];
+    factor=WIDTH'(1);
     for(position=2;position<=max_positions;position=position+1) begin
-        // Precompute A(r-e_i) for ALL candidates in O(started)
-        // binomial calls, rather than O(started^2) repeated products.
+        // Carry A(r) from the previous selected block. Split the integer
+        // number of completions descending through active labels. Each
+        // split uses m=r[k]-1 and d=accum[k]-1, not wide binomials.
         first_active=0;
         for(k=1;k<=started;k=k+1) begin
+            if(remaining[k]<0) $fatal(1,"NATIVE_LEX_NEGATIVE_REMAINING");
             if(remaining[k]>0 && first_active==0) first_active=k;
             accum[k]=remaining[k]+((k==1)?0:accum[k-1]);
             fast_child_factor[k]='0;
         end
-        factor=WIDTH'(1);
+        if(accum[started]!=n) $fatal(1,"NATIVE_LEX_ACCUM_MISMATCH");
         if(first_active>0) begin
             for(k=first_active;k<=started;k=k+1)
                 if(remaining[k]<=0)
                     $fatal(1,"NATIVE_LEX_FAST_INTERIOR_EXHAUSTION at=%0d",position);
-            prefix_factor[first_active]=WIDTH'(1);
-            for(k=first_active+1;k<=started;k=k+1)
-                prefix_factor[k]=prefix_factor[k-1]*
-                    WIDTH'(choose_exact(accum[k]-1,remaining[k]-1));
-            suffix_factor[started]=WIDTH'(1);
-            for(k=started-1;k>=first_active;k=k-1)
-                suffix_factor[k]=suffix_factor[k+1]*
-                    WIDTH'(choose_exact(accum[k+1]-2,remaining[k+1]-1));
-            factor=prefix_factor[started];
-            fast_child_factor[first_active]=suffix_factor[first_active];
-            for(k=first_active+1;k<=started;k=k+1)
-                if(remaining[k]>1)
-                    fast_child_factor[k]=prefix_factor[k-1]*
-                        WIDTH'(choose_exact(accum[k]-2,remaining[k]-2))*
-                        suffix_factor[k];
-        end
+            split_mass=factor;
+            for(k=started;k>first_active;k=k-1) begin
+                fast_child_factor[k]=split_ratio_exact(split_mass,remaining[k]-1,accum[k]-1);
+                if(fast_child_factor[k]>split_mass) $fatal(1,"NATIVE_LEX_SPLIT_RANGE");
+                split_mass=split_mass-fast_child_factor[k];
+            end
+            fast_child_factor[first_active]=split_mass;
+        end else if(factor!==WIDTH'(1) || n!=0)
+            $fatal(1,"NATIVE_LEX_EMPTY_FACTOR");
         if(position<=16 || position==255 || position==256 ||
            position>=DAYS-105)
             if(factor!==factor_A())
@@ -242,7 +326,7 @@ initial begin
         end
         if(factor==0) $fatal(1,"NATIVE_LEX_ILLEGAL_PARENT_ORDER");
         h_lookup(started,n,h_parent);
-        calculated_parent=factor*h_parent;
+        calculated_parent=mul_checked(factor,h_parent);
         if(calculated_parent!==parent)
             $fatal(1,"NATIVE_LEX_PARENT_COUNT_MISMATCH at=%0d",position);
         if(n>0) h_lookup(started,n-1,h_old);
@@ -258,7 +342,7 @@ initial begin
                         $fatal(1,"NATIVE_LEX_FAST_CHILD_REFERENCE_MISMATCH at=%0d month=%0d",position,k);
                     remaining[k]=remaining[k]+1;
                 end
-                child[k]=fast_child_factor[k]*h_old;
+                child[k]=mul_checked(fast_child_factor[k],h_old);
             end
             wide_sum={1'b0,old_sum}+{1'b0,child[k]};
             if(wide_sum[WIDTH] || wide_sum[WIDTH-1:0]>parent)
@@ -271,11 +355,11 @@ initial begin
                 $fatal(1,"NATIVE_LEX_EXTRA_FRESH_MONTH at=%0d",position);
         end else begin
             // Independently verify rightmost first-fresh block by H_(s+1).
-            child_factor=factor*
+            child_factor=mul_checked(factor,
                 WIDTH'(choose_exact(n+lengths[started+1]-2,
-                                    lengths[started+1]-2));
+                                    lengths[started+1]-2)));
             h_lookup(started+1,n+lengths[started+1]-1,h_fresh);
-            grandchild=child_factor*h_fresh;
+            grandchild=mul_checked(child_factor,h_fresh);
             if(fresh!==grandchild)
                 $fatal(1,"NATIVE_LEX_FRESH_PARTITION_MISMATCH at=%0d",position);
         end
@@ -294,9 +378,11 @@ initial begin
             remaining[started]=lengths[started]-1;
             n=n+remaining[started];
             selected_count=fresh;
+            factor=child_factor;
             choice=started;
         end else begin
             remaining[choice]=remaining[choice]-1;
+            factor=fast_child_factor[choice];
             n=n-1;
         end
         if(selected_count==0 || rank==0 || rank>selected_count)
@@ -317,6 +403,10 @@ initial begin
             $display("STAGE1_NATIVE_LEX_MONTH2_FINISH_PASS position=4148");
         end
         $fwrite(out,"%c",choice);
+        if(position%64==0) begin
+            $display("NATIVE_LEX_V010_HEARTBEAT position=%0d started=%0d",position,started);
+            $fflush(out);$fflush();
+        end
         if(position==8 || position==11 || position==32 ||
            position==64 || position==255 || position==256 || position==2032 ||
            position==4137 || position==4138 || position==4148 || position==DAYS) begin
@@ -327,7 +417,7 @@ initial begin
     end
     $fclose(out);$fclose(fd);
     if(max_positions==DAYS) begin
-        if(started!=MONTHS || rank!=WIDTH'(1) || parent!=WIDTH'(1))
+        if(started!=MONTHS || rank!=WIDTH'(1) || parent!=WIDTH'(1) || factor!=WIDTH'(1))
             $fatal(1,"NATIVE_LEX_TERMINAL_RANK");
         for(k=1;k<=MONTHS;k=k+1)
             if(remaining[k]!=0)
