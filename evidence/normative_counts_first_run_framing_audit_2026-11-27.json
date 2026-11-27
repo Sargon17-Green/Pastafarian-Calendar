@@ -1,0 +1,31 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "source_pin": "99523da654c32b9dbdf794b76602cb4cf191ceaa",
+  "runtime_pin": "eb3135565a8670cced3f6bbca4dbf7b014c45634",
+  "run": 45965932204,
+  "job": 140394491358,
+  "job_conclusion": "failure",
+  "canonical_job": 140394490587,
+  "canonical_conclusion": "success",
+  "artifact": 15183105316,
+  "artifact_sha256": "eb3fb2eaf272ead28e90803aa40c5624ed7355b08f469be401a720e886464b32",
+  "zip_entries": 78,
+  "crc": "PASS",
+  "source_blobs": {
+    "source/.github/workflows/false-arabic-normative-counts.yml": "f6da4b06c7324d2955efef3405d6de74fd4cffda",
+    "source/src/monster_bootstrap.false": "2ba488dd2cf529c6bdd572999723594f3b0d4d97",
+    "source/src/bigint.false": "1e8de1147ba46cd0eb75a47f24673bbd9783946f",
+    "source/test/normative_reference.false": "3e9acc012bedf83294a6ec3cccb081a069556b5b",
+    "source/tools/normative_counts_native.py": "62b9fa9ac63d92b3fd03238f6194840542498ec2"
+  },
+  "offline_actual_archive_checks": {
+    "positive_exit0_exact_stdout_empty_stderr": 14,
+    "mutant_exit1_exact_stdout_path_line_column_source_caret": 2,
+    "program_stdout_stderr_sha256": 48,
+    "oracle_expected_fields_recomputed": 80
+  },
+  "failure_reason": "QA framing mismatch: original interpreter writes newline before buffered string; diagnostic is 'divide by zero', not 'division by zero'. Exact archived outputs and codes independently pass corrected framing. No overall gate acceptance on failed run.",
+  "production_changes_after_run": false,
+  "acceptance": false,
+  "next": "New QA-only exact source run; audit its artifact independently before accepting counts correction. Then fix op55 and op56; Stage23 NOT_STARTED."
+}

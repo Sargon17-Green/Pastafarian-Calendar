@@ -84,9 +84,18 @@ def execute(name, base, c, t, negative=False):
     stdout = (ROOT/(name+".stdout")).read_bytes()
     stderr = (ROOT/(name+".stderr")).read_bytes()
     if negative:
-        ok = code == 1 and stdout == b"NORM_COUNTS_MISMATCH\n" and b"division by zero" in stderr.lower()
+        # The pinned interpreter buffers strings differently from character output.
+        # Require the complete intentional abort diagnostic, not merely a substring.
+        matches = [(i, line) for i, line in enumerate(data.splitlines(), 1)
+                   if b'NORM_COUNTS_MISMATCH' in line]
+        assert len(matches) == 1
+        line_no, line = matches[0]
+        col = line.index(b"0 0/") + 4
+        exact_error = (f"{p}:{line_no}:{col}: error: divide by zero\n".encode()
+                       + line + b"\n" + b" " * (col-1) + b"^\n")
+        ok = code == 1 and stdout == b"\nNORM_COUNTS_MISMATCH" and stderr == exact_error
     else:
-        ok = code == 0 and stdout == b"NORM_COUNTS_OK\n" and not stderr
+        ok = code == 0 and stdout == b"\nNORM_COUNTS_OK" and not stderr
     return dict(name=name,c=str(c),t=str(t),expected=list(map(str,counts(c,t))),negative=negative,
                 code=code,pass_gate=ok,program_sha256=digest(data),
                 stdout_sha256=digest(stdout),stderr_sha256=digest(stderr))
