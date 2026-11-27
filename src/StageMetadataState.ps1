@@ -1,5 +1,6 @@
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'FrozenStage42MetadataComparator.ps1')
+. (Join-Path $PSScriptRoot 'Stage44MetadataState.ps1')
 
 $script:StageMetadataSchemaVersion = 1
 $script:StageMetadataSchemaId = 'STAGE43_TRANSITION_SCHEMA_V1'
@@ -406,6 +407,37 @@ function Get-StageMetadataState {
     return New-StageMetadataStateResult -Success $true -ReasonCode 'OK_SHAPE_ONLY' -Profile 'SEALED_SHAPE_ONLY' -Values $values
 }
 
+# Stage44 is classified independently; predecessor consumers see only the frozen
+# Stage43 map. Shape compatibility must not be interpreted as Stage44 acceptance.
+function Get-Stage43PredecessorCompatibilityState {
+    [CmdletBinding()]
+    param([Parameter(Mandatory=$true)][AllowNull()][AllowEmptyCollection()][byte[]]$Bytes,
+          [Parameter(Mandatory=$true)][string]$RepositoryRoot)
+
+    $parsed = ConvertFrom-StrictStageMetadataBytes -Bytes $Bytes -RequiredKeys @('CURRENT_STAGE')
+    if (-not $parsed.Success) {
+        return Get-StageMetadataState -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+    }
+    $has44 = $parsed.Values['CURRENT_STAGE'] -ceq '44'
+    foreach ($key in $parsed.Values.Keys) {
+        if ($key.StartsWith('STAGE44_', [StringComparison]::Ordinal)) { $has44 = $true; break }
+    }
+    if (-not $has44) {
+        return Get-StageMetadataState -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+    }
+    $next = Get-Stage44MetadataState -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+    if (-not $next.Success) {
+        return New-StageMetadataStateResult -Success $false -ReasonCode ('STAGE44_' + $next.ReasonCode) -Profile 'REJECT_STATE'
+    }
+    [byte[]]$frozen43 = Get-Stage44FrozenBytes -RepositoryRoot $RepositoryRoot
+    $predecessor = Get-StageMetadataState -Bytes $frozen43 -RepositoryRoot $RepositoryRoot
+    if (-not $predecessor.Success -or $predecessor.Profile -cne 'SEALED_SHAPE_ONLY') {
+        return New-StageMetadataStateResult -Success $false -ReasonCode 'STAGE44_INVALID_PREDECESSOR' -Profile 'REJECT_STATE'
+    }
+    $predecessor | Add-Member -NotePropertyName Stage44Profile -NotePropertyValue $next.Profile
+    return $predecessor
+}
+
 function Assert-Stage43MetadataCompatibility {
     [CmdletBinding()]
     param(
@@ -419,7 +451,7 @@ function Assert-Stage43MetadataCompatibility {
     } catch {
         throw ('STAGE_METADATA_READ_FAILED: ' + $_.Exception.GetType().FullName)
     }
-    $state = Get-StageMetadataState -Bytes $bytes -RepositoryRoot $RepositoryRoot
+    $state = Get-Stage43PredecessorCompatibilityState -Bytes $bytes -RepositoryRoot $RepositoryRoot
     if (-not $state.Success) {
         throw ('STAGE_METADATA_STATE_REJECTED: ' + $state.ReasonCode + ':' + $state.Detail)
     }

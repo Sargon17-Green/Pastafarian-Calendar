@@ -127,6 +127,24 @@ foreach($n in 1..3){
     Check44State ($alteredState.Success -and -not (Test-Stage44PhaseEvidenceBinding -State $alteredState -TrustedEvidence $trusted)) "valid SHA substitution $n"
 }
 
+# Predecessor-consumer gateway: synthetic shapes, not historical acceptance.
+. (Join-Path $root 'src/StageMetadataState.ps1')
+$control43=Get-Stage43PredecessorCompatibilityState -Bytes (Get-Stage44FrozenBytes -RepositoryRoot $root) -RepositoryRoot $root
+Check44State ($control43.Success -and $control43.Profile -ceq 'SEALED_SHAPE_ONLY' -and $control43.Values.Count -eq 796) 'gateway unchanged Stage43 control'
+foreach($n in 1..3){
+    $m=Fixture44 $n
+    $s=Get-Stage43PredecessorCompatibilityState -Bytes (Encode44 $m) -RepositoryRoot $root
+    $want=@('STAGE44_PENDING_SHAPE_ONLY','STAGE44_IMPLEMENTING_SHAPE_ONLY','STAGE44_SEALED_SHAPE_ONLY')[$n-1]
+    Check44State ($s.Success -and $s.Profile -ceq 'SEALED_SHAPE_ONLY' -and $s.Stage44Profile -ceq $want -and $s.Values.Count -eq 796 -and $s.Values['CURRENT_STAGE'] -ceq '43' -and $s.Values['STAGE23_RUNTIME_VERIFICATION'] -ceq 'GREEN_CONFIRMED') "gateway predecessor projection $n"
+    $bad=Copy44 $m;$bad['STAGE43_SEAL_COMMIT_NATIVE_RECHECK']='PENDING_NEW_SHA'
+    $rejected=Get-Stage43PredecessorCompatibilityState -Bytes (Encode44 $bad) -RepositoryRoot $root
+    Check44State (-not $rejected.Success -and $rejected.Profile -ceq 'REJECT_STATE') "gateway frozen mutation $n"
+    $bad=Copy44 $m;$bad['CURRENT_STAGE']='23'
+    $rejected=Get-Stage43PredecessorCompatibilityState -Bytes (Encode44 $bad) -RepositoryRoot $root
+    Check44State (-not $rejected.Success -and $rejected.Profile -ceq 'REJECT_STATE') "gateway wrong-stage injection $n"
+}
+if($script:checks44 -ne 240){throw ('Stage44 classifier count mismatch: '+$script:checks44)}
+
 Write-Host ('STAGE44_CLASSIFIER_ASSERTIONS_PASSED='+$script:checks44)
 Write-Host 'STAGE44_CLASSIFIER_ASSERTIONS_FAILED=0'
 Write-Host 'STAGE44_CLASSIFIER_RESULT=PASS_SHAPE_ONLY'
