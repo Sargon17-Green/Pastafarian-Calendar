@@ -1,0 +1,261 @@
+name: Issue29 Ada Telugu seven F differential
+on:
+  push:
+    branches:
+      - 'qa/issue29-ada-telugu-f-seven-20261127'
+    paths:
+      - '.github/workflows/issue29-ada-telugu-f-seven-20261127.yml'
+permissions:
+  contents: read
+jobs:
+  f-seven-differential:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock live parent and prepare seven-case QA
+        run: |
+          set -euo pipefail
+          mkdir -p evidence "$RUNNER_TEMP/f-seven/src"
+          work="$RUNNER_TEMP/f-seven"
+          test "$(git rev-parse HEAD^)" = d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/issue29-ada-telugu-f-seven-20261127.yml
+          git rev-parse HEAD HEAD^ > evidence/qa-and-source-commit.txt
+          printf '%s\n' '741c00367f8be2302199e577d534b59b4a59ed23509accd0594bc124917277c5' > evidence/source-draft-zip.sha256
+          test "$(git rev-parse HEAD^:src/normative_oracle.ads)" = c4588566076798dd394feeab580ebc3d38c09744
+          git show HEAD^:src/normative_oracle.ads > "$work/src/normative_oracle.ads"
+          test "$(git hash-object "$work/src/normative_oracle.ads")" = c4588566076798dd394feeab580ebc3d38c09744
+          printf '%s  %s\n' 'c4588566076798dd394feeab580ebc3d38c09744' 'src/normative_oracle.ads' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/normative_oracle.adb)" = 0be8f8ab4ddef26d34963d5567707a511ebda50b
+          git show HEAD^:src/normative_oracle.adb > "$work/src/normative_oracle.adb"
+          test "$(git hash-object "$work/src/normative_oracle.adb")" = 0be8f8ab4ddef26d34963d5567707a511ebda50b
+          printf '%s  %s\n' '0be8f8ab4ddef26d34963d5567707a511ebda50b' 'src/normative_oracle.adb' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/exact_math.ads)" = 3ab9c5325858e5ef2d7fa59ab6d30d0c1ff523aa
+          git show HEAD^:src/exact_math.ads > "$work/src/exact_math.ads"
+          test "$(git hash-object "$work/src/exact_math.ads")" = 3ab9c5325858e5ef2d7fa59ab6d30d0c1ff523aa
+          printf '%s  %s\n' '3ab9c5325858e5ef2d7fa59ab6d30d0c1ff523aa' 'src/exact_math.ads' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/exact_math.adb)" = 4b014d2e6a467ec606493c6c977e8cc184fea40a
+          git show HEAD^:src/exact_math.adb > "$work/src/exact_math.adb"
+          test "$(git hash-object "$work/src/exact_math.adb")" = 4b014d2e6a467ec606493c6c977e8cc184fea40a
+          printf '%s  %s\n' '4b014d2e6a467ec606493c6c977e8cc184fea40a' 'src/exact_math.adb' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/month_weaving.ads)" = 183c0e4d9538ae1defe1b63eb3871ffe7feee991
+          git show HEAD^:src/month_weaving.ads > "$work/src/month_weaving.ads"
+          test "$(git hash-object "$work/src/month_weaving.ads")" = 183c0e4d9538ae1defe1b63eb3871ffe7feee991
+          printf '%s  %s\n' '183c0e4d9538ae1defe1b63eb3871ffe7feee991' 'src/month_weaving.ads' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/month_weaving.adb)" = 9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef
+          git show HEAD^:src/month_weaving.adb > "$work/src/month_weaving.adb"
+          test "$(git hash-object "$work/src/month_weaving.adb")" = 9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef
+          printf '%s  %s\n' '9b02c62dfbc7d8b3b532aba8cd9f1ad0f8b28fef' 'src/month_weaving.adb' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/canonical_full_weave_gmp_v164.ads)" = 0b68edf7eddbc33869358bcfcc21e32465fc591e
+          git show HEAD^:src/canonical_full_weave_gmp_v164.ads > "$work/src/canonical_full_weave_gmp_v164.ads"
+          test "$(git hash-object "$work/src/canonical_full_weave_gmp_v164.ads")" = 0b68edf7eddbc33869358bcfcc21e32465fc591e
+          printf '%s  %s\n' '0b68edf7eddbc33869358bcfcc21e32465fc591e' 'src/canonical_full_weave_gmp_v164.ads' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/canonical_full_weave_gmp_v164.adb)" = 845bd8905943a54e63d6aba0334404a5051fe666
+          git show HEAD^:src/canonical_full_weave_gmp_v164.adb > "$work/src/canonical_full_weave_gmp_v164.adb"
+          test "$(git hash-object "$work/src/canonical_full_weave_gmp_v164.adb")" = 845bd8905943a54e63d6aba0334404a5051fe666
+          printf '%s  %s\n' '845bd8905943a54e63d6aba0334404a5051fe666' 'src/canonical_full_weave_gmp_v164.adb' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/canonical_wide_rank_gmp_v164.ads)" = 14b94e81534e98cfdb07be3824076bd7082385ea
+          git show HEAD^:src/canonical_wide_rank_gmp_v164.ads > "$work/src/canonical_wide_rank_gmp_v164.ads"
+          test "$(git hash-object "$work/src/canonical_wide_rank_gmp_v164.ads")" = 14b94e81534e98cfdb07be3824076bd7082385ea
+          printf '%s  %s\n' '14b94e81534e98cfdb07be3824076bd7082385ea' 'src/canonical_wide_rank_gmp_v164.ads' >> evidence/source-blobs.txt
+          test "$(git rev-parse HEAD^:src/canonical_wide_rank_gmp_v164.adb)" = 52b8814c2ab1924cdebafe893a65d97cd3ccfa61
+          git show HEAD^:src/canonical_wide_rank_gmp_v164.adb > "$work/src/canonical_wide_rank_gmp_v164.adb"
+          test "$(git hash-object "$work/src/canonical_wide_rank_gmp_v164.adb")" = 52b8814c2ab1924cdebafe893a65d97cd3ccfa61
+          printf '%s  %s\n' '52b8814c2ab1924cdebafe893a65d97cd3ccfa61' 'src/canonical_wide_rank_gmp_v164.adb' >> evidence/source-blobs.txt
+          cat > "$work/f_integration_probe.adb" <<'F_DRAFT_EOF'
+          with Ada.Text_IO;
+          with Ada.Command_Line;
+          with Ada.Numerics.Big_Numbers.Big_Integers;
+          with Normative_Oracle;
+          procedure F_Integration_Probe is
+             use Ada.Numerics.Big_Numbers.Big_Integers;
+             use Ada.Text_IO;
+             C : constant Big_Integer := To_Big_Integer (-15_055_671);
+          begin
+             if Ada.Command_Line.Argument_Count /= 1 then
+                raise Constraint_Error with "exactly one target required";
+             end if;
+             declare
+                T : constant Big_Integer := From_String (Ada.Command_Line.Argument (1));
+             begin
+                Put_Line ("F_INTEGRATION_INPUT " & To_String (C) & " " & To_String (T));
+                Put_Line ("F_INTEGRATION_CALL_BEGIN"); Flush;
+                declare
+                   R : constant Normative_Oracle.Calendar_Result :=
+                     Normative_Oracle.Calendar_Date (C, T);
+                begin
+                   Put_Line ("F_INTEGRATION_RESULT " & To_String (R.Year_Number) &
+                     " " & Positive'Image (R.Cutlet_Canonical) &
+                     " " & To_String (R.Day_In_Cutlet) &
+                     " " & Positive'Image (R.Month_Canonical) &
+                     " " & To_String (R.Day_In_Month));
+                   Put_Line ("F_INTEGRATION_CALL_END"); Flush;
+                end;
+             end;
+          end F_Integration_Probe;
+          F_DRAFT_EOF
+          cat > "$work/f_integration.gpr" <<'F_DRAFT_EOF'
+          with "gnatcoll_gmp";
+          project F_Integration is
+             for Source_Dirs use (".", "src");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("f_integration_probe.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata");
+             end Compiler;
+          end F_Integration;
+          F_DRAFT_EOF
+          cat > "$work/preflight.py" <<'F_DRAFT_EOF'
+          import bisect, collections, hashlib, importlib.util, json, pathlib, string, sys
+          
+          def require(ok, msg):
+              if not ok:
+                  raise SystemExit('REFERENCE_NOT_ACCEPTED: '+msg)
+          
+          root=pathlib.Path(sys.argv[1]); evidence=pathlib.Path(sys.argv[2]); ref=root/'reference.py'
+          require(hashlib.sha256(ref.read_bytes()).hexdigest()=='75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378','reference source SHA256')
+          spec=importlib.util.spec_from_file_location('frozen_reference',ref)
+          r=importlib.util.module_from_spec(spec); sys.modules[spec.name]=r; spec.loader.exec_module(r)
+          c=-15055671; offsets=[0,1,2030,2031,2032,4242,4243]
+          cal=r.NormativeCalendar(); y=cal.year5000(c)
+          require((y.number,y.open_gate_index,y.close_gate_index,y.open_gate_day,y.close_gate_day)==(5000,-4,4,-15057703,-15053459),'year certificate')
+          s=cal.build_year_structure(c,y)
+          require((s.cutlet_count,tuple(s.cutlet_partition),tuple(s.cutlet_name_indices))==(6,(1,2,1,2,1,1),(15,17,10,14,8,13)),'cross-native cutlet witness')
+          ids=list(s.month_weaving); names=list(s.month_name_indices); lengths=list(s.month_lengths)
+          require(s.month_count==45 and len(ids)==sum(lengths)==4244 and len(names)==len(lengths)==45,'dimensions')
+          require(len(set(names))==45 and all(1<=n<=47 for n in names),'name range')
+          require(all(4<=n<=123 for n in lengths) and all(1<=i<=45 for i in ids),'month domains')
+          alphabet=string.digits+string.ascii_uppercase+string.ascii_lowercase
+          require(hashlib.sha256(''.join(alphabet[i] for i in ids).encode()).hexdigest()=='f9fd241420d4fae53553bc9ee77accaa1a20f57ba66134ecdca623a3190438ef','full independently certified Seal32 weave digest')
+          require(names==[18,14,37,28,24,42,6,20,19,41,16,39,25,1,9,38,3,46,27,40,12,43,35,32,29,10,44,36,23,17,33,5,30,15,11,45,8,4,7,31,34,22,13,2,26],'certified Seal33 names')
+          positions=collections.defaultdict(list)
+          for i,label in enumerate(ids): positions[label].append(i)
+          require([len(positions[i]) for i in range(1,46)]==lengths,'multiplicities')
+          require(all(positions[i][0]<positions[i+1][0] and positions[i][-1]<positions[i+1][-1] for i in range(1,45)),'rails')
+          cutlets=list(s.cutlets); ends=[x.last_day for x in cutlets]; starts=[x.first_day for x in cutlets]
+          require(starts[0]==y.open_gate_day+1 and ends[-1]==y.close_gate_day and all(a<=b for a,b in zip(starts,ends)) and all(starts[i+1]==ends[i]+1 for i in range(5)),'cutlet coverage')
+          # Independent interval lookup and occurrence-list projection, cross-checked for each day.
+          counts=collections.Counter(); rows=[]
+          expected_months=[(18,1),(14,1),(32,21),(20,56),(29,38),(2,122),(26,105)]
+          for i,label in enumerate(ids):
+              t=y.open_gate_day+1+i; counts[label]+=1
+              require(counts[label]==bisect.bisect_right(positions[label],i),'projection count')
+              ix=bisect.bisect_left(ends,t)
+              require(ix<6 and starts[ix]<=t<=ends[ix],'cutlet interval')
+              if i in offsets:
+                  yy=cal.find_target_year(c,t); require(yy==y,'target year')
+                  j=offsets.index(i); m=(names[label-1],counts[label]); require(m==expected_months[j],'frozen month projection')
+                  require(t==[-15057702,-15057701,-15055672,-15055671,-15055670,-15053460,-15053459][j],'input mapping')
+                  v=[y.number,cutlets[ix].name_index,t-starts[ix]+1,*m]
+                  rows.append({'offset0':i,'input':[c,t],'expected':v})
+          require(len(rows)==7 and rows[3]['expected']==[5000,10,503,20,56],'anchor witness')
+          (evidence/'oracle.json').write_text(json.dumps({'schema':'ISSUE29_F_SEVEN/1','reference_commit':'0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4','year':[y.number,y.open_gate_day,y.close_gate_day],'cutlet_intervals':[[x.name_index,x.first_day,x.last_day] for x in cutlets],'projection_count':4244,'cases':rows},indent=2)+'\n')
+          for row in rows: print('REFERENCE_CASE',row['offset0'],*row['input'],*row['expected'])
+          print('REFERENCE_PASS cases=7 projection=4244')
+          F_DRAFT_EOF
+          cat > "$work/adjudicate.py" <<'F_DRAFT_EOF'
+          import json,pathlib,re,sys
+          p=pathlib.Path(sys.argv[1])
+          def require(ok,msg):
+              if not ok: raise SystemExit('NOT_ACCEPTED: '+msg)
+          for f in ['reference.exit','build.exit','run.exit','scope.exit']:
+              require((p/f).read_text().strip()=='0',f)
+          require((p/'reference.stderr').stat().st_size==0,'reference stderr')
+          require((p/'reference.stdout').read_text().splitlines().count('REFERENCE_PASS cases=7 projection=4244')==1,'reference gate')
+          o=json.loads((p/'oracle.json').read_text()); rows=o['cases']
+          require(o['schema']=='ISSUE29_F_SEVEN/1' and o['projection_count']==4244 and [r['offset0'] for r in rows]==[0,1,2030,2031,2032,4242,4243],'oracle scope')
+          require([r['input'] for r in rows]==[[-15055671,t] for t in [-15057702,-15057701,-15055672,-15055671,-15055670,-15053460,-15053459]],'oracle inputs')
+          require(rows[3]['expected']==[5000,10,503,20,56],'anchor')
+          markers=['F_INTEGRATION_CALL_BEGIN','STAGE13_DIAG=calendar_begin','STAGE13_DIAG=month_weave_issue29_gmp_patch_begin','STAGE13_DIAG=month_weave_issue29_gmp_patch_done','STAGE13_DIAG=calendar_result_ready','F_INTEGRATION_CALL_END']
+          require(sorted(x.name for x in p.glob('case-*.stdout'))==[f'case-{i}.stdout' for i in range(7)],'exact case files')
+          for i,row in enumerate(rows):
+              q=p/f'case-{i}'
+              require(q.with_suffix('.exit').read_text().strip()=='0',f'case {i} exit')
+              require(q.with_suffix('.stderr').stat().st_size==0,f'case {i} stderr')
+              lines=q.with_suffix('.stdout').read_text().splitlines()
+              require(all(lines.count(m)==1 for m in markers),f'case {i} unique markers')
+              require([lines.index(m) for m in markers]==sorted(lines.index(m) for m in markers),f'case {i} phase order')
+              inputs=[x for x in lines if x.startswith('F_INTEGRATION_INPUT')]
+              require(len(inputs)==1 and list(map(int,inputs[0].split()[1:]))==row['input'],f'case {i} input')
+              results=[(j,x) for j,x in enumerate(lines) if x.startswith('F_INTEGRATION_RESULT')]
+              require(len(results)==1,f'case {i} result count'); j,x=results[0]
+              require(lines.index(markers[-2])<j<lines.index(markers[-1]),f'case {i} result order')
+              require(re.fullmatch(r'F_INTEGRATION_RESULT(?: +[-+]?\d+){5} *',x) is not None,f'case {i} result grammar')
+              actual=list(map(int,x.split()[1:])); require(actual==row['expected'],f'case {i} mismatch expected={row["expected"]} actual={actual}')
+              print('F_CASE_PASS',i,*row['input'],*actual)
+          require((p/'memory.max').read_text().strip()=='1073741824' and (p/'memory.swap.max').read_text().strip()=='0','memory caps')
+          events=dict(x.split() for x in (p/'memory.events').read_text().splitlines()); require(all(events.get(k)=='0' for k in ['max','oom','oom_kill']),'memory events')
+          require(0<int((p/'memory.peak').read_text())<=1073741824,'memory peak')
+          print('F_SEVEN_DIFFERENTIAL_PASS calls=7 fields=35 scope=year5000_only')
+          F_DRAFT_EOF
+          cat > "$work/run.sh" <<'F_DRAFT_EOF'
+          set -euo pipefail
+          work=$1
+          evidence=$2
+          cg=/sys/fs/cgroup$(awk -F: '$1==0 {print $3}' /proc/self/cgroup)
+          for k in memory.max memory.swap.max; do cat "$cg/$k" > "$evidence/$k"; done
+          [[ $(cat "$evidence/memory.max") == 1073741824 && $(cat "$evidence/memory.swap.max") == 0 ]]
+          trap 'cat "$cg/memory.events" > "$evidence/memory.events"; cat "$cg/memory.peak" > "$evidence/memory.peak"' EXIT
+          cd "$work"
+          ulimit -t 175
+          set +e
+          /usr/bin/time -v -o "$evidence/reference.time" python3 -B preflight.py "$work" "$evidence" > "$evidence/reference.stdout" 2> "$evidence/reference.stderr"
+          rc=$?; echo "$rc" > "$evidence/reference.exit"; ((rc==0)) || exit "$rc"
+          /usr/bin/time -v -o "$evidence/build.time" gprbuild -p -j1 -P f_integration.gpr > "$evidence/build.stdout" 2> "$evidence/build.stderr"
+          rc=$?; echo "$rc" > "$evidence/build.exit"; ((rc==0)) || exit "$rc"
+          targets=(-15057702 -15057701 -15055672 -15055671 -15055670 -15053460 -15053459)
+          for i in "${!targets[@]}"; do
+            /usr/bin/time -v -o "$evidence/case-$i.time" env PC_STAGE13_DIAGNOSTIC=1 LC_ALL=C ./bin/f_integration_probe "${targets[$i]}" > "$evidence/case-$i.stdout" 2> "$evidence/case-$i.stderr"
+            rc=$?; echo "$rc" > "$evidence/case-$i.exit"
+            if ((rc!=0)); then echo "$rc" > "$evidence/run.exit"; exit "$rc"; fi
+          done
+          echo 0 > "$evidence/run.exit"
+          F_DRAFT_EOF
+          git fetch --no-tags --depth=1 origin 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git rev-parse FETCH_HEAD)" = 0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4
+          test "$(git rev-parse FETCH_HEAD:tests/normative_reference.py)" = d58298c6b7be58fc1d1e2d64a0d203b7c42e4d53
+          git show FETCH_HEAD:tests/normative_reference.py > "$work/reference.py"
+          printf '%s\n' '0e4e75886dea4f4c7e0b6e39cce79e1d66f046f4' > evidence/reference-commit.txt
+          (cd "$work" && printf '%s\n' '75d56765b45892940326f67bd85a2c7c9874c01e43b49ee3553c9f6192d94378  reference.py' '58d45cbc93bcff9749bfb18f201269a49fcdefedc9d4312de1f83fab2b9d55cf  preflight.py' 'e06635d16dfb5c77999363acc5ef3602c49bd28acf8f1a20de526f21eb3c879d  adjudicate.py' 'af8cb485b80d776e6938e70dd8cb823608f67f712e19d1f94af44543419cda1d  f_integration_probe.adb' '6ac77d8b69da87a263059cf02cb16f3c74e15b53eb71648623bb8498862eab6f  run.sh' 'fecbe86ab42e73b3a90de5bdf914566e00029befbe7e95457704d928b84fed05  f_integration.gpr' | tee "$PWD/source-inputs.sha256" | sha256sum -c)
+          cp "$work/"{f_integration_probe.adb,f_integration.gpr,adjudicate.py,run.sh,preflight.py,source-inputs.sha256} evidence/
+          bash -n "$work/run.sh"
+          python3 -m py_compile "$work/preflight.py" "$work/adjudicate.py"
+          echo SOURCE_LOCK_PASS d10d50383025d73ad2ce11d19d5759221d70f730 10
+      - name: Install GNAT13 and GMP
+        run: |
+          set -euo pipefail
+          sudo apt-get update > evidence/apt-update.log 2>&1
+          sudo apt-get install -y gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/apt-install.log 2>&1
+          gprbuild --version > evidence/gprbuild.version
+          gnatmake --version > evidence/gnat.version
+          dpkg-query -W gnat-13 gprbuild libgnatcoll-gmp-dev > evidence/packages.txt
+      - name: Bounded reference preflight and seven independent F calls
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/f-seven"
+          evidence="$PWD/evidence"
+          set +e
+          /usr/bin/time -v -o "$evidence/scope.time" sudo systemd-run --scope --quiet -p MemoryMax=1073741824 -p MemorySwapMax=0 -- /usr/sbin/runuser -u "$(id -un)" -- /usr/bin/timeout -k 5s 175s /bin/bash "$work/run.sh" "$work" "$evidence"
+          rc=$?
+          echo "$rc" > "$evidence/scope.exit"
+          python3 "$work/adjudicate.py" "$evidence" > "$evidence/verdict.txt" 2>&1
+          verdict=$?
+          cat "$evidence/verdict.txt"
+          if test -f "$evidence/reference.stdout"; then cat "$evidence/reference.stdout"; fi
+          if test -f "$evidence/reference.stderr"; then cat "$evidence/reference.stderr"; fi
+          for f in "$evidence"/case-*.stdout; do if test -f "$f"; then cat "$f"; fi; done
+          exit "$verdict"
+      - name: Freeze evidence even on failure
+        if: always()
+        run: |
+          mkdir -p evidence
+          (cd evidence && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS)
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-ada-telugu-f-seven-20261127
+          path: evidence/
+          if-no-files-found: error
