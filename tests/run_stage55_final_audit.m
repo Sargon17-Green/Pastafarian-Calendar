@@ -53,6 +53,7 @@ try
     % Independent exact endpoint recurrence: exhaustive small frontiers.
     % This is experimental and does not replace production weaving.
     run_stage55_endpoint_counter_tests();
+    normative_oracle('weavePreflight');
 
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
     fprintf('STAGE_55_RECURSIVE_REGRESSIONS_BEGIN\n');

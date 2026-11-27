@@ -101,6 +101,13 @@ jobs:
       - name: Check out exact branch commit
         uses: actions/checkout@v4
 
+      - name: Generic forward worker preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs/stage55_forward_worker
+          python3 tools/stage55_forward_worker.py --preflight 2>&1 | tee logs/stage55_forward_worker/preflight.log
+
       - name: Set up MATLAB R2026a
         uses: matlab-actions/setup-matlab@v3
         with:
@@ -116,6 +123,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: matlab-stage55-audit-${{ github.run_id }}
-          path: logs/STAGE_55_MATLAB_RUN.log
+          path: |
+            logs/STAGE_55_MATLAB_RUN.log
+            logs/stage55_forward_worker/
           if-no-files-found: warn
           retention-days: 30

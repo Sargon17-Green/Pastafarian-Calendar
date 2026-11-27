@@ -19,6 +19,8 @@ switch operation
         varargout{1} = sauce(varargin{1}, varargin{2});
     case 'chooseRank'
         varargout{1} = chooseRank(varargin{1}, varargin{2});
+    case 'weavePreflight'
+        verifyForwardWeavingAdapter();
     case 'resetGates'
         gateStore('reset');
     otherwise
@@ -890,6 +892,268 @@ monthLengths = family.unrank1(rank);
 end
 
 function family = makeWeavingFamily(lengths)
+% Independent forward insertion in a bounded test-only Python worker.
+lengths = double(lengths(:).');
+cachedCount = [];
+family = struct('count', @countAll, 'unrank1', @unrank1);
+
+    function total = countAll()
+        if isempty(cachedCount)
+            reply = forwardWeavingRequest('count', lengths, []);
+            cachedCount = bi(reply.count);
+        end
+        total = cachedCount;
+    end
+
+    function word = unrank1(rank1)
+        r = bi(rank1);
+        total = countAll();
+        if r < bi(1) || r > total
+            error('Pastafari:Oracle:WeavingRank', 'Ranga splotu miesięcy jest poza zakresem.');
+        end
+        reply = forwardWeavingRequest('unrank', lengths, r);
+        assert(bi(reply.count) == total, 'Forward worker count changed.');
+        word = double(reply.word(:).');
+        assert(numel(word) == sum(lengths) && reply.positions == numel(word));
+        assert(all(word >= 1 & word <= numel(lengths) & fix(word) == word));
+        first = zeros(size(lengths)); last = first;
+        for j = 1:numel(lengths)
+            positions = find(word == j);
+            assert(numel(positions) == lengths(j));
+            first(j) = positions(1); last(j) = positions(end);
+        end
+        assert(all(diff(first) > 0) && all(diff(last) > 0));
+    end
+end
+
+function reply = forwardWeavingRequest(operation, lengths, rank)
+% CI host is Ubuntu; fail closed on unsupported environments.
+assert(isunix && ~ismac, 'Forward oracle requires Linux and Python 3.11+.');
+root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+logDir = fullfile(root, 'logs', 'stage55_forward_worker');
+if ~isfolder(logDir), mkdir(logDir); end
+base = tempname(logDir);
+request = [base '.request.json'];
+response = [base '.response.json'];
+payload = struct('operation', operation, 'lengths', lengths);
+if strcmp(operation, 'unrank'), payload.rank = char(rank); end
+writeOracleFile(request, jsonencode(payload));
+worker = fullfile(root, 'tools', 'stage55_forward_worker.py');
+cmd = ['python3 ' shellQuote(worker) ' ' shellQuote(request) ' ' shellQuote(response) ' 2>&1'];
+[status, output] = system(cmd);
+writeOracleFile([base '.log'], output);
+fprintf('FORWARD_WORKER operation=%s exit=%d evidence=%s\n', operation, status, base);
+assert(status == 0 && isfile(response), 'Forward worker failed: %s', output);
+reply = jsondecode(fileread(response));
+assert(strcmp(reply.operation, operation) && ischar(reply.count) && ...
+    ~isempty(regexp(reply.count, '^[1-9][0-9]*
+lengths = double(lengths(:).');
+m = numel(lengths);
+memo = containers.Map('KeyType', 'char', 'ValueType', 'any');
+initialRemaining = lengths;
+family = struct();
+family.count = @countAll;
+family.unrank1 = @unrank1;
+
+    function key = stateKey(remaining, openedUpTo, closedUpTo)
+        key = sprintf('%d,', remaining);
+        key = [key, '|', sprintf('%d|%d', openedUpTo, closedUpTo)];
+    end
+
+    function tf = legalMove(remaining, openedUpTo, closedUpTo, j)
+        if remaining(j) == 0
+            tf = false;
+            return
+        end
+        alreadyOpened = remaining(j) < lengths(j);
+        if ~alreadyOpened && j ~= openedUpTo + 1
+            tf = false;
+            return
+        end
+        willClose = remaining(j) == 1;
+        if willClose && j ~= closedUpTo + 1
+            tf = false;
+            return
+        end
+        tf = true;
+    end
+
+    function [nextRemaining, nextOpened, nextClosed] = applyMove(remaining, openedUpTo, closedUpTo, j)
+        nextRemaining = remaining;
+        nextOpened = openedUpTo;
+        nextClosed = closedUpTo;
+        if nextRemaining(j) == lengths(j)
+            nextOpened = j;
+        end
+        nextRemaining(j) = nextRemaining(j) - 1;
+        if nextRemaining(j) == 0
+            nextClosed = j;
+        end
+    end
+
+    function totalCount = countAll()
+        totalCount = countState(initialRemaining, 0, 0);
+    end
+
+    function totalCount = countState(remaining, openedUpTo, closedUpTo)
+        if all(remaining == 0)
+            totalCount = bi(1);
+            return
+        end
+        key = stateKey(remaining, openedUpTo, closedUpTo);
+        if isKey(memo, key)
+            totalCount = memo(key);
+            return
+        end
+        totalCount = bi(0);
+        for j = 1:m
+            if legalMove(remaining, openedUpTo, closedUpTo, j)
+                [nr, no, nc] = applyMove(remaining, openedUpTo, closedUpTo, j);
+                totalCount = totalCount + countState(nr, no, nc);
+            end
+        end
+        memo(key) = totalCount;
+    end
+
+    function out = unrank1(rank1)
+        r = bi(rank1);
+        allCount = countAll();
+        if r < bi(1) || r > allCount
+            error('Pastafari:Oracle:WeavingRank', 'Ranga splotu miesięcy jest poza zakresem.');
+        end
+        remaining = initialRemaining;
+        openedUpTo = 0;
+        closedUpTo = 0;
+        out = zeros(1, sum(lengths));
+        position = 1;
+        while position <= numel(out)
+            selected = false;
+            for j = 1:m
+                if ~legalMove(remaining, openedUpTo, closedUpTo, j)
+                    continue
+                end
+                [nr, no, nc] = applyMove(remaining, openedUpTo, closedUpTo, j);
+                block = countState(nr, no, nc);
+                if r > block
+                    r = r - block;
+                else
+                    out(position) = j;
+                    remaining = nr;
+                    openedUpTo = no;
+                    closedUpTo = nc;
+                    position = position + 1;
+                    selected = true;
+                    break
+                end
+            end
+            if ~selected
+                error('Pastafari:Oracle:WeavingUnrank', 'Nie udało się rozwinąć rangi splotu miesięcy.');
+            end
+        end
+    end
+end
+
+function weaving = chooseMonthWeaving(structureSauce, monthLengths)
+family = makeWeavingFamily(monthLengths);
+count = family.count();
+if count < bi(1)
+    error('Pastafari:Oracle:WeavingFamilyEmpty', 'Rodzina splotów miesięcy jest pusta.');
+end
+stream = askBowl(structureSauce, 4, 32);
+rank = chooseRank(stream, count);
+weaving = family.unrank1(rank);
+end
+
+function nameIndices = chooseMonthNames(structureSauce, monthCount)
+N = fallingFactorial(47, monthCount);
+stream = askBowl(structureSauce, 5, 33);
+rank = chooseRank(stream, N);
+nameIndices = unrankDistinctIndices(47, monthCount, rank);
+end
+
+function structure = buildYearStructure(calculationDay, year)
+firstDay = year.openGateDay + bi(1);
+r = sauce(calculationDay, firstDay);
+cutletCount = chooseCutletCount(r, year);
+cutletPartition = chooseCutletPartition(calculationDay, r, year, cutletCount);
+cutletNameIndices = chooseCutletNames(r, cutletCount);
+cutlets = materializeCutlets(year, cutletPartition, cutletNameIndices);
+monthCount = chooseMonthCount(r, year);
+monthLengths = chooseMonthLengths(r, year, monthCount);
+monthWeaving = chooseMonthWeaving(r, monthLengths);
+monthNameIndices = chooseMonthNames(r, monthCount);
+structure = struct('cutletCount', cutletCount, 'cutletPartition', cutletPartition, ...
+    'cutletNameIndices', cutletNameIndices, 'cutlets', cutlets, 'monthCount', monthCount, ...
+    'monthLengths', monthLengths, 'monthWeaving', monthWeaving, ...
+    'monthNameIndices', monthNameIndices);
+end
+
+function result = calendarDate(calculationDay, targetDay)
+calculationDay = bi(calculationDay);
+targetDay = bi(targetDay);
+year = findTargetYear(calculationDay, targetDay);
+structure = buildYearStructure(calculationDay, year);
+chosenCutlet = [];
+chosenCutletId = 0;
+for k = 1:numel(structure.cutlets)
+    c = structure.cutlets(k);
+    if c.firstDay <= targetDay && targetDay <= c.lastDay
+        chosenCutlet = c;
+        chosenCutletId = k;
+        break
+    end
+end
+if isempty(chosenCutlet)
+    error('Pastafari:Oracle:CutletMissing', 'Nie znaleziono kotleta zawierającego dzień pytany.');
+end
+dayInCutlet = targetDay - chosenCutlet.firstDay + bi(1);
+yearOffset0 = targetDay - (year.openGateDay + bi(1));
+offset = yearOffset0.toDoubleExact();
+monthId = structure.monthWeaving(offset + 1);
+dayInMonth = 0;
+for p = 1:offset + 1
+    if structure.monthWeaving(p) == monthId
+        dayInMonth = dayInMonth + 1;
+    end
+end
+catalog = pastafari.sourceLanguageCatalog();
+cutletName = catalog.cutlets(structure.cutletNameIndices(chosenCutletId)).text;
+monthName = catalog.months(structure.monthNameIndices(monthId)).text;
+result = {year.number, cutletName, dayInCutlet, monthName, bi(dayInMonth)};
+if numel(result) ~= 5
+    error('Pastafari:Oracle:FiveFields', 'Źródło odniesienia musi zwracać dokładnie pięć pól.');
+end
+end
+, 'once')));
+end
+
+function out = shellQuote(value)
+q = char(39);
+out = [q strrep(value, q, char([39 34 39 34 39])) q];
+end
+
+function writeOracleFile(path, value)
+fid = fopen(path, 'w');
+assert(fid >= 0, 'Cannot write oracle evidence: %s', path);
+cleanup = onCleanup(@() fclose(fid)); %#ok<NASGU>
+assert(fwrite(fid, value, 'char') == numel(value));
+end
+
+function verifyForwardWeavingAdapter()
+families = {[1], [1 1], [2 2], [3 2 1], [2 1 2]};
+for k = 1:numel(families)
+    direct = makeDirectWeavingFamily(families{k});
+    forward = makeWeavingFamily(families{k});
+    n = direct.count();
+    assert(forward.count() == n);
+    for rank = 1:n.toDoubleExact()
+        assert(isequal(forward.unrank1(bi(rank)), direct.unrank1(bi(rank))));
+    end
+end
+fprintf('FORWARD_MATLAB_ADAPTER_TINY_PASS families=%d\n', numel(families));
+end
+
+function family = makeDirectWeavingFamily(lengths)
 lengths = double(lengths(:).');
 m = numel(lengths);
 memo = containers.Map('KeyType', 'char', 'ValueType', 'any');
