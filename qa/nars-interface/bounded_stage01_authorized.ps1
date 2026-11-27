@@ -71,7 +71,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload')) {
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload')) {
    $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_stage01_chunked_suite_'+$key+'.txt')
    if($meta.suite_paths.$key -cne $expectedPath -or (Test-Path -LiteralPath $expectedPath)){throw 'SUITE_RECEIPT_PATH_INVALID_OR_PREEXISTS'}
  }
@@ -138,7 +138,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $suite=@{}
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload')){
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload')){
    $path=[string]$meta.suite_paths.$key
    if(Test-Path -LiteralPath $path -PathType Leaf){
      Copy-Item -LiteralPath $path -Destination (Join-Path $Evidence ('suite_'+$key+'.txt')) -Force
@@ -153,7 +153,11 @@ try {
  $r['suite_payload']=$suite.payload
  # Diagnostics never participate in acceptance. Validate the raw trace as
  # an exact prefix of its source-anchored ordered token manifest.
- $r['trace_compile_exact']=($suite.trace_helper_fx -ceq 'QAS01T' -and $suite.trace_main_fx -ceq 'QAS01TraceMain' -and $suite.trace_run_fx -ceq 'QAS01TraceRun')
+ $r['trace_definition_count']=$suite.trace_def_count
+ $r['trace_compile_ec']=$suite.trace_compile_ec
+ $r['trace_compile_et']=$suite.trace_compile_et
+ $r['trace_compile_payload']=$suite.trace_compile_payload
+ $r['trace_compile_exact']=($suite.trace_helper_fx -ceq 'QAS01T' -and $suite.trace_main_fx -ceq 'QAS01TraceMain' -and $suite.trace_run_fx -ceq 'QAS01TraceRun' -and $suite.trace_def_count -ceq [string]$meta.trace_definition_lines -and $suite.trace_compile_ec -cin @('1','2'))
  $r['trace_ec']=$suite.trace_ec
  $r['trace_et']=$suite.trace_et
  $r['trace_payload']=$suite.trace_payload

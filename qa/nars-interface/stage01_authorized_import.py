@@ -146,7 +146,8 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
     suite_paths = {name: str(path_obj.with_name(f"{path_obj.stem}_suite_{name}.txt"))
                    for name in ("start", "return", "ec", "et", "payload", "done",
                                 "trace_helper_fx", "trace_main_fx", "trace_run_fx",
-                                "trace", "trace_ec", "trace_et", "trace_payload")}
+                                "trace", "trace_ec", "trace_et", "trace_payload",
+                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload")}
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
@@ -168,17 +169,36 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
     # EC=0, run a separately named diagnostic copy with unchanged statements.
     # Its initializers run again; it is not independent acceptance evidence.
     traced, trace_tokens = build_trace_definition(next(b for b in blocks if b["name"] == "RunStage01Tests"))
+    # Assemble the exact nested vector in bounded fragments. Compile with a
+    # short expression and capture compiler EC separately from invocation EC.
+    trace_parts = []
+    for i in range(0, len(traced), 16):
+        lines = traced[i:i + 16]
+        expr = nested_fx_expression(lines)
+        if len(lines) == 1:
+            expr = "(⊂" + expr + ")"
+        trace_parts.append(("QAS01TraceDef←" if i == 0 else
+                            "QAS01TraceDef←QAS01TraceDef,") + expr)
     trace_runner = [
         "QAS01TraceRun",
         "  :If 0=⊃QAS01FinalEC[1]",
         f"      QAS01TraceTie←(⎕UCS {_codes(suite_paths['trace'])}) ⎕NCREATE 0",
         f"      QAS01T ⎕UCS {_codes(TRACE_HEADER)}",
-        "      QAS01DiagEC←⎕EC 'QAS01TraceMain'",
+        "      :If 'QAS01TraceMain'≡QAS01TraceName",
+        "          QAS01DiagEC←⎕EC 'QAS01TraceMain'",
+        "      :EndIf",
         "  :EndIf",
     ]
     diagnostic_programs = [
         write_expr("⎕FX " + nested_fx_expression(TRACE_HELPER), suite_paths["trace_helper_fx"]),
-        write_expr("⎕FX " + nested_fx_expression(traced), suite_paths["trace_main_fx"]),
+        "QAS01TraceName←''",
+        *trace_parts,
+        write_expr("⍴QAS01TraceDef", suite_paths["trace_def_count"]),
+        "QAS01TraceCompileEC←⎕EC 'QAS01TraceName←⎕FX QAS01TraceDef'",
+        write_expr("⊃QAS01TraceCompileEC[1]", suite_paths["trace_compile_ec"]),
+        write_expr("⊃QAS01TraceCompileEC[2]", suite_paths["trace_compile_et"]),
+        write_expr("⊃QAS01TraceCompileEC[3]", suite_paths["trace_compile_payload"]),
+        write_expr("QAS01TraceName", suite_paths["trace_main_fx"]),
         write_expr("⎕FX " + nested_fx_expression(trace_runner), suite_paths["trace_run_fx"]),
         "QAS01TraceRun",
         write_expr("⊃QAS01DiagEC[1]", suite_paths["trace_ec"]),
@@ -242,6 +262,8 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         "trace_header": TRACE_HEADER,
         "trace_tokens": trace_tokens,
         "trace_groups": [list(pair) for pair in TRACE_GROUPS],
+        "trace_definition_lines": len(traced),
+        "trace_assembly_chunks": len(trace_parts),
         "trace_definition_sha256": hashlib.sha256("\n".join(traced).encode("utf-8")).hexdigest(),
         "trace_diagnostic_only": True,
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),

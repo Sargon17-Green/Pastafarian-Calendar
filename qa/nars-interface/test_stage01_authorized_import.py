@@ -76,8 +76,8 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(receipt["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(receipt["final_expression"], "SAME_EC_AFTER_TEST")
         _, outer, programs = self.decode(candidate)
-        self.assertEqual(len(programs), 35)
-        self.assertEqual(outer.count("⎕EC ⎕UCS "), 35)
+        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"])
+        self.assertEqual(outer.count("⎕EC ⎕UCS "), len(programs))
         self.assertNotIn("←", outer)
         self.assertNotIn("QAS01FinalEC", outer)
         capture_fragment = outer.split(" ⋄ ")[23]
@@ -94,10 +94,11 @@ class Stage01ChunkedTests(unittest.TestCase):
             self.assertIn(f"QAS01FinalEC[{slot}]", programs[index])
             self.assertEqual(programs[index].count("⎕NAPPEND"), 1)
             self.assertEqual(programs[index].count("QAS01FinalEC["), 1)
-        self.assertNotIn("QAS01FinalEC", programs[34])
-        self.assertEqual(programs[34].count("⎕NAPPEND"), 1)
+        self.assertNotIn("QAS01FinalEC", programs[-1])
+        self.assertEqual(programs[-1].count("⎕NAPPEND"), 1)
         self.assertEqual(set(receipt["suite_paths"]), {"start", "return", "ec", "et", "payload", "done",
-            "trace_helper_fx", "trace_main_fx", "trace_run_fx", "trace", "trace_ec", "trace_et", "trace_payload"})
+            "trace_helper_fx", "trace_main_fx", "trace_run_fx", "trace", "trace_ec", "trace_et", "trace_payload",
+            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"})
         self.assertEqual(len(STAGE01_MARKER.encode("ascii")), 113)
         self.assertEqual(receipt["final_inner_sha256"], hashlib.sha256(final.encode("utf-8")).hexdigest())
         self.assertEqual(sum(program.count(" Stage01PrefixFix ") for program in programs), 95)
@@ -121,9 +122,25 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertTrue(receipt["trace_diagnostic_only"])
         self.assertEqual(receipt["trace_tokens"], tokens)
         self.assertEqual(receipt["trace_header"], TRACE_HEADER)
-        self.assertIn("⎕FX " + nested_fx_expression(traced), programs[28])
-        self.assertEqual(programs[30], "QAS01TraceRun")
-        for index, slot in enumerate((1, 2, 3), 31):
+        self.assertEqual(receipt["trace_definition_lines"], len(traced))
+        self.assertEqual(receipt["trace_assembly_chunks"], (len(traced) + 15) // 16)
+        self.assertEqual(programs[28], "QAS01TraceName←''")
+        for k, i in enumerate(range(0, len(traced), 16)):
+            lines = traced[i:i + 16]
+            expr = nested_fx_expression(lines)
+            if len(lines) == 1:
+                expr = "(⊂" + expr + ")"
+            self.assertEqual(programs[29 + k],
+                ("QAS01TraceDef←" if i == 0 else "QAS01TraceDef←QAS01TraceDef,") + expr)
+        end = 29 + receipt["trace_assembly_chunks"]
+        self.assertIn("⍴QAS01TraceDef", programs[end])
+        self.assertEqual(programs[end + 1], "QAS01TraceCompileEC←⎕EC 'QAS01TraceName←⎕FX QAS01TraceDef'")
+        for index, slot in enumerate((1, 2, 3), end + 2):
+            self.assertIn(f"QAS01TraceCompileEC[{slot}]", programs[index])
+        self.assertIn("QAS01TraceName", programs[end + 5])
+        run = programs.index("QAS01TraceRun")
+        self.assertEqual(run, end + 7)
+        for index, slot in enumerate((1, 2, 3), run + 1):
             self.assertIn(f"QAS01DiagEC[{slot}]", programs[index])
         self.assertNotIn(STAGE01_MARKER, "".join(programs[27:]))
         self.assertEqual(receipt["stage01"], "NOT_ACCEPTED")
@@ -154,7 +171,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         serialized, outer, _ = self.decode(candidate)
         self.assertTrue(serialized.isascii())
         self.assertNotIn("⋄", serialized)
-        self.assertEqual(serialized.count("{diamond}"), 34)
+        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"])
         self.assertEqual(receipt["outer_lx_chars"], len(outer))
         self.assertEqual(receipt["outer_lx_sha256"], hashlib.sha256(outer.encode("utf-8")).hexdigest())
         self.assertIn("0=foo=:3", candidate.decode("cp1252"))
