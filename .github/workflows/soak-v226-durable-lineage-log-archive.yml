@@ -1,0 +1,133 @@
+name: Soak v226 preserve original workflow logs and run metadata (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v226-durable-lineage-log-archive.yml
+permissions:
+  actions: read
+  contents: write
+jobs:
+  preserve:
+    if: github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock QA activation and prior archive
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "62824423333b662fee9d7edf471fd7fc89a285fc"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v226-durable-lineage-log-archive.yml"
+          test "$(git rev-parse HEAD:qa/soak/archive/v225/manifest.json)" = "9b514914e78245e14fd2ce03063546cd3f5402f0"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          test ! -e qa/soak/archive/v226
+      - name: Recover raw run log ZIPs and bind failure and success witnesses
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p qa/soak/archive/v226
+          ulimit -v 1048576
+          timeout -k 5s 360s python3 - <<'PY'
+          import hashlib,io,json,os,subprocess,zipfile
+          from pathlib import Path,PurePosixPath
+          old=Path("qa/soak/archive/v225")
+          root=Path("qa/soak/archive/v226")
+          m=json.loads((old/"manifest.json").read_text())
+          assert m["schema"]=="SOAK_V225_DURABLE_LINEAGE_ARCHIVE/1"
+          assert len(m["archives"])==16 and len(m["roster_reconciled_records"])==22
+          assert m["STOP_NEW_NATIVE_SOAK_DISPATCH"] and m["whole_year_credit"]==0
+          def sha(b):return hashlib.sha256(b).hexdigest()
+          for k,r in m["archives"].items():
+              b=(old/(k+".zip")).read_bytes()
+              assert len(b)==r["bytes"] and sha(b)==r["sha256"]
+          specs=dict(m["archives"])
+          specs["v225"]={"run":46052899439,"run_head":"3e29c14a552f8227edce1f3c168e951b71b9aca6","conclusion":"success"}
+          repo=os.environ["GITHUB_REPOSITORY"]
+          def api(path):
+              return subprocess.check_output(["gh","api",f"repos/{repo}/{path}"],timeout=45)
+          expected_jobs={"v209":140615353795,"v210":140624554605,"v211":140627063420,"v212":140633602836,"v213":140635044174,"v215":140643102426,"v216":140650786680,"v217":140657872491,"v218":140660455910,"v219":140663413586,"v220":140669224074,"v221":140677819733,"v222":140678673791,"v223":140686827045,"v225":140688336780}
+          markers={"v217":"SOAK_V217_LEGACY_RANK_MATHEMATICAL_BRIDGE/1","v218":"SOAK_V218_TYPESCRIPT_WEAVE_SOURCE_MODELS/1","v219":"SOAK_V219_KOTLIN_LINEAGE_MODELS/1","v220":"SOAK_V220_CPP_HYBRID_LINEAGE_MODELS/1","v221":"SOAK_V221_ELIXIR_LINEAGE_MODELS/1","v222":"SOAK_V222_V_SHARED_UNRANK_LINEAGE/1","v223":"SOAK_V223_MATLAB_HISTORICAL_DEPENDENCY_DRIFT/1","v225":"DURABLE_GIT_ARCHIVE_PASS 16 22"}
+          records={}
+          for label,s in specs.items():
+              run=s["run"]
+              meta=json.loads(api(f"actions/runs/{run}"))
+              assert meta["id"]==run and meta["head_sha"]==s["run_head"]
+              assert meta["status"]=="completed" and meta["conclusion"]==s["conclusion"]
+              assert meta["run_attempt"]==1,(label,meta["run_attempt"])
+              jobs=json.loads(api(f"actions/runs/{run}/attempts/1/jobs?per_page=100"))
+              assert jobs["total_count"]==len(jobs["jobs"]) and jobs["total_count"]>0
+              assert all(j["status"]=="completed" for j in jobs["jobs"])
+              if label in expected_jobs:
+                  assert any(j["id"]==expected_jobs[label] and j["conclusion"]==s["conclusion"] for j in jobs["jobs"])
+              raw=api(f"actions/runs/{run}/attempts/1/logs")
+              assert 0<len(raw)<=25*1024*1024
+              with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                  files=[f for f in z.infolist() if not f.is_dir()]
+                  assert 1<=len(files)<=5000 and sum(f.file_size for f in files)<=80*1024*1024
+                  names=[f.filename for f in files]
+                  assert len(names)==len(set(names))
+                  for n in names:
+                      p=PurePosixPath(n)
+                      assert not p.is_absolute() and ".." not in p.parts and "\\" not in n
+                  assert z.testzip() is None
+                  members={f.filename:{"bytes":f.file_size,"sha256":sha(z.read(f))} for f in files}
+                  # Match emitted result lines, not the displayed shell source.
+                  emitted=[]
+                  for f in files:
+                      if f.filename.endswith(".txt"):
+                          for line in z.read(f).decode("utf-8",errors="replace").splitlines():
+                              if "Z " in line:
+                                  emitted.append(line.split("Z ",1)[1])
+                  if label in markers:
+                      assert any((line.startswith("{") and markers[label] in line) or line.startswith(markers[label]) for line in emitted),(label,"missing result witness")
+              (root/(label+"-logs.zip")).write_bytes(raw)
+              md={"run":meta,"jobs":jobs}
+              mdbytes=(json.dumps(md,indent=2,sort_keys=True)+"\n").encode()
+              (root/(label+"-metadata.json")).write_bytes(mdbytes)
+              records[label]={"run":run,"run_head":s["run_head"],"run_attempt":1,"conclusion":s["conclusion"],"log_bytes":len(raw),"log_sha256":sha(raw),"log_members":members,"metadata_bytes":len(mdbytes),"metadata_sha256":sha(mdbytes),"job_ids":[j["id"] for j in jobs["jobs"]],"emitted_witness_checked":label in markers,"log_digest_provenance":"Computed at acquisition; no historical GitHub-provided log digest assumed"}
+              print("RAW_LOG_VERIFIED",label,s["conclusion"],len(raw),len(members),sha(raw),flush=True)
+          assert len(records)==17 and records["v210"]["conclusion"]==records["v213"]["conclusion"]=="failure"
+          receipt={"schema":"SOAK_V226_DURABLE_LINEAGE_LOG_ARCHIVE/1","prior_archive_commit":"62824423333b662fee9d7edf471fd7fc89a285fc","prior_manifest_blob":"9b514914e78245e14fd2ce03063546cd3f5402f0","records":records,"prior_artifacts_rehashed":16,"failed_attempts_preserved":["v210","v213"],"native_date_calls":0,"whole_year_credit":0,"admitted_engines":0,"independent_algorithms_certified":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (root/"manifest.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n")
+          print("LOG_ARCHIVE_VERIFIED",len(records),sum(x["log_bytes"] for x in records.values()),flush=True)
+          PY
+      - name: Commit only acquired log archives and metadata
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- qa/soak/archive/v226/
+          python3 - <<'PY'
+          import subprocess
+          p="qa/soak/archive/v226/"
+          versions=[131,*range(209,224),225]
+          expected={p+"manifest.json"}|{p+f"v{v}-{s}" for v in versions for s in ("logs.zip","metadata.json")}
+          assert len(expected)==35
+          actual=set(subprocess.check_output(["git","diff","--cached","--name-only"],text=True).splitlines())
+          assert actual==expected,(actual,expected)
+          PY
+          git commit -m "qa(soak): preserve original run log ZIPs and metadata for 17 lineage audit runs"
+          git push origin HEAD:refs/heads/qa/issue29-gmp-complete-small-family-v198
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$(git rev-parse HEAD)"
+          echo "LOG_ARCHIVE_COMMIT=$(git rev-parse HEAD)"
+      - name: Verify committed log bytes and metadata
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,subprocess
+          p="qa/soak/archive/v226/"
+          m=json.loads(subprocess.check_output(["git","show","HEAD:"+p+"manifest.json"]))
+          assert len(m["records"])==17
+          for label,r in m["records"].items():
+              for suffix,stem in [("logs.zip","log"),("metadata.json","metadata")]:
+                  b=subprocess.check_output(["git","show","HEAD:"+p+label+"-"+suffix])
+                  assert len(b)==r[stem+"_bytes"] and hashlib.sha256(b).hexdigest()==r[stem+"_sha256"]
+          print("DURABLE_LOG_ARCHIVE_PASS",len(m["records"]))
+          PY
