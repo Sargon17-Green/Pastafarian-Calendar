@@ -103,7 +103,8 @@ if prefixLimit==5000
         else
             accepted=limit; steps=wide-limit;
         end
-        rank=(accepted-one).regularMod(N)+one;
+        acceptedOffset=accepted-one;
+        rank=acceptedOffset.regularMod(N)+one;
         selectorNative=false;
     end
     assert(rank>=one && rank<=N);
