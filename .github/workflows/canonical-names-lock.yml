@@ -1413,3 +1413,28 @@ jobs:
           name: dart-hebrew-public-trace-${{ matrix.workload }}
           path: out/dart-hebrew-public-trace/
           if-no-files-found: warn
+
+  dart-hebrew-representative-lifecycle:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-lifecycle]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Disposable memo lifecycle stress
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_lifecycle.py
+          python3 tool/dart_hebrew_representative_lifecycle.py --out out/dart-hebrew-lifecycle
+      - name: Upload lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-lifecycle
+          path: out/dart-hebrew-lifecycle/
+          if-no-files-found: warn
