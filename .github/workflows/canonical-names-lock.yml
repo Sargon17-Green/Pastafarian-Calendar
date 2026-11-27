@@ -1550,3 +1550,175 @@ jobs:
           path: observer-parser-evidence/
           if-no-files-found: error
           retention-days: 14
+
+  # D2 approved JVM capability probe only. Never a producer or certification.
+  post55-observer-jvm-capability:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Kotlin+Cymraeg'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact event source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Observe fixed benign JVM only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir -p observer-jvm-evidence
+          python3 -I -S - <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import platform
+          import resource
+          import shutil
+          import signal
+          import subprocess
+          import time
+
+          OUT = pathlib.Path("observer-jvm-evidence").resolve()
+          LIMIT = 1048576
+          SYSCALLS = "execve,execveat,clone,clone3,fork,vfork,exit,exit_group"
+          EXPECTED = b"D2_BENIGN_JVM21_OK\n"
+          SOURCE = """public final class D2Benign {
+              public static void main(String[] args) throws InterruptedException {
+                  if (args.length != 0 || Runtime.version().feature() != 21)
+                      throw new IllegalStateException("contract");
+                  int[] result = {0};
+                  Thread t = new Thread(() -> result[0] = 6 * 7);
+                  t.start();
+                  t.join();
+                  if (result[0] != 42) throw new IllegalStateException("worker");
+                  System.out.println("D2_BENIGN_JVM21_OK");
+              }
+          }
+          """
+
+          def digest(path):
+              with path.open("rb") as f:
+                  return hashlib.file_digest(f, "sha256").hexdigest()
+
+          def limit_file():
+              resource.setrlimit(resource.RLIMIT_FSIZE, (LIMIT, LIMIT))
+
+          def run_bounded(argv, stdout, stderr, env, cwd):
+              started = time.monotonic_ns()
+              with stdout.open("wb") as out, stderr.open("wb") as err:
+                  p = subprocess.Popen(argv, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
+                                       stdout=out, stderr=err, start_new_session=True,
+                                       preexec_fn=limit_file)
+                  timed_out = False
+                  try:
+                      p.wait(timeout=15)
+                  except subprocess.TimeoutExpired:
+                      timed_out = True
+                      try:
+                          os.killpg(p.pid, signal.SIGKILL)
+                      except ProcessLookupError:
+                          pass
+                      p.wait(timeout=3)
+              return {"exit": p.returncode, "timed_out": timed_out,
+                      "elapsed_ns": time.monotonic_ns() - started}
+
+          receipt = {
+              "schema": "post55-d2-benign-jvm-capability-v1",
+              "source_sha": os.environ["GITHUB_SHA"],
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "ref": os.environ["GITHUB_REF"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "job_key": os.environ["GITHUB_JOB"],
+              "os_release": platform.freedesktop_os_release().get("PRETTY_NAME"),
+              "kernel": platform.release(),
+              "image_version": os.environ.get("ImageVersion"),
+              "scope": "fixed benign Java 21 class only; no producer or user data",
+              "trace_syscalls": SYSCALLS,
+              "timeout_seconds": 15,
+              "raw_limit_bytes": LIMIT,
+              "capture_status": "NOT_ASSESSED",
+              "CI_PROCESS_OBSERVATION": "NOT_ASSESSED",
+              "OS_ATTESTATION": False,
+              "certifies_full_calendar": False,
+          }
+          names = ("raw.trace", "observer.stderr", "child.stdout",
+                   "compile.stdout", "compile.stderr")
+          for name in names:
+              (OUT / name).touch()
+          try:
+              work = pathlib.Path(os.environ["RUNNER_TEMP"]) / "d2-benign-jvm"
+              work.mkdir(mode=0o700, exist_ok=False)
+              env = {"PATH": "/usr/bin:/bin", "LANG": "C.UTF-8",
+                     "LC_ALL": "C.UTF-8", "HOME": str(work), "TMPDIR": str(work)}
+              java_home = pathlib.Path(os.environ["JAVA_HOME"]).resolve(strict=True)
+              java = (java_home / "bin/java").resolve(strict=True)
+              javac = (java_home / "bin/javac").resolve(strict=True)
+              strace_path = shutil.which("strace", path=env["PATH"])
+              if not strace_path:
+                  raise RuntimeError("strace_missing")
+              strace = pathlib.Path(strace_path).resolve(strict=True)
+              receipt["tools"] = {name: {"path": str(p), "sha256": digest(p)}
+                                  for name, p in (("java", java), ("javac", javac),
+                                                  ("strace", strace))}
+              src = work / "D2Benign.java"
+              src.write_text(SOURCE, encoding="ascii")
+              (OUT / "D2Benign.java").write_bytes(src.read_bytes())
+              receipt["java_source_sha256"] = digest(src)
+              compile_argv = [str(javac), "-J-Xmx128m", "--release", "21",
+                              "-d", str(work), str(src)]
+              receipt["compile"] = run_bounded(compile_argv, OUT / "compile.stdout",
+                                               OUT / "compile.stderr", env, work)
+              if receipt["compile"]["exit"] != 0 or receipt["compile"]["timed_out"]:
+                  raise RuntimeError("compile_failed")
+              cls = work / "D2Benign.class"
+              receipt["class_sha256"] = digest(cls)
+              (OUT / "D2Benign.class").write_bytes(cls.read_bytes())
+              child = [str(java), "-Xms16m", "-Xmx64m", "-XX:ActiveProcessorCount=2",
+                       "-XX:-UsePerfData", "-XX:+DisableAttachMechanism",
+                       "-cp", str(work), "D2Benign"]
+              argv = [str(strace), "-f", "-ttt", "-s", "4096", "-e",
+                      "trace=" + SYSCALLS, "-o", str(OUT / "raw.trace"), "--", *child]
+              receipt["argv"] = argv
+              receipt["observation"] = run_bounded(argv, OUT / "child.stdout",
+                                                   OUT / "observer.stderr", env, work)
+              result = receipt["observation"]
+              if result["timed_out"] or result["exit"] != 0:
+                  raise RuntimeError("observation_timeout_or_nonzero")
+              if any((OUT / n).stat().st_size >= LIMIT for n in names):
+                  raise RuntimeError("file_limit_reached")
+              if not (OUT / "raw.trace").stat().st_size:
+                  raise RuntimeError("empty_trace")
+              if (OUT / "child.stdout").read_bytes() != EXPECTED:
+                  raise RuntimeError("fixed_stdout_mismatch")
+              if (OUT / "observer.stderr").stat().st_size:
+                  raise RuntimeError("unexpected_stderr")
+              receipt["capture_status"] = "CAPTURED_REVIEW_REQUIRED"
+              receipt["reason"] = "JVM trace grammar and provider pins not yet independently assessed"
+          except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+              receipt["reason"] = type(exc).__name__ + ": " + str(exc)[:256]
+          finally:
+              receipt["files"] = {n: {"bytes": (OUT / n).stat().st_size,
+                                       "sha256": digest(OUT / n)} for n in names}
+              (OUT / "receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True)
+                                                + "\n", encoding="utf-8")
+              print("D2_JVM_CAPTURE_STATUS=" + receipt["capture_status"])
+              print("CI_PROCESS_OBSERVATION=NOT_ASSESSED; OS_ATTESTATION=false")
+          if receipt["capture_status"] != "CAPTURED_REVIEW_REQUIRED":
+              raise SystemExit(1)
+          PY
+      - name: Preserve bounded JVM observation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kotlin-cymraeg-d2-jvm-observer-${{ github.run_id }}-${{ github.run_attempt }}
+          path: observer-jvm-evidence/
+          if-no-files-found: error
+          retention-days: 14
