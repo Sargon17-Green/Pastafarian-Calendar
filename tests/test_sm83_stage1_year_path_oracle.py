@@ -229,5 +229,211 @@ def check_stage1_year_path_oracle() -> None:
     )
 
 
+
+# Fixed-endpoint directional Host contract (NOT a native implementation).
+def check_fixed_endpoint_contract() -> None:
+    from hashlib import sha256
+    from struct import pack
+    from collections import Counter
+
+    lo32, hi32 = -(1 << 31), (1 << 31) - 1
+
+    def s32(value):
+        if not lo32 <= value <= hi32:
+            raise ValueError("signed32 overflow")
+        return value
+
+    # Iterative source-derived absolute map, independent of gate_at recursion.
+    g = {0: FOUNDATION}
+    for n in range(1, 513):
+        g[n] = g[n-1] + gate_gap(n, True)
+        g[-n] = g[1-n] - gate_gap(n, False)
+    raw = b"".join(pack("<i", g[i]-FOUNDATION) for i in sorted(g))
+    assert sha256(raw).hexdigest() == "d4bc06694ca0389bac5cc856593c527449f059c81971243c0b481b06f198f407"
+    assert all(GAP_MIN <= g[i+1]-g[i] <= 963 for i in range(-512,512))
+
+    def validate(m, c, y, direction):
+        s32(c)
+        s32(c-FOUNDATION)
+        if direction not in (-1, 1):
+            raise ValueError("direction")
+        i, j = y.open_index, y.close_index
+        s32(y.open_gate)
+        s32(y.close_gate)
+        if (i not in m or j not in m or m[i] != y.open_gate or
+                m[j] != y.close_gate or j-i < 6 or
+                not YEAR_MIN <= y.length <= YEAR_MAX):
+            raise ValueError("invalid prior year")
+        low, high = m[min(m)], m[max(m)]
+        if s32(c-YEAR_MAX) < low or s32(c+YEAR_MAX) > high:
+            raise ValueError("calculation horizon")
+        anchor = j if direction == 1 else i
+        b = m[anchor]
+        s32(b-FOUNDATION)
+        end = s32(b+direction*YEAR_MAX)
+        if not low <= end <= high:
+            raise ValueError("directional horizon")
+        return anchor, b
+
+    def full_sort(m, anchor, direction):
+        # Independent full enumeration, not the two-pass implementation.
+        pairs = []
+        for k, day in m.items():
+            i, j = (anchor, k) if direction == 1 else (k, anchor)
+            if j-i >= 6 and YEAR_MIN <= m[j]-m[i] <= YEAR_MAX:
+                pairs.append(YearCandidate(i, j, m[i], m[j]))
+        return sorted(pairs, key=lambda p: (p.length, p.open_gate))
+
+    def scan(m, anchor, direction):
+        # Candidate algorithm: scan strictly increasing span; no candidate array.
+        b = m[anchor]
+        k = anchor + direction*6
+        while k in m:
+            span = direction*(m[k]-b)
+            if span > YEAR_MAX:
+                break
+            if span >= YEAR_MIN:
+                i, j = (anchor,k) if direction == 1 else (k,anchor)
+                yield YearCandidate(i,j,m[i],m[j])
+            k += direction
+
+    def choose(m, c, y, direction, rank_override=None):
+        anchor, b = validate(m,c,y,direction)
+        count = sum(1 for _ in scan(m,anchor,direction))
+        if not 1 <= count <= 132:
+            raise ValueError("candidate count")
+        seal = 11 if direction == 1 else 12
+        rank = ask(c,b,1,seal,count).rank if rank_override is None else rank_override
+        if not 1 <= rank <= count:
+            raise ValueError("rank")
+        chosen = next(v for n,v in enumerate(scan(m,anchor,direction),1) if n == rank)
+        return chosen,count,rank
+
+    def payload(y,n,r):
+        return pack("<iihhHHH",y.open_gate,y.close_gate,y.open_index,y.close_index,y.length,n,r)
+
+    checked = Counter()
+    mutants = Counter()
+
+    def compare(m,c,y,direction,label,override=None,legacy=False):
+        anchor,b = validate(m,c,y,direction)
+        options = full_sort(m,anchor,direction)
+        assert 1 <= len(options) <= 132
+        assert all(a.length < z.length for a,z in zip(options,options[1:]))
+        seal = 11 if direction == 1 else 12
+        rank = ask(c,b,1,seal,len(options)).rank if override is None else override
+        chosen,n,r = choose(m,c,y,direction,override)
+        assert (chosen,n,r) == (options[rank-1],len(options),rank)
+        assert list(scan(m,anchor,direction)) == options
+        assert len(payload(chosen,n,r)) == 18
+        assert (chosen.open_gate if direction == 1 else chosen.close_gate) == b
+        if legacy:
+            old = next_year(c,y) if direction == 1 else previous_year(c,y)
+            assert chosen == old
+        if override is None:
+            wrong = {
+                "seal": ask(c,b,1,23-seal,n).rank,
+                "target_c": ask(c,c,1,seal,n).rank,
+                "abi": ask(FOUNDATION+c,FOUNDATION+b,1,seal,n).rank,
+                "reverse_order": n-r+1,
+                "rank_plus_one": r%n+1,
+            }
+            for kind, bad_rank in wrong.items():
+                if options[bad_rank-1] != chosen:
+                    mutants[kind] += 1
+        checked["next" if direction == 1 else "previous"] += 1
+        print(f"HOST_DIRECTION_VECTOR name={label} c={c} fixed={b} seal={seal} "
+              f"count={n} rank={r} result18={payload(chosen,n,r).hex()}",flush=True)
+        return chosen
+
+    def rejected(fn, label):
+        try:
+            fn()
+        except ValueError:
+            checked["invalid"] += 1
+        else:
+            raise AssertionError(f"accepted invalid {label}")
+
+    data = json.loads((Path(__file__).parent/"fixtures/sm83_stage1_canonical_vectors.json").read_text(encoding="utf-8"))
+    assert data["provenance"]["commit"] == "56bc4173aae4975ded019ef5ab5a36249f1424df"
+
+    def walk(c,t,label):
+        y,_,_ = year5000(c)
+        num,steps = 5000,0
+        while not y.open_gate < t <= y.close_gate:
+            direction = 1 if t > y.close_gate else -1
+            y = compare(g,c,y,direction,f"{label}_step{steps+1}",legacy=True)
+            steps += 1
+            assert steps <= MAX_YEAR_WALKS
+            num += direction
+        old = find_year(c,t)
+        assert (num,y,steps) == (old.year_number,old.span,old.walks)
+        return num,steps
+
+    for v in data["vectors"]:
+        num,steps = walk(v["c"],v["t"],f"canonical{v['id']}")
+        assert num == v["expected"][0]
+        if v["id"] in (6,7,10):
+            assert steps > 0
+    for c in (FOUNDATION-1234, FOUNDATION, FOUNDATION+1234):
+        y,_,_ = year5000(c)
+        for name,t,expected in (
+            ("open-1",y.open_gate-1,4999),("open",y.open_gate,4999),
+            ("open+1",y.open_gate+1,5000),("close-1",y.close_gate-1,5000),
+            ("close",y.close_gate,5000),("close+1",y.close_gate+1,5001)):
+            num,_ = walk(c,t,f"edge{c}_{name}")
+            assert num == expected
+        for d in (-1,1):
+            z=y
+            for step in range(4):
+                z=compare(g,c,z,d,f"multistep{c}_{d}_{step}",legacy=True)
+
+    base,_,_ = year5000(FOUNDATION)
+    for d in (-1,1):
+        for c in (g[-512]+YEAR_MAX,g[512]-YEAR_MAX):
+            compare(g,c,base,d,f"calc_horizon{c}_{d}")
+        for c in (g[-512]+YEAR_MAX-1,g[512]-YEAR_MAX+1,lo32,hi32):
+            rejected(lambda: choose(g,c,base,d),"calculation outside")
+        for y in (YearCandidate(base.open_index,base.close_index,base.open_gate+1,base.close_gate),
+                  YearCandidate(-513,base.close_index,g[-512],base.close_gate),
+                  YearCandidate(0,5,g[0],g[5]),
+                  YearCandidate(1,-1,g[1],g[-1])):
+            rejected(lambda: choose(g,FOUNDATION,y,d),"malformed year")
+
+        # Exactly 137 gaps totaling 5778; 132 admissible ranks.
+        # Opposite side has extra room, so one-day directional shortfall
+        # can be tested separately from the calculation horizon.
+        m = {i: FOUNDATION+42*i for i in range(-139,140) if -137 <= d*i <= 137 or d*i < -137}
+        m[d*137] += d*24
+        y = (YearCandidate(-6,0,m[-6],m[0]) if d==1
+             else YearCandidate(0,6,m[0],m[6]))
+        first = compare(m,FOUNDATION,y,d,f"synthetic{d}_first",1)
+        last = compare(m,FOUNDATION,y,d,f"synthetic{d}_last",132)
+        assert first.length == 252 and last.length == 5778
+        short=dict(m)
+        short[d*137]-=d
+        rejected(lambda: choose(short,FOUNDATION-d,y,d),"one-day directional shortfall")
+        rejected(lambda: choose(m,FOUNDATION,y,d,0),"zero rank")
+        rejected(lambda: choose(m,FOUNDATION,y,d,133),"rank beyond count")
+
+        # Fault-injected nonnormative map: six intervals cannot fit.
+        # This is only a zero-candidate defensive-path test.
+        bad = {i: FOUNDATION+42*i for i in range(-139,140)}
+        for k in range(1,140):
+            bad[d*k]=FOUNDATION+d*1000*k
+        rejected(lambda: choose(bad,FOUNDATION,y,d),"zero candidates")
+
+    rejected(lambda: choose(g,FOUNDATION,base,0),"invalid direction")
+    rejected(lambda: s32(hi32+1),"positive overflow")
+    rejected(lambda: s32(lo32-1),"negative overflow")
+    rejected(lambda: s32(hi32-FOUNDATION),"relative overflow")
+    assert set(mutants) == {"seal","target_c","abi","reverse_order","rank_plus_one"}, mutants
+    assert checked["next"] and checked["previous"] and checked["invalid"]
+    print(f"HOST_STAGE1_FIXED_ENDPOINT=PASS next={checked['next']} "
+          f"previous={checked['previous']} invalid={checked['invalid']} "
+          f"mutants={dict(sorted(mutants.items()))} map_sha256={sha256(raw).hexdigest()} "
+          "canonical_year_paths=10/10 max_candidates=132 result_bytes=18 native=NOT_EXECUTED",flush=True)
+
 if __name__ == "__main__":
     check_stage1_year_path_oracle()
+    check_fixed_endpoint_contract()
