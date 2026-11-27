@@ -1,8 +1,6 @@
 name: WAT Stage02 SAVE(M) source-fresh Native witness
 on:
-  push:
-    branches: ['WAT+Español']
-    paths: ['.github/workflows/wat-stage02-save-m-native.yml']
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -16,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
       - name: Preserve exact source and provenance
         shell: bash
@@ -26,7 +24,8 @@ jobs:
           mkdir -p "$e"
           printf 'PROJECT_ID=PC-BRANCH-WAT-SPANISH\nSOURCE_COMMIT=%s\nSOURCE_BLOB=%s\nQA_HEAD=%s\nRUN_ID=%s\nRUN_ATTEMPT=%s\nRUNNER=%s/%s\n' "$SOURCE_COMMIT" "$SOURCE_BLOB" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$RUNNER_OS" "$RUNNER_ARCH" > "$e/identity.txt"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD^)" = "$SOURCE_COMMIT"
+          test "$(git rev-parse HEAD^)" = "149d169632b4cf1d0556d3925afd032f90553db5"
+          test "$(git rev-parse HEAD^^)" = "$SOURCE_COMMIT"
           test "$(git rev-parse "$SOURCE_COMMIT:$SOURCE_PATH")" = "$SOURCE_BLOB"
           test "$(git rev-parse "HEAD:$SOURCE_PATH")" = "$SOURCE_BLOB"
           git cat-file blob "$SOURCE_BLOB" > "$e/exact.wat"
