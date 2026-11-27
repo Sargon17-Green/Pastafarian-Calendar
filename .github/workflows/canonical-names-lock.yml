@@ -26,6 +26,9 @@ jobs:
           done < CANONICAL_NAMES_LOCK.sha256
       - name: Independent Stage1 bounded gate histogram oracle
         run: python3 tests/test_sm83_stage1_gate_histogram.py
+      - name: Independent Stage1 fixed-endpoint year path oracle
+        timeout-minutes: 3
+        run: python3 tests/test_sm83_stage1_year_path_oracle.py
 
   dmg-native-smoke:
     runs-on: ubuntu-latest
