@@ -1,4 +1,5 @@
 name: Isolated Stage 1 Native H Transfer and Full Lex
+# The outer job budget covers all original per-gate caps; the full lex cap remains 850s.
 on:
   push:
     branches: ['SystemVerilog+Kalaallisut']
