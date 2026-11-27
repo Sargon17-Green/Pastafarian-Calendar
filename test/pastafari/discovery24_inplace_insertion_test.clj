@@ -432,10 +432,10 @@
                      (:dp-cell-writes source-trace))
                   (str "source raming and DP writes unexpectedly coincide: "
                        profile "/" rank))
-              (swap! totals update :source-accounting-non-equal inc)))))
+              (swap! totals update :source-accounting-non-equal inc))))))
     (assoc @totals
            :profiles (count small-profiles)
-           :digest (hex-bytes (.digest digest))))))
+           :digest (hex-bytes (.digest digest)))))
 
 (defn- parse-python-output [output]
   (into {}
