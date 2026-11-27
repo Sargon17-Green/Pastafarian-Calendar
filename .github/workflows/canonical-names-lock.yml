@@ -1287,3 +1287,33 @@ jobs:
           name: dart-hebrew-exact-memo-qa
           path: out/dart-hebrew-exact-memo-qa/
           if-no-files-found: error
+
+  dart-hebrew-representative-preflight:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-preflight]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Independent LRU auditor synthetic tests and source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_lru_audit.py tool/dart_hebrew_representative_preflight.py
+          python3 tool/dart_hebrew_representative_lru_audit.py --self-test --verify-source .
+      - name: Pristine baseline only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/dart_hebrew_representative_preflight.py
+      - name: Upload preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-preflight
+          path: out/dart-hebrew-representative-preflight/
+          if-no-files-found: warn

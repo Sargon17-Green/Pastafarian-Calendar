@@ -1,0 +1,31 @@
+{
+  "project_id": "PC-BRANCH-DART-HEBREW",
+  "source_commit": "daa4194b525f67b4e3dde55549b737e2e4f32438",
+  "source_tree": "55b8a26e5f052360e51c33b3cc1b9edbf70627b9",
+  "blobs": {
+    ".github/workflows/dart-hebrew-exact-memo-qa.yml": "7d93d65f3695e6c3d39a4b307447f05a523c3c79",
+    "bin/stage4_package_consumer_tests.dart": "8c78373482be28483da2baed2723623a8a9366ae",
+    "docs/DART_HEBREW_REPRESENTATIVE_CALLER_MEMO_QA_CONTRACT.md": "1b48fb42a448334fb2a1d869607555794174fc1a",
+    "lib/pastafari_calendar.dart": "3f7c35b6187e47667006ca0864a3ae956dd42080",
+    "lib/src/monster_base.dart": "03bc54a3972fc48afd62c3b020199cb448769778",
+    "lib/src/monster_bowl_processor.dart": "e7f6ed24d354bfcd5ed51d9af1c5d06128aab08e",
+    "lib/src/monster_bowl_questions.dart": "eae2de2398a15ee6c43e9b5796f4f1c6c1dd0549",
+    "lib/src/monster_five_field_calendar.dart": "f29c6cd893bbe31d5ddef294a25013ca384e504d",
+    "lib/src/monster_meatball_gates.dart": "072c957dca2803f6ce05fe076ff2f882dd914afa",
+    "lib/src/monster_meatball_partition.dart": "2dd196357f35fbae7c4bf63995338dc43673c7b1",
+    "lib/src/monster_modular_math.dart": "40bf06311a9a3edabcbdac811952cfade17d583d",
+    "lib/src/monster_month_lengths.dart": "f62796e02bec7d1a052cb878b9f90b17e8003359",
+    "lib/src/monster_month_names.dart": "fe10b6d53fe8e3eb1c05df058e4552e27723c234",
+    "lib/src/monster_month_weave_counter.dart": "5e2321a4c9d00701f2968f2c7dbfc5d5e7c02446",
+    "lib/src/monster_month_weave_planner.dart": "1824e96d82e6b0ceb12da01ba33fa75a83204d2a",
+    "lib/src/monster_seed_feeder.dart": "4fa6c7b4fbf6bb348e76b7c8e860fab12ba88808",
+    "lib/src/monster_visible_droplets.dart": "19a18baae110ab5962c0da84fa3d1f944b87c54a",
+    "lib/src/monster_work_counts.dart": "cc6156bc81929d8f219ba7f8b85caa9437304811",
+    "lib/src/monster_year_eligibility.dart": "de2df360b6d917f6117f48432714c1d9ddb2a76b",
+    "lib/src/monster_year_locator.dart": "d5f3b7fe3b00d9a1b8af57a54ca580d512e1c27a",
+    "lib/src/monster_year_selection.dart": "3e93cf9ae009cceef349506283d3bd97d35ad5e4",
+    "lib/src/monster_year_traversal.dart": "887d7e9557f08d3dcd017596a59a610864182ec1",
+    "lib/src/source_language_catalog.dart": "742c770fab24245ac9a7a7b100ba3a753ef22b2a",
+    "pubspec.yaml": "77d991d9fbb0e751f8d8625a8fd76e0006eb47dd"
+  }
+}
