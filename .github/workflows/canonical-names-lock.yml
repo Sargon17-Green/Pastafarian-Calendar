@@ -1443,6 +1443,422 @@ jobs:
           printf '%s\n' "$code" > stage56-b4-evidence/scratch-exit.txt
           cat stage56-b4-evidence/scratch-stdout.txt
           test "$code" -eq 0 && test ! -s stage56-b4-evidence/scratch-stderr.txt && grep -E '^STAGE56_SCRATCH_SYNTHETIC_PASS cells=[0-9]+ shapes=3 negative=10 status=PASS$' stage56-b4-evidence/scratch-stdout.txt
+      - name: Stage56 opt-in integrated fused arithmetic and independent rank oracle
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-b4-evidence
+          if timeout 200s python3 -B tools/stage56_fused_qa/integrated_oracle.py > stage56-b4-evidence/fused-stdout.txt 2> stage56-b4-evidence/fused-stderr.txt; then code=0; else code=$?; fi
+          printf '%s\n' "$code" > stage56-b4-evidence/fused-exit.txt
+          cat stage56-b4-evidence/fused-stdout.txt
+          test "$code" -eq 0 && test ! -s stage56-b4-evidence/fused-stderr.txt && grep -E '^STAGE56_FUSED_INTEGRATED_PASS arithmetic=[0-9]+ small=39 large=3 rank_probes=[0-9]+ bench=128
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-b4-${{ github.sha }}
+          path: stage56-b4-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+  stage56-real-year-profile-b5-preflight-native:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Validate SHA-bound B5 input gate without substituting synthetic years
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-b5-evidence
+          printf '%s\n' 'PC-BRANCH-PHP-MALAY' > stage56-b5-evidence/PROJECT_ID.txt
+          printf '%s\n' "$GITHUB_SHA" > stage56-b5-evidence/SHA.txt
+          php -v > stage56-b5-evidence/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
+          php -l tests/stage56_actual_year_profile.php > stage56-b5-evidence/lint-profiler.txt 2>&1; l1=$?
+          php -l tests/stage56_actual_year_profile_preflight_tests.php > stage56-b5-evidence/lint-preflight.txt 2>&1; l2=$?
+          php -l tests/stage56_actual_year_profile_cli_contract_tests.php > stage56-b5-evidence/lint-cli.txt 2>&1; l3=$?
+          timeout 60s php -d memory_limit=512M tests/stage56_actual_year_profile_preflight_tests.php \
+            > stage56-b5-evidence/stdout.txt 2> stage56-b5-evidence/stderr.txt
+          code=$?
+          timeout 60s php -d memory_limit=512M tests/stage56_actual_year_profile_cli_contract_tests.php \
+            > stage56-b5-evidence/cli-stdout.txt 2> stage56-b5-evidence/cli-stderr.txt
+          cli_code=$?
+          python3 -m py_compile tests/stage56_b5_source_binding_audit.py > stage56-b5-evidence/binding-compile.txt 2>&1
+          binding_compile=$?
+          timeout 60s python3 tests/stage56_b5_source_binding_audit.py --self-test \
+            > stage56-b5-evidence/binding-stdout.txt 2> stage56-b5-evidence/binding-stderr.txt
+          binding_code=$?
+          printf 'lint_profiler=%s\nlint_preflight=%s\nlint_cli=%s\nexit=%s\ncli_exit=%s\nbinding_compile=%s\nbinding_exit=%s\n' "$l1" "$l2" "$l3" "$code" "$cli_code" "$binding_compile" "$binding_code" > stage56-b5-evidence/exit.txt
+          cat stage56-b5-evidence/lint-*.txt stage56-b5-evidence/stdout.txt stage56-b5-evidence/cli-stdout.txt stage56-b5-evidence/binding-stdout.txt
+          if (( l1 != 0 || l2 != 0 || l3 != 0 || code != 0 || cli_code != 0 || binding_compile != 0 || binding_code != 0 )); then
+            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt stage56-b5-evidence/binding-stderr.txt stage56-b5-evidence/binding-compile.txt >&2
+            exit 1
+          fi
+          if [[ -s stage56-b5-evidence/stderr.txt || -s stage56-b5-evidence/cli-stderr.txt || -s stage56-b5-evidence/binding-stderr.txt || -s stage56-b5-evidence/binding-compile.txt ]]; then
+            cat stage56-b5-evidence/stderr.txt stage56-b5-evidence/cli-stderr.txt stage56-b5-evidence/binding-stderr.txt stage56-b5-evidence/binding-compile.txt >&2
+            exit 1
+          fi
+          grep -Fx 'STAGE56_B5_PREFLIGHT checks=25 synthetic_structure_only=YES provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/stdout.txt
+          grep -Fx 'STAGE56_B5_CLI_NEGATIVE checks=12 real_year_profiles=0 provenance=NOT_VERIFIED status=PASS' stage56-b5-evidence/cli-stdout.txt
+          grep -Fx 'STAGE56_B5_SOURCE_BINDING_SELF_TEST checks=22 synthetic_only=YES status=PASS' stage56-b5-evidence/binding-stdout.txt
+      - name: Retain SHA-bound B5 preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-b5-preflight-${{ github.sha }}
+          path: stage56-b5-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
+  external-reference-differential:
+    if: github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    env:
+      # Preserve the exact pinned canonical checkout as read-only evidence.
+      # importlib loads core.py and otherwise writes untracked __pycache__ files.
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout PHP feature branch
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout independent pinned canonical source
+        uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/pastafari-calendar
+          ref: cc2cf0b422757a5e7c33218ce30cffa8f99c6786
+          path: .external-canonical-source
+          persist-credentials: false
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and capture provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage56-external-evidence
+          git -C .external-canonical-source rev-parse HEAD | tee stage56-external-evidence/canonical-head.txt
+          test "$(git -C .external-canonical-source rev-parse HEAD)" = 'cc2cf0b422757a5e7c33218ce30cffa8f99c6786'
+          test -z "$(git -C .external-canonical-source status --porcelain --untracked-files=all)"
+          for file in implementations/python/pastafari_calendar/core.py browser/pastafari-calendar-fast.js verification/reference-oracle/reference.mjs; do
+            digest="$(git -C .external-canonical-source show "HEAD:$file" | sha256sum | cut -d' ' -f1)"
+            printf '%s  %s\n' "$digest" "$file" >> stage56-external-evidence/canonical-source.sha256
+          done
+          git rev-parse HEAD > stage56-external-evidence/php-branch-head.txt
+      - name: Export real external reference years (not PHP input)
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 3600s python3 -B tools/stage56_export_external_canonical_reference.py \
+            --canonical-repo .external-canonical-source \
+            --source-commit cc2cf0b422757a5e7c33218ce30cffa8f99c6786 \
+            --calculation-jdn=-13334246 \
+            --output stage56-external-evidence/reference.json \
+            > stage56-external-evidence/export.stdout 2> stage56-external-evidence/export.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/export.exit
+          cat stage56-external-evidence/export.stdout
+          cat stage56-external-evidence/export.stderr >&2
+          exit "$rc"
+      - name: Audit canonical checkout after Python reference export
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C .external-canonical-source status --porcelain --untracked-files=all > stage56-external-evidence/canonical-post-export-status.txt
+          if test -s stage56-external-evidence/canonical-post-export-status.txt; then
+            cat stage56-external-evidence/canonical-post-export-status.txt >&2
+            echo "::error::Pinned canonical source checkout was modified during export; inspect retained artifact."
+            exit 1
+          fi
+      - name: Export exact-source gate witnesses for PHP QA (not PHP production)
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s python3 -B tools/stage56_export_external_gate_witness.py \
+            --canonical-repo .external-canonical-source \
+            --source-commit cc2cf0b422757a5e7c33218ce30cffa8f99c6786 \
+            --calculation-jdn=-13334246 \
+            --reference stage56-external-evidence/reference.json \
+            --reference-sha256 46b2f316eb2b08c2dc99fd827d8e0a227061c9b97bbb708842318c08a7bf1880 \
+            --output stage56-external-evidence/external-gates.json \
+            > stage56-external-evidence/gates.stdout 2> stage56-external-evidence/gates.stderr
+          rc=$?
+          printf '%s\n' "$rc" > stage56-external-evidence/gates.exit
+          cat stage56-external-evidence/gates.stdout
+          cat stage56-external-evidence/gates.stderr >&2
+          test "$rc" -eq 0
+          test ! -s stage56-external-evidence/gates.stderr
+      - name: Audit contextual external gates and exact output digest (QA-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd stage56-external-evidence
+            sha256sum -c external-gates.json.sha256
+          )
+          python3 -B - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          root = Path('stage56-external-evidence')
+          raw = (root / 'external-gates.json').read_bytes()
+          witness = json.loads(raw)
+          assert witness['project_id'] == 'PC-BRANCH-PHP-MALAY'
+          assert witness['status'] == 'EXTERNAL_GATE_WITNESS_QA_ONLY_NOT_PHP_PRODUCTION'
+          assert witness['source_commit'] == 'cc2cf0b422757a5e7c33218ce30cffa8f99c6786'
+          assert witness['reference_sha256'] == '46b2f316eb2b08c2dc99fd827d8e0a227061c9b97bbb708842318c08a7bf1880'
+          assert witness['calculation_jdn'] == -13334246
+          assert witness['independent_scroll_oracle'] == 'NOT_ASSESSED_HERE'
+          assert witness['php_production_export'] == 'NOT_GENERATED_HERE'
+          years = witness['years']
+          assert [y['number'] for y in years] == [4999, 5000, 5001]
+          assert witness['year5000_anchor'] == years[1]
+          gates = witness['gate_positions']
+          assert isinstance(gates, dict) and gates
+          expected = set()
+          for y in years:
+              p, q = y['openGateIndex'], y['closeGateIndex']
+              assert type(p) is int and type(q) is int and 6 <= q-p <= 137
+              assert type(y['openGateDay']) is int and type(y['closeGateDay']) is int
+              assert gates[str(p)] == y['openGateDay']
+              assert gates[str(q)] == y['closeGateDay']
+              for i in range(p, q+1):
+                  expected.add(str(i))
+                  assert type(gates[str(i)]) is int
+                  if i > p:
+                      assert 42 <= gates[str(i)]-gates[str(i-1)] <= 963
+          assert set(gates) == expected
+          assert all(a['closeGateIndex'] == b['openGateIndex'] and
+                     a['closeGateDay'] == b['openGateDay']
+                     for a, b in zip(years, years[1:]))
+          assert years[1]['openGateDay'] < -13334246 <= years[1]['closeGateDay']
+          assert hashlib.sha256((root / 'reference.json').read_bytes()).hexdigest() == witness['reference_sha256']
+          assert (root / 'gates.exit').read_text().strip() == '0'
+          assert not (root / 'gates.stderr').read_bytes()
+          print('STAGE56_EXTERNAL_GATES_QA_ONLY gates=%d years=3 sha256=%s' %
+                (len(gates), hashlib.sha256(raw).hexdigest()))
+          PY
+          git -C .external-canonical-source status --porcelain --untracked-files=all > stage56-external-evidence/canonical-post-gates-status.txt
+          test ! -s stage56-external-evidence/canonical-post-gates-status.txt
+      - name: Verify independent Scroll gate comparator mutations
+        run: node --test tests/stage56_independent_gates.test.mjs
+      - name: Independently reproduce all 27 gate positions (QA only)
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s node tools/stage56_verify_independent_gates.mjs \
+            --canonical-repo .external-canonical-source \
+            --input stage56-external-evidence/external-gates.json \
+            --report stage56-external-evidence/scroll-gates-report.json \
+            > stage56-external-evidence/scroll-gates.stdout 2> stage56-external-evidence/scroll-gates.stderr
+          rc=$?
+          printf '%s\n' "$rc" > stage56-external-evidence/scroll-gates.exit
+          cat stage56-external-evidence/scroll-gates.stdout
+          cat stage56-external-evidence/scroll-gates.stderr >&2
+          test "$rc" -eq 0
+          test ! -s stage56-external-evidence/scroll-gates.stderr
+          test -s stage56-external-evidence/scroll-gates-report.json
+          test -z "$(git -C .external-canonical-source status --porcelain --untracked-files=all)"
+      - name: Export source-bound Python semantic samples
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s python3 -B tools/stage56_external_semantic_samples.py \
+            --canonical-repo .external-canonical-source \
+            --input stage56-external-evidence/reference.json \
+            --output stage56-external-evidence/python-tuples.json \
+            > stage56-external-evidence/samples.stdout 2> stage56-external-evidence/samples.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/samples.exit
+          cat stage56-external-evidence/samples.stdout
+          cat stage56-external-evidence/samples.stderr >&2
+          exit "$rc"
+      - name: Verify object-order-neutral comparator with fail-closed mutations
+        run: node --test tests/stage56_external_semantic_equality.test.mjs
+      - name: Compare full month weaving and JS/Python/Scroll semantic tuples
+        shell: bash
+        run: |
+          set -uo pipefail
+          timeout 1200s node tools/stage56_verify_external_reference.mjs \
+            --canonical-repo .external-canonical-source \
+            --calculation-jdn -13334246 \
+            --input stage56-external-evidence/reference.json \
+            --python-samples stage56-external-evidence/python-tuples.json \
+            --report stage56-external-evidence/differential-report.json \
+            > stage56-external-evidence/differential.stdout 2> stage56-external-evidence/differential.stderr
+          rc=$?
+          echo "$rc" > stage56-external-evidence/differential.exit
+          cat stage56-external-evidence/differential.stdout
+          cat stage56-external-evidence/differential.stderr >&2
+          exit "$rc"
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Stage56 fast PHP sauce differential before real-year profiles (not acceptance)
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          php -l src/Patches/CanonicalJdnBoundary56.php > stage56-php-real-evidence/lint-coordinate-boundary.txt 2>&1 || exit 2
+          php -l tests/stage56_canonical_jdn_boundary56.php > stage56-php-real-evidence/lint-coordinate-tests.txt 2>&1 || exit 2
+          timeout 120s php -d memory_limit=512M tests/stage56_canonical_jdn_boundary56.php \
+            > stage56-php-real-evidence/coordinate-boundary.stdout \
+            2> stage56-php-real-evidence/coordinate-boundary.stderr
+          coordinate_rc=$?
+          printf '%s\n' "$coordinate_rc" > stage56-php-real-evidence/coordinate-boundary.exit
+          cat stage56-php-real-evidence/coordinate-boundary.stdout
+          cat stage56-php-real-evidence/coordinate-boundary.stderr >&2
+          if test "$coordinate_rc" -ne 0 || test -s stage56-php-real-evidence/coordinate-boundary.stderr; then exit 2; fi
+          php -l tests/stage56_php_sauce_probe.php > stage56-php-real-evidence/lint-sauce-probe.txt 2>&1
+          lint_rc=$?
+          python3 -B tools/stage56_compare_php_sauce.py --help > /dev/null
+          python_rc=$?
+          if test "$lint_rc" -ne 0 || test "$python_rc" -ne 0; then
+            cat stage56-php-real-evidence/lint-sauce-probe.txt >&2
+            exit 2
+          fi
+          timeout 120s php -d memory_limit=512M tests/stage56_php_sauce_probe.php \
+            > stage56-php-real-evidence/sauce-php.json \
+            2> stage56-php-real-evidence/sauce-php.stderr
+          php_rc=$?
+          printf '%s\n' "$php_rc" > stage56-php-real-evidence/sauce-php.exit
+          if test "$php_rc" -ne 0 || test -s stage56-php-real-evidence/sauce-php.stderr; then
+            cat stage56-php-real-evidence/sauce-php.stderr >&2
+            exit 2
+          fi
+          if timeout 120s python3 -B tools/stage56_compare_php_sauce.py \
+            --canonical-repo .external-canonical-source \
+            --php-input stage56-php-real-evidence/sauce-php.json \
+            --report stage56-php-real-evidence/sauce-compare-report.json \
+            > stage56-php-real-evidence/sauce-compare.stdout \
+            2> stage56-php-real-evidence/sauce-compare.stderr; then
+            compare_rc=0
+          else
+            compare_rc=$?
+          fi
+          printf '%s\n' "$compare_rc" > stage56-php-real-evidence/sauce-compare.exit
+          cat stage56-php-real-evidence/sauce-compare.stdout
+          cat stage56-php-real-evidence/sauce-compare.stderr >&2
+          # Boundary-only evidence is independent of the still-failing raw gate.
+          if timeout 120s python3 -B tools/stage56_source_bound_boundary_gate.py \
+            --canonical-repo .external-canonical-source \
+            --source-manifest stage56-external-evidence/canonical-source.sha256 \
+            --php-input stage56-php-real-evidence/sauce-php.json \
+            --report stage56-php-real-evidence/source-bound-boundary-report.json \
+            --test-mutations \
+            > stage56-php-real-evidence/source-bound-boundary.stdout \
+            2> stage56-php-real-evidence/source-bound-boundary.stderr; then
+            boundary_rc=0
+          else
+            boundary_rc=$?
+          fi
+          printf '%s\n' "$boundary_rc" > stage56-php-real-evidence/source-bound-boundary.exit
+          cat stage56-php-real-evidence/source-bound-boundary.stdout
+          cat stage56-php-real-evidence/source-bound-boundary.stderr >&2
+          if test "$boundary_rc" -ne 0 || test -s stage56-php-real-evidence/source-bound-boundary.stderr; then
+            echo '::error::Pinned-source boundary parity/provenance gate failed.'
+            exit 2
+          fi
+          if test "$compare_rc" -ne 0 || test -s stage56-php-real-evidence/sauce-compare.stderr; then
+            echo '::error::PHP sauce differs from pinned Python; skip redundant 900s year profiles.'
+            exit 1
+          fi
+      - name: Stage56 PHP source-JDN provider adapter microgate (QA only)
+        id: stage56_source_adapter
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage56-php-real-evidence
+          php -l src/Patches/YearStructureProvider56.php > stage56-php-real-evidence/lint-provider.txt 2>&1
+          php -l tests/stage56_provider_coordinate_adapter.php > stage56-php-real-evidence/lint-provider-adapter.txt 2>&1
+          timeout 90s php -d memory_limit=512M tests/stage56_provider_coordinate_adapter.php \
+            > stage56-php-real-evidence/provider-adapter.stdout \
+            2> stage56-php-real-evidence/provider-adapter.stderr
+          test ! -s stage56-php-real-evidence/provider-adapter.stderr
+      - name: Stage56 source-bound PHP real years and bounded profiles (not acceptance)
+        if: ${{ always() && steps.stage56_source_adapter.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          printf '%s\n' PC-BRANCH-PHP-MALAY > stage56-php-real-evidence/PROJECT_ID.txt
+          printf '%s\n' "$GITHUB_SHA" > stage56-php-real-evidence/SHA.txt
+          php -v > stage56-php-real-evidence/php-version.txt
+          test "$(php -r 'echo PHP_INT_SIZE;')" = 8 || exit 1
+          php -l src/BigInt.php > stage56-php-real-evidence/lint-bigint.txt 2>&1 || exit 1
+          php -l src/Patches/MonthWeavingInterleaving56.php > stage56-php-real-evidence/lint-interleaving.txt 2>&1 || exit 1
+          php -l src/Patches/MonthWeavingRanker56.php > stage56-php-real-evidence/lint-ranker.txt 2>&1 || exit 1
+          php -l src/Patches/UnboundedUniformChoice56.php > stage56-php-real-evidence/lint-choice.txt 2>&1 || exit 1
+          php -l src/Patches/YearStructureProvider56.php > stage56-php-real-evidence/lint-provider.txt 2>&1 || exit 1
+          php -l tests/stage56_source_bound_php_year.php > stage56-php-real-evidence/lint.txt 2>&1 || exit 1
+          bad=0
+          for year in 4999 5000 5001; do
+            if timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
+              .external-canonical-source \
+              stage56-external-evidence/reference.json \
+              stage56-external-evidence/external-gates.json \
+              stage56-external-evidence/scroll-gates-report.json \
+              "$year" "stage56-php-real-evidence/$year.json" \
+              > "stage56-php-real-evidence/$year.stdout" \
+              2> "stage56-php-real-evidence/$year.stderr"; then
+              rc=0
+            else
+              rc=$?
+            fi
+            printf '%s\n' "$rc" > "stage56-php-real-evidence/$year.exit"
+            cat "stage56-php-real-evidence/$year.stdout"
+            cat "stage56-php-real-evidence/$year.stderr" >&2
+            if [ "$rc" -ne 0 ] || [ -s "stage56-php-real-evidence/$year.stderr" ] || [ ! -s "stage56-php-real-evidence/$year.json" ]; then bad=1; fi
+          done
+          test "$bad" -eq 0
+      - name: Verify PHP month-count choice stream against pinned canonical source
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          python3 -B tools/stage56_verify_php_month_count_trace.py \
+            --canonical-repo .external-canonical-source \
+            --reference stage56-external-evidence/reference.json \
+            --profile-dir stage56-php-real-evidence \
+            --report stage56-php-real-evidence/month-count-choice-trace.json
+          rc=$?
+          printf '%s\n' "$rc" > stage56-php-real-evidence/month-count-choice-trace.exit
+          exit "$rc"
+      - name: Emit evidence hashes
+        if: always()
+        shell: bash
+        run: |
+          set -eu
+          find stage56-external-evidence -maxdepth 1 -type f -print0 > stage56-evidence-inputs0
+          if test -d stage56-php-real-evidence; then
+            find stage56-php-real-evidence -maxdepth 1 -type f -print0 >> stage56-evidence-inputs0
+          fi
+          sort -z stage56-evidence-inputs0 | xargs -0 -r sha256sum > stage56-evidence-files.sha256
+          rm stage56-evidence-inputs0
+          cat stage56-evidence-files.sha256
+      - name: Upload evidence even if differential fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-external-qa-${{ github.sha }}
+          path: |
+            stage56-external-evidence/
+            stage56-php-real-evidence/
+            stage56-evidence-files.sha256
+          if-no-files-found: error
+          retention-days: 30
+ stage56-b4-evidence/fused-stdout.txt
       - name: Retain SHA-bound B4 Native evidence
         if: always()
         uses: actions/upload-artifact@v4

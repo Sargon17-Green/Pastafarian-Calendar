@@ -21,12 +21,13 @@ final class MonthWeavingInterleaving56
     private array $lengths;
     private int $monthCount;
     private bool $scratchExperiment;
+    private bool $fusedExperiment;
     private bool $scratchFailed = false;
     private ?SuffixScratchRows56 $scratch = null;
     private int $scratchLoads = 0;
 
     /** @param list<int> $lengths */
-    public function __construct(array $lengths, bool $scratchExperiment = false)
+    public function __construct(array $lengths, bool $scratchExperiment = false, bool $fusedExperiment = false)
     {
         if (!array_is_list($lengths) || $lengths === [] || count($lengths) > 47) {
             throw new InvalidArgumentException('STAGE56_INTERLEAVING_LENGTHS');
@@ -41,7 +42,9 @@ final class MonthWeavingInterleaving56
         if ($total > 5778) throw new InvalidArgumentException('STAGE56_INTERLEAVING_TOTAL');
         $this->lengths = array_values($lengths);
         $this->monthCount = count($lengths);
+        if ($scratchExperiment && $fusedExperiment) throw new InvalidArgumentException('STAGE56_EXPERIMENT_CONFLICT');
         $this->scratchExperiment = $scratchExperiment;
+        $this->fusedExperiment = $fusedExperiment;
     }
 
     public function count(): BigInt
@@ -544,7 +547,9 @@ final class MonthWeavingInterleaving56
                     $r = $q - 1;
                     $target = $monthLength + $r;
                     if (!isset($following[$target])) throw new LogicException('STAGE56_INTERLEAVING_DP_INDEX');
-                    $cumulative = $cumulative->add($weight->mul($following[$target]));
+                    $cumulative = $this->fusedExperiment
+                        ? $cumulative->addProduct56($weight, $following[$target], true)
+                        : $cumulative->add($weight->mul($following[$target]));
                     $current[$q] = $cumulative;
                     $weight = $weight->mulSmall($monthLength + $r - 1)
                         ->divSmallExact($r + 1);

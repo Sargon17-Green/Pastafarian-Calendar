@@ -145,6 +145,54 @@ final class BigInt
     }
 
     /**
+     * Exact c + a*b, opt-in for the Stage56 suffix experiment only.
+     * All unsupported operands use the original signed multiply/add path.
+     */
+    public function addProduct56(self $a, self $b, bool $experiment = false): self
+    {
+        $na = count($a->limbs); $nb = count($b->limbs); $nc = count($this->limbs);
+        if (!$experiment || PHP_INT_SIZE !== 8 || $this->sign < 0 ||
+            $a->sign <= 0 || $b->sign <= 0 || min($na, $nb) < 8 ||
+            min($na, $nb) > 32 || max($na, $nb) < 64 ||
+            max($na, $nb, $nc) > 3000) {
+            return $this->add($a->mul($b));
+        }
+        // Canonical limb bounds are enforced before grouped integer arithmetic.
+        foreach ([$a->limbs, $b->limbs, $this->limbs] as $limbs) {
+            foreach ($limbs as $limb) {
+                if (!is_int($limb) || $limb < 0 || $limb >= self::BASE) {
+                    return $this->add($a->mul($b));
+                }
+            }
+        }
+        $out = []; $carry = 0;
+        $n = max($na + $nb - 1, $nc);
+        for ($k = 0; $k < $n; ++$k) {
+            $sum = $carry + ($this->limbs[$k] ?? 0);
+            $carry = 0;
+            $i = max(0, $k - $nb + 1);
+            $last = min($na - 1, $k);
+            while ($i <= $last) {
+                $end = min($last + 1, $i + 8);
+                for (; $i < $end; ++$i) {
+                    $sum += $a->limbs[$i] * $b->limbs[$k - $i];
+                }
+                // At most eight products plus bounded incoming carry:
+                // 8*(B-1)^2 + 3002*B < PHP_INT_MAX for B=10^9.
+                $carry += intdiv($sum, self::BASE);
+                $sum %= self::BASE;
+            }
+            $carry += intdiv($sum, self::BASE);
+            $out[] = $sum % self::BASE;
+        }
+        while ($carry > 0) {
+            $out[] = $carry % self::BASE;
+            $carry = intdiv($carry, self::BASE);
+        }
+        return new self(1, $out);
+    }
+
+    /**
      * Karatsuba multiplication for large operands, with a schoolbook base case.
      * @param list<int> $a
      * @param list<int> $b
