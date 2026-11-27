@@ -1,8 +1,6 @@
 name: COBOL Chinese calendar integration work counts
 on:
   push:
-    branches:
-      - 'COBOL+简体中文'
     paths:
       - 'src/calendar_work_counts.cob'
       - 'test/calendar_work_counts_tests.cob'
@@ -14,6 +12,7 @@ permissions:
   contents: read
 jobs:
   work-counts-native:
+    if: github.ref == 'refs/heads/COBOL+简体中文'
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:

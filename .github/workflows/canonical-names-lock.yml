@@ -2894,7 +2894,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build
-          git merge-base --is-ancestor 5574f8ae5029aa7c4941c030b6b671217e3c603a HEAD
+          # Validate the accepted QA-only history separately from integration HEAD.
+          git merge-base --is-ancestor 5574f8ae5029aa7c4941c030b6b671217e3c603a 324bdfad73a9e5aec8f7ad15ae588875d0a2226f
+          git merge-base --is-ancestor 324bdfad73a9e5aec8f7ad15ae588875d0a2226f HEAD
+          git diff --exit-code 324bdfad73a9e5aec8f7ad15ae588875d0a2226f HEAD -- qa/cobol docs/POST_STAGE55_QA51B_TEST_BUILD_FAULT_INJECTION_CONTRACT_2026-11-25.md
           test "$(git rev-parse HEAD:src/big_integer.cob)" = 982c1f266a18c2bcaba79b994177a93750f27bfa
           test "$(git rev-parse HEAD:src/patched_distance.cob)" = 4e8412030716debca481306ba28be805ade76326
           python3 -B - <<'PY'
@@ -2911,11 +2914,13 @@ jobs:
           ])
           actual = sorted(subprocess.check_output(
               ["git", "diff", "--name-only",
-               "5574f8ae5029aa7c4941c030b6b671217e3c603a", "HEAD"],
+               "5574f8ae5029aa7c4941c030b6b671217e3c603a", "324bdfad73a9e5aec8f7ad15ae588875d0a2226f"],
               text=True).splitlines())
           assert actual == expected, (actual, expected)
           PY
-          git diff --exit-code 5574f8ae5029aa7c4941c030b6b671217e3c603a HEAD -- src
+          git diff --exit-code 5574f8ae5029aa7c4941c030b6b671217e3c603a 324bdfad73a9e5aec8f7ad15ae588875d0a2226f -- src
+          git diff --exit-code 324bdfad73a9e5aec8f7ad15ae588875d0a2226f HEAD -- src/big_integer.cob src/patched_distance.cob
+          printf '%s\n' '324bdfad73a9e5aec8f7ad15ae588875d0a2226f' > build/historical-qa51b-accepted-sha.txt
           git rev-parse HEAD > build/HEAD.txt
           git rev-parse HEAD:src/big_integer.cob > build/production-big-integer-blob.txt
           git rev-parse HEAD:src/patched_distance.cob > build/production-patched-distance-blob.txt
@@ -2941,7 +2946,7 @@ jobs:
             | tee build/instrumentation.log
           test -s build/instrumented-source.diff
           test -s build/instrumentation.json
-          git diff --exit-code 5574f8ae5029aa7c4941c030b6b671217e3c603a HEAD -- src
+          git diff --exit-code HEAD -- src
       - name: Compile strict test-build executable
         shell: bash
         run: |
@@ -2994,7 +2999,7 @@ jobs:
               "stderr_bytes":len(err),
               "production_source_modified":False,
               "stage56_opened":False,
-              "full_calendar_integration":False
+              "full_calendar_integration_tested":False
           }
           (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
           assert result["pass"], result
