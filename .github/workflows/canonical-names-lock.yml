@@ -1777,8 +1777,10 @@ jobs:
             > stage56-php-real-evidence/provider-adapter.stdout \
             2> stage56-php-real-evidence/provider-adapter.stderr
           test ! -s stage56-php-real-evidence/provider-adapter.stderr
-      - name: Stage56 source-bound PHP real years and bounded profiles (not acceptance)
+      - name: Stage56 isolated opt-in scratch real years and bounded profiles (not acceptance)
         if: ${{ always() && steps.stage56_source_adapter.outcome == 'success' }}
+        env:
+          STAGE56_QA_SCRATCH: '1'
         shell: bash
         run: |
           set -uo pipefail
@@ -1826,6 +1828,16 @@ jobs:
             --report stage56-php-real-evidence/month-count-choice-trace.json
           rc=$?
           printf '%s\n' "$rc" > stage56-php-real-evidence/month-count-choice-trace.exit
+          exit "$rc"
+      - name: Compare scratch real-year evidence with exact stride8 baseline (QA only)
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-php-real-evidence
+          python3 -B tools/stage56_compare_scratch_real_year.py stage56-php-real-evidence
+          rc=$?
+          printf '%s\n' "$rc" > stage56-php-real-evidence/scratch-comparison.exit
           exit "$rc"
       - name: Emit evidence hashes
         if: always()
