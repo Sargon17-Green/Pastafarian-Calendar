@@ -1,0 +1,101 @@
+name: Soak v209 historical roster reconciliation and shared recurrence audit (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v209-recurrence-lineage.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify QA activation and restore v131 original evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "b9e89ee16548a64d62ce886e3940a5a53540325b"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v209-recurrence-lineage.yml"
+          mkdir -p evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14618673805/zip > evidence/v131.zip
+          echo "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2  evidence/v131.zip" | sha256sum -c -
+      - name: Reconcile exact v131 sources and static recurrence witnesses
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64,hashlib,json,re,subprocess,zipfile
+          from pathlib import Path
+          e=Path("evidence")
+          review=json.loads(Path("qa/soak/v208_main_repository_lineage_review.json").read_text())
+          with zipfile.ZipFile(e/"v131.zip") as z:
+              assert z.testzip() is None
+              n=[n for n in z.namelist() if n.endswith("v131-lineage-screen.json")]
+              assert len(n)==1
+              raw=z.read(n[0])
+          assert hashlib.sha256(raw).hexdigest()=="dc47db154744da65ccea13eee734995e6534882164c92df99eacf44b505d7aac"
+          v131=json.loads(raw)
+          assert v131["total_historical_records"]==91 and len(v131["records"])==91
+          assert len({r["record_id"] for r in v131["records"]})==91
+          assert v131["official_10000_year_soak_credit"]==0 and not v131["soak_dispatch_authorized"]
+          repo=review["scope"]["repository"]; ref=review["scope"]["snapshot"]
+          source={r["record_id"]:r for r in v131["records"] if r["repository"]==repo and r["branch"]=="main"}
+          assert set(source)=={r["id"] for r in review["records"]} and len(source)==10
+          heads={r["historical_head_commit"] for r in source.values()}
+          assert len(heads)==1
+          observed=heads.pop()
+          def blob(sha):
+              assert re.fullmatch("[0-9a-f]{40}",sha)
+              d=json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/git/blobs/{sha}"]))
+              b=base64.b64decode(d["content"])
+              assert d["sha"]==sha and d["size"]==len(b)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==sha
+              return b
+          specs={
+           "REF-57":(953,1077,["cumulative += weight * following[monthLength + r]","weight * BigInt(monthLength + r - 1)","i <= start + 7","suffixPm1[off + 1] * BigInt(prefix[off] - 1)","remainingForMonth === 1 && month !== low","baseCount * numerator","rank -= block","binomialCount(activeTotal + newRemaining - 1, newRemaining - 1)"]),
+           "REF-58":(592,711,["cumulative += weight * following[month_length + r]","weight * (month_length + r - 1) // (r + 1)","index <= start + 7","suffix_pm1[offset + 1] * (prefix[offset] - 1)","remaining_for_month == 1 and month != low","base_count * numerator // denominator","rank -= block","binomial(active_total + new_remaining - 1, new_remaining - 1)"]),
+           "MAIN-FAST-JS":(862,1003,["cumulative += weight * next[n + r]","weight * BigInt(n + r - 1)","i <= start + 7","suffixPm1[off + 1] * BigInt(prefix[off] - 1)","remainingForK === 1 && k !== low","baseCount * numerator","rank -= block","binomial(activeTotal + newRemaining - 1, newRemaining - 1)"]),
+           "MAIN-PY":(820,954,["cumulative += weight * following[month_length + r]","weight * (month_length + r - 1) // (r + 1)","index <= start + 7","suffix_pm1[offset + 1] * (prefix[offset] - 1)","remaining_for_month == 1 and month != low","base_count * numerator // denominator","rank -= block","active_total + new_remaining - 1, new_remaining - 1"]),
+           "MAIN-RUBY":(665,800,["cumulative += weight * following[month_length + r]","weight * (month_length + r - 1) / (r + 1)","index <= start + 7","suffix_pm1[offset + 1] * (prefix[offset] - 1)","remaining_for_month == 1 && month != low","base_count * numerator / denominator","rank -= block","binomial(active_total + new_remaining - 1, new_remaining - 1)"]),
+           "MAIN-JAVA":(1120,1286,["weight.multiply(following[monthLength + r])","weight.multiply(bi(monthLength + r - 1L)).divide(bi(r + 1L))","index <= start + 7","multiply(bi(prefix[offset] - 1L))","remainingForMonth == 1 && month != low","baseCount.multiply(numerator).divide(denominator)","rank = rank.subtract(block)","binomial(activeTotal + newRemaining - 1, newRemaining - 1)"]),
+           "MAIN-C":(1551,1828,["wi_mul(&term, &weight, &following->values[following_index])","(uint32_t)(month_length + r - 1)","index <= start + 7","(uint32_t)(prefix[offset] - 1)","remaining_for_month == 1 && month != low","wi_div_exact(&next_base, &multiplied, &denominator)","wi_sub(&rank, &rank, &block)","(uint32_t)(active_total + new_remaining - 1)"]),
+           "MAIN-CPP":(914,1086,["cumulative += weight * following.at(","weight *= month_length + r - 1","index <= start + 7","suffix_pm1[offset + 1] * (prefix[offset] - 1)","remaining_for_month == 1 && month != low","base_count * numerator, denominator","rank -= block","active_total + new_remaining - 1,"])
+          }
+          rows=[]
+          for r in review["records"]:
+              rid=r["id"]; old=source[rid]
+              assert old["observed_source_path"]==r["path"]
+              b=blob(r["blob"])
+              # Bind blob to actual historical path, not just content by hash.
+              tree=json.loads(subprocess.check_output(["gh","api",f"repos/{repo}/contents/{r['path']}?ref={ref}"]))
+              assert tree["sha"]==r["blob"]
+              v=blob(old["git_blob_sha1"])
+              assert hashlib.sha256(v).hexdigest()==old["source_sha256"] and len(v)==old["source_bytes"]
+              row={"id":rid,"path":r["path"],"review_blob":r["blob"],"v131_blob":old["git_blob_sha1"],"same_bytes":b==v}
+              if rid in specs:
+                  lo,hi,anchors=specs[rid]
+                  lines=b.decode("utf-8").splitlines()
+                  excerpt="\n".join(lines[lo-1:hi])+"\n"
+                  flat=re.sub(r"\s+","",excerpt)
+                  assert all(re.sub(r"\s+","",a) in flat for a in anchors),(rid,[a for a in anchors if re.sub(r"\s+","",a) not in flat])
+                  (e/(rid+".txt")).write_text(excerpt)
+                  row.update(excerpt_lines=[lo,hi],excerpt_sha256=hashlib.sha256(excerpt.encode()).hexdigest(),anchor_checks=len(anchors),v131_same_pattern_verified=(b==v))
+              rows.append(row)
+          report={"schema":"SOAK_V209_STATIC_RECURRENCE_LINEAGE/1","v131_observed_head":observed,"v208_review_head":ref,"same_snapshot":observed==ref,"records":rows,"record_count":10,"exact_blob_matches":sum(r["same_bytes"] for r in rows),"shared_recurrence_review_records":8,"cache_lookahead_records":8,"anchor_checks":sum(r.get("anchor_checks",0) for r in rows),"source_static_only":True,"independent_algorithms_certified":0,"duplicate_decisions":0,"native_date_calls":0,"whole_year_credit":0,"soak_dispatch_authorized":False}
+          (e/"result.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v209-lineage-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
