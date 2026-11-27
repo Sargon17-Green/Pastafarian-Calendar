@@ -1,0 +1,233 @@
+name: Issue29 v202 live Ada complete year structure and projection (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v202-live-year-structure.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  structure:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock exact live sources and independent reference
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "bba20620c8a844c4b6f58a42527522dbfe40f374"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/issue29-v202-live-year-structure.yml"
+          mkdir -p evidence "$RUNNER_TEMP/live"
+          git rev-parse HEAD > evidence/QA_HEAD.txt
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730 149e677af1cef63f1a47cd99ed7953c16ef6bb24
+          test "$(git rev-parse d10d50383025d73ad2ce11d19d5759221d70f730:src/normative_oracle.adb)" = "0be8f8ab4ddef26d34963d5567707a511ebda50b"
+          test "$(git rev-parse d10d50383025d73ad2ce11d19d5759221d70f730:src/normative_oracle.ads)" = "c4588566076798dd394feeab580ebc3d38c09744"
+          git archive d10d50383025d73ad2ce11d19d5759221d70f730 src | tar -x -C "$RUNNER_TEMP/live"
+          git ls-tree -r d10d50383025d73ad2ce11d19d5759221d70f730 src > evidence/source-blobs.txt
+          echo "d10d50383025d73ad2ce11d19d5759221d70f730" > evidence/LIVE_HEAD.txt
+          test "$(git rev-parse 149e677af1cef63f1a47cd99ed7953c16ef6bb24:tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          git show 149e677af1cef63f1a47cd99ed7953c16ef6bb24:tests/fixtures/stage55_year5000_appendix_a_metadata.json > evidence/reference-metadata.json
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15199677578/zip > "$RUNNER_TEMP/projection.zip"
+          echo "937dc0962d77c4e66f28bbde731716b08612cfb5a304b948ad02543b0af25e50  $RUNNER_TEMP/projection.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import csv,hashlib,json,os,zipfile
+          from pathlib import Path
+          e=Path("evidence")
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"])/"projection.zip") as z:
+              assert z.testzip() is None
+              def get(suffix):
+                  matches=[x for x in z.namelist() if x.endswith(suffix)]
+                  assert len(matches)==1,(suffix,matches)
+                  return z.read(matches[0])
+              data=get("oracle/STAGE55_YEAR5000_CANDIDATE.csv")
+              assert data==get("STAGE55_YEAR5000_CANDIDATE_RUN1.csv")==get("STAGE55_YEAR5000_CANDIDATE_RUN2.csv")
+              summary=json.loads(get("projection-summary.json"))
+              word=get("native-word.json")
+          assert hashlib.sha256(data).hexdigest()==summary["projection_sha256"]
+          assert summary["matched_rows"]==8488 and summary["full_converter_calls"]==0
+          assert hashlib.sha256(word).hexdigest()=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+          assert len(list(csv.DictReader(data.decode("ascii").splitlines())))==4244
+          (e/"reference-projection.csv").write_bytes(data)
+          (e/"reference-word.json").write_bytes(word)
+          PY
+      - name: Add diagnostic wrapper in temporary source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          spec=Path("src/normative_oracle.ads")
+          body=Path("src/normative_oracle.adb")
+          for p in (spec,body):
+              original=p.read_bytes()
+              Path(str(p)+".original").write_bytes(original)
+          spec_marker="end Normative_Oracle;"
+          s=spec.read_text()
+          assert s.count(spec_marker)==1
+          spec.write_text(s.replace(spec_marker,"   procedure QA_V202_Structure;\n"+spec_marker))
+          wrapper="""   procedure QA_V202_Structure is
+             C : constant Big_Integer := Foundation_Day;
+             Gates : Gate_State;
+             procedure Report (Label_Text : String; Value : Big_Integer) is
+             begin
+                Ada.Text_IO.Put_Line (Label_Text & "=" & To_String (Value));
+                Ada.Text_IO.Flush;
+             end Report;
+          begin
+             Initialize_Gates (Gates);
+             declare
+                Y : constant Year_Record := Find_Target_Year (Gates, C, C);
+                First_Day : constant Big_Integer := Y.Open_Day + B (1);
+                R : constant Sauce_Result := Sauce (C, First_Day);
+                Gap_Count : constant Natural := To_Natural_Checked (Y.Close_Index - Y.Open_Index, 1_000);
+                Cutlet_Max : constant Natural := Natural'Min (17, Gap_Count);
+                Choices : constant Natural := Cutlet_Max - 5;
+                K : constant Positive := Positive (5 + To_Natural_Checked
+                  (Choose_Rank (Ask_Bowl (R, 2, Seal_Cutlet_Count), B (Choices)), Choices));
+                Partition : constant Natural_Array := Choose_Cutlet_Partition (Gates, C, Y, R, K);
+                CN : constant Natural_Array := Unrank_Distinct
+                  (17, K, Choose_Rank (Ask_Bowl (R, 5, Seal_Cutlet_Names), Falling_Factorial (17, K)));
+                Total : constant Natural := To_Natural_Checked (Y.Close_Day - Y.Open_Day, 5_778);
+                Low : constant Natural := (Total + 122) / 123;
+                High : constant Natural := Natural'Min (47, Total / 4);
+                Slots : constant Positive := Positive (Low - 1 + To_Natural_Checked
+                  (Choose_Rank (Ask_Bowl (R, 3, Seal_Month_Count), B (High - Low + 1)), High - Low + 1));
+                MN : constant Natural_Array := Unrank_Distinct
+                  (47, Slots, Choose_Rank (Ask_Bowl (R, 5, Seal_Month_Names), Falling_Factorial (47, Slots)));
+                L : Natural_Array (1 .. Slots);
+                Cursor : Big_Integer := Y.Open_Index;
+             begin
+                Report ("YEAR", Y.Number);
+                Report ("OPEN_INDEX", Y.Open_Index);
+                Report ("CLOSE_INDEX", Y.Close_Index);
+                Report ("FIRST_DAY", First_Day);
+                Report ("LAST_DAY", Y.Close_Day);
+                Report ("YEAR_LENGTH", B (Total));
+                Report ("CUTLET_COUNT", B (K));
+                Report ("MONTH_COUNT", B (Slots));
+                for I in Partition'Range loop
+                   Report ("PARTITION", B (Partition (I)));
+                   Report ("CUTLET_LENGTH", Gate_At (Gates, Cursor + B (Partition (I))) - Gate_At (Gates, Cursor));
+                   Report ("CUTLET_NAME", B (CN (I)));
+                   Cursor := Cursor + B (Partition (I));
+                end loop;
+                Choose_Month_Lengths (R, Total, Slots, L);
+                for I in L'Range loop
+                   Report ("MONTH_LENGTH", B (L (I)));
+                   Report ("MONTH_NAME", B (MN (I)));
+                end loop;
+                declare
+                   W : constant Natural_Array := Choose_Month_Weaving (R, L);
+                begin
+                   for I in W'Range loop
+                      Report ("WORD", B (W (I)));
+                   end loop;
+                end;
+             end;
+             Ada.Text_IO.Put_Line ("V202_STRUCTURE_COMPLETE ZERO_F=1");
+          end QA_V202_Structure;
+
+          """
+          b=body.read_text()
+          assert b.count(spec_marker)==1
+          assert "Calendar_Date (" not in wrapper and "Find_Target_Year" in wrapper
+          body.write_text(b.replace(spec_marker,wrapper+spec_marker))
+          assert body.read_text().replace(wrapper,"",1)==b
+          assert spec.read_text().replace("   procedure QA_V202_Structure;\n","",1)==s
+          PY
+          diff -u src/normative_oracle.adb.original src/normative_oracle.adb > "$GITHUB_WORKSPACE/evidence/body-wrapper.diff" || test "$?" = 1
+          diff -u src/normative_oracle.ads.original src/normative_oracle.ads > "$GITHUB_WORKSPACE/evidence/spec-wrapper.diff" || test "$?" = 1
+          sha256sum src/normative_oracle.ad* > "$GITHUB_WORKSPACE/evidence/build-source.sha256"
+      - name: Install GNAT and GMP bindings
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Run native live structural functions without calling Calendar_Date
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/live"
+          mkdir tests
+          cat > structure.gpr <<'GPR'
+          with "gnatcoll_gmp.gpr";
+          project Structure is
+             for Source_Dirs use ("src", "tests");
+             for Object_Dir use "obj";
+             for Exec_Dir use "bin";
+             for Main use ("issue29_v202_structure.adb");
+             package Compiler is
+                for Default_Switches ("Ada") use ("-gnat2022", "-gnatW8", "-gnata", "-gnato");
+             end Compiler;
+          end Structure;
+          GPR
+          cat > tests/issue29_v202_structure.adb <<'ADA'
+          with Normative_Oracle;
+          procedure Issue29_V202_Structure is
+          begin
+             Normative_Oracle.QA_V202_Structure;
+          end Issue29_V202_Structure;
+          ADA
+          timeout -k 5s 180s gprbuild -p -j2 -P structure.gpr > "$GITHUB_WORKSPACE/evidence/build.log" 2>&1
+          sha256sum bin/issue29_v202_structure > "$GITHUB_WORKSPACE/evidence/binary.sha256"
+          set +e
+          (ulimit -v 2097152; ulimit -t 600; timeout -k 5s 630s /usr/bin/time -v -o "$GITHUB_WORKSPACE/evidence/time.txt" bin/issue29_v202_structure) > "$GITHUB_WORKSPACE/evidence/stdout.txt" 2> "$GITHUB_WORKSPACE/evidence/stderr.txt"
+          code=$?
+          set -e
+          echo "$code" > "$GITHUB_WORKSPACE/evidence/exit.txt"
+          grep -v '^WORD=' "$GITHUB_WORKSPACE/evidence/stdout.txt"
+          test "$code" = 0
+      - name: Compare independently generated structure and project every day
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+          e=Path("evidence")
+          f=json.loads((e/"reference-metadata.json").read_text())
+          out=(e/"stdout.txt").read_text()
+          assert "V202_STRUCTURE_COMPLETE ZERO_F=1" in out
+          d=defaultdict(list)
+          for line in out.splitlines():
+              if line.startswith("V202_"): continue
+              k,v=line.split("=",1)
+              d[k].append(int(v))
+          scalars={"YEAR":f["year"],"OPEN_INDEX":f["open_gate_index"],"CLOSE_INDEX":f["close_gate_index"],"FIRST_DAY":f["first_day"],"LAST_DAY":f["last_day"],"YEAR_LENGTH":f["last_day"]-f["first_day"]+1,"CUTLET_COUNT":f["cutlet_count"],"MONTH_COUNT":f["months"]}
+          vectors={"PARTITION":f["cutlet_gate_partition"],"CUTLET_LENGTH":f["cutlet_day_lengths"],"CUTLET_NAME":f["cutlet_name_indices"],"MONTH_LENGTH":f["month_lengths"],"MONTH_NAME":f["month_name_indices"],"WORD":json.loads((e/"reference-word.json").read_text())}
+          checks={k:d[k]==[v] for k,v in scalars.items()}
+          checks.update({k:d[k]==v for k,v in vectors.items()})
+          rows=[]
+          cutlets=[(n,j) for n,l in zip(d["CUTLET_NAME"],d["CUTLET_LENGTH"]) for j in range(1,l+1)]
+          seen=defaultdict(int)
+          for i,m in enumerate(d["WORD"]):
+              seen[m]+=1
+              cn,cd=cutlets[i]
+              rows.append([d["YEAR"][0],cn,cd,d["MONTH_NAME"][m-1],seen[m]])
+          fields=["YEAR","CUTLET_INDEX","CUTLET_DAY","MONTH_INDEX","MONTH_DAY"]
+          reference=[[int(row[k]) for k in fields] for row in csv.DictReader((e/"reference-projection.csv").open())]
+          mismatches=[{"offset":i,"actual":a,"expected":b} for i,(a,b) in enumerate(zip(rows,reference)) if a!=b]
+          checks["projection"]=len(rows)==len(reference)==4244 and not mismatches
+          with (e/"actual-projection.csv").open("w",newline="") as fp:
+              w=csv.writer(fp);w.writerow(fields);w.writerows(rows)
+          result={"schema":"ISSUE29_V202_STRUCTURE/1","checks":checks,"matched_rows":sum(a==b for a,b in zip(rows,reference)),"rows":len(rows),"first_mismatches":mismatches[:10],"matched_word_symbols":sum(a==b for a,b in zip(d["WORD"],vectors["WORD"])),"calendar_calls":0,"whole_year_credit":0,"scope":"native private structural routines with QA-only wrapper; Python per-day projection, not Calendar_Date"}
+          (e/"result.json").write_text(json.dumps(result,indent=2)+"\n")
+          print(json.dumps(result))
+          assert all(checks.values())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v202-structure-${{ github.run_id }}
+          path: evidence/
+          retention-days: 30
