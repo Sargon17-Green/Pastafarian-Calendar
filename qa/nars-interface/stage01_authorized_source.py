@@ -10,14 +10,14 @@ import sys
 
 from lx_workspace_probe import make_canary
 
-SOURCE_COMMIT = "0f24aae0f2e45b8e816d4ecd27be154afa2fe94f"
+SOURCE_COMMIT = "4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371"
 EXPECTED_TOTAL_FUNCTIONS = 95
 SOURCE_FILES = [
     ("src/monster_bootstrap.apl", "cb94d203116afa32fb55b8ff74b8569d6e03d02c", 13),
     ("src/normative_oracle.apl", "5be0ef4186156968408578b9991fc8477ccd3a92", 69),
     ("src/source_language_catalog.apl", "f47575e1c32d915836fb96556b64b58226b90005", 6),
     ("test/stage01_fixtures.apl", "a6aa84274aa2880b053d5dd221b1654dbbd70a2c", 1),
-    ("test/stage01_tests.apl", "3371f1575da8c03cb4175b0031f244ee1757ed00", 6),
+    ("test/stage01_tests.apl", "d974d2a349517afba0b5d68b2c8db5800fa11df7", 6),
 ]
 HELPER_LINES = [
     "z←name Stage01Fix source;fixed",
@@ -98,12 +98,30 @@ def load_locked_sources(repo_root: pathlib.Path, source_commit: str = SOURCE_COM
         raise ValueError("SOURCE_BRANCH_HEAD_DRIFT:" + branch_tip)
     _run_git(repo_root, "merge-base", "--is-ancestor", "7161824b9fcbfaca91f20d1ea492417e77003ff4", source_commit)
     changed = _run_git(repo_root, "diff", "--name-only", "7161824b9fcbfaca91f20d1ea492417e77003ff4", source_commit).decode("utf-8").splitlines()
-    if changed != ["src/normative_oracle.apl"]:
+    if changed != ["src/normative_oracle.apl", "test/stage01_tests.apl"]:
         raise ValueError("UNAUTHORIZED_SOURCE_DIFF")
     before = _run_git(repo_root, "show", "7161824b9fcbfaca91f20d1ea492417e77003ff4:src/normative_oracle.apl")
     after = _run_git(repo_root, "show", f"{source_commit}:src/normative_oracle.apl")
     if before.count(b":If rem-x<0") != 1 or after != before.replace(b":If rem-x<0", b":If (rem-x)<0"):
         raise ValueError("AUTHORIZED_ONE_LINE_DIFF_MISMATCH")
+    previous_lock = "0f24aae0f2e45b8e816d4ecd27be154afa2fe94f"
+    _run_git(repo_root, "merge-base", "--is-ancestor", previous_lock, source_commit)
+    if _run_git(repo_root, "diff", "--name-only", previous_lock, source_commit).decode("utf-8").splitlines() != ["test/stage01_tests.apl"]:
+        raise ValueError("UNAUTHORIZED_TEST_DIFF")
+    test_path = "test/stage01_tests.apl"
+    old_test = _run_git(repo_root, "show", f"{previous_lock}:{test_path}")
+    new_test = _run_git(repo_root, "show", f"{source_commit}:{test_path}")
+    expected_lines = old_test.splitlines(keepends=True)
+    for index, original, corrected in (
+        (179, "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES)", "AssertEqual (⊂,17) (⊂⍴CUTLET_NAMES)"),
+        (180, "AssertEqual (⊂47) (⊂⍴MONTH_NAMES)", "AssertEqual (⊂,47) (⊂⍴MONTH_NAMES)"),
+    ):
+        original_bytes, corrected_bytes = original.encode("utf-8"), corrected.encode("utf-8")
+        if expected_lines[index].count(original_bytes) != 1:
+            raise ValueError("AUTHORIZED_TEST_SHAPE_ANCHOR_MISMATCH")
+        expected_lines[index] = expected_lines[index].replace(original_bytes, corrected_bytes)
+    if new_test != b"".join(expected_lines):
+        raise ValueError("AUTHORIZED_TWO_LINE_TEST_DIFF_MISMATCH")
     files = []
     all_names = []
     all_blocks = []
