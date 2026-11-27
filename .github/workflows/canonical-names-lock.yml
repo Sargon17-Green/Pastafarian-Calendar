@@ -29,6 +29,9 @@ jobs:
       - name: Independent Stage1 fixed-endpoint year path oracle
         timeout-minutes: 3
         run: python3 tests/test_sm83_stage1_year_path_oracle.py
+      - name: Generate independent Native396 actual-map differential vectors
+        timeout-minutes: 3
+        run: python3 tests/sm83_native396_vectors.py
 
   dmg-native-smoke:
     runs-on: ubuntu-latest
