@@ -1,0 +1,183 @@
+name: Soak v222 V shared unrank source lineage (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v222-v-shared-unrank-lineage.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  static-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Verify historical roster and normalized source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "3f7385a0e9dd2e4c75e8059c6ae2aada49685043"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v222-v-shared-unrank-lineage.yml"
+          mkdir -p evidence
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14618673805/zip > evidence/v131.zip
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15223861465/zip > evidence/v221.zip
+          echo "383241ca5002fd28dbdf62c239090b7fa557b42dca4350deaef8cfd955ba86c2  evidence/v131.zip" | sha256sum -c -
+          echo "e1f26e93bffb6c0da6272cfb624642a0cc24041b51de4ae98ebfd4b3190846a4  evidence/v221.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess
+          from pathlib import Path
+          def load(p,suffix):
+              with zipfile.ZipFile(p) as z:
+                  assert z.testzip() is None
+                  n=[n for n in z.namelist() if n.endswith(suffix)]
+                  assert len(n)==1
+                  return json.loads(z.read(n[0]))
+          prior=load("evidence/v221.zip","result.json")
+          assert (prior["vectors"],prior["states"],prior["transitions"],prior["rank_checks"],prior["mismatches"])==(54,7149,18202,312,0)
+          assert prior["model_only"] and not prior["soak_dispatch_authorized"]
+          rows={x["record_id"]:x for x in load("evidence/v131.zip","v131-lineage-screen.json")["records"]}
+          ref="a35970c2dbcb0aff6cb8099d9b29bff9f744ccda"
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          pins={"AMHARIC-V":("pastafari/patch15_numeric_date.v","a2950a4fc1f6cefc095a870e92bc1dd0f35bc5bf"),"REF-54":("pastafari/normative_oracle_test.v","a4557ba0b5ec391ff280284a9725cb5ed7e2e7e7")}
+          src={};inv={}
+          for rid,(p,h) in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              row=rows[rid]
+              assert row["historical_head_commit"]==ref and row["observed_source_path"]==p and row["git_blob_sha1"]==h and row["source_sha256"]==hashlib.sha256(b).hexdigest()
+              inv[p]={"blob":h,"sha256":row["source_sha256"],"bytes":len(b)}
+              Path("evidence",Path(p).name+".source.txt").write_bytes(b)
+              src[rid]=b.decode("utf-8")
+          def body(s,prefix,kind):
+              a="fn (mut c "+kind+"WeaveCounter) unrank1("
+              b="fn (mut e "+kind+"Engine) positive_gate_gap("
+              assert s.count(a)==s.count(b)==1
+              x=s[s.index(a):s.index(b)]
+              x=x.replace(kind,"Common").replace(prefix+"_weave_","common_weave_")
+              x=x.replace("\tc.prepare_factor_matrix()\n","").replace("c.factor_matrix[opened][left - 1]","c.factor_suffix(opened, left - 1)")
+              return x.strip()
+          p=body(src["AMHARIC-V"],"patch15","Patch15")
+          q=body(src["REF-54"],"oracle","Oracle")
+          assert p==q and len(p)==2304 and len(p.splitlines())==84
+          Path("evidence/normalized-unrank.txt").write_text(p+"\n")
+          anchors=["row[0] = factors[opened + 1][size - 1]","row[left] = big_add(row[left - 1]","c.factor_matrix[state.opened_up_to][left]","patch15_choose_month_weaving(result, month_lengths)"]
+          assert all(a in src["AMHARIC-V"] for a in anchors)
+          anchors=["result = c.factor_suffix(opened, left - 1)","tail := c.factor_suffix(opened + 1, left + size - 1)","if total_length > 12","return c.count_factorized(state)","fn oracle_weave_exhaustive_small(","oracle_choose_month_weaving(result, month_lengths)"]
+          assert all(a in src["REF-54"] for a in anchors)
+          Path("evidence/source-pins.json").write_text(json.dumps(inv,indent=2)+"\n")
+          PY
+      - name: Verify recurrence and cumulative binary selection on independent model
+        run: |
+          set -euo pipefail
+          ulimit -v 524288
+          timeout -k 5s 120s python3 - <<'PY'
+          from itertools import product
+          from functools import lru_cache
+          from math import comb
+          import json
+          from pathlib import Path
+          vectors=states=transitions=rank_checks=cumulative_checks=0
+          for m in range(1,5):
+           for L in product(range(2,5),repeat=m):
+            if sum(L)>12:continue
+            vectors+=1
+            maxs=[0]
+            for n in L:maxs.append(maxs[-1]+n)
+            F=[[] for _ in range(m+1)]; F[m]=[1]*(maxs[m]+1)
+            for o in range(m-1,-1,-1):
+             n=L[o]; row=[F[o+1][n-1]];coef=1
+             for s in range(1,maxs[o]+1):
+              assert coef*(s+n-2)%s==0
+              coef=coef*(s+n-2)//s
+              row.append(row[-1]+coef*F[o+1][s+n-1])
+             F[o]=row
+            @lru_cache(None)
+            def R(o,s):
+             if o==m:return 1
+             n=L[o]
+             if s==0:return R(o+1,n-1)
+             return R(o,s-1)+comb(s+n-2,n-2)*R(o+1,s+n-1)
+            for o,row in enumerate(F):
+             for s,b in enumerate(row):assert b==R(o,s)
+            def base(a):
+             B=1;S=0
+             for n in a:B*=comb(S+n-1,n-1);S+=n
+             return B
+            def children(rem,o,c):
+             for i,n in enumerate(rem):
+              if not n or (n==L[i] and i!=o) or (n==1 and i!=c):continue
+              r=list(rem);r[i]-=1
+              yield i,(tuple(r),o+(n==L[i]),c+(n==1))
+            @lru_cache(None)
+            def brute(rem,o,c):
+             global states,transitions,cumulative_checks
+             states+=1
+             if not any(rem):return 1
+             a=rem[c:o];S=sum(a);B=base(a)
+             child_counts={i:brute(*state) for i,state in children(rem,o,c)}
+             transitions+=len(child_counts)
+             assert sum(child_counts.values())==B*F[o][S]
+             if S:
+              pref=[0]
+              for n in a:pref.append(pref[-1]+n)
+              cum=[0]*(len(a)+1);cum[-1]=B
+              for i in range(len(a)-1,0,-1):
+               num=cum[i+1]*pref[i];den=pref[i+1]-1
+               assert num%den==0
+               cum[i]=num//den
+              for j in range(1,len(cum)):
+               assert (cum[j]-cum[j-1])*F[o][S-1]==child_counts.get(c+j-1,0)
+               cumulative_checks+=1
+             return sum(child_counts.values())
+            total=brute(L,0,0)
+            def unrank(rank,binary):
+             state=(L,0,0);out=[]
+             while any(state[0]):
+              rem,o,c=state
+              candidates=dict(children(*state))
+              a=rem[c:o];S=sum(a);B=base(a)
+              if binary and S:
+               old=B*F[o][S-1]
+               if rank>old:
+                i=o;rank-=old
+               else:
+                pref=[0]
+                for n in a:pref.append(pref[-1]+n)
+                cum=[0]*(len(a)+1);cum[-1]=B
+                for j in range(len(a)-1,0,-1):cum[j]=cum[j+1]*pref[j]//(pref[j+1]-1)
+                lo=1;hi=len(a)
+                while lo<hi:
+                 mid=(lo+hi)//2
+                 if rank<=cum[mid]*F[o][S-1]:hi=mid
+                 else:lo=mid+1
+                rank-=cum[lo-1]*F[o][S-1];i=c+lo-1
+               assert i in candidates
+               state=candidates[i]
+              else:
+               for i,child in candidates.items():
+                v=brute(*child)
+                if rank>v:rank-=v
+                else:state=child;break
+               else:raise AssertionError("rank")
+              out.append(i+1)
+             assert rank==1
+             return out
+            for r in sorted({1,(total+1)//2,total}):
+             assert unrank(r,True)==unrank(r,False)
+             rank_checks+=1
+          assert vectors==89 and states==2682 and transitions==4874 and cumulative_checks>0 and rank_checks>0
+          out={"schema":"SOAK_V222_V_SHARED_UNRANK_LINEAGE/1","historical_head":"a35970c2dbcb0aff6cb8099d9b29bff9f744ccda","records":["AMHARIC-V","REF-54"],"normalized_unrank_identical":True,"normalized_lines":84,"normalized_chars":2304,"normalizations":["type and helper prefixes","remove production table preparation","replace table lookup by corresponding recursive factor lookup"],"production_count":"BOTTOM_UP_SUFFIX_FACTOR","reference_count_above_12_days":"RECURSIVE_MEMOIZED_SAME_FACTOR","reference_count_at_most_12_days":"FIRST_POSITION_DISTRIBUTION","reference_separate_small_exhaustive_witness":True,"unrank_both":"CUMULATIVE_BINARY_SEARCH","vectors":vectors,"states":states,"transitions":transitions,"cumulative_checks":cumulative_checks,"rank_checks":rank_checks,"mismatches":0,"model_only":True,"original_v_executions":0,"native_date_calls":0,"whole_year_credit":0,"full_dependency_closure_verified":False,"admitted_engines":0,"soak_dispatch_authorized":False}
+          Path("evidence/result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v222-v-lineage-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
