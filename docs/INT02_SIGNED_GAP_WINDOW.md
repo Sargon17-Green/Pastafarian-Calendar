@@ -1,0 +1,9 @@
+# INT-02 signed-gap assembly and cropped window
+PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE
+Parent c179472d906269d97b41175490bbff17f0023b4f. Source lock 0add0726ef80f160f73594eba50c246c0bdeb0a5f613e14b6baa23e2f5321aae; source oracle blob 63cb9905c7a26d876255711256e84d3a217b2a74 unchanged.
+
+CALENDAR-GATE-WINDOW takes action RD in epoch ±20000, counts 0..615 and separate gap arrays in order -1,-2,... and +1,+2,..., each gap 42..963. Distinct caller-owned buffers: BINARY-LONG SIGNED scalars and entries, BINARY-SHORT UNSIGNED status. Returns contiguous increasing RD window from the last gate strictly below action-5778 to first strictly above action+5778, inclusive. Missing bracket, bad count/gap/action or oversized result returns status22, count zero, fully zeroed output. Success status0, unused output slots zero. Inputs immutable, no heap. Does not certify that supplied gaps are normative; sauce/gap generation is still outstanding.
+
+Bound: 615 gaps each side, scratch 1231 RD values. Even 615*963 from epoch is signed-32-bit safe. At most floor(11556/42)+1=276 interior gates plus two outer brackets, hence <=278 <=280. Outer gates within action ±6741; this is the existing candidates ABI. Strict brackets deliberately include an extra outer gate when a gate equals the boundary. No candidate can extend beyond action ±5778.
+
+Preflight: separate JS sequential assembly/crop model vs prefix-sum/filter/sort reference: 182/182 comparisons matched, max observed 278 output gates. Six malformed/insufficient scenarios included. No COBOL compiler or Native result claimed. Source oracle used only as locked existing contract reference, not copied into production. No Stage56, no CI dispatch, no acceptance. NEXT: independent sauce/gap generation, six signed witnesses and full window differential, bounded seal-10 selection and candidate integration; test this subprogram natively. Existing three isolated CI gates remain unaccepted.
