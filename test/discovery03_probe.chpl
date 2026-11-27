@@ -1223,6 +1223,52 @@ proc probeSixCutletPartitions() {
   }
 }
 
+// Сім частин, два різні діапазони: [3,3] і [3,4].
+// Для фіксованих частин лише сума 21 має один ранг.
+// Для [3,4] число рангів для N=21..28 дорівнює C(7,N-21):
+// 1,7,21,35,35,21,7,1. Перевіряємо також N=20 та 7*upper+1.
+// Незалежний повний лексикографічний перебір; 129 рангів,
+// 13 перевірок потужності, 142 твердження; очікувано 7258 загалом.
+// Дослідження, не історичний свідок і не приймання Stage 6.
+proc probeSevenSlotNarrowBoundedCompositions() {
+  for upper in 3..4 {
+    for total in 20..(7*upper+1) {
+      var tested: BoundedCompositionCounter;
+      tested.totalValue = total;
+      tested.slotsTotal = 7;
+      tested.lo = 3;
+      tested.hi = upper;
+      var enumerated = 0;
+      for a in 3..upper {
+        for b in 3..upper {
+          for c in 3..upper {
+            for d in 3..upper {
+              for e in 3..upper {
+                for f in 3..upper {
+                  for g in 3..upper {
+                    if a+b+c+d+e+f+g != total then continue;
+                    enumerated += 1;
+                    const actual = tested.unrank1(new bigint(enumerated));
+                    check(actual.size == 7 && actual[0] == a &&
+                          actual[1] == b && actual[2] == c &&
+                          actual[3] == d && actual[4] == e &&
+                          actual[5] == f && actual[6] == g,
+                          "Сім частин: верхня межа=" + upper:string +
+                          ", сума=" + total:string + ", ранг=" + enumerated:string);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      check(tested.countAll() == enumerated,
+            "Сім частин: потужність, верхня межа=" + upper:string +
+            ", сума=" + total:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1235,6 +1281,7 @@ proc main() {
   probeFourSlotBoundedCompositions();
   probeFiveSlotBoundedCompositions();
   probeSixSlotBoundedCompositions();
+  probeSevenSlotNarrowBoundedCompositions();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
