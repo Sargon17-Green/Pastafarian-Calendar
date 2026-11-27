@@ -1,0 +1,139 @@
+name: Issue29 v199 live Ada and QA GMP real-rank component differential (zero F)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/issue29-v199-real-weave.yml
+      - tests/issue29_v199_real_weave.adb
+      - issue29_v199_real_weave.gpr
+permissions:
+  contents: read
+  actions: read
+jobs:
+  real-weave:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Lock exact QA parent and untouched sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "6cb58c68dccdf336ff4a2aa571f76d7cf48c2c79"
+          test "$(git rev-parse HEAD:src/canonical_full_weave_gmp_v164.adb)" = "947c3325b705d61504f09dc1d46275ed14f52249"
+          git diff --exit-code HEAD^ HEAD -- src
+          mkdir -p evidence input
+          git rev-parse HEAD > evidence/HEAD.txt
+          git fetch --no-tags origin d10d50383025d73ad2ce11d19d5759221d70f730
+          test "$(git rev-parse FETCH_HEAD)" = "d10d50383025d73ad2ce11d19d5759221d70f730"
+          test "$(git rev-parse FETCH_HEAD:src/canonical_full_weave_gmp_v164.adb)" = "845bd8905943a54e63d6aba0334404a5051fe666"
+          for ref in HEAD FETCH_HEAD; do
+            test "$(git rev-parse "$ref:src/canonical_full_weave_gmp_v164.ads")" = "0b68edf7eddbc33869358bcfcc21e32465fc591e"
+            test "$(git rev-parse "$ref:src/canonical_wide_rank_gmp_v164.adb")" = "52b8814c2ab1924cdebafe893a65d97cd3ccfa61"
+            test "$(git rev-parse "$ref:src/canonical_wide_rank_gmp_v164.ads")" = "14b94e81534e98cfdb07be3824076bd7082385ea"
+          done
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          actual=subprocess.check_output(["git","diff","--name-only","HEAD^","HEAD"],text=True).splitlines()
+          assert sorted(actual)==sorted([".github/workflows/issue29-v199-real-weave.yml","tests/issue29_v199_real_weave.adb","issue29_v199_real_weave.gpr"])
+          src=Path("tests/issue29_v199_real_weave.adb").read_text()
+          assert "Normative_Oracle" not in src and "Calendar_Date" not in src
+          PY
+      - name: Restore immutable source-rank and GMP certificates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15178712147/zip > "$RUNNER_TEMP/source.zip"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15179093713/zip > "$RUNNER_TEMP/gmp.zip"
+          echo "424c346b85ef09eeb3615332429f3319dca4a21a9e61e315c44f456d6b88ba3f  $RUNNER_TEMP/source.zip" | sha256sum -c -
+          echo "b5a833b220ce728b99a3626fd372e73c330fe1c01bfea5be3fecaea089863420  $RUNNER_TEMP/gmp.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,os,sys,zipfile
+          from pathlib import Path
+          sys.set_int_max_str_digits(0)
+          tmp=Path(os.environ["RUNNER_TEMP"])
+          with zipfile.ZipFile(tmp/"source.zip") as z:
+              assert z.testzip() is None
+              d=json.loads(z.read("source-weave-rank.json"))
+              o=json.loads(z.read("source-weave-rank-oracle.json"))
+              assert d["rank"]==o["rank"] and d["native_selector_executed"]
+          with zipfile.ZipFile(tmp/"gmp.zip") as z:
+              assert z.testzip() is None
+              assert z.read("rank.txt").decode()==d["rank"] and z.read("root-count.txt").decode()==d["root_count"]
+              raw=z.read("source-word.json")
+              assert hashlib.sha256(raw).hexdigest()=="76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e"
+              word=json.loads(raw)
+          digest=lambda s:hashlib.sha256(s.encode("ascii")).hexdigest()
+          assert digest(d["rank"])=="160ca5c4a8ee5d0ec29c583a0d7ab91a71d8be4b7dc4c139ebaae066596dcff3"
+          assert digest(d["root_count"])=="c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8"
+          L=[115,108,119,109,106,81,115,114,117,120,98,52,81,97,121,97,115,96,107,61,106,115,119,39,84,103,115,107,55,119,97,50,122,110,81,54,101,83,88,40,25,77,98,122,105]
+          assert len(word)==sum(L)==4244 and [word.count(i) for i in range(1,46)]==L
+          assert d["direction"] in (-1,1) and 1<=int(d["ring_first"])<=2**127-1
+          for name,content in {"lengths.txt":"\n".join(map(str,L)),"word.txt":"\n".join(map(str,word)),"rank.txt":d["rank"],"count.txt":d["root_count"],"ring.txt":d["ring_first"]+"\n"+str(d["direction"])}.items():
+              Path("input",name).write_text(content+"\n")
+          Path("evidence/input-lock.json").write_text(json.dumps({"source_rank_run":45955943924,"gmp_word_run":45958143616,"word_sha256":hashlib.sha256(raw).hexdigest(),"rank_sha256":digest(d["rank"]),"root_sha256":digest(d["root_count"]),"lengths":L},indent=2)+"\n")
+          PY
+      - name: Install GNAT and GMP bindings
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gnat-13 gprbuild libgnatcoll-gmp-dev
+          dpkg-query -W gnat-13 libgnatcoll-gmp-dev libgmp10 > evidence/packages.txt
+      - name: Build and execute both pinned components in isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for variant in live qa; do
+            ref=HEAD
+            if [[ "$variant" == live ]]; then ref=d10d50383025d73ad2ce11d19d5759221d70f730; fi
+            dir="$RUNNER_TEMP/$variant"
+            mkdir -p "$dir/src" "$dir/tests"
+            for file in canonical_full_weave_gmp_v164.adb canonical_full_weave_gmp_v164.ads canonical_wide_rank_gmp_v164.adb canonical_wide_rank_gmp_v164.ads; do
+              git show "$ref:src/$file" > "$dir/src/$file"
+              git hash-object "$dir/src/$file" >> "evidence/$variant-source-blobs.txt"
+            done
+            cp tests/issue29_v199_real_weave.adb "$dir/tests/"
+            cp issue29_v199_real_weave.gpr "$dir/"
+            cp -r input "$dir/"
+            (cd "$dir"; timeout -k 5s 180s gprbuild -p -j2 -P issue29_v199_real_weave.gpr) > "evidence/$variant-build.log" 2>&1
+            sha256sum "$dir/bin/issue29_v199_real_weave" > "evidence/$variant-binary.sha256"
+            nm "$dir/bin/issue29_v199_real_weave" > "evidence/$variant-symbols.txt"
+            if grep -iq normative_oracle "evidence/$variant-symbols.txt"; then exit 1; fi
+            set +e
+            (cd "$dir"; ulimit -v 2097152; ulimit -t 420; timeout -k 5s 480s /usr/bin/time -v -o "$GITHUB_WORKSPACE/evidence/$variant-time.txt" bin/issue29_v199_real_weave) > "evidence/$variant-stdout.txt" 2> "evidence/$variant-stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$variant-exit.txt"
+            if [[ -f "$dir/actual-word.txt" ]]; then cp "$dir/actual-word.txt" "evidence/$variant-word.txt"; fi
+          done
+      - name: Verify actual outputs against independent certificate
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          e=Path("evidence"); expected=list(map(int,Path("input/word.txt").read_text().split()))
+          results={}
+          for v in ("live","qa"):
+              out=(e/f"{v}-stdout.txt").read_text()
+              code=int((e/f"{v}-exit.txt").read_text())
+              p=e/f"{v}-word.txt"
+              word=list(map(int,p.read_text().split())) if p.exists() else []
+              results[v]={"exit":code,"count_pass":"V199_ROOT_COUNT_PASS" in out,"rank_pass":"V199_SOURCE_RING_RANK_PASS" in out,"symbols":len(word),"word_pass":word==expected and "V199_FULL_WORD_PASS SYMBOLS=4244 ZERO_F=1" in out}
+          summary={"schema":"ISSUE29_V199_REAL_COMPONENT_DIFFERENTIAL/1","variants":results,"calendar_calls":0,"whole_year_credit":0,"shared_inputs":"MATLAB-derived ring and independently certified fixed lengths; Ada sauce not executed","stage_accepted":False}
+          (e/"result.json").write_text(json.dumps(summary,indent=2)+"\n")
+          print(json.dumps(summary))
+          assert all(x["exit"]==0 and x["count_pass"] and x["rank_pass"] and x["word_pass"] for x in results.values())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue29-v199-real-weave-${{ github.run_id }}
+          path: evidence/
+          retention-days: 30
