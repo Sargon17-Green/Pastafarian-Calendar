@@ -1521,7 +1521,7 @@ jobs:
   external-reference-differential:
     if: github.ref == 'refs/heads/PHP+Bahasa-Melayu'
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 110
     env:
       # Preserve the exact pinned canonical checkout as read-only evidence.
       # importlib loads core.py and otherwise writes untracked __pycache__ files.
@@ -1804,22 +1804,31 @@ jobs:
           php -l tests/stage56_source_bound_php_year.php > stage56-php-real-evidence/lint.txt 2>&1 || exit 1
           bad=0
           for year in 4999 5000 5001; do
-            if timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
+            modes='0 1'
+            if [ "$year" = 5000 ]; then modes='1 0'; fi
+            for mode in $modes; do
+              dir=stage56-php-real-evidence
+              if [ "$mode" = 1 ]; then dir=stage56-fused-evidence; fi
+              mkdir -p "$dir"
+              printf '%s\n' "$GITHUB_SHA" > "$dir/SHA.txt"
+              printf '%s\n' PC-BRANCH-PHP-MALAY > "$dir/PROJECT_ID.txt"
+              if STAGE56_QA_FUSED="$mode" timeout 900s php -d memory_limit=512M tests/stage56_source_bound_php_year.php \
               .external-canonical-source \
               stage56-external-evidence/reference.json \
               stage56-external-evidence/external-gates.json \
               stage56-external-evidence/scroll-gates-report.json \
-              "$year" "stage56-php-real-evidence/$year.json" \
-              > "stage56-php-real-evidence/$year.stdout" \
-              2> "stage56-php-real-evidence/$year.stderr"; then
+              "$year" "$dir/$year.json" \
+              > "$dir/$year.stdout" \
+              2> "$dir/$year.stderr"; then
               rc=0
             else
               rc=$?
             fi
-            printf '%s\n' "$rc" > "stage56-php-real-evidence/$year.exit"
-            cat "stage56-php-real-evidence/$year.stdout"
-            cat "stage56-php-real-evidence/$year.stderr" >&2
-            if [ "$rc" -ne 0 ] || [ -s "stage56-php-real-evidence/$year.stderr" ] || [ ! -s "stage56-php-real-evidence/$year.json" ]; then bad=1; fi
+            printf '%s\n' "$rc" > "$dir/$year.exit"
+            cat "$dir/$year.stdout"
+            cat "$dir/$year.stderr" >&2
+            if [ "$rc" -ne 0 ] || [ -s "$dir/$year.stderr" ] || [ ! -s "$dir/$year.json" ]; then bad=1; fi
+            done
           done
           test "$bad" -eq 0
       - name: Verify PHP month-count choice stream against pinned canonical source
@@ -1836,6 +1845,24 @@ jobs:
           rc=$?
           printf '%s\n' "$rc" > stage56-php-real-evidence/month-count-choice-trace.exit
           exit "$rc"
+      - name: Verify fused month-count stream and paired performance (QA only)
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-fused-evidence
+          python3 -B tools/stage56_verify_php_month_count_trace.py \
+            --canonical-repo .external-canonical-source \
+            --reference stage56-external-evidence/reference.json \
+            --profile-dir stage56-fused-evidence \
+            --report stage56-fused-evidence/month-count-choice-trace.json
+          trace_rc=$?
+          printf '%s\n' "$trace_rc" > stage56-fused-evidence/month-count-choice-trace.exit
+          python3 -B tools/stage56_compare_fused_pair.py stage56-php-real-evidence stage56-fused-evidence "$GITHUB_SHA" > stage56-fused-evidence/pair-report.json
+          pair_rc=$?
+          printf '%s\n' "$pair_rc" > stage56-fused-evidence/pair.exit
+          cat stage56-fused-evidence/pair-report.json
+          test "$trace_rc" -eq 0 && test "$pair_rc" -eq 0
       - name: Emit evidence hashes
         if: always()
         shell: bash
@@ -1844,6 +1871,9 @@ jobs:
           find stage56-external-evidence -maxdepth 1 -type f -print0 > stage56-evidence-inputs0
           if test -d stage56-php-real-evidence; then
             find stage56-php-real-evidence -maxdepth 1 -type f -print0 >> stage56-evidence-inputs0
+          fi
+          if test -d stage56-fused-evidence; then
+            find stage56-fused-evidence -maxdepth 1 -type f -print0 >> stage56-evidence-inputs0
           fi
           sort -z stage56-evidence-inputs0 | xargs -0 -r sha256sum > stage56-evidence-files.sha256
           rm stage56-evidence-inputs0
@@ -1856,6 +1886,7 @@ jobs:
           path: |
             stage56-external-evidence/
             stage56-php-real-evidence/
+            stage56-fused-evidence/
             stage56-evidence-files.sha256
           if-no-files-found: error
           retention-days: 30
