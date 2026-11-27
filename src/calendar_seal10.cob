@@ -51,6 +51,7 @@ main.
     end-perform
     if bi > 6 goback end-if
     move order-val(function mod(bi, 6) + 1) to next-bowl
+    if next-bowl < 1 or next-bowl > 6 goback end-if
     move bowl-val(1) to operand-a
     move "000000000000000000000000000000000000191" to operand-b
     move "+" to op-code

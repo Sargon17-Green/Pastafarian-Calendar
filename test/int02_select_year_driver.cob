@@ -3,7 +3,7 @@ identification division.
 program-id. INT02-SELECT-YEAR-DRIVER.
 data division.
 working-storage section.
-01 rd-input pic -(9)9.
+01 rd-input pic x(32).
 01 action-rd binary-long signed.
 01 gate-n binary-long signed.
 01 gates.
