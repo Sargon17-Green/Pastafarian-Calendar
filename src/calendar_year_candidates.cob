@@ -46,14 +46,14 @@ main.
         goback
     end-if
     perform varying ix from 1 by 1 until ix > gate-count
+        if gate-rd(ix) < first-gate or gate-rd(ix) > last-gate
+            goback
+        end-if
         if ix > 1
             compute delta-days = gate-rd(ix) - gate-rd(ix - 1)
             if delta-days < 42 or delta-days > 963
                 goback
             end-if
-        end-if
-        if gate-rd(ix) < first-gate or gate-rd(ix) > last-gate
-            goback
         end-if
         compute slot-no = gate-rd(ix) - first-gate + 1
         move ix to gate-index(slot-no)

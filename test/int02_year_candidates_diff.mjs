@@ -37,6 +37,7 @@ call(a,g,-1,23,pairs);call(a,g,pairs.length+1,23,pairs);
 call(a,g.slice(1),0,22,[]);call(a,g.slice(0,-1),0,22,[]);
 const bad=g.slice();bad[1]=bad[0];call(a,bad,0,22,[]);
 call(a+20001,g,0,22,[]);
+for(const extreme of [-2147483648,2147483647]){const gs=g.slice();gs[1]=extreme;call(a,gs,0,22,[])}
 function brute(a,g){const p=[];for(let i=0;i<g.length;i++)for(let j=i+6;j<g.length;j++){const l=g[j]-g[i];if(g[i]<a&&a<=g[j]&&l>=252&&l<=5778)p.push([g[i],g[j]])}return p.sort((x,y)=>(x[1]-x[0])-(y[1]-y[0])||x[0]-y[0])}
 for(const step of [42,963]){
  const gs=[a];while(gs[0]>a-5778)gs.unshift(gs[0]-step);while(gs.at(-1)<a+5778)gs.push(gs.at(-1)+step);
