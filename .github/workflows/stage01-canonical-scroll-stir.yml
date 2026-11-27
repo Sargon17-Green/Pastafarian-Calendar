@@ -455,3 +455,57 @@ jobs:
           path: build/canonical-endpoints/
           if-no-files-found: warn
           retention-days: 30
+
+  scroll-canonical-year-neighbor-direct:
+    name: Canonical year neighbors — original direct entry (2 cases)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+      - name: Compile original normative date probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+          gfortran "${flags[@]}" -c src/source_language_catalog.f90 -o build/source_language_catalog.o
+          gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+          gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+          gfortran "${flags[@]}" -c test/normative_oracle_calendar.f90 -o build/normative_oracle_calendar.o
+          gfortran "${flags[@]}" test/stage01_scroll_full_date_probe.f90 \
+            build/big_integer.o build/source_language_catalog.o build/bootstrap_infrastructure.o \
+            build/normative_oracle_core.o build/normative_oracle_calendar.o \
+            -o build/stage01_scroll_full_date_probe
+          test -x build/stage01_scroll_full_date_probe
+      - name: Run bounded canonical year-neighbor comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/canonical-year-neighbors
+          git rev-parse HEAD > build/canonical-year-neighbors/checkout.txt
+          test "$(cat build/canonical-year-neighbors/checkout.txt)" = "$GITHUB_SHA"
+          sha256sum test/stage01_scroll_month_endpoint_diff.py test/stage01_scroll_year_neighbor_diff.py test/stage01_scroll_full_date_diff.py test/stage01_scroll_full_date_probe.f90 test/stage01_scroll_*independent.py test/stage01_scroll_weaving_reverse_endpoint.py test/normative_oracle_calendar.f90 test/normative_oracle_core.f90 .github/workflows/stage01-canonical-scroll-stir.yml > build/canonical-year-neighbors/source-sha256.txt
+          python3 -m py_compile test/stage01_scroll_year_neighbor_diff.py
+          set +e
+          (ulimit -v 1048576; /usr/bin/time -f 'ELAPSED_SECONDS=%e MAXRSS_KIB=%M EXIT=%x' -o build/canonical-year-neighbors/resource.log timeout --signal=TERM --kill-after=5s 600s python3 -u test/stage01_scroll_year_neighbor_diff.py --fortran-exe build/stage01_scroll_full_date_probe --out-dir build/canonical-year-neighbors) > build/canonical-year-neighbors/driver.log 2>&1
+          rc=$?
+          set -e
+          echo "$rc" > build/canonical-year-neighbors/exit.txt
+          cat build/canonical-year-neighbors/driver.log
+          test "$rc" -eq 0
+          grep -Fxq 'YEAR_NEIGHBOR_SELECTION_SELFTEST=1/1' build/canonical-year-neighbors/driver.log
+          grep -Fxq 'CANONICAL_YEAR_NEIGHBOR_DIRECT=2/2 CASES; 10/10 EXACT FIELDS' build/canonical-year-neighbors/driver.log
+          grep -Fxq 'CANONICAL_YEAR_NEIGHBOR_QA_ONLY_NOT_FULL_STAGE1_ACCEPTANCE' build/canonical-year-neighbors/driver.log
+      - name: Preserve direct year-neighbor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fortran-stage01-canonical-year-neighbor-direct
+          path: build/canonical-year-neighbors/
+          if-no-files-found: warn
+          retention-days: 30
