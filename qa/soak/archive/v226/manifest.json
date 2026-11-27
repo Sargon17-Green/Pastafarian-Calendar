@@ -1,0 +1,558 @@
+{
+  "STOP_NEW_NATIVE_SOAK_DISPATCH": true,
+  "admitted_engines": 0,
+  "failed_attempts_preserved": [
+    "v210",
+    "v213"
+  ],
+  "independent_algorithms_certified": 0,
+  "native_date_calls": 0,
+  "prior_archive_commit": "62824423333b662fee9d7edf471fd7fc89a285fc",
+  "prior_artifacts_rehashed": 16,
+  "prior_manifest_blob": "9b514914e78245e14fd2ce03063546cd3f5402f0",
+  "records": {
+    "v131": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        136218466869
+      ],
+      "log_bytes": 8968,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_frozen-source-evidence-lineage-only.txt": {
+          "bytes": 31765,
+          "sha256": "ba183da0968f796c650e7258afc558f0b79201a1d4fa5c432c9cbc54103ef5b9"
+        },
+        "frozen-source-evidence-lineage-only/system.txt": {
+          "bytes": 819,
+          "sha256": "072b38b6d69d5e21f3ed98f183a85797879b16516d2dc45aa860fddcc8bd135f"
+        }
+      },
+      "log_sha256": "cce2806172a4f162fe70a9a70b959148d209fb3e7fa7bfa4571f6eb7bcc5962b",
+      "metadata_bytes": 20466,
+      "metadata_sha256": "e8ac0b237df203697f12482626097ec04d8f30305cc700c349962389f3125b68",
+      "run": 44715717410,
+      "run_attempt": 1,
+      "run_head": "1c99c36ee9da266f354bfebdbfdaa047c075e3fa"
+    },
+    "v209": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140615353795
+      ],
+      "log_bytes": 8309,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 26092,
+          "sha256": "04fc3bbc4dd373d20529aea98a4b624f63c9e25e71bbeb93f792766e79c17d8d"
+        },
+        "static/system.txt": {
+          "bytes": 647,
+          "sha256": "4d666370c0c6cfdb8e010884a5dde52d2d11f75df202a9b8580a2a1667d868f2"
+        }
+      },
+      "log_sha256": "3d6e5f811db52946c48025c4491e7586f9fec2e56cc670366f7ad6d5712ee3f7",
+      "metadata_bytes": 19199,
+      "metadata_sha256": "e883c0c7856aeef1815fcee0b2c79ce87d85f07495ebb5e8ff69d51e291da61c",
+      "run": 46031257472,
+      "run_attempt": 1,
+      "run_head": "4d1aa56c2f728b2dffaf0ea35f24d43c96216671"
+    },
+    "v210": {
+      "conclusion": "failure",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140624554605
+      ],
+      "log_bytes": 7828,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 22980,
+          "sha256": "9b5942a627d23717e764e9db1754a9687851bc24b58bab8c5799b9d3686a20c7"
+        },
+        "static/system.txt": {
+          "bytes": 654,
+          "sha256": "3df92bd07b1868d941433e36fc16b0c1fe8ded8903a57b633e85a1edb9f4c5e0"
+        }
+      },
+      "log_sha256": "ead53205eeb9677484893bb58378afa158aed1d82647d96932d0a6aca2bf3674",
+      "metadata_bytes": 19164,
+      "metadata_sha256": "9d1b0014d00e8d9abc8561b4f2aab6fdc58f48bc8a62edb677d5c0aef7466471",
+      "run": 46033965002,
+      "run_attempt": 1,
+      "run_head": "7fd99f6ecc3a13ed316ff7a2fcaf177fb013d343"
+    },
+    "v211": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140627063420
+      ],
+      "log_bytes": 8858,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 26895,
+          "sha256": "5d18a7d822dd04dda300653a0bc613c7b8a23147252f2171cd7a0edab59b4fe5"
+        },
+        "static/system.txt": {
+          "bytes": 808,
+          "sha256": "7c1f41434bcc9974736b4eb44c2caf51ac9e2af68e34eed959b01ce380a376e6"
+        }
+      },
+      "log_sha256": "2fa49f4762b5a52d45c06e5d7255d419d1813201ef87ccc68b88d97f8fe5a1e4",
+      "metadata_bytes": 19164,
+      "metadata_sha256": "ff1cd72c14605e344fdf199c0f8c6886a86e11c20412d1dc9726407de6902a67",
+      "run": 46034705999,
+      "run_attempt": 1,
+      "run_head": "17be40cdd70a705c041b51d6e2ed979e447ee73a"
+    },
+    "v212": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140633602836
+      ],
+      "log_bytes": 7668,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 22733,
+          "sha256": "063b76de68714377fec693961e8d3ebb8789c0aca5077409d10887490ac16b7f"
+        },
+        "static/system.txt": {
+          "bytes": 649,
+          "sha256": "25f14fd60200bdbe6037139934b91848aefbf73c2e8a77235332e859a39233aa"
+        }
+      },
+      "log_sha256": "e2e63edcd544224c5f85b5d1b611b14f328d6c2140de343984bc6abcc73392ea",
+      "metadata_bytes": 19188,
+      "metadata_sha256": "6ae579c5e99dd5d41ee9987cc3c90b48fd5bc4622b4605d69518b14af168c2f8",
+      "run": 46036641908,
+      "run_attempt": 1,
+      "run_head": "8819adb7b352bbda67dce4c2330b40a8e133a829"
+    },
+    "v213": {
+      "conclusion": "failure",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140635044174
+      ],
+      "log_bytes": 9689,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 28808,
+          "sha256": "307cb343832ec3178b994e555357167dac6925223c3ee678a328402e006184fa"
+        },
+        "static/system.txt": {
+          "bytes": 659,
+          "sha256": "88329f4cab000f7e3a78186b18ace2dc900912b302ac621af9aa241b3e26cc06"
+        }
+      },
+      "log_sha256": "aeb9202160a04a191c276dc1e68338126bea67091aff0aa2b89a6ce8a5fc5c13",
+      "metadata_bytes": 19161,
+      "metadata_sha256": "d1d301144972e08b600e6d91071ca67fe984d23bca238a7ddd04868c77d446af",
+      "run": 46037066831,
+      "run_attempt": 1,
+      "run_head": "888f9f2dbbd1551a674e8623ef0de05e71dab686"
+    },
+    "v214": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140641634271
+      ],
+      "log_bytes": 9841,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 29380,
+          "sha256": "133d4a22a887fb215f2c9f15ad9e36f0ec52c25ae8498f862956324f83b6ec21"
+        },
+        "static/system.txt": {
+          "bytes": 659,
+          "sha256": "d92b92e29a0f474c5006abd63a9dee4db65f380178c458da35d423878f0c73cb"
+        }
+      },
+      "log_sha256": "87d53a25b2f5fb78d59199da547b72c135be5c4413d836012665823b74eb26c4",
+      "metadata_bytes": 19161,
+      "metadata_sha256": "a05872e83a9507e934f3c8cfb53024dbac8e59b9a583846ee200cfc087f36616",
+      "run": 46039012605,
+      "run_attempt": 1,
+      "run_head": "d10a8e461dd81841ffafdac0a419251f49fc4581"
+    },
+    "v215": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140643102426
+      ],
+      "log_bytes": 13129,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 44328,
+          "sha256": "dbfcb48774bf5ee7494bcb8fb78218e85afa600354f14c7e97f687b8503ea303"
+        },
+        "static/system.txt": {
+          "bytes": 650,
+          "sha256": "fb95d4d9ee948b35e5dbe166d01a2b586fd44078cc67083d63130cd23a6bfc54"
+        }
+      },
+      "log_sha256": "bd4fa485c69c33b6fbc388e3441867e2a0a245474144c7485a45dbbe06d4d78f",
+      "metadata_bytes": 19159,
+      "metadata_sha256": "1ded8c466b42ff940f808513f4280dca80c49250e8b77b30ef9498bb1b6bd5ee",
+      "run": 46039437887,
+      "run_attempt": 1,
+      "run_head": "23ba4e32d8f69b0792edffa2208ed209eb5b5b06"
+    },
+    "v216": {
+      "conclusion": "success",
+      "emitted_witness_checked": false,
+      "job_ids": [
+        140650786680
+      ],
+      "log_bytes": 14327,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static.txt": {
+          "bytes": 42852,
+          "sha256": "2aa32234ed9c77f881368ae4c1456a4923e3eeb406b0dbb556cae81835fdd1e5"
+        },
+        "static/system.txt": {
+          "bytes": 652,
+          "sha256": "7bfa27e96f3b41515ae084abf7b66c40f359a52b2aedba22cd004377178c3337"
+        }
+      },
+      "log_sha256": "dfb194c4d10106875974af8a565c0c3e6754363456dfae725776221136ea3fea",
+      "metadata_bytes": 19200,
+      "metadata_sha256": "4188e96519f157d079a2782964ea8701971f389651a929259c1989bcd34f0130",
+      "run": 46041713083,
+      "run_attempt": 1,
+      "run_head": "cd87b5a63cf6f4226a218cc54d775134d786cc88"
+    },
+    "v217": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140657872491
+      ],
+      "log_bytes": 8026,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_synthetic.txt": {
+          "bytes": 24471,
+          "sha256": "0b6d06b0738e39e6ff65ce8688bf7622cfded3e0e1a019c02ccca9c1bfc01b14"
+        },
+        "synthetic/system.txt": {
+          "bytes": 663,
+          "sha256": "12656905e35c4e41e4129e1273ce320ee2a0be08ebb4b39a7ca0605de4f07e7d"
+        }
+      },
+      "log_sha256": "64bd5a716fec432e1f2306ccbab98c071f14fdeb5545abc351b003dddadad9db",
+      "metadata_bytes": 19209,
+      "metadata_sha256": "cdafd73535440e913ea51bfb4adcdb4224bad8dec691fb19e1e1809ba9c90d5f",
+      "run": 46043798928,
+      "run_attempt": 1,
+      "run_head": "0d25a5271479cd43455ef8f12acef1c974f5da42"
+    },
+    "v218": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140660455910
+      ],
+      "log_bytes": 8008,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 24035,
+          "sha256": "06b60b1b0ca1d9f3db11d6fca81e7ded4c75be92a155f8347d308b32183fb62c"
+        },
+        "static-model/system.txt": {
+          "bytes": 659,
+          "sha256": "5536505019983a030cda88a697e86bdc13c970a02871d0f86075dff816bbe9c2"
+        }
+      },
+      "log_sha256": "2f02141c7c83e846107b41cc25f7b0d262c546171eb5160d0ec2b3ecb8758d35",
+      "metadata_bytes": 19211,
+      "metadata_sha256": "9510a5f38eafc5adc26f6aec31a992a585601512d24da7490ba5005097cd827c",
+      "run": 46044563580,
+      "run_attempt": 1,
+      "run_head": "5315c6b3953b0d3bcbd40917aad88fa1ef535541"
+    },
+    "v219": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140663413586
+      ],
+      "log_bytes": 8113,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 25076,
+          "sha256": "5bc450db003cc8242e82a8ead02e8a46e36457c12f3aa69f54b5e64d60a73202"
+        },
+        "static-model/system.txt": {
+          "bytes": 655,
+          "sha256": "0473d40f0b6a5bb8e86e5fccd41b1cdac68e12aebbe5f5562e155519683f0518"
+        }
+      },
+      "log_sha256": "2b113cae949744cbcea3344aa8c037183603a9199d734a2f1422351d54b0e6c4",
+      "metadata_bytes": 19187,
+      "metadata_sha256": "7e241d6f8cec408bad56e24c9bc756f567784aa7b59d037904a8d767395d7c1b",
+      "run": 46045439733,
+      "run_attempt": 1,
+      "run_head": "3a0b910fa6075bf4ff5c784c526317e2b992d213"
+    },
+    "v220": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140669224074
+      ],
+      "log_bytes": 8590,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 26751,
+          "sha256": "9dc3afd5572d78c37554832ba01948c5b3542fabe87449a019a9b3cd6b65de97"
+        },
+        "static-model/system.txt": {
+          "bytes": 659,
+          "sha256": "6da3a352d4471d0d610b20308f1e66b5d2094a7800b114df2a56689c41fc6bd5"
+        }
+      },
+      "log_sha256": "436ae284c0151cc567b619cebd3c7f97920935ff59ca9157ac95ec62bdac8017",
+      "metadata_bytes": 19194,
+      "metadata_sha256": "85612df3f525bd5c2afb49dcc0a4335585a2ec6e25b900a90f1cb9e1af083f7e",
+      "run": 46047176358,
+      "run_attempt": 1,
+      "run_head": "c96604e6cde1ee798308277d464ecbb6cfaa9c59"
+    },
+    "v221": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140677819733
+      ],
+      "log_bytes": 19157,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 26096,
+          "sha256": "7771813571fd6c330e455c0fa7d036104a93cf85a2738763ee22819e94da879e"
+        },
+        "static-model/10_Post Run actions_checkout@v4.txt": {
+          "bytes": 1735,
+          "sha256": "47a17116df0fc7f479f8eb2b98ae5fdb55c9b35ed43dde678bf1fd672796c6ef"
+        },
+        "static-model/11_Complete job.txt": {
+          "bytes": 376,
+          "sha256": "e298b256820c6c3c83beb04f31d4bc77cedc2ea0ef239589e468f2bd4cd99d86"
+        },
+        "static-model/1_Set up job.txt": {
+          "bytes": 2071,
+          "sha256": "bce2ca4620ef3aa61a45188c970b48552b5e214a2df942951554da13b90b6810"
+        },
+        "static-model/2_Run actions_checkout@v4.txt": {
+          "bytes": 6198,
+          "sha256": "c1953955c09604add7fa724908c924c2cfe168e4a7fdcaadaafe9687c51250f3"
+        },
+        "static-model/3_Bind historical source and prior receipt.txt": {
+          "bytes": 6833,
+          "sha256": "720a301088f9d515eddc45bcf1b13562af85bb8ef3003f245a3c988d5359bd76"
+        },
+        "static-model/4_Exhaustively compare translated branch counts and dual order ranks.txt": {
+          "bytes": 6816,
+          "sha256": "e6ac88092885171be2e6115f185f607b8fd89c50fa8ae4481c1ab531d475ca63"
+        },
+        "static-model/5_Run actions_upload-artifact@v4.txt": {
+          "bytes": 2085,
+          "sha256": "5f4f1f19b9daa16006a7a3640881597aabed0c22ad641d36ab210816297f0302"
+        },
+        "static-model/system.txt": {
+          "bytes": 655,
+          "sha256": "32f34a90839621dc4e04b0e57e51712193acee1c63c977c10b436323da627b65"
+        }
+      },
+      "log_sha256": "e4b9caffab7b461451af8e1570128aed06770f1c5a87dd3ced1e03e37c6598d5",
+      "metadata_bytes": 19165,
+      "metadata_sha256": "b557ef0de0821a9df86ca49cd93a252e6d821ab43496b1320fc60786273701d6",
+      "run": 46049743760,
+      "run_attempt": 1,
+      "run_head": "3f7385a0e9dd2e4c75e8059c6ae2aada49685043"
+    },
+    "v222": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140678673791
+      ],
+      "log_bytes": 19446,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 27427,
+          "sha256": "7581952455da64178226ba5fa3fe564f4e595bf9e2c4c2552bc04c1c8e758cbe"
+        },
+        "static-model/10_Post Run actions_checkout@v4.txt": {
+          "bytes": 1735,
+          "sha256": "149c9499c9aa1e840a2d27345fbc8c89a3f3e4e093ac07bc61df8b83d076acdb"
+        },
+        "static-model/11_Complete job.txt": {
+          "bytes": 376,
+          "sha256": "fc8e8807c7f2e4d42432ef8db1d7d9af4f655aed13422bcb9c42512b89657793"
+        },
+        "static-model/1_Set up job.txt": {
+          "bytes": 2071,
+          "sha256": "81bc69b965cacd0f274c2bfd4c2e8010dc0a640029b9b466ba053b53bf427e31"
+        },
+        "static-model/2_Run actions_checkout@v4.txt": {
+          "bytes": 6198,
+          "sha256": "afb778e8b29cc54eafe9b836e6fcfccf18ebd9f8ac39458887ef432fe48d1851"
+        },
+        "static-model/3_Verify historical roster and normalized source.txt": {
+          "bytes": 5781,
+          "sha256": "83f6a003c3e48d3973a9f6864fe7cf9e38b56c68464ab6c341564f0aab32ae38"
+        },
+        "static-model/4_Verify recurrence and cumulative binary selection on independent model.txt": {
+          "bytes": 9209,
+          "sha256": "28e10a6dfe33eaaaa26ab8e72ae7ba4553c98b7c9369d144c3da514c36e0271d"
+        },
+        "static-model/5_Run actions_upload-artifact@v4.txt": {
+          "bytes": 2075,
+          "sha256": "4d41323684c3288a03122e9fd08608e79cf9c944d4a4542cd440827a3417cb4d"
+        },
+        "static-model/system.txt": {
+          "bytes": 658,
+          "sha256": "1e79e80df90ced1aa21cc255b256d7bcb726aeeb60422643a2a4a69db38fee3c"
+        }
+      },
+      "log_sha256": "52832950d1f10105883f9a1d378b16e40804eee58c9c26f69959009a52a233e9",
+      "metadata_bytes": 19166,
+      "metadata_sha256": "bbbfe4acfe906dfa692ffa8c70a0c28e1aac4b5d0878ce9f6114c10537e57773",
+      "run": 46050003381,
+      "run_attempt": 1,
+      "run_head": "a9eef1646f6bb9dbe8b3355bfef71c38ed701889"
+    },
+    "v223": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140686827045
+      ],
+      "log_bytes": 19289,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_static-model.txt": {
+          "bytes": 26410,
+          "sha256": "0dfdb54a3177c12ee7f264e55bcf7e261a2e0e6f9677038a5af0868de435f2b2"
+        },
+        "static-model/10_Post Run actions_checkout@v4.txt": {
+          "bytes": 1735,
+          "sha256": "f4677a766ab02de970c11a9c98da513c415e488ca967589c4a8b12c817bf8e27"
+        },
+        "static-model/11_Complete job.txt": {
+          "bytes": 376,
+          "sha256": "bb0dc4201517cc15cd5c594426fa681e23fe4b052141b7d1d33f9d60805389d5"
+        },
+        "static-model/1_Set up job.txt": {
+          "bytes": 2071,
+          "sha256": "e4f8b4728c9fa68bbc7f1932ece0c4b2bb019a39606e8ba76701a9019faff163"
+        },
+        "static-model/2_Run actions_checkout@v4.txt": {
+          "bytes": 6198,
+          "sha256": "fb1082cb43662a97ed950643c7557a9184521fbaa58bc82f9980b2f6820dc02f"
+        },
+        "static-model/3_Bind historical roster and reconcile exact dependency drift.txt": {
+          "bytes": 7728,
+          "sha256": "141f808f3f95d3f3daf4db29ed089cf82edb90b3d1d7c24157228494ecda1ecf"
+        },
+        "static-model/4_Reproduce local exhaustive layered DAG and recursive reference model.txt": {
+          "bytes": 6229,
+          "sha256": "259b60a4446d200e290a83c2e024466a27292dd17fc925e5ae1e83241a81b99a"
+        },
+        "static-model/5_Run actions_upload-artifact@v4.txt": {
+          "bytes": 2091,
+          "sha256": "1bda23a182c6f00a8f0543e7d9860130ea32f733768ec9888f8e56a62234e61b"
+        },
+        "static-model/system.txt": {
+          "bytes": 669,
+          "sha256": "ad95020547b76f6dc9e3b0bb0949cf91698609c836d3dce430c76382ef9b6c00"
+        }
+      },
+      "log_sha256": "3821906ea70fa5644f505879ff52182655626163018fe78f023b4f6f620296b4",
+      "metadata_bytes": 19234,
+      "metadata_sha256": "afd8e3e79b63c4249623cc0e1d5be5ed1265904163c0a822270b545b28b9188a",
+      "run": 46052448323,
+      "run_attempt": 1,
+      "run_head": "55a320b40b36e9d7f67c2b96b60c0228eadf55e1"
+    },
+    "v225": {
+      "conclusion": "success",
+      "emitted_witness_checked": true,
+      "job_ids": [
+        140688336780
+      ],
+      "log_bytes": 20780,
+      "log_digest_provenance": "Computed at acquisition; no historical GitHub-provided log digest assumed",
+      "log_members": {
+        "0_preserve.txt": {
+          "bytes": 28779,
+          "sha256": "ce537b5217405b269e180e9b272fcee03e6b2c6dbd978a78219ffe2f8910229a"
+        },
+        "preserve/12_Post Run actions_checkout@v4.txt": {
+          "bytes": 1735,
+          "sha256": "2879c08663f81ea13a697aebef5390a93f2fcce4e1b47f033623fe723c9ab3dd"
+        },
+        "preserve/13_Complete job.txt": {
+          "bytes": 348,
+          "sha256": "bd62b7338f17ac34bec411a810b05a1dc9d155521a9006d0b19ecab34ed69525"
+        },
+        "preserve/1_Set up job.txt": {
+          "bytes": 1936,
+          "sha256": "586b9959ba5c0020780d8c0cb740dc1be346691be61b34ff732930418b4a0eed"
+        },
+        "preserve/2_Run actions_checkout@v4.txt": {
+          "bytes": 6198,
+          "sha256": "d0215f1e15654b76d3888366d92086e2da43568f75a24291391674590223bf53"
+        },
+        "preserve/3_Lock exact QA activation and index.txt": {
+          "bytes": 936,
+          "sha256": "09b74d9036aa35c2daa42c2425a873a0a103c504e1b49ae14379db92bf4f8bcb"
+        },
+        "preserve/4_Verify 16 raw ZIPs, failed receipts, and reconcile historical roster.txt": {
+          "bytes": 12966,
+          "sha256": "38becc7de776f663f234802ac29aec1725f77ac32e99a3fef0e6f67823c5c3f7"
+        },
+        "preserve/5_Commit verified ZIP bytes and manifest only on QA branch.txt": {
+          "bytes": 3491,
+          "sha256": "09ecb575f2858484ceb6152bdb81bf8ea72135c33418409ad19706c2220ab193"
+        },
+        "preserve/6_Read back committed raw bytes and verify hashes.txt": {
+          "bytes": 1190,
+          "sha256": "6dcf89808471a741921f6acb1592cb39839316a39db59e105d9218fbb9007bfc"
+        },
+        "preserve/system.txt": {
+          "bytes": 747,
+          "sha256": "e9475796b7e6998ec4c0136169f453ee59f6cf100cff82db2288f3b52f6574a8"
+        }
+      },
+      "log_sha256": "2d0ae69ad40b18edae8463abb51d71e07915b45cc252342fc71506e1865db6d3",
+      "metadata_bytes": 19497,
+      "metadata_sha256": "dee6fbc0068c70905bd65cea913260a480034c2d26436b794fff127bd04842dd",
+      "run": 46052899439,
+      "run_attempt": 1,
+      "run_head": "3e29c14a552f8227edce1f3c168e951b71b9aca6"
+    }
+  },
+  "schema": "SOAK_V226_DURABLE_LINEAGE_LOG_ARCHIVE/1",
+  "whole_year_credit": 0
+}
