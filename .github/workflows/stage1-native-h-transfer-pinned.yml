@@ -1,0 +1,62 @@
+name: SystemVerilog Stage 1 Pinned Native Full Gate
+on:
+  push:
+    branches: ['qa-systemverilog-kalaallisut-stage1-20261022']
+    paths: ['.github/workflows/stage1-native-h-transfer-pinned.yml']
+permissions:
+  contents: read
+concurrency:
+  group: stage1-native-h-pinned-a2ff17df
+  cancel-in-progress: false
+jobs:
+  native-h-transfer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 85
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: a2ff17df329b2f4b7628d5e8d0a55be51a631d1f
+          persist-credentials: false
+      - name: Verify exact source and fresh inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = a2ff17df329b2f4b7628d5e8d0a55be51a631d1f
+          test "$(git rev-parse HEAD:tests/tb_weave_native_lex_fast.sv)" = d8ee4b4ab7de7ed78baa28486e220c55a885b703
+          test "$(git rev-parse HEAD:scripts/verify_native_H_transfer.sh)" = acd26d7cb32496d31d463ace3c7aca42d95cf673
+          test "$(git rev-parse HEAD:scripts/verify_native_lex_full.sh)" = 9bf30edc300ce108df01d955a98d1eb083f1f6ce
+          test -z "$(git status --porcelain=v1)"
+          for file in native_H_table.hex native_H_root.bin native_lex_rank.bin native_lex_full.bin; do
+            test ! -e "build/$file"
+          done
+          mkdir -p build
+          git rev-parse HEAD | tee build/native_ci_head.txt
+          printf '%s\n' "${{ github.sha }}" > build/native_ci_runner_sha.txt
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Source-fresh original Native H transfer and full lex
+        shell: bash
+        run: |
+          set -euo pipefail
+          iverilog -V > build/native_ci_toolchain.log 2>&1
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          { ulimit -S -v; ulimit -H -v; } | tee build/native_ci_vm_limit.txt
+          test "$(ulimit -S -v)" = 3145728
+          test "$(ulimit -H -v)" = 3145728
+          /usr/bin/time -v -o build/native_ci_resources.txt bash scripts/verify_native_H_transfer.sh 2>&1 | tee build/native_ci_gate.log
+      - name: Preserve Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-native-h-pinned-a2ff17df
+          path: |
+            build/native_ci_*
+            build/native_H_*.log
+            build/native_H_*.bin
+            build/native_lex_*.log
+            build/native_lex_*.bin
+          if-no-files-found: warn
+          retention-days: 90
