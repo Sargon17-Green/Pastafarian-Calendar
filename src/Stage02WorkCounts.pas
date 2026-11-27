@@ -80,9 +80,8 @@ begin
   Result.Action := CountForDay(CalculationDay);
   Result.Target := CountForDay(TargetDay);
   Delta := BigSubtract(TargetDay, CalculationDay);
-  { DEFEITO INJETADO INTENCIONALMENTE, Stage06, 2026-11-27.
-    Autorizado pelo utilizador; fator 2 incorreto. Nao historico. }
-  Result.Distance := BigAdd(BigMultiplyUInt32(BigAbs(Delta), 2), BigOne);
+  { Stage07: cardinalidade normativa do intervalo fechado. }
+  Result.Distance := BigAdd(BigAbs(Delta), BigOne);
   Result.Connection := BigAdd(Result.Action, Result.Target);
   Order := BigCompare(TargetDay, CalculationDay);
   if Order < 0 then Result.Direction := 1

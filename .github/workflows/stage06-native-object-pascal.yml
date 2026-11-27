@@ -1,18 +1,20 @@
-name: Stage 6 Native Object Pascal - intentional distance scale RED
+name: Stage 7 Native Object Pascal - distance scale patch
 on:
   push:
     branches:
       - 'Object-Pascal\+Português'
     paths:
       - 'src/**'
-      - 'test/stage06_distance_probe.pas'
-      - 'test/build_and_run_stage06_distance.sh'
+      - 'test/stage07_distance_probe.pas'
+      - 'test/Stage07SeededLegacy.pas'
+      - 'docs/stage07_distance_verify.py'
+      - 'test/build_and_run_stage07_distance.sh'
       - 'docs/stage06_distance_tag_scale_oracle.py'
       - '.github/workflows/stage06-native-object-pascal.yml'
 permissions:
   contents: read
 jobs:
-  stage06-native-red:
+  stage07-native-green:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -21,15 +23,15 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fp-compiler
-      - name: Verify intentional RED against independent oracle
-        run: bash test/build_and_run_stage06_distance.sh
+      - name: Verify production GREEN and isolated seeded legacy RED
+        run: bash test/build_and_run_stage07_distance.sh
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage06-distance-evidence
+          name: stage07-distance-evidence
           path: |
-            evidence/stage06-*
-            build/stage06/vectors.tsv
+            evidence/stage07-*
+            build/stage07/vectors.tsv
           if-no-files-found: warn
           retention-days: 30
