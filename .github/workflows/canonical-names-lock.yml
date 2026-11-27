@@ -1333,3 +1333,29 @@ jobs:
           python3 -m py_compile tool/dart_hebrew_representative_auditor_extension.py
           python3 tool/dart_hebrew_representative_lru_audit.py --verify-source .
           python3 tool/dart_hebrew_representative_auditor_extension.py
+
+  dart-hebrew-representative-small-oracle:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-small-oracle]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Source lock and independent bounded counter oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/dart_hebrew_representative_lru_audit.py --verify-source .
+          python3 -m py_compile tool/dart_hebrew_representative_small_oracle.py
+          python3 tool/dart_hebrew_representative_small_oracle.py --out out/dart-hebrew-representative-small-oracle
+      - name: Upload small oracle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-small-oracle
+          path: out/dart-hebrew-representative-small-oracle/
+          if-no-files-found: warn
