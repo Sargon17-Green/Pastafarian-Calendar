@@ -7,7 +7,7 @@ Proyecto PC-BRANCH-WAT-SPANISH; rama WAT+Español, no protegida; HEAD auditado c
 Git trees recursive=1 devolvió 183 entradas, truncated=false. El árbol src contiene exactamente tres módulos WAT:
 - src/monster_bootstrap.wat (a803abe599de3b8df4f9ad0afd1136c2442cb2aa): 10 exportaciones (memoria, contexto nuevo, despacho neutral, fase, estado, token, dos métricas y dos pruebas). Sin importaciones. El despacho devuelve 1 tras validar el modo y cambiar fase/estado/token; no resuelve una fecha.
 - src/source_language_catalog.wat (736d4359e56273c985728096e35d21ee289ab9c8): 6 exportaciones (memoria, punteros de chuleta/mes, longitud y dos pruebas); sin importaciones.
-- src/wide_integer.wat (511e005f4cb47829aeb0d225d590774c64789027): 19 exportaciones (memoria, arena, enteros exactos y pruebas); sin importaciones.
+- src/wide_integer.wat (511e005f4cb47829aeb0d225d590774c64789027): 20 exportaciones (memoria, arena, enteros exactos y pruebas); sin importaciones.
 
 No hay src/production/ ni otro módulo de producción fuera de src: el inventario de fuentes ejecutables está limitado a src/, oracle/, tests/ y workflows de QA. Los cuatro módulos oracle son salsa, conteos, puertas/años y calendario integrado; todos sin importaciones. El módulo oracle/normative_calendar_wide.wat (70267bb5730678f81d6138a2224d6b8d9a193eb8) exporta wide_calendar_date, construcción de días amplios, cinco accesores de resultado, funciones normativas y pruebas; no exporta calendar_date. tests/normative_final_resolver.wat es una prueba de resolución parcial (result_ptr y pruebas), no una API de producción. No se ha ejecutado código para esta clasificación.
 
