@@ -33,15 +33,39 @@ if [ "$research_rc" -ne 0 ] || ! grep -Fxq 'YEAR_BOUNDARY_RESEARCH_ONLY_RESULT=P
   exit 1
 fi
 
+# Research diagnostics only: unchanged 240s watchdog and gate semantics.
+# Record CPU versus wall time, plus cgroup throttling snapshots when available.
+# Missing host metrics must not change the probe's exit code.
+run_checked_timed() {
+  local label="$1" output="$2" rc
+  shift 2
+  local TIMEFORMAT="YEAR_BOUNDARY_${label}_TIMING real=%R user=%U sys=%S cpu=%P"
+  for metric in cpu.max cpu.stat memory.events; do
+    if [[ -r "/sys/fs/cgroup/$metric" ]]; then
+      printf 'YEAR_BOUNDARY_%s_BEFORE_%s\n' "$label" "$metric"
+      cat "/sys/fs/cgroup/$metric" || true
+    fi
+  done
+  { time timeout --signal=TERM --kill-after=5s 240s "$@" >"$output" 2>&1; } 2>"$output.timing"
+  rc=$?
+  cat "$output.timing" || true
+  for metric in cpu.max cpu.stat memory.events; do
+    if [[ -r "/sys/fs/cgroup/$metric" ]]; then
+      printf 'YEAR_BOUNDARY_%s_AFTER_%s\n' "$label" "$metric"
+      cat "/sys/fs/cgroup/$metric" || true
+    fi
+  done
+  return "$rc"
+}
+
 # Checked structure/decomposition probe: one full year build, no duplicate API rebuild.
 printf '%s\n' 'YEAR_BOUNDARY_STRUCTURE_BUILD_MODE=CHECKED'
 timeout --signal=TERM --kill-after=5s 120s \
   chpl -M src -M test test/year_boundary_probe.chpl \
   -o "$tmpdir/year_boundary_structure_checked"
 set +e
-timeout --signal=TERM --kill-after=5s 240s \
-  "$tmpdir/year_boundary_structure_checked" --structureOnly=true \
-  >"$tmpdir/structure.log" 2>&1
+run_checked_timed STRUCTURE "$tmpdir/structure.log" \
+  "$tmpdir/year_boundary_structure_checked" --structureOnly=true
 structure_rc=$?
 set -e
 cat "$tmpdir/structure.log"
@@ -58,8 +82,7 @@ timeout --signal=TERM --kill-after=5s 120s \
   chpl -M src -M test test/calendar_date_api_probe.chpl \
   -o "$tmpdir/calendar_date_api_checked"
 set +e
-timeout --signal=TERM --kill-after=5s 240s \
-  "$tmpdir/calendar_date_api_checked" >"$tmpdir/api.log" 2>&1
+run_checked_timed API "$tmpdir/api.log" "$tmpdir/calendar_date_api_checked"
 api_rc=$?
 set -e
 cat "$tmpdir/api.log"
