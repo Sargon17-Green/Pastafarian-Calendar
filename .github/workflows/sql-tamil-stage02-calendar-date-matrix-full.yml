@@ -1,3 +1,5 @@
+# Exact optimized-source regression following Residual B run 45913549110 (16/16, 80/80).
+# Retain original 24 native + 8 isolation + 24 live differential case contract.
 name: SQL Tamil Slice25 source-locked full matrix PG17
 on:
   push:
@@ -90,6 +92,42 @@ jobs:
           test "$(git hash-object sql/test/10_normative_reference.sql)" = 'ce17bf6fd166451b6904411c5e29d1b26d92e278'
           mkdir -p slice25-matrix-evidence
           printf 'GITHUB_SHA=%s\nGITHUB_REF_NAME=%s\nMODE=%s\nCASE=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$TEST_MODE" "$TEST_CASE" > slice25-matrix-evidence/versions.txt
+          while read -r expected file; do
+            actual="$(git hash-object "$file")"
+            printf '%s %s\n' "$actual" "$file" >> slice25-matrix-evidence/locks.txt
+            test "$expected" = "$actual"
+          done <<'LOCKS'
+          9ca6f6ea5b3932facbe92aee6a2b38f6557cedd5 sql/00_schema.sql
+          b28730931e26ee65eaf9108621320d73f458ba07 sql/01_source_language_catalog.sql
+          3367fe9c34e830b0bd99049ebef64398d150cd79 sql/02_monster_bootstrap.sql
+          72ae68d3ec009f65f081a099c8bf06e0dd3ed9d6 sql/03_stage02_production_core.sql
+          caed82dc41d7a259953dc817d5e0722038821310 sql/04_stage02_stone_states.sql
+          f465b466d4a00e24baa689561725a12e5478bf55 sql/05_stage02_hidden_drop.sql
+          caf2991b2ae89f99074d80814655d162f6c68b78 sql/06_stage02_visible_drops.sql
+          0ad25cc4054f46fba66c10dfeffcd81d49f32399 sql/07_stage02_bowls.sql
+          f84f0ac6c2b570aa3ef61038247a44e602014534 sql/08_stage02_bowl_round.sql
+          2f2f2e19e8851b3130f3c3d5edafd5dfbc6923f9 sql/09_stage02_post_stir_round.sql
+          c5c6be7c02c255382ae7c317bfbf17138a12788c sql/10_stage02_sauce.sql
+          b9339560c58cd7a6ab13871ad144257e01c26b84 sql/11_stage02_answer_stream.sql
+          bde130055cead8d3e5677acac516af7329819748 sql/12_stage02_choose_rank.sql
+          d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
+          be1d5450f37e3448f7683aea2a0cabdd4620a6c0 sql/14_stage02_gate_day_selector.sql
+          4d0ad4326b2488e8d2260ffff37f0a93ce49e4f9 sql/15_stage02_year5000_gate_candidates.sql
+          b2fd62c17b133c639f8751fe2eaa03e93ae167f5 sql/16_stage02_year5000.sql
+          116e330d0215f58e23e94b4b573071ad24d44664 sql/17_stage02_adjacent_year_navigation.sql
+          c204a314972b22a4a38f06a02c2fe1bd5bde7acf sql/18_stage02_target_year_navigation.sql
+          d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
+          42acfb80e9eabfd9d091176643763ee7d7bca9ee sql/20_stage02_cutlet_partition.sql
+          5d32a391e1b5609ef790d6a6731ae6713db85a28 sql/21_stage02_cutlet_names.sql
+          3a23c9a1b5ccae667e3e8990005f4b37480df7e4 sql/22_stage02_month_count.sql
+          0fdcaaa03121692ea9762f79cd08e9aedb0ca24c sql/23_stage02_month_lengths.sql
+          a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c sql/24_stage02_month_weaving.sql
+          43c2a6f1071f3e2c9b3ca0225154e42dd2a0de53 sql/25_stage02_month_names.sql
+          faac634a06aee59354de207eb088e4e9996034fa sql/26_stage02_year_structure.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          21f38cd280498070b08b6c3074780f1742c36957 sql/test/151_stage25_calendar_date_locked_goldens_44701320191.jsonl
+          LOCKS
+          test "$(wc -l < slice25-matrix-evidence/locks.txt)" -eq 29
           python3 sql/test/150_stage25_calendar_date_oracle.py --self-test | tee slice25-matrix-evidence/ordinal-selftest.txt
           python3 sql/test/164_stage25_calendar_date_matrix.py --audit | tee slice25-matrix-evidence/audit.txt
           python3 sql/test/165_stage25_calendar_date_full_matrix_contract.py | tee slice25-matrix-evidence/matrix-contract.txt
@@ -104,7 +142,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker run -d --name sql-tamil-slice25-matrix-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17
+          docker run -d --name sql-tamil-slice25-matrix-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
           ready=0
           for i in $(seq 1 60); do
             if docker exec -u postgres sql-tamil-slice25-matrix-pg pg_isready -q -U postgres; then ready=1; break; fi
@@ -112,6 +150,7 @@ jobs:
           done
           test "$ready" -eq 1
           docker exec -u postgres sql-tamil-slice25-matrix-pg postgres --version | tee -a slice25-matrix-evidence/versions.txt
+          docker exec -u postgres sql-tamil-slice25-matrix-pg psql --version | tee -a slice25-matrix-evidence/versions.txt
       - name: Execute bounded production / isolation / normative differential
         shell: bash
         run: |
@@ -123,13 +162,32 @@ jobs:
             args+=(-f "/work/${matches[0]}")
           done
           if [ "$TEST_MODE" = 'differential' ]; then args+=(-f /work/sql/test/10_normative_reference.sql); fi
-          args+=(-f /work/slice25-matrix-evidence/test.sql)
-          docker exec -u postgres sql-tamil-slice25-matrix-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" 2>&1 | tee slice25-matrix-evidence/postgres-results.txt
+          set +e
+          timeout --kill-after=10s 90s docker exec -u postgres sql-tamil-slice25-matrix-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres "${args[@]}" > slice25-matrix-evidence/load.log 2>&1
+          load_code=$?
+          set -e
+          printf 'LOAD_PSQL_EXIT=%s\n' "$load_code" > slice25-matrix-evidence/load-exit.txt
+          cat slice25-matrix-evidence/load.log
+          test "$load_code" -eq 0
+          set +e
+          timeout --kill-after=10s 750s docker exec -u postgres sql-tamil-slice25-matrix-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres -d postgres -f /work/slice25-matrix-evidence/test.sql > slice25-matrix-evidence/postgres-results.txt 2>&1
+          code=$?
+          set -e
+          printf 'PSQL_EXIT=%s\n' "$code" > slice25-matrix-evidence/exit.txt
+          cat slice25-matrix-evidence/postgres-results.txt
+          test "$code" -eq 0
           test "$(grep -c 'SLICE25_NATIVE_FIELD_PASS=' slice25-matrix-evidence/postgres-results.txt)" -eq 5
           if [ "$TEST_MODE" = 'differential' ]; then test "$(grep -c 'SLICE25_DIFFERENTIAL_FIELD_PASS=' slice25-matrix-evidence/postgres-results.txt)" -eq 5; fi
           if [ "$TEST_MODE" = 'isolation' ]; then grep -q 'SLICE25_ISOLATION_SCHEMA_PASS=' slice25-matrix-evidence/postgres-results.txt; grep -q 'SLICE25_ISOLATION_BODY_PASS=' slice25-matrix-evidence/postgres-results.txt; fi
           grep -q "SLICE25_MATRIX_GREEN=$TEST_MODE:$TEST_CASE" slice25-matrix-evidence/postgres-results.txt
           printf 'SLICE25_FULL_CASE_GREEN=%s:%s\n' "$TEST_MODE" "$TEST_CASE" > slice25-matrix-evidence/completion.txt
+      - name: Hash final evidence
+        if: always()
+        shell: bash
+        run: |
+          if [ -d slice25-matrix-evidence ]; then
+            find slice25-matrix-evidence -type f ! -name artifact-files-sha256.txt -print0 | sort -z | xargs -0 -r sha256sum > slice25-matrix-evidence/artifact-files-sha256.txt
+          fi
       - name: Preserve original job logs, SQL, oracle, source and version hashes
         if: always()
         uses: actions/upload-artifact@v4
