@@ -1438,3 +1438,71 @@ jobs:
           name: dart-hebrew-representative-lifecycle
           path: out/dart-hebrew-lifecycle/
           if-no-files-found: warn
+
+  dart-hebrew-representative-timing:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-timing]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [COLD, SAME, MIXED, INDEPENDENT]
+        comparison: [pristine, call, session]
+        exclude:
+          - workload: INDEPENDENT
+            comparison: call
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Untraced paired representative timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_timing.py
+          python3 tool/dart_hebrew_representative_timing.py --workload ${{ matrix.workload }} --comparison ${{ matrix.comparison }} --out out/dart-hebrew-representative-timing
+      - name: Upload timing evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-timing-${{ matrix.workload }}-${{ matrix.comparison }}
+          path: out/dart-hebrew-representative-timing/
+          if-no-files-found: warn
+
+  dart-hebrew-representative-memory:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-memory]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        workload: [COLD, SAME, MIXED, INDEPENDENT, LIFECYCLE]
+        comparison: [call, session]
+        exclude:
+          - workload: INDEPENDENT
+            comparison: call
+          - workload: LIFECYCLE
+            comparison: call
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - name: Separate untraced process RSS and isolate memory diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_timing.py tool/dart_hebrew_representative_memory.py
+          python3 tool/dart_hebrew_representative_memory.py --workload ${{ matrix.workload }} --comparison ${{ matrix.comparison }} --out out/dart-hebrew-representative-memory
+      - name: Upload separate memory evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-representative-memory-${{ matrix.workload }}-${{ matrix.comparison }}
+          path: out/dart-hebrew-representative-memory/
+          if-no-files-found: warn
