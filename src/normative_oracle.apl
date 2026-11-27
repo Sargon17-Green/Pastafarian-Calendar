@@ -395,7 +395,7 @@
   :For position :In ⍳slots
       suffixSlots←slots-position
       :For x :In (lo-1)+⍳((hi-lo)+1)
-          :If rem-x<0
+          :If (rem-x)<0
               :Continue
           :EndIf
           count←dp[suffixSlots+1;(rem-x)+1]
