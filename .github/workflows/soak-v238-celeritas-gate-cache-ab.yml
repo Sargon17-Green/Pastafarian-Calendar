@@ -1,0 +1,194 @@
+name: Soak v238 Celeritas gate cache capacity A-B (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v238-celeritas-gate-cache-ab.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind accepted component and exact candidate source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "879a7a8159b623140fb93e286ba29885f0a42b01"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v238-celeritas-gate-cache-ab.yml"
+          test "$(git rev-parse HEAD:qa/soak/v234_short_rejection_component_probe.cpp)" = "71429208378c21560042c66bf6b7b155230194aa"
+          mkdir -p evidence candidate/include/pastafari candidate/src
+          test -n "$GH_TOKEN"
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15232689246/zip > evidence/v237.zip
+          echo "9de15c507d5555a941d0097e38b1da0585eb361baacf7d643fba2bd664a5e407  evidence/v237.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231834031/zip > evidence/v236.zip
+          echo "711a95ca9d0d2e24ae128556fc967ddcd653e2803c1395e259ec46b9ef12d841  evidence/v236.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15231492525/zip > evidence/v235-failed.zip
+          echo "9ff8d08d98fde45aa2c124137b6cd8d0e8d9ab3aac13a596a836565d293c209c  evidence/v235-failed.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15230524197/zip > evidence/v234.zip
+          echo "059f89e5cf45c86a3165c3c5a2005074d69bcb121a11ad0467eb50840fb0fe9e  evidence/v234.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          repo="Sargon17-Green/Pastafarian-Calendar"
+          ref="97f661ff17aa035fbd7721c690164f007a44dfc6"
+          base="32ad50c8177233adc87eed1721c1e6f34f24ced1"
+          def api(p):return subprocess.check_output(["gh","api",p],timeout=45)
+          c=json.loads(api(f"repos/{repo}/compare/{base}...{ref}"))
+          assert c["ahead_by"]==1 and c["behind_by"]==0
+          assert [(f["filename"],f["additions"],f["deletions"]) for f in c["files"]]==[("src/monster.cpp",12,0)]
+          with zipfile.ZipFile("evidence/v234.zip") as z:
+              assert z.testzip() is None
+              r=json.loads(z.read("result.json"))
+              assert r["classification"]=="COMPONENT_NATIVE_CANDIDATE_PASS"
+              assert r["component_checks_verified"]==53 and r["invalid_inputs_rejected"]==3
+              with zipfile.ZipFile(__import__("io").BytesIO(z.read("v233.zip"))) as old:
+                  assert old.testzip() is None
+                  prev=json.loads(old.read("result.json"))
+                  expected=json.loads(old.read("expected-v5.json"))["rows"]
+          with zipfile.ZipFile("evidence/v236.zip") as z:
+              assert z.testzip() is None
+              v236=json.loads(z.read("result.json"))
+          assert v236["schema"]=="SOAK_V236_CELERITAS_VERSIONED_CANDIDATE/1"
+          assert v236["source_commit"]==ref and len(v236["cases"])==3 and all(x["matched"] for x in v236["cases"])
+          assert v236["whole_year_credit"]==0
+          with zipfile.ZipFile("evidence/v237.zip") as z:
+              assert z.testzip() is None
+              v237=json.loads(z.read("result.json"))
+          assert v237["schema"]=="SOAK_V237_CELERITAS_FIXED_C_COST/1"
+          assert v237["source_commit"]==ref and v237["timing_probe_completed"]
+          assert [(x["c"],x["t"]) for x in v237["rows"]]==[(739617,739617),(739617,739617),(739617,739618)]
+          assert v237["rows"][2]["structure_cache_hits"]==1
+          Path("evidence/frozen-v237.json").write_text(json.dumps(v237,indent=2)+"\n")
+          pins={"src/monster.cpp":"10e075c67f619e6685fe8d4c00439916bd9e2372","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          inv={}
+          for p,h in pins.items():
+              b=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/{repo}/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\x00"+b).hexdigest()==h
+              Path("candidate",p).write_bytes(b)
+              inv[p]={"blob":h,"sha256":hashlib.sha256(b).hexdigest()}
+          assert all(prev["cases"][i]["observed_fields"]==expected[k]["fields"] for i,k in enumerate(["control_000000","timeout_000371","timeout_000385"]))
+          Path("evidence/expected.json").write_text(json.dumps(expected,indent=2)+"\n")
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"base":base,"sources":inv,"source_diff":"+12 lines, no deletions","v234_run":46066864605},indent=2)+"\n")
+          PY
+      - name: Compile original candidate and one-constant diagnostic variant
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path("candidate/src/monster.cpp")
+          s=p.read_bytes()
+          a=b"constexpr std::size_t GATE_GRAVEYARD_LIMIT = 32768;"
+          b=b"constexpr std::size_t GATE_GRAVEYARD_LIMIT = 131072;"
+          assert s.count(a)==1
+          variant=s.replace(a,b)
+          assert variant.replace(b,a)==s
+          Path("candidate/src/variant.cpp").write_bytes(variant)
+          Path("evidence/ab-source.json").write_text(json.dumps({"base_sha256":hashlib.sha256(s).hexdigest(),"variant_sha256":hashlib.sha256(variant).hexdigest(),"only_change":"GATE_GRAVEYARD_LIMIT 32768 -> 131072","reversible":True},indent=2)+"\n")
+          PY
+          cat > candidate/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          using namespace pastafari;
+          using Clock=std::chrono::steady_clock;
+          std::size_t ci(const std::string& name){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& name){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==name)return x.canonicalIndex;throw std::runtime_error("month");}
+          int main(){
+            const Integer c{739617};
+            resetPersistentScarVaultsDiagnostic();
+            setAccelerationScarsEnabled(true);
+            setFullHistoricalAccelerationValidation(false);
+            for(int i=0;i<2;++i){
+              const Integer t=c+i;
+              const auto before=persistentScarMetricsDiagnostic();
+              auto start=Clock::now();
+              std::cerr<<"BEGIN "<<i<<" "<<c<<" "<<t<<std::endl;
+              const auto a=calendarDateSpaghetti(c,t);
+              auto seconds=std::chrono::duration<double>(Clock::now()-start).count();
+              const auto after=persistentScarMetricsDiagnostic();
+              std::cout<<"DATE\t"<<i<<"\t"<<c<<"\t"<<t<<"\t"<<seconds<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName;
+              #define DELTA(f) std::cout<<"\t"<<(after.f-before.f)
+              DELTA(patch28GateCalculated);
+              DELTA(patch28GateGraveyardHit);
+              DELTA(patch28GateGraveyardMiss);
+              DELTA(patch28GateResurrection);
+              DELTA(patch28PoisonedGate);
+              DELTA(patch29HistoricalScanFallback);
+              DELTA(patch27AncestralHit);
+              DELTA(patch39FinalResultHit);
+              #undef DELTA
+              std::cout<<std::endl;
+            }
+          }
+          CPP
+          for mode in base variant; do
+            source=monster
+            if [ "$mode" = variant ]; then source=variant; fi
+            (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I candidate/include "candidate/src/$source.cpp" candidate/driver.cpp -o "candidate/$mode") > "evidence/$mode.build.log" 2>&1 || { cat "evidence/$mode.build.log"; exit 1; }
+          done
+          sha256sum candidate/base candidate/variant candidate/driver.cpp > evidence/build.sha256
+      - name: Sequential fresh-process A-B on two fixed-c witnesses
+        run: |
+          set -euo pipefail
+          for mode in base variant; do
+            set +e
+            (ulimit -v 3145728; /usr/bin/time -v -o "evidence/$mode.time.txt" timeout -k 5s 180s "candidate/$mode") > "evidence/$mode.stdout" 2> "evidence/$mode.stderr"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$mode.exit"
+            cat "evidence/$mode.stdout" "evidence/$mode.stderr"
+          done
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path("evidence")
+          frozen=json.loads((p/"frozen-v237.json").read_text())
+          expected=[frozen["rows"][0],frozen["rows"][2]]
+          modes={}
+          for mode,capacity in [("base",32768),("variant",131072)]:
+              rows=[]
+              for l in (p/f"{mode}.stdout").read_text().splitlines():
+                  if not l.startswith("DATE\t"):continue
+                  a=l.split("\t")
+                  assert len(a)==20
+                  keys=["gate_calculated","gate_cache_hits","gate_cache_misses","gate_resurrections","gate_poisoned","reverse_scan_fallback","structure_cache_hits","final_result_cache_hits"]
+                  rows.append({"i":int(a[1]),"c":int(a[2]),"t":int(a[3]),"seconds":float(a[4]),"fields":list(map(int,a[5:10])),"raw_names":a[10:12],**dict(zip(keys,map(int,a[12:])))})
+              code=int((p/f"{mode}.exit").read_text())
+              m=re.search(r"Maximum resident set size \(kbytes\): (\d+)",(p/f"{mode}.time.txt").read_text())
+              matched=code==0 and len(rows)==2 and all(all(x[k]==y[k] for k in ["c","t","fields","raw_names"]) for x,y in zip(rows,expected))
+              modes[mode]={"capacity":capacity,"exit":code,"rows":rows,"frozen_match":matched,"peak_rss_kib":int(m.group(1)) if m else None}
+          ok=all(v["frozen_match"] for v in modes.values())
+          summary={}
+          if ok:
+              a=modes["base"]["rows"][1];b=modes["variant"]["rows"][1]
+              summary={"adjacent_base_seconds":a["seconds"],"adjacent_variant_seconds":b["seconds"],"adjacent_base_gate_calculated":a["gate_calculated"],"adjacent_variant_gate_calculated":b["gate_calculated"],"adjacent_speedup":a["seconds"]/b["seconds"] if b["seconds"]>0 else None,"gate_recomputation_reduced":b["gate_calculated"]<a["gate_calculated"]}
+          out={"schema":"SOAK_V238_CELERITAS_GATE_CACHE_AB/1","base_commit":"97f661ff17aa035fbd7721c690164f007a44dfc6","modes":modes,"summary":summary,"comparison_completed":ok,"variant_diagnostic_only":True,"independent_new_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v238-gate-cache-ab-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
