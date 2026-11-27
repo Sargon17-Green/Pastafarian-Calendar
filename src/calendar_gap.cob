@@ -50,7 +50,8 @@ main.
         goback
     end-if
     move 1 to bi
-    perform until order-val(bi) = 1 or bi > 6
+    perform until bi > 6
+        if order-val(bi) = 1 exit perform end-if
         add 1 to bi
     end-perform
     if bi > 6 goback end-if

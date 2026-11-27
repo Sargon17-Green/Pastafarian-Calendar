@@ -29,11 +29,11 @@ main.
     call "CALENDAR-SAUCE" using action-rd target-rd
         sauce-bowls sauce-order result-status
     if result-status not = 0 perform fail-case end-if
-    if bowl-val(1) not = "65286679584284972964194865805379907599" perform fail-case end-if
+    if bowl-val(1) not = "065286679584284972964194865805379907599" perform fail-case end-if
     if bowl-val(2) not = "127720283375330263615328810127751035299" perform fail-case end-if
-    if bowl-val(3) not = "54364069496183805843611594721403108554" perform fail-case end-if
-    if bowl-val(4) not = "93072329024469476118876155742008280619" perform fail-case end-if
-    if bowl-val(5) not = "54867842942953573450868747713087920246" perform fail-case end-if
+    if bowl-val(3) not = "054364069496183805843611594721403108554" perform fail-case end-if
+    if bowl-val(4) not = "093072329024469476118876155742008280619" perform fail-case end-if
+    if bowl-val(5) not = "054867842942953573450868747713087920246" perform fail-case end-if
     if bowl-val(6) not = "111207247632761530752404582123499651367" perform fail-case end-if
     if order-val(1) not = 4 perform fail-case end-if
     if order-val(2) not = 5 perform fail-case end-if
