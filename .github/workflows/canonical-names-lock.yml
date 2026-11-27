@@ -1317,3 +1317,19 @@ jobs:
           name: dart-hebrew-representative-preflight
           path: out/dart-hebrew-representative-preflight/
           if-no-files-found: warn
+
+  dart-hebrew-representative-auditor-extension:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-representative-auditor-extension]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify frozen manifest and added synthetic coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tool/dart_hebrew_representative_auditor_extension.py
+          python3 tool/dart_hebrew_representative_lru_audit.py --verify-source .
+          python3 tool/dart_hebrew_representative_auditor_extension.py
