@@ -1,6 +1,6 @@
 # Pastafarian Calendar - Fortran / English line
 
-This directory is the Stage 1 bootstrap of an independent implementation line. It was created from an empty project tree from the embedded specification supplied for this line. No implementation, test, fixture, generated table, checksum, trace, cache, or expected output from another implementation line is used.
+This directory grew from the Stage 1 bootstrap of an independent implementation line. It was created from an empty project tree from the embedded specification supplied for this line. No implementation, test, fixture, generated table, checksum, trace, cache, or expected output from another implementation line is used.
 
 ## Language contract
 
@@ -32,4 +32,8 @@ The script only compiles Fortran sources and runs the resulting Fortran test exe
 
 ## Semantic boundaries
 
-The production-side bootstrap infrastructure does not call the reference oracle. The oracle lives under `test/` and is test-only; it is a verification tool, not a parallel canonical authority. The Stage 1 production skeleton has no calendar algorithm yet; the historical spaghetti path begins only when Stage 2 introduces Discovery 01.
+The production-side bootstrap infrastructure does not call the reference oracle. The oracle lives under `test/` and is test-only; it is a verification tool, not a parallel canonical authority. The Stage 1 production skeleton contained no calendar algorithm. Stage 2 opens the historical spaghetti path with Discovery 01 only.
+
+## Stage 2 — Discovery 01 (open)
+
+The production path now executes the historical raw Euclidean remainder, which returns zero for exact multiples of M instead of M. The invocation owns its input and result; the test-only oracle remains isolated. See [the acceptance contract](test/STAGE02_DISCOVERY01_CONTRACT.md). Patch 01 is not implemented. Native acceptance is pending.
