@@ -1,0 +1,51 @@
+name: MATLAB Stage55 Production Reverse Differential
+on:
+  push:
+    branches: ['MATLAB\+Polski']
+    paths:
+      - 'src/\+pastafari/WholeMonthWeavingFamily.m'
+      - 'tests/run_stage55_production_reverse_gate.m'
+      - 'tools/verify_stage55_production_reverse.py'
+      - '.github/workflows/matlab-stage55-production-reverse.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: matlab-stage55-production-reverse-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  production-reverse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock source and oracle fixtures
+        run: |
+          set -eu
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/+pastafari/BigInt.m)" = "86581532df7492a236283c5ee9410ca281e2e6f5"
+          test "$(git hash-object tests/fixtures/stage55_year5000_middle_word.json)" = "cb4983bcb15e4840b26b46ef2c0566ab870a111e"
+          test "$(git hash-object tests/fixtures/stage55_year5000_appendix_a_metadata.json)" = "a1383b111a88203b0d652b8f0a0e9af1a8b75f25"
+          mkdir -p logs/stage55_production_reverse
+          git rev-parse HEAD > logs/stage55_production_reverse/checkout.txt
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Native production family
+        timeout-minutes: 165
+        uses: matlab-actions/run-command@v3
+        with:
+          command: >-
+            addpath('tests'); diary('logs/stage55_production_reverse/native.log');
+            try; run_stage55_production_reverse_gate(); diary off;
+            catch ME; disp(getReport(ME,'extended','hyperlinks','off')); diary off; rethrow(ME); end
+      - name: Independent pinned exact digest comparison
+        run: python3 tools/verify_stage55_production_reverse.py
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage55-production-reverse-${{ github.sha }}
+          path: logs/stage55_production_reverse/
+          if-no-files-found: error
+          retention-days: 30
