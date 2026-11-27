@@ -170,10 +170,7 @@ function s56Main(array $args): int {
     $start=hrtime(true);
     echo "STAGE56_PHP_REAL_YEAR_BEGIN year={$args[5]} source_commit=" . S56_SOURCE . "\n";
     flush();
-    $mode=getenv('STAGE56_QA_SCRATCH');
-    s56Require($mode === false || $mode === '1', 'SCRATCH_MODE');
-    $scratchExperiment=$mode === '1';
-    $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE, $scratchExperiment);
+    $provider = new YearStructureProvider56(new BootstrapKernel(), S56_SOURCE);
     $profilePath = $args[6] . '.profile.jsonl';
     @unlink($profilePath);
     $dpProfilePath = $args[6] . '.dp.jsonl';
@@ -199,13 +196,8 @@ function s56Main(array $args): int {
     };
     $structure = $provider->buildVerified(S56_JDN, $candidate,
         $trustedAnchor, $years[$idx], $trustedYear, $gateDay, $profile);
-    $providerScratch=$provider->scratchStats56();
     unset($provider);
     gc_collect_cycles();
-    if ($scratchExperiment) {
-        s56Require(is_array($providerScratch), 'PROVIDER_SCRATCH_STATS');
-        $profile('end','scratch_provider',$providerScratch);
-    }
     $providerSeconds = (hrtime(true)-$start)/1e9;
     $cutletOracleStart = hrtime(true);
     $cutletReport = Stage56CutletSemanticOracle::validateStructure(
@@ -281,8 +273,7 @@ function s56Main(array $args): int {
         $years[$idx]['closeGateIndex']-$years[$idx]['openGateIndex'] &&
         count($structure['cutlets']) === $structure['cutletCount'],
         'PHP_CUTLET_COVERAGE');
-    // Separate fresh ranker with private file, never shared with provider.
-    $ranker=new MonthWeavingRanker56(null, $scratchExperiment);
+    $ranker=new MonthWeavingRanker56();
     // Timeout-safe QA evidence: record which independent round-trip operation
     // was still running, without altering the underlying count/rank/unrank.
     $measureRoundtrip=static function(string $stage,callable $operation) use($profile):mixed {
@@ -312,17 +303,6 @@ function s56Main(array $args): int {
     $roundtrip=$measureRoundtrip('roundtrip_unrank',
         static fn():array=>$ranker->unrank($structure['monthLengths'],$rank));
     $end=hrtime(true);
-    $roundtripScratch=$ranker->scratchStats56();
-    if ($scratchExperiment) {
-        s56Require(is_array($roundtripScratch), 'ROUNDTRIP_SCRATCH_STATS');
-        $profile('end','scratch_roundtrip',$roundtripScratch);
-        $expectedBytes=[4999=>67368340,5000=>101192560,5001=>179186560][(int)$args[5]];
-        foreach ([$providerScratch,$roundtripScratch] as $stats) {
-            s56Require($stats['bytes'] === $expectedBytes && $stats['bytes'] <= 268435456 &&
-                $stats['rows'] === count($structure['monthLengths'])-1 && $stats['loads'] > 0,
-                'SCRATCH_EXACT_SIZE_OR_ROWS');
-        }
-    }
     s56Require($roundtrip === $structure['monthWeaving'] &&
         $rank->sign() > 0 && $rank->compare($count) <= 0,
         'PHP_RANK_ROUNDTRIP');
@@ -349,8 +329,6 @@ function s56Main(array $args): int {
         'unrank_seconds'=>($end-$tUnrank)/1e9,
         'total_seconds'=>($end-$start)/1e9,
         'peak_bytes'=>memory_get_peak_usage(true),
-        'qa_engine'=>$scratchExperiment?'scratch':'stride8',
-        'provider_scratch'=>$providerScratch,'roundtrip_scratch'=>$roundtripScratch,
         'month_differential'=>'PASS', 'rank_roundtrip'=>'PASS',
         'cutlet_external_semantics'=>'PASS_SOURCE_FREE_ORACLE',
         'stage56_accepted'=>false

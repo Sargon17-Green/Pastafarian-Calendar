@@ -21,9 +21,8 @@ final class MonthWeavingRanker56
     /** @var list<int>|null */
     private ?array $fastCounts = null;
 
-    public function __construct(?MonthWeavingAdjoint56 $adjoint = null, private readonly bool $scratchExperiment = false)
+    public function __construct(?MonthWeavingAdjoint56 $adjoint = null)
     {
-        if ($adjoint !== null && $scratchExperiment) throw new InvalidArgumentException('STAGE56_SCRATCH_LEGACY');
         $this->forceLegacy = $adjoint !== null;
         $this->adjoint = $adjoint ?? new MonthWeavingAdjoint56();
     }
@@ -152,16 +151,10 @@ final class MonthWeavingRanker56
     private function fastEngineFor(array $counts): MonthWeavingInterleaving56
     {
         if ($this->fastEngine === null || $this->fastCounts !== $counts) {
-            $this->fastEngine = new MonthWeavingInterleaving56($counts, $this->scratchExperiment);
+            $this->fastEngine = new MonthWeavingInterleaving56($counts);
             $this->fastCounts = array_values($counts);
         }
         return $this->fastEngine;
-    }
-
-    /** Explicit QA diagnostics; never enables scratch. */
-    public function scratchStats56(): ?array
-    {
-        return $this->scratchExperiment ? $this->fastEngine?->scratchStats56() : null;
     }
 
     /** @param list<int> $counts @param list<int> $word @return list<int> */

@@ -18,23 +18,16 @@ final class YearStructureProvider56
 
     public function __construct(
         private readonly BootstrapKernel $kernel,
-        private readonly ?string $sourceCommit = null,
-        bool $scratchExperiment = false
+        private readonly ?string $sourceCommit = null
     ) {
         // Explicit opt-in only. Reject unpinned source identity at construction.
         if ($sourceCommit !== null) {
             CanonicalJdnBoundary56::toPhpJdn(0, $sourceCommit);
         }
         $this->slices=new YearStructureSlices56();
-        $this->ranker=new MonthWeavingRanker56(null, $scratchExperiment);
+        $this->ranker=new MonthWeavingRanker56();
         $this->chooser=new UnboundedUniformChoice56();
         $this->binder=new ContextualYear5000Anchor56();
-    }
-
-    /** Experimental read-only per-provider ranker diagnostics. */
-    public function scratchStats56(): ?array
-    {
-        return $this->ranker->scratchStats56();
     }
 
     /**

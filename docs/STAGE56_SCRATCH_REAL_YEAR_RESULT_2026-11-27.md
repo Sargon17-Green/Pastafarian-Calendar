@@ -1,0 +1,12 @@
+# Stage56 actual-year scratch rejection and rollback — 2026-11-27
+PROJECT_ID PC-BRANCH-PHP-MALAY; experiment c9d944ea06e808c882b0272102ee54436bfbd281, automatic run 45963133695, exact branch and SHA authenticated by checkout logs and artifact run metadata. B4 job 140385401890 completed/success, artifact 15181981245 SHA256 1cb83d33912344216f7b8229bee7c8ebbd8a63c5eddca17bd41b85de38c42021 CRC21/21, PHP B4 120 vectors, 3940 ranks/unranks, 31419 fast words, profiler 259 positions/2 buckets, scratch 40 cells/3 shapes/10 negatives PASS in log. External job 140385402214 completed/failure steps16/18/20, artifact 15183837817 SHA256 4f82eace6aa3c3fb0a3d691033130c6923f77ce74d45f24e6329b07a33ccd4fe CRC84/84 and manifest83/83, no unlisted files, project/SHA match. External tuples271 PASS only; month-count trace three years PASS; Raw Sauce FAIL. Real year exits 0/0/124, stderr all empty.
+ 
+| Year | Exact parent seconds | Scratch seconds | Reduction | Baseline peak bytes | Scratch peak bytes | Provider/roundtrip bytes | Decision |
+|---|---:|---:|---:|---:|---:|---|---|
+|4999|591.976011697|537.261978428|9.2426%|224395264|98566144|67368340/67368340|REJECT <10%|
+|5000|875.773382096|778.052850995|11.1582%|270532608|131072000|101192560/101192560|PASS_QA_ONLY|
+|5001|900 censored|900 censored|not measurable|388497408 observed DP|168296448 observed at roundtrip_count start|179186560/provider only|REJECT exit124|
+ 
+5001 provider month_weaving_count 367.361998073s, unrank 241.588639957s; provider scratch 45 rows/44 loads, complete exact byte size; second fresh roundtrip_count started but timed out at DP row24, no final year JSON. All three cutlet oracle messages PASS, not full-year acceptance. 4999 and 5000 independent provider/roundtrip scratch rows and loads 33/32+65 and 44/43+87. Exact comparator SCRATCH_COMPARISON_REJECT. Cross-run timing not controlled paired benchmark. Do not lower threshold or extend caps.
+ 
+Rollback: restore four changed existing files exactly to 9b1150f1b4c34c1f408bdd57c255fcaa4082209f blobs (workflow, ranker, provider, year harness); retain original experiment doc, comparator as inactive historical QA tool, isolated scratch prototype/synthetic tests and all previous history. No branch reset, no force, no promotion. Stage56 NOT ACCEPTED. Next: evaluate independent exact algorithm to reduce fresh full count cost (5001 two independent full builds are limiting); do not rerun failed opt-in unchanged or weaken independence. A new rollback push is not evidence until completed. No PATCH22/PATCH23/main/merge/publication.
