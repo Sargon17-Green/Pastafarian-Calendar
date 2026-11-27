@@ -1,4 +1,8 @@
-; Isolated Stage1 Native395: Foundation year-5000 candidate selection.
+; Isolated Stage1 Native395: original Foundation baseline plus host-driven vectors.
+; This mailbox is test-only, not linked into other ROM targets.
+SECTION "Native395 extended test mailbox", WRAM0
+wNative395ExtendedPhase:: ds 1
+
 SECTION "Calendar Stage1 Native395 tests", ROMX, BANK[3]
 RunCalendarGateYearBench::
     call SRAMEnable
@@ -6,6 +10,7 @@ RunCalendarGateYearBench::
     ld [wCalendarActive], a
     ld [wCalendarActiveOwner], a
     ld [wTestResult], a
+    ld [wNative395ExtendedPhase], a
     ld a, 1
     ld [wTestCaseHi], a
     ld a, 139
@@ -132,6 +137,52 @@ RunCalendarGateYearBench::
     jp nz, .fail16
     call .checkLeaseAndSram
     jp nz, .fail17
+
+    ; The baseline above remains intact. The emulator now supplies one absolute
+    ; signed32 input at a time, while the existing owner/lease is live.
+    ; 1=ready, 2=execute, 3=completed, 4=next, 5=finish.
+    ; Host bounds each wait; this mailbox is isolated to Native395 QA.
+.extendedReady:
+    ld a, 1
+    ld [wNative395ExtendedPhase], a
+.extendedWait:
+    ld a, [wNative395ExtendedPhase]
+    cp 2
+    jr z, .extendedRun
+    cp 5
+    jr z, .extendedFinish
+    jr .extendedWait
+.extendedRun:
+    call CalendarGateYearSelect
+    call .checkLeaseAndSram
+    jr nz, .extendedFail
+    ld a, 3
+    ld [wNative395ExtendedPhase], a
+.extendedAck:
+    ld a, [wNative395ExtendedPhase]
+    cp 4
+    jr z, .extendedReady
+    jr .extendedAck
+.extendedFinish:
+    ; Re-execute Foundation, not a host-written publication. The original
+    ; INT32_MAX/abort/idle checks and final differential then run unchanged.
+    ld hl, .foundation32
+    ld de, wPairCalcOffset
+    ld b, 4
+    call CalendarGateYearCopyN
+    call CalendarGateYearSelect
+    ld a, [wCalendarStatus]
+    or a
+    jr nz, .extendedFail
+    call .checkLeaseAndSram
+    jr nz, .extendedFail
+    ld a, 6
+    ld [wNative395ExtendedPhase], a
+    jr .extendedRestored
+.extendedFail:
+    ld a, 178 ; diagnostic case 434: extended lease or restoration failure
+    jp .failDiagnostic
+.extendedRestored:
 
     ; Snapshot the successful publication. Signed32 overflow at c=INT32_MAX
     ; must fail without changing any of the 18 public result bytes.

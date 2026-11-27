@@ -9,6 +9,8 @@ from pathlib import Path
 
 from test_rom import (
     MAX_BOOT_AND_TEST_FRAMES,
+    FAILURE,
+    WRAM_RESULT,
     SUCCESS,
     TOTAL_CASES,
     UNIMPLEMENTED,
@@ -40,6 +42,18 @@ def parse_symbols(path: Path) -> dict[str, tuple[int, int]]:
         "wCalendarActive",
         "wCalendarStatus",
         "wLeaseTable",
+        "wNative395ExtendedPhase",
+        "wPairCalcOffset",
+        "wPairTargetOffset",
+        "wCalendarAnswerInputBowl",
+        "wCalendarAnswerInputSeal",
+        "wCalendarSelectCount",
+        "wCalendarSelectDirection",
+        "wCalendarActiveOwner",
+        "wCalendarRequestedOwner",
+        "wCalendarRequestedBanks",
+        "wCalendarOrdinalSign",
+        "wCalendarOrdinalLength",
     }
     for line in path.read_text(encoding="utf-8").splitlines():
         match = re.fullmatch(r"([0-9A-Fa-f]{2}):([0-9A-Fa-f]{4})\s+([A-Za-z_]\w*)", line.strip())
@@ -247,7 +261,7 @@ def main() -> None:
         flush=True,
     )
 
-    extended_year_vectors()
+    vectors = extended_year_vectors()
 
     try:
         from pyboy import PyBoy
@@ -257,9 +271,107 @@ def main() -> None:
     boy = PyBoy(str(rom_path), window="null")
     try:
         boy.set_emulation_speed(0)
-        result, case, dispatch, frames = wait_for_completion(
+        # Drive only the isolated ROM test mailbox. The expected publication
+        # comes from the independent Host recurrence/full-sort oracle above.
+        # Never write expected results into emulator RAM.
+        def address(name: str) -> int:
+            bank, addr = symbols[name]
+            assert bank == 0 and 0xC000 <= addr < 0xD000, (name, bank, addr)
+            return addr
+
+        def read_bytes(name: str, size: int) -> bytes:
+            addr = address(name)
+            return bytes(int(boy.memory[addr + i]) for i in range(size))
+
+        def write_bytes(name: str, payload: bytes) -> None:
+            addr = address(name)
+            for i, value in enumerate(payload):
+                boy.memory[addr + i] = value
+
+        phase = address("wNative395ExtendedPhase")
+
+        def wait_phase(expected: int, limit: int, label: str) -> int:
+            for frames_waited in range(1, limit + 1):
+                boy.tick(1, render=False, sound=False)
+                assert int(boy.memory[WRAM_RESULT]) != FAILURE, (
+                    f"{label}: assembly failure before phase {expected}"
+                )
+                if int(boy.memory[phase]) == expected:
+                    return frames_waited
+            raise AssertionError(f"{label}: phase {expected} timeout after {limit} frames")
+
+        # Each ready/completed handshake prevents frame polling from missing
+        # a fast invalid case. Both the bootstrap and each selection are bounded.
+        baseline_frames = wait_phase(1, 120000, "original Foundation baseline")
+        assert read_bytes("wCalendarGateYearResultOpen", 18) == vectors[0][3]
+
+        preserved = {
+            "wPairTargetOffset": 4,
+            "wCalendarAnswerInputBowl": 1,
+            "wCalendarAnswerInputSeal": 1,
+            "wCalendarSelectCount": 2,
+            "wCalendarSelectDirection": 1,
+            "wCalendarActive": 1,
+            "wCalendarActiveOwner": 1,
+            "wCalendarRequestedOwner": 1,
+            "wCalendarRequestedBanks": 1,
+            "wCalendarOrdinalSign": 1,
+            "wCalendarOrdinalLength": 3,
+            "wLeaseTable": 16,
+        }
+
+        def caller_state() -> dict[str, bytes]:
+            return {name: read_bytes(name, size) for name, size in preserved.items()}
+
+        def leased_sram() -> bytes:
+            # The assembly check maps the live leased bank 3 at each handshake.
+            # Compare every byte, not only its existing $6e sentinel.
+            return bytes(int(boy.memory[i]) for i in range(0xA000, 0xC000))
+
+        initial_caller = caller_state()
+        assert initial_caller["wCalendarActive"] == b"\x01"
+        assert initial_caller["wCalendarActiveOwner"] == bytes([70])
+        assert initial_caller["wLeaseTable"][3] == 72
+        initial_sram = leased_sram()
+        assert initial_sram[0] == 0x6E
+        previous = vectors[0][3]
+        total_vector_frames = 0
+        for name, c, status, payload in vectors:
+            assert caller_state() == initial_caller, f"{name}: caller changed before selection"
+            assert read_bytes("wCalendarGateYearResultOpen", 18) == previous
+            calc = c.to_bytes(4, "little", signed=True)
+            write_bytes("wPairCalcOffset", calc)
+            boy.memory[phase] = 2
+            elapsed = wait_phase(3, 120000, name)
+            total_vector_frames += elapsed
+            actual_status = read_bytes("wCalendarStatus", 1)[0]
+            actual = read_bytes("wCalendarGateYearResultOpen", 18)
+            expected = payload if status == 0 else previous
+            assert actual_status == status, (name, actual_status, status)
+            assert actual == expected, (name, actual.hex(), expected.hex())
+            assert read_bytes("wPairCalcOffset", 4) == calc, f"{name}: calculation input"
+            assert caller_state() == initial_caller, f"{name}: caller/owner/lease restoration"
+            assert leased_sram() == initial_sram, f"{name}: leased SRAM mutated"
+            print(
+                f"NATIVE395_EXTENDED_VECTOR name={name} c_abs={c} status={actual_status} "
+                f"result18={actual.hex()} expected18={expected.hex()} frames={elapsed} "
+                "caller_owner_lease_sram8192=PASS",
+                flush=True,
+            )
+            previous = expected
+            boy.memory[phase] = 4
+            wait_phase(1, 120000, f"{name} acknowledgement")
+
+        boy.memory[phase] = 5
+        restore_frames = wait_phase(6, 120000, "Foundation restoration")
+        result, case, dispatch, tail_frames = wait_for_completion(
             boy, max_frames=120000, high_byte_address=high_address
         )
+        frames = baseline_frames + restore_frames + tail_frames
+        assert frames <= 120000, f"baseline and restoration frame budget: {frames}"
+        print(f"NATIVE395_EXTENDED=PASS valid=19 invalid=4 vectors=23 "
+              f"selection_frames={total_vector_frames} per_case_limit=120000 "
+              f"baseline_restore_frames={frames}", flush=True)
         print(
             f"ROM_NATIVE_STATUS={result:02X} LAST_TEST_CASE={case} "
             f"DISPATCH_STATUS={dispatch:02X} FRAMES={frames}",
