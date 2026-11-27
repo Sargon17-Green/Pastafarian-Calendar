@@ -1,0 +1,26 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "source_pin": "08bfc6a7bcb0aeb6ed486d031745b8c18b96db2e",
+  "run": 46004021727,
+  "job": 140522539817,
+  "artifact": 15202060031,
+  "artifact_sha256": "2ae93f3187d2e5f9b461b3e03a5501c3f60ac8a7ab54accdf7922d9b5b37b198",
+  "crc_entries": 76,
+  "verified_program_output_hashes": 45,
+  "verified_exit_codes": 15,
+  "independent_expected_vectors": 15,
+  "source_blobs_verified": 7,
+  "positive_pass": 8,
+  "positive_fail": 4,
+  "negative_pass": 3,
+  "failures": {
+    "batch_witness_full": "STAGE22_OUT_BOWL_1_CELL_1_FAIL",
+    "batch_ones": "STAGE22_OUT_BOWL_1_CELL_1_FAIL",
+    "batch_boundary": "STAGE22_OUT_BOWL_1_CELL_2_FAIL",
+    "batch_rank720": "STAGE22_OUT_BOWL_2_CELL_2_FAIL"
+  },
+  "root_cause": "op39 reads only limb zero of (T-1) mod720; 719=1*512+207, producing rank208 not 720. Reconstruction of both limbs is exact on 0..719. Other failures may share this cause; fresh Native required.",
+  "repair": "Read second limb via op3 (returns 0 outside length), reconstruct low+512*high+1. Add rank512,rank513 and exact old truncation mutant; retain original cases and old-code mutants.",
+  "native_gate_pass": false,
+  "stage_acceptance": false
+}

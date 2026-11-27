@@ -21,8 +21,9 @@ AUX_NEW = b"p;3>[z;b:0a;!b;0h;!!f:]?"
 AUX_OLD = b"p;3>[z;b:2a;!b;0h;!!f:]?"
 OFFSET = b"  z;b:6a;!b;0h;!!v:\n  z;b:s;a;!v;a;!b;9h;!!s:\n"
 OFFSET_ANCHOR = b"  z;b:i;a;!b;0h;!!v:\n  z;b:v;a;!149a;!b;23h;!!v:"
-RANK_NEW = b"  z;b:1a;!b;0h;!!v:\n  z;b:t;a;!v;a;!b;10h;!!n:\n  z;b:720a;!b;0h;!!v:\n  z;b:n;a;!v;a;!b;16h;!!n:\n  z;b:n;a;!0a;!b;3h;!!r:\n  r;1+r:"
-RANK_OLD = RANK_NEW.replace(b"1a;", b"4a;", 1).replace(b"720a;", b"7a;").replace(b"r;1+r:", b"r;4+r:")
+RANK_TRUNCATED = b"  z;b:1a;!b;0h;!!v:\n  z;b:t;a;!v;a;!b;10h;!!n:\n  z;b:720a;!b;0h;!!v:\n  z;b:n;a;!v;a;!b;16h;!!n:\n  z;b:n;a;!0a;!b;3h;!!r:\n  r;1+r:"
+RANK_NEW = RANK_TRUNCATED.replace(b"  r;1+r:", b"  z;b:n;a;!1a;!b;3h;!!v:\n  r;v;512*+1+r:")
+RANK_OLD = RANK_TRUNCATED.replace(b"1a;", b"4a;", 1).replace(b"720a;", b"7a;").replace(b"r;1+r:", b"r;4+r:")
 ANCHOR = b"1i:\n [i;47<][\n  w;i;+g;!t:"
 FILES = ("src/bigint.false", "src/monster_bootstrap.false", "test/normative_reference.false",
          "tools/stage21_native_diagnostic.py", "tools/stage22_native_diagnostic.py",
@@ -49,12 +50,14 @@ def visible(q, steps, old_aux=False):
         b = nxt
     return b, [j+1 for j in order]
 
-def batch(initial, steps, offset=False, old_rank=False):
+def batch(initial, steps, offset=False, old_rank=False, truncate_rank=False):
     b = list(initial)
     trace = []
     for u in range(1, steps+1):
         t = save(sum(b) + 149*u + (6 if offset else 0))
         rank = 4 + (t-4) % 7 if old_rank else 1 + (t-1) % 720
+        if truncate_rank:
+            rank = 1 + (rank - 1) % 512
         order = P[rank-1]
         nxt = []
         for j,x in enumerate(b):
@@ -90,6 +93,9 @@ def math_check():
     assert batch(w,1,True,True)[0] == [529,349,853,394,878,599]
     assert batch([566,1,1,1,1,1],1)[1][0]["rank"] == 720
     assert batch([567,1,1,1,1,1],1)[1][0]["rank"] == 1
+    assert batch([358,1,1,1,1,1],1)[1][0]["rank"] == 512
+    assert batch([359,1,1,1,1,1],1)[1][0]["rank"] == 513
+    assert batch([566,1,1,1,1,1],1,truncate_rank=True)[1][0]["rank"] == 208
     assert batch([M-153,1,1,1,1,1],1)[1][0]["total"] == "1"
     assert save(M)==M and save(M+1)==1
     assert visible(d21.case("ones"),1)[0] == [19,22,25,17,18,19]
@@ -105,6 +111,8 @@ def math_check():
     # Exhaust the full rank space, including the two wrap endpoints.
     for rank in range(1,721):
         assert batch([rank+566,1,1,1,1,1],1)[1][0]["rank"] == rank
+        low, high = (rank-1) % 512, (rank-1) // 512
+        assert 1 + low + 512*high == rank
     return {"random_batch_properties":384,"rank_space":720,"stage_acceptance":False}
 
 def main():
@@ -136,7 +144,7 @@ def main():
     def persist():
         report={"project_id":"PC-BRANCH-FALSE-ARABIC","source_pin":pin,"runtime_pin":RT,
                 "reference_blob":REF,"design":design,"cases":rows,
-                "native_gate_pass":len(rows)==15 and all(x["passed"] for x in rows),
+                "native_gate_pass":len(rows)==18 and all(x["passed"] for x in rows),
                 "independent_artifact_audit":False,"stage_acceptance":False}
         (E/"receipt.json").write_text(json.dumps(report,indent=2)+"\n")
     def run(stage,label,q,steps,source=src,negative=None):
@@ -163,6 +171,7 @@ def main():
     for name,q,steps in (("witness",[2,3,5,7,11,13],1),("witness_full",[2,3,5,7,11,13],12),
                          ("ones",[1]*6,12),("boundary",d22.case("boundary"),12),
                          ("rank720",[566,1,1,1,1,1],1),("rank1",[567,1,1,1,1,1],1),
+                         ("rank512",[358,1,1,1,1,1],1),("rank513",[359,1,1,1,1,1],1),
                          ("save_wrap",[M-153,1,1,1,1,1],1)):
         run(22,"batch_"+name,q,steps)
     q=[20,30,50,70,110,130]
@@ -171,7 +180,10 @@ def main():
         ("old_rank",replace_once(src,RANK_NEW,RANK_OLD),batch(q,1,old_rank=True)[0])):
         bad=marker(22,batch(q,1)[0],wrong,d22.limbs)
         run(22,label,q,1,modified,bad)
-    assert len(rows)==15
+    q=[566,1,1,1,1,1]
+    bad=marker(22,batch(q,1)[0],batch(q,1,truncate_rank=True)[0],d22.limbs)
+    run(22,"old_truncated_rank",q,1,replace_once(src,RANK_NEW,RANK_TRUNCATED),bad)
+    assert len(rows)==18
     print(json.dumps({"cases":len(rows),"passed":sum(r["passed"] for r in rows)}))
     if not all(r["passed"] for r in rows):
         raise SystemExit(1)

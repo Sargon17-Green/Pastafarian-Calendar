@@ -592,7 +592,8 @@ z;39=~["E_BOWL_BATCH_LAYOUT"0 0/]?
   z;b:720a;!b;0h;!!v:
   z;b:n;a;!v;a;!b;16h;!!n:
   z;b:n;a;!0a;!b;3h;!!r:
-  r;1+r:
+  z;b:n;a;!1a;!b;3h;!!v:
+  r;v;512*+1+r:
   z;b:r;a;!b;34h;!!o:
   { Build six new values from the same old snapshot, in bowl-ID order. }
   0q:1u:
