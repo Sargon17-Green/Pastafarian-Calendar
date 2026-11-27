@@ -1,0 +1,187 @@
+# QA only: missing Slice20 actual-sauce composition; synthetic bounded year records.
+name: SQL Tamil Stage02 real sauce month count PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - '.github/workflows/sql-tamil-stage02-real-sauce-month-count.yml'
+permissions:
+  contents: read
+jobs:
+  composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        days: [252, 492, 2460, 5778]
+        direction: [-1, 1]
+    env:
+      DAYS: ${{ matrix.days }}
+      DIRECTION: ${{ matrix.direction }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lock production and normative inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          printf 'SHA=%s\nBRANCH=%s\nDAYS=%s\nDIRECTION=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$DAYS" "$DIRECTION" > evidence/versions.txt
+          while read -r expected file; do
+            actual="$(git hash-object "$file")"
+            printf '%s %s\n' "$actual" "$file" >> evidence/locks.txt
+            test "$expected" = "$actual"
+            sha256sum "$file" >> evidence/source-sha256.txt
+          done <<'LOCKS'
+          9ca6f6ea5b3932facbe92aee6a2b38f6557cedd5 sql/00_schema.sql
+          b28730931e26ee65eaf9108621320d73f458ba07 sql/01_source_language_catalog.sql
+          3367fe9c34e830b0bd99049ebef64398d150cd79 sql/02_monster_bootstrap.sql
+          72ae68d3ec009f65f081a099c8bf06e0dd3ed9d6 sql/03_stage02_production_core.sql
+          caed82dc41d7a259953dc817d5e0722038821310 sql/04_stage02_stone_states.sql
+          f465b466d4a00e24baa689561725a12e5478bf55 sql/05_stage02_hidden_drop.sql
+          caf2991b2ae89f99074d80814655d162f6c68b78 sql/06_stage02_visible_drops.sql
+          0ad25cc4054f46fba66c10dfeffcd81d49f32399 sql/07_stage02_bowls.sql
+          f84f0ac6c2b570aa3ef61038247a44e602014534 sql/08_stage02_bowl_round.sql
+          2f2f2e19e8851b3130f3c3d5edafd5dfbc6923f9 sql/09_stage02_post_stir_round.sql
+          c5c6be7c02c255382ae7c317bfbf17138a12788c sql/10_stage02_sauce.sql
+          b9339560c58cd7a6ab13871ad144257e01c26b84 sql/11_stage02_answer_stream.sql
+          bde130055cead8d3e5677acac516af7329819748 sql/12_stage02_choose_rank.sql
+          d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
+          be1d5450f37e3448f7683aea2a0cabdd4620a6c0 sql/14_stage02_gate_day_selector.sql
+          4d0ad4326b2488e8d2260ffff37f0a93ce49e4f9 sql/15_stage02_year5000_gate_candidates.sql
+          b2fd62c17b133c639f8751fe2eaa03e93ae167f5 sql/16_stage02_year5000.sql
+          116e330d0215f58e23e94b4b573071ad24d44664 sql/17_stage02_adjacent_year_navigation.sql
+          c204a314972b22a4a38f06a02c2fe1bd5bde7acf sql/18_stage02_target_year_navigation.sql
+          d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
+          42acfb80e9eabfd9d091176643763ee7d7bca9ee sql/20_stage02_cutlet_partition.sql
+          5d32a391e1b5609ef790d6a6731ae6713db85a28 sql/21_stage02_cutlet_names.sql
+          3a23c9a1b5ccae667e3e8990005f4b37480df7e4 sql/22_stage02_month_count.sql
+          0fdcaaa03121692ea9762f79cd08e9aedb0ca24c sql/23_stage02_month_lengths.sql
+          a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c sql/24_stage02_month_weaving.sql
+          43c2a6f1071f3e2c9b3ca0225154e42dd2a0de53 sql/25_stage02_month_names.sql
+          faac634a06aee59354de207eb088e4e9996034fa sql/26_stage02_year_structure.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          ce17bf6fd166451b6904411c5e29d1b26d92e278 sql/test/10_normative_reference.sql
+          LOCKS
+          test "$(wc -l < evidence/locks.txt)" -eq 29
+          test "$(find sql -maxdepth 1 -type f -name '*.sql' | wc -l)" -eq 28
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          d, direction = int(os.environ["DAYS"]), int(os.environ["DIRECTION"])
+          assert d in (252,492,2460,5778) and direction in (-1,1)
+          calc = -15055671
+          opening = calc + direction*d
+          target, closing = opening+1, opening+d
+          fixture = dict(days=d, direction=direction, calculation=calc, target=target, opening=opening, closing=closing, year=5000, open_index=0, close_index=6)
+          Path("evidence/fixture.json").write_text(json.dumps(fixture,sort_keys=True)+"\n")
+          for lane, schema, forbidden in (("production","pastafari_sql_tamil","pastafari_sql_tamil_test"),("normative","pastafari_sql_tamil_test","pastafari_sql_tamil")):
+              sql = f"""BEGIN READ ONLY;
+          SET LOCAL statement_timeout = '300s';
+          SELECT 'ISOLATION='||count(*) FROM pg_namespace WHERE nspname='{forbidden}';
+          WITH s AS MATERIALIZED (SELECT {schema}.sauce({calc}::numeric,{target}::numeric) AS x),
+          y AS MATERIALIZED (SELECT ROW(5000::numeric,0::numeric,6::numeric,{opening}::numeric,{closing}::numeric)::{schema}.year_rec AS yr),
+          r AS MATERIALIZED (SELECT x,{schema}.choose_month_count(x,yr) AS k FROM s CROSS JOIN y)
+          SELECT 'RESULT='||jsonb_build_object('bowls',(x).bowls,'order_at_drop_46',(x).order_at_drop_46,'month_count',k)::text FROM r;
+          COMMIT;
+          """
+              Path(f"evidence/{lane}.sql").write_text(sql)
+          PY
+          sha256sum '.github/workflows/sql-tamil-stage02-real-sauce-month-count.yml' evidence/fixture.json evidence/*.sql >> evidence/source-sha256.txt
+      - name: Start isolated PostgreSQL 17.12 and two independent databases
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name sql-sauce-pg --network none -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          ready=0
+          for i in $(seq 1 60); do
+            if docker exec -u postgres sql-sauce-pg pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 2
+          done
+          test "$ready" -eq 1
+          docker exec -u postgres sql-sauce-pg postgres --version | tee -a evidence/versions.txt
+          docker exec -u postgres sql-sauce-pg psql --version | tee -a evidence/versions.txt
+          for db in production normative; do
+            docker exec -u postgres sql-sauce-pg createdb -U postgres "$db"
+          done
+      - name: Execute production-only and normative lanes
+        shell: bash
+        run: |
+          set -euo pipefail
+          pg=(docker exec -u postgres sql-sauce-pg psql -At -X -v ON_ERROR_STOP=1 -U postgres)
+          args=()
+          while read -r hash file; do
+            if [[ "$file" != sql/test/* ]]; then args+=(-f "/work/$file"); fi
+          done < evidence/locks.txt
+          failed=0
+          for lane in production normative; do
+            load=("${args[@]}")
+            if [[ "$lane" = normative ]]; then load=(-f /work/sql/test/10_normative_reference.sql); fi
+            set +e
+            timeout --kill-after=10s 90s "${pg[@]}" -d "$lane" "${load[@]}" > "evidence/$lane-load.log" 2>&1
+            code=$?
+            set -e
+            printf 'LOAD_PSQL_EXIT=%s\n' "$code" > "evidence/$lane-load-exit.txt"
+            cat "evidence/$lane-load.log"
+            if [[ "$code" != 0 ]]; then failed=1; continue; fi
+            set +e
+            timeout --kill-after=10s 320s "${pg[@]}" -d "$lane" -f "/work/evidence/$lane.sql" > "evidence/$lane-results.txt" 2>&1
+            code=$?
+            set -e
+            printf 'PSQL_EXIT=%s\n' "$code" > "evidence/$lane-exit.txt"
+            cat "evidence/$lane-results.txt"
+            if [[ "$code" != 0 ]]; then failed=1; fi
+          done
+          test "$failed" -eq 0
+      - name: Compare independent generated sauce fields and scalar result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee evidence/comparison.txt
+          import json
+          from pathlib import Path
+          from decimal import Decimal
+          f=json.loads(Path("evidence/fixture.json").read_text())
+          def result(lane):
+              lines=Path(f"evidence/{lane}-results.txt").read_text().splitlines()
+              assert lines.count("ISOLATION=0")==1 and lines.count("COMMIT")==1
+              rows=[l[7:] for l in lines if l.startswith("RESULT=")]
+              assert len(rows)==1
+              r=json.loads(rows[0],parse_float=Decimal)
+              assert set(r)=={"bowls","order_at_drop_46","month_count"}
+              M=170141183460469231731687303715884105727
+              bowls=r["bowls"]
+              assert isinstance(bowls,list) and len(bowls)==6
+              assert all(type(x) in (int,Decimal) and x==int(x) and 1<=x<=M for x in bowls)
+              assert sorted(r["order_at_drop_46"])==list(range(1,7))
+              lo=(f["days"]+122)//123
+              hi=min(47,f["days"]//4)
+              assert type(r["month_count"]) is int and lo<=r["month_count"]<=hi
+              return r
+          a,b=result("production"),result("normative")
+          for field in ("bowls","order_at_drop_46","month_count"):
+              ok=a[field]==b[field]
+              print(f"FIELD={field}:{int(ok)}")
+              assert ok, field
+          print("REAL_SAUCE_MONTH_COUNT_GREEN")
+          PY
+          grep -Fxq REAL_SAUCE_MONTH_COUNT_GREEN evidence/comparison.txt
+      - name: Hash original evidence
+        if: always()
+        run: |
+          if [ -d evidence ]; then
+            find evidence -type f ! -name artifact-files-sha256.txt -print0 | sort -z | xargs -0 -r sha256sum > evidence/artifact-files-sha256.txt
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-sauce-${{ matrix.days }}-${{ matrix.direction }}-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: warn
+          retention-days: 90
+      - name: Remove isolated database
+        if: always()
+        run: docker rm -f sql-sauce-pg 2>/dev/null || true
