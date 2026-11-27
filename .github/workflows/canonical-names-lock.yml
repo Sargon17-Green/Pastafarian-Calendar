@@ -240,3 +240,12 @@ jobs:
     uses: ./.github/workflows/false-arabic-stage22-acceptance.yml
     permissions:
       contents: read
+
+  false-arabic-normative-counts:
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/FALSE+العربية' &&
+      contains(github.event.head_commit.message, '[false-arabic-normative-counts]')
+    uses: ./.github/workflows/false-arabic-normative-counts.yml
+    permissions:
+      contents: read

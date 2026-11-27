@@ -1,0 +1,31 @@
+{
+  "project_id": "PC-BRANCH-FALSE-ARABIC",
+  "base": "1dc118fc873bf04c1b491b3a9e4cb60ca92045f7",
+  "scope": "static and mathematical only",
+  "day_at_normative_epoch": {
+    "normative": "1",
+    "old": "60222684"
+  },
+  "direction": [
+    {
+      "sign": -1,
+      "normative": 1,
+      "old": 3
+    },
+    {
+      "sign": 0,
+      "normative": 2,
+      "old": 1
+    },
+    {
+      "sign": 1,
+      "normative": 3,
+      "old": 2
+    }
+  ],
+  "visible_nonleading_aux": {
+    "input": "B=4,L=3,R=5,drop=1,stone=17,position=4,index=1",
+    "normative": "134",
+    "old": "136"
+  }
+}

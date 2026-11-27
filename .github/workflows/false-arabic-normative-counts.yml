@@ -1,0 +1,49 @@
+name: FALSE Arabic normative counts correction
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  normative-counts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      SOURCE_PIN: ${{ github.sha }}
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build exact original interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/normative_counts upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/normative_counts/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/normative_counts/runtime_observed.txt
+          test "$(cat evidence/normative_counts/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+          gcc --version > evidence/normative_counts/compiler_version.txt
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src upstream/interpreter.c upstream/src/false.c upstream/utils/file.c upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c upstream/src/token.c -o upstream/false_int > evidence/normative_counts/compiler_stdout.txt 2> evidence/normative_counts/compiler_stderr.txt
+          printf '%s' '4 7 1ø.%%' > evidence/normative_counts/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/normative_counts/unicode_pick.false > evidence/normative_counts/unicode_pick.stdout 2> evidence/normative_counts/unicode_pick.stderr
+          test "$(cat evidence/normative_counts/unicode_pick.stdout)" = '4'
+      - name: Run source-locked independent raw-cell gate
+        run: |
+          python3 -m py_compile tools/normative_counts_native.py
+          python3 tools/normative_counts_native.py
+      - name: Preserve exact programs, source, output and receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-normative-counts
+          path: evidence/normative_counts/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
