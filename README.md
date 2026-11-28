@@ -32,8 +32,8 @@ The script only compiles Fortran sources and runs the resulting Fortran test exe
 
 ## Semantic boundaries
 
-The production-side bootstrap infrastructure does not call the reference oracle. The oracle lives under `test/` and is test-only; it is a verification tool, not a parallel canonical authority. The Stage 1 production skeleton contained no calendar algorithm. Stage 2 opens the historical spaghetti path with Discovery 01 only.
+The production-side bootstrap infrastructure does not call the reference oracle. The oracle lives under `test/` and is test-only; it is a verification tool, not a parallel canonical authority. The Stage 1 production skeleton contained no calendar algorithm. Stage 2 opens the historical spaghetti path with Discovery 01 and Patch 01.
 
-## Stage 2 - Discovery 01 (open)
+## Stage 2 - Discovery 01 and Patch 01
 
-The production path now executes the historical raw Euclidean remainder, which returns zero for exact multiples of M instead of M. The invocation owns its input and result; the test-only oracle remains isolated. See [the acceptance contract](test/STAGE02_DISCOVERY01_CONTRACT.md). Patch 01 is not implemented. Native acceptance is pending.
+The production path now executes the historical raw Euclidean remainder, which returns zero for exact multiples of M instead of M. The invocation owns its input and result; the test-only oracle remains isolated. See [the acceptance contract](test/STAGE02_DISCOVERY01_CONTRACT.md). Discovery 01 was accepted at 5a9c6387ef1a703e11bc5ddbbf7aa6111c94e6c6. Patch 01 preserves the raw value and maps zero to M in the corrected invocation result. See [Patch 01 contract](test/STAGE02_PATCH01_CONTRACT.md). Native acceptance of the patch is pending.

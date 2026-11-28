@@ -10,5 +10,5 @@ gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -
 ./build/stage01_tests
 
 gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build -c src/discovery01_remainder.f90 -o build/discovery01_remainder.o
-gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build test/stage02_discovery01.f90 build/big_integer.o build/bootstrap_infrastructure.o build/discovery01_remainder.o build/normative_oracle_core.o -o build/stage02_discovery01
-./build/stage02_discovery01
+gfortran -std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build test/stage02_patch01.f90 build/big_integer.o build/bootstrap_infrastructure.o build/discovery01_remainder.o build/normative_oracle_core.o -o build/stage02_patch01
+./build/stage02_patch01
