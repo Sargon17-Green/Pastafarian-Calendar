@@ -1,0 +1,247 @@
+name: Soak v252 exact versioned shared gate integrity native (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v252-celeritas-versioned-shared-gate-native.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind v246 profile and exact v243-v245 candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "d18dbb34f654c957e3fcc532fd15117566f2eb63"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v252-celeritas-versioned-shared-gate-native.yml"
+          mkdir -p evidence source/src source/include/pastafari
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15258539100/zip > evidence/v251.zip
+          echo "4a07b73fba88b008d15d154ae811c8428b6852482be329aff5d844d943665d43  evidence/v251.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15255358297/zip > evidence/v245.zip
+          echo "9e8902c00f65a7481ccf2fb4c826f6571a7b2bde757a7a0e4d297e36574e452c  evidence/v245.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15258401628/zip > evidence/v250.zip
+          echo "ba735b8d7366005a4cd187217e82b9ea426d483363c38868a5cf9212a9557b1a  evidence/v250.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15256434675/zip > evidence/v249.zip
+          echo "524089999bccee5c29961983afe207b49650aba5f828f6cebed0213b4eb510fd  evidence/v249.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15256044364/zip > evidence/v248.zip
+          echo "39497107f8ed16bf0ea3767162a7af37c3127735433b22460697a7cee3502849  evidence/v248.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15255714213/zip > evidence/v247.zip
+          echo "73cb5ffa97582ffa0e329103ab4438892f55cbf8962c0046e9f87bcbfd8683e3  evidence/v247.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15254779866/zip > evidence/v246.zip
+          echo "82b4e1a942c43e204ab8571e6d19a034d3da4f8140853ddf96bedd6932c6f81f  evidence/v246.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,hashlib,zipfile,subprocess
+          from pathlib import Path
+          with zipfile.ZipFile("evidence/v246.zip") as z:
+              assert z.testzip() is None
+              r=json.loads(z.read("result.json"))
+              frozen=json.loads(z.read("frozen-v245.json"))
+          assert r["schema"]=="SOAK_V246_CELERITAS_COLD_PHASE_PROFILE/1" and r["profile_completed"]
+          with zipfile.ZipFile("evidence/v247.zip") as z:
+              assert z.testzip() is None
+              prev=json.loads(z.read("result.json"))
+          assert prev["schema"]=="SOAK_V247_MERSENNE_SAVE_AB/1" and prev["comparison_completed"]
+          assert prev["source_commit"]==r["candidate_commit"]
+          with zipfile.ZipFile("evidence/v248.zip") as z:
+              assert z.testzip() is None
+              geometry=json.loads(z.read("result.json"))
+          assert geometry["schema"]=="SOAK_V248_CELERITAS_GATE_GEOMETRY_EQUIVALENCE/1" and geometry["component_pass"] and geometry["signed_gap_questions"]==1469
+          assert geometry["source_commit"]==r["candidate_commit"]
+          ref="408d80e43159eba06849b6a929e0010f32b9b91b"
+          assert r["candidate_commit"]==ref and [x["c"] for x in frozen]==[739617,-377237,6875993]
+          Path("evidence/frozen.json").write_text(json.dumps(frozen,ensure_ascii=False,indent=2)+"\n")
+          pins={"src/monster.cpp":"faad56bd1a2f70b19d40e266b3b2e05754197a48","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          manifest={}
+          for p,h in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==h
+              Path("source",p).write_bytes(raw)
+              manifest[p]={"blob":h,"sha256":hashlib.sha256(raw).hexdigest()}
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"files":manifest},indent=2)+"\n")
+          PY
+      - name: Compile exact baseline and shared-geometry diagnostic
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          s=Path("source/src/monster.cpp").read_text()
+          a="const GateGraveyardKey key{stage56CorrectedSauce_, n};"
+          b="""// QA only: canonical saved-sum geometry is identical for
+                      // the two stage flags. Share only the cumulative gate vault
+                      // in normal acceleration, not year checkpoints or sauce.
+                      const GateGraveyardKey key{
+                          (accelerationsOn() && !fullHistoricalValidationOn())
+                              ? true : stage56CorrectedSauce_, n};"""
+          assert s.count(a)==2
+          variant=s.replace(a,b)
+          assert variant.replace(b,a)==s
+          Path("source/src/variant.cpp").write_text(variant)
+          Path("evidence/ab-source.json").write_text(json.dumps({"original_sha256":hashlib.sha256(s.encode()).hexdigest(),"variant_sha256":hashlib.sha256(variant.encode()).hexdigest(),"reversible":True,"only_change":"canonical shared gate vault key in accelerated non-historical mode at both signed traversal sites","source_equivalence_argument":["same counts, stones, hidden and visible helper inputs","same 46-step initial bowl recurrence; single latch at i=46","both post-stir recurrences use SAVE(sum(old)+149*stir), identical permutation, neighbor indices, coefficients and simultaneous update","same 922-family gap rank from identical final bowls and latch; same foundation and signed cumulative recurrence","conditional on valid cache contents and exact pinned source; all explicit historical/fault routes retained"],"universal_equivalence_certified":False},indent=2)+"\n")
+          PY
+          python3 - <<'PY'
+          import json,hashlib,zipfile
+          from pathlib import Path
+          p=Path("source/src/variant.cpp")
+          with zipfile.ZipFile("evidence/v249.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+              pins=json.loads(z.read("ab-source.json"))
+          assert prior["schema"]=="SOAK_V249_SHARED_GATE_GEOMETRY_AB/1" and prior["comparison_completed"]
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==pins["variant_sha256"]
+          with zipfile.ZipFile("evidence/v250.zip") as z:
+              assert z.testzip() is None
+              prior250=json.loads(z.read("result.json"))
+          assert prior250["schema"]=="SOAK_V250_SHARED_GATE_POISON/1" and prior250["guard_pass"]
+          assert prior250["in_range_mutation_normal_mode_tested"] is False
+          original=p.read_text()
+          guarded=original
+          changes=[
+              ("    std::string semanticFingerprint{};\n};\n\nstd::map<GateGraveyardKey, BuriedGate>","    std::string semanticFingerprint{};\n    int verifiedGap = 0;\n};\n\nstd::map<GateGraveyardKey, BuriedGate>",1),
+              ("bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963;","bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963 &&\n                        rememberedGap == corpse.verifiedGap;",2),
+              ("                        persistentSemanticFingerprint()\n                    };\n                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);","                        persistentSemanticFingerprint(),\n                        gap.convert_to<int>()\n                    };\n                    std::lock_guard<std::mutex> guard(gateGraveyardMutex);",2)
+          ]
+          for a,b,n in changes:
+              assert guarded.count(a)==n,a
+              guarded=guarded.replace(a,b)
+          restored=guarded
+          for a,b,n in reversed(changes):
+              assert restored.count(b)==n,b
+              restored=restored.replace(b,a)
+          assert restored==original
+          import subprocess
+          with zipfile.ZipFile("evidence/v251.zip") as z:
+              assert z.testzip() is None
+              result=json.loads(z.read("result.json"))
+              pin=json.loads(z.read("gap-integrity-pins.json"))
+          assert result["schema"]=="SOAK_V251_GATE_GAP_INTEGRITY_RED_GREEN/1" and result["red_reproduced"] and result["green_repaired"]
+          assert hashlib.sha256(guarded.encode()).hexdigest()==pin["guarded_sha256"]
+          ref="87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065"
+          blob="9a09f53c4bb54fa3e3861677bd0d367b7d4d5f78"
+          raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/src/monster.cpp?ref={ref}"],timeout=45)
+          assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==blob
+          def norm(x):
+              return [l.strip() for l in x.splitlines() if l.strip() and not l.lstrip().startswith("//")]
+          assert norm(guarded)==norm(raw.decode()),"versioned source differs from v251 guarded semantic lines"
+          Path("source/src/versioned.cpp").write_bytes(raw)
+          with zipfile.ZipFile("evidence/v245.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+          assert prior["schema"]=="SOAK_V245_JS_FIXED_C_PUBLIC_API/1" and prior["comparison_pass"]
+          assert [(x["c"],x["t"]) for x in prior["rows"]]==[(739617,739617),(739617,739618),(-377237,-377237),(-377237,-377236),(6875993,6875993),(6875993,6875994)]
+          Path("evidence/frozen-v245-all.json").write_text(json.dumps(prior["rows"],ensure_ascii=False,indent=2)+"\n")
+          Path("evidence/versioned-pins.json").write_text(json.dumps({"commit":ref,"blob":blob,"sha256":hashlib.sha256(raw).hexdigest(),"exact_v251_guarded_semantic_lines_equal":True},indent=2)+"\n")
+          PY
+          cat > source/probe.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+          using namespace pastafari;
+          std::size_t ci(const std::string& n){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& n){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("month");}
+          void require(bool b,const char* msg){if(!b)throw std::runtime_error(msg);}
+          void component(){
+            for(int mode=0;mode<3;++mode)for(int order=0;order<2;++order){
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(mode!=1);
+              setFullHistoricalAccelerationValidation(mode==2);
+              Patch18YearWalkWorkspace a(FOUNDATION_DAY_OLD,order!=0),b(FOUNDATION_DAY_OLD,order==0);
+              const auto ap=a.gateDay(128),an=a.gateDay(-128);
+              const auto before=persistentScarMetricsDiagnostic();
+              const auto bp=b.gateDay(128),bn=b.gateDay(-128);
+              const auto after=persistentScarMetricsDiagnostic();
+              require(ap==bp&&an==bn,"signed endpoint mismatch");
+              auto calc=after.patch28GateCalculated-before.patch28GateCalculated;
+              auto hits=after.patch28GateResurrection-before.patch28GateResurrection;
+              require(calc==(mode==0?0:256)&&hits==(mode==0?256:0),"shared route guard");
+              std::cout<<"COMPONENT\t"<<mode<<"\t"<<order<<"\t"<<ap<<"\t"<<an<<"\t"<<calc<<"\t"<<hits<<std::endl;
+            }
+          }
+          int main(int argc,char** argv){
+            if(argc!=2)return 2;
+            if(std::string(argv[1])=="component"){component();return 0;}
+            const Integer c{argv[1]};
+            resetPersistentScarVaultsDiagnostic();
+            setAccelerationScarsEnabled(true);
+            setFullHistoricalAccelerationValidation(false);
+            for(int i=0;i<2;++i){
+              const Integer t=c+i;
+              const auto before=persistentScarMetricsDiagnostic();
+              const auto start=std::chrono::steady_clock::now();
+              const auto a=calendarDateSpaghetti(c,t);
+              const auto after=persistentScarMetricsDiagnostic();
+              const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+              std::cout<<"DATE\t"<<c<<"\t"<<t<<"\t"<<seconds<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<"\t"<<after.patch28GateCalculated-before.patch28GateCalculated<<"\t"<<after.patch28GateResurrection-before.patch28GateResurrection<<"\t"<<after.patch27AncestralHit-before.patch27AncestralHit<<std::endl;
+            }
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include source/src/versioned.cpp source/probe.cpp -o source/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum source/probe source/probe.cpp source/src/versioned.cpp > evidence/build.sha256
+      - name: Native exact candidate signed component and six original public dates
+        run: |
+          set -euo pipefail
+          (ulimit -v 786432; timeout -k 5s 45s source/probe component) > evidence/component.stdout 2> evidence/component.stderr
+          cat evidence/component.stdout
+          test ! -s evidence/component.stderr
+          for c in 739617 -377237 6875993; do
+            set +e
+            (ulimit -v 3145728; /usr/bin/time -v -o "evidence/$c.time.txt" timeout -k 5s 150s source/probe "$c") > "evidence/$c.stdout" 2> "evidence/$c.stderr"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$c.exit"
+            cat "evidence/$c.stdout" "evidence/$c.stderr"
+          done
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path("evidence")
+          frozen=json.loads((p/"frozen-v245-all.json").read_text())
+          rows=[];groups=[]
+          for c,n in [(739617,31487),(-377237,29289),(6875993,43793)]:
+              actual=[]
+              for l in (p/f"{c}.stdout").read_text().splitlines():
+                  a=l.split("\t")
+                  assert len(a)==14 and a[0]=="DATE"
+                  actual.append({"c":int(a[1]),"t":int(a[2]),"seconds":float(a[3]),"fields":list(map(int,a[4:9])),"raw_names":a[9:11],"gate_calculated":int(a[11]),"gate_resurrections":int(a[12]),"structure_hits":int(a[13])})
+              code=int((p/f"{c}.exit").read_text())
+              expected=[x for x in frozen if x["c"]==c]
+              ok=code==0 and len(actual)==2 and not (p/f"{c}.stderr").read_text()
+              ok=ok and all((x["c"],x["t"],x["fields"],x["raw_names"])==(y["c"],y["t"],y["fields"],y["cpp_raw_names"]) for x,y in zip(actual,expected))
+              ok=ok and actual[0]["gate_calculated"]==n and actual[1]["gate_calculated"]==actual[1]["gate_resurrections"]==0 and actual[1]["structure_hits"]==1
+              m=re.search(r"Maximum resident set size \(kbytes\): (\d+)",(p/f"{c}.time.txt").read_text())
+              groups.append({"c":c,"exit":code,"matched":bool(ok),"peak_rss_kib":int(m.group(1)) if m else None})
+              rows.extend(actual)
+          component=(p/"component.stdout").read_text().splitlines()
+          component_ok=len(component)==6 and all(l.startswith("COMPONENT\t") for l in component)
+          ok=component_ok and all(x["matched"] for x in groups)
+          out={"schema":"SOAK_V252_VERSIONED_SHARED_GATE_NATIVE/1","candidate_commit":"87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065","groups":groups,"rows":rows,"component_pass":component_ok,"versioned_candidate_pass":ok,"compared_previously_frozen_pairs":6,"independent_new_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v252-versioned-shared-gate-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
