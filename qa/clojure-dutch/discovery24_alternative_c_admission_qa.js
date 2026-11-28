@@ -34,14 +34,14 @@ function contract() {
   }
   function admit(profile,pos,rank,limits=LIMITS) {
     if(!Array.isArray(profile)||profile.length<2||profile.length>33) return {status:"REFUSE_PROFILE_SCOPE"};
-    if(!profile.every(v=>Number.isInteger(v)&&v>=4&&v<=123))return {status:"REFUSE_PROFILE_SCOPE"};
+    if(!Array.from(profile).every(v=>Number.isInteger(v)&&v>=4&&v<=123))return {status:"REFUSE_PROFILE_SCOPE"};
     const n=profile.reduce((a,b)=>a+b,0);
     if(n>3569)return {status:"REFUSE_PROFILE_SCOPE"};
     if(!Number.isInteger(pos)||pos<1||pos>=n||pos>520)return {status:"REFUSE_POSITION_SCOPE"};
     const e=envelope(BigInt(profile.length),BigInt(n),BigInt(pos));
     // Cheap length check precedes regex or BigInt conversion; the rank is never
     // converted here. B is a deliberately loose bound, in bits, on valid rank.
-    if(typeof rank!=="string"||rank.length===0||BigInt(rank.length)>e.B||!/^[1-9][0-9]*$/.test(rank))return {status:"REFUSE_RANK_ENCODING"};
+    if(typeof rank!=="string"||rank.length===0||BigInt(rank.length)>e.B||rank[0]==='0'||/[^0-9]/.test(rank))return {status:"REFUSE_RANK_ENCODING"};
     // Exact decimal length of 2^B-1 checked only downstream, inside metered execution.
     // A length ceiling alone is not proof that rank <= root count.
     if(!limits||keys.some(k=>typeof limits[k]!=="bigint"||limits[k]<1n||limits[k]>LIMITS[k]))return {status:"REFUSE_INVALID_CAP"};
@@ -91,7 +91,8 @@ function contract() {
     assert(admit([4,4],8,"1").status==="REFUSE_POSITION_SCOPE","p=N");
     assert(admit(Array(34).fill(4),1,"1").status==="REFUSE_PROFILE_SCOPE","m outside");
     assert(admit(Array(33).fill(123),1,"1").status==="REFUSE_PROFILE_SCOPE","N outside");
-    for(const rank of ["","0","01","-1","1.0","1e4"," 1","9".repeat(42861)])assert(admit(profile,520,rank).status==="REFUSE_RANK_ENCODING","rank encoding");
+    assert(admit([4,,4],1,"1").status==="REFUSE_PROFILE_SCOPE","sparse profile");
+    for(const rank of ["","0","01","-1","1.0","1e4"," 1","1\n","1\r\n","9".repeat(42861)])assert(admit(profile,520,rank).status==="REFUSE_RANK_ENCODING","rank encoding");
     assert(admit(profile,520,"1",{...LIMITS,scalar:LIMITS.scalar+1n}).status==="REFUSE_INVALID_CAP","cap escalation");
     assert(admit(profile,520,"1",{...LIMITS,bit:0n}).status==="REFUSE_INVALID_CAP","zero cap");
     return {status:"PASS_ADMISSION_CERTIFICATE_MODEL_ONLY",checks,caps:LIMITS,cases,max,stage2:"OPEN",production:"UNCHANGED",rank:"NOT_VERIFIED",native:"NOT_RUN"};
@@ -102,7 +103,7 @@ console.log(JSON.stringify(contract(),(_,v)=>typeof v==='bigint'?String(v):v,2))
 /* Observed offline JS model result:
 {
   "status": "PASS_ADMISSION_CERTIFICATE_MODEL_ONLY",
-  "checks": 1243,
+  "checks": 1246,
   "caps": {
     "scalar": "550000000000",
     "bit": "65000000000000000000000",
