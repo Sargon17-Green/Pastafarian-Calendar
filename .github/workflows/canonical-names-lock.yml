@@ -1520,9 +1520,9 @@ jobs:
       - name: Verify format and capture exact repair evidence
         shell: bash
         run: |
-          if ! dart format --output=none --set-exit-if-changed lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart lib/pastafari_calendar.dart; then
-            dart format --output=write lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart lib/pastafari_calendar.dart
-            for file in lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart lib/pastafari_calendar.dart; do
+          if ! dart format --output=none --set-exit-if-changed lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; then
+            dart format --output=write lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart
+            for file in lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; do
               echo "DART_CAPTURE_BEGIN:${file}"
               base64 -w0 "${file}"
               printf '\n'
@@ -1590,3 +1590,98 @@ jobs:
           name: dart-hebrew-production-streaming-q
           path: out/production-streaming-q/
           if-no-files-found: warn
+
+  dart-hebrew-production-distribution:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    needs:
+      - dart-hebrew-stage1-native
+      - dart-hebrew-stage2-production10-year-walk
+      - dart-hebrew-stage2-production16-date
+      - dart-hebrew-stage3-public-api
+      - dart-hebrew-stage4-package-consumer
+      - dart-hebrew-stage5-external-consumer
+      - dart-hebrew-production-gregorian-boundary
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.2
+      - run: dart pub get
+      - name: Verify CLI format and analyze
+        shell: pwsh
+        run: |
+          dart format --output=none --set-exit-if-changed bin/pastafari_calendar_cli.dart
+          if ($LASTEXITCODE -ne 0) { throw "CLI formatting gate failed" }
+          dart analyze
+          if ($LASTEXITCODE -ne 0) { throw "Dart analyzer failed" }
+      - name: Build and round-trip Windows executable
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force out\distribution | Out-Null
+          dart compile exe bin/pastafari_calendar_cli.dart -o out\distribution\pastafari-calendar.exe
+          if ($LASTEXITCODE -ne 0) { throw "Windows executable compilation failed" }
+
+          $help = & out\distribution\pastafari-calendar.exe --help
+          if ($LASTEXITCODE -ne 0) { throw "CLI help smoke test failed" }
+          $help | Set-Content -Encoding utf8 out\distribution\help.json
+
+          $forward = & out\distribution\pastafari-calendar.exe forward '--calculation-date=2026-11-28' '--requested-date=2026-11-28' '--max-transitions=0'
+          if ($LASTEXITCODE -ne 0) { throw "CLI forward smoke test failed" }
+          $forward | Set-Content -Encoding utf8 out\distribution\forward.json
+          $forwardData = $forward | ConvertFrom-Json
+          if ($forwardData.pastafarian_date.year_number -ne '5000') { throw "Forward smoke year was not 5000" }
+
+          $inverseArgs = @(
+            'inverse',
+            '--calculation-date=2026-11-28',
+            ('--year-number=' + $forwardData.pastafarian_date.year_number),
+            ('--cutlet-index=' + $forwardData.pastafarian_date.cutlet.canonical_index),
+            ('--day-in-cutlet=' + $forwardData.pastafarian_date.cutlet.day),
+            ('--month-index=' + $forwardData.pastafarian_date.month.canonical_index),
+            ('--day-in-month=' + $forwardData.pastafarian_date.month.day),
+            '--max-transitions=0'
+          )
+          $inverse = & out\distribution\pastafari-calendar.exe @inverseArgs
+          if ($LASTEXITCODE -ne 0) { throw "CLI inverse smoke test failed" }
+          $inverse | Set-Content -Encoding utf8 out\distribution\inverse.json
+          $inverseData = $inverse | ConvertFrom-Json
+          if ($inverseData.serial_day -ne $forwardData.requested_serial_day) { throw "Forward/inverse serial-day mismatch" }
+          if ($inverseData.gregorian_date.year -ne '2026' -or $inverseData.gregorian_date.month -ne 11 -or $inverseData.gregorian_date.day -ne 28) { throw "Forward/inverse Gregorian date mismatch" }
+
+          Copy-Item pubspec.yaml, README.md -Destination out\distribution
+          Copy-Item lib -Destination out\distribution\lib -Recurse
+          New-Item -ItemType Directory -Force out\distribution\bin, out\distribution\docs | Out-Null
+          Copy-Item bin\pastafari_calendar_cli.dart -Destination out\distribution\bin\
+          Copy-Item docs\DART_HEBREW_PRODUCTION_DISTRIBUTION_CONTRACT.md -Destination out\distribution\docs\
+          Copy-Item docs\DART_HEBREW_PRODUCTION_INVERSE_FIXED_C_CONTRACT.md -Destination out\distribution\docs\
+
+          @'
+          Pastafari Calendar — Dart + Hebrew
+          Windows x64 self-contained CLI.
+          Run RUN.cmd --help for JSON usage.
+          Runtime conversion does not require the Dart SDK or network access.
+          Source and technical contracts are included in lib/, bin/ and docs/.
+          '@ | Set-Content -Encoding utf8 out\distribution\README.txt
+
+          @'
+          @echo off
+          setlocal
+          "%~dp0pastafari-calendar.exe" %*
+          exit /b %errorlevel%
+          '@ | Set-Content -Encoding ascii out\distribution\RUN.cmd
+
+          Compress-Archive -Path out\distribution\* -DestinationPath out\pastafari-calendar-dart-hebrew-win-x64.zip -Force
+          (Get-FileHash -Algorithm SHA256 out\pastafari-calendar-dart-hebrew-win-x64.zip).Hash | Set-Content -Encoding ascii out\pastafari-calendar-dart-hebrew-win-x64.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dart-hebrew-production-distribution-win-x64
+          path: |
+            out/pastafari-calendar-dart-hebrew-win-x64.zip
+            out/pastafari-calendar-dart-hebrew-win-x64.sha256
+            out/distribution/help.json
+            out/distribution/forward.json
+            out/distribution/inverse.json
+          if-no-files-found: error
+          retention-days: 30

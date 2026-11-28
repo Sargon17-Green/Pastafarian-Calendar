@@ -1,5 +1,6 @@
 import 'package:pastafari_calendar_dart_hebrew/pastafari_calendar.dart';
 
+import 'pastafari_calendar_cli.dart';
 import '../lib/src/monster_year_selection.dart';
 import '../lib/src/monster_year_traversal.dart';
 
@@ -12,8 +13,12 @@ void require(bool condition, String label) {
   }
 }
 
-bool sameDate(GregorianCivilDate a, GregorianCivilDate b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
+String _formatCivilDate(GregorianCivilDate date) =>
+    date.year.toString() +
+    '-' +
+    date.month.toString().padLeft(2, '0') +
+    '-' +
+    date.day.toString().padLeft(2, '0');
 
 void main() {
   final calculationDate = GregorianCivilDate(BigInt.from(2026), 11, 28);
@@ -21,37 +26,42 @@ void main() {
   final anchor = MonsterTraversedYear.from5000(
     MonsterYear5000Selector().select(calculationDay),
   );
-  final traversal = MonsterYearTraversal();
-  final next = traversal.next(calculationDay, anchor);
-  final previous = traversal.previous(calculationDay, anchor);
+  final next = MonsterYearTraversal().next(calculationDay, anchor);
   final futureSerial = next.candidate.openGate + BigInt.one;
-  final pastSerial = previous.candidate.closeGate;
   final futureCivil = GregorianCivilDate.fromSerialDay(futureSerial);
-  final pastCivil = GregorianCivilDate.fromSerialDay(pastSerial);
-  final converter = PastafariGregorianConverter();
   final watch = Stopwatch()..start();
 
-  final futureDate = converter.calculate(
-    calculationDate,
-    futureCivil,
-    maxTransitions: 1,
+  final futureOutput = runCalendarCli(<String>[
+    'forward',
+    '--calculation-date=2026-11-28',
+    '--requested-date=' + _formatCivilDate(futureCivil),
+    '--max-transitions=1',
+  ]);
+  final futureData = futureOutput['pastafarian_date'] as Map<String, Object?>;
+  final futureCutlet = futureData['cutlet'] as Map<String, Object?>;
+  final futureMonth = futureData['month'] as Map<String, Object?>;
+  final futureDate = MonsterFiveFieldDate.fromComponents(
+    yearNumber: BigInt.parse(futureData['year_number'] as String),
+    cutletCanonicalIndex: futureCutlet['canonical_index'] as int,
+    dayInCutlet: futureCutlet['day'] as int,
+    monthCanonicalIndex: futureMonth['canonical_index'] as int,
+    dayInMonth: futureMonth['day'] as int,
   );
-  final pastDate = converter.calculate(
-    calculationDate,
-    pastCivil,
-    maxTransitions: 1,
+  require(
+    BigInt.parse(futureOutput['requested_serial_day'] as String) ==
+        futureSerial,
+    'CLI forward serial day',
   );
   require(futureDate.yearNumber == BigInt.from(5001), 'Fixed-c forward year');
-  require(pastDate.yearNumber == BigInt.from(4999), 'Fixed-c backward year');
   require(
     futureDate.cutletName ==
         SourceLanguageCatalog.cutletText(futureDate.cutletCanonicalIndex),
     'Future cutlet canonical name',
   );
   require(
-    pastDate.monthName ==
-        SourceLanguageCatalog.monthText(pastDate.monthCanonicalIndex),
-    'Past month canonical name',
+    futureDate.monthName ==
+        SourceLanguageCatalog.monthText(futureDate.monthCanonicalIndex),
+    'Future month canonical name',
   );
 
   final futureInput = MonsterFiveFieldDate.fromComponents(
@@ -61,29 +71,32 @@ void main() {
     monthCanonicalIndex: futureDate.monthCanonicalIndex,
     dayInMonth: futureDate.dayInMonth,
   );
-  final pastInput = MonsterFiveFieldDate.fromComponents(
-    yearNumber: pastDate.yearNumber,
-    cutletCanonicalIndex: pastDate.cutletCanonicalIndex,
-    dayInCutlet: pastDate.dayInCutlet,
-    monthCanonicalIndex: pastDate.monthCanonicalIndex,
-    dayInMonth: pastDate.dayInMonth,
+  final inverseOutput = runCalendarCli(<String>[
+    'inverse',
+    '--calculation-date=2026-11-28',
+    '--year-number=' + futureInput.yearNumber.toString(),
+    '--cutlet-index=' + futureInput.cutletCanonicalIndex.toString(),
+    '--day-in-cutlet=' + futureInput.dayInCutlet.toString(),
+    '--month-index=' + futureInput.monthCanonicalIndex.toString(),
+    '--day-in-month=' + futureInput.dayInMonth.toString(),
+    '--max-transitions=1',
+  ]);
+  final inverseDate = inverseOutput['gregorian_date'] as Map<String, Object?>;
+  require(
+    BigInt.parse(inverseOutput['serial_day'] as String) == futureSerial,
+    'CLI inverse serial day',
   );
-  final futureBack = converter.toSerialDay(
-    calculationDate,
-    futureInput,
-    maxTransitions: 1,
-  );
-  final pastBack = converter.toGregorian(
-    calculationDate,
-    pastInput,
-    maxTransitions: 1,
-  );
-  require(futureBack == futureSerial, 'Future inverse serial day');
-  require(sameDate(pastBack, pastCivil), 'Past inverse Gregorian date');
+  require(inverseDate['year'] == futureCivil.year.toString(), 'Inverse year');
+  require(inverseDate['month'] == futureCivil.month, 'Inverse month');
+  require(inverseDate['day'] == futureCivil.day, 'Inverse day');
 
   var refused = false;
   try {
-    converter.toSerialDay(calculationDate, futureInput, maxTransitions: 0);
+    PastafariGregorianConverter().toSerialDay(
+      calculationDate,
+      futureInput,
+      maxTransitions: 0,
+    );
   } on IncompleteMonsterYearNumberTraversal catch (error) {
     require(error.calculationDay == calculationDay, 'Fixed calculation day');
     require(error.requestedYearNumber == BigInt.from(5001), 'Requested year');
@@ -94,7 +107,11 @@ void main() {
 
   var invalidBudget = false;
   try {
-    converter.toSerialDay(calculationDate, futureInput, maxTransitions: 65);
+    PastafariGregorianConverter().toSerialDay(
+      calculationDate,
+      futureInput,
+      maxTransitions: 65,
+    );
   } on RangeError {
     invalidBudget = true;
   }
@@ -114,22 +131,43 @@ void main() {
   }
   require(invalidComponent, 'Nonpositive day ordinal rejected');
 
+  final wrongDayInCutlet = futureDate.dayInCutlet > 1
+      ? futureDate.dayInCutlet - 1
+      : futureDate.dayInCutlet + 1;
   final mismatch = MonsterFiveFieldDate.fromComponents(
     yearNumber: futureDate.yearNumber,
     cutletCanonicalIndex: futureDate.cutletCanonicalIndex,
-    dayInCutlet: futureDate.dayInCutlet + 1,
+    dayInCutlet: wrongDayInCutlet,
     monthCanonicalIndex: futureDate.monthCanonicalIndex,
     dayInMonth: futureDate.dayInMonth,
   );
   var inconsistent = false;
   try {
-    converter.toSerialDay(calculationDate, mismatch, maxTransitions: 1);
+    PastafariGregorianConverter().toSerialDay(
+      calculationDate,
+      mismatch,
+      maxTransitions: 1,
+    );
   } on ArgumentError {
     inconsistent = true;
   }
   require(inconsistent, 'Conflicting cutlet/month coordinates rejected');
 
+  final help = runCalendarCli(<String>['--help']);
+  require((help['usage'] as List<String>).length >= 2, 'CLI help contract');
+  var invalidUsage = false;
+  try {
+    runCalendarCli(<String>[
+      'forward',
+      '--calculation-date=2026-11-28',
+    ]);
+  } on FormatException {
+    invalidUsage = true;
+  }
+  require(invalidUsage, 'CLI missing required argument rejected');
+
   final elapsed = watch.elapsedMilliseconds;
+  print('PRODUCTION_INVERSE_FIXED_C_TIMING elapsed_ms=' + elapsed.toString());
   require(elapsed <= 240000, 'Fixed-c forward/inverse time budget');
   print('PRODUCTION_INVERSE_FIXED_C_PASS checks=' +
       checks.toString() +

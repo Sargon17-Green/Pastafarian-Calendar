@@ -23,3 +23,23 @@ dart run bin/stage1_tests.dart
 ```text
 dart run tool/generate_stage1_fixtures.dart
 ```
+
+## Production CLI and distribution
+
+The public CLI is implemented in `bin/pastafari_calendar_cli.dart` and emits JSON. It supports signed proleptic-Gregorian years and uses the same fixed calculation date `c` throughout §R traversal.
+
+Forward conversion:
+
+```sh
+dart run bin/pastafari_calendar_cli.dart forward --calculation-date=2026-11-28 --requested-date=2026-11-28
+```
+
+Inverse conversion accepts the five numeric components returned by a forward conversion:
+
+```sh
+dart run bin/pastafari_calendar_cli.dart inverse --calculation-date=2026-11-28 --year-number=N --cutlet-index=N --day-in-cutlet=N --month-index=N --day-in-month=N
+```
+
+Use `--max-transitions=0..64` to set the bounded §R walk (default: 64). Run `dart run bin/pastafari_calendar_cli.dart --help` for the machine-readable usage response. The inverse rejects inconsistent cutlet/month coordinates and never guesses a serial day.
+
+The package intentionally declares `publish_to: none`: no pub.dev publication or GitHub Release is performed. A Windows x64 self-contained executable and source bundle are produced only as a CI artifact after the required Native and public-API gates pass.
