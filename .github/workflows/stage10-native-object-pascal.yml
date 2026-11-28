@@ -1,0 +1,33 @@
+name: Stage 10 Native Object Pascal - hidden drop order discovery
+on:
+  push:
+    branches:
+      - 'Object-Pascal\+Português'
+    paths:
+      - 'src/**'
+      - 'test/stage10_hidden_drop_order_probe.pas'
+      - 'test/build_and_run_stage10_hidden_drop_order.sh'
+      - 'docs/stage10_hidden_drop_order_oracle.py'
+      - '.github/workflows/stage10-native-object-pascal.yml'
+permissions:
+  contents: read
+jobs:
+  stage10-native-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FPC
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+      - name: Verify exact seeded RED
+        run: bash test/build_and_run_stage10_hidden_drop_order.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage10-hidden-drop-order-evidence
+          path: evidence/stage10/
+          if-no-files-found: error
+          retention-days: 30
