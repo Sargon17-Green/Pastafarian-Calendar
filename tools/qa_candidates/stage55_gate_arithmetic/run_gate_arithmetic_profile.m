@@ -1,6 +1,16 @@
 function run_gate_arithmetic_profile(sourceRoot, vectorsPath, outputPath)
 % Diagnostic-only profiling. The pinned GateQuestionEngine and every inner
 % defect/patch compatibility route execute on every measured call.
+outputDirectory = fileparts(outputPath);
+if ~exist(outputDirectory, 'dir')
+    mkdir(outputDirectory);
+end
+pidPath = fullfile(outputDirectory, 'matlab.pid');
+pidFid = fopen(pidPath, 'w');
+assert(pidFid >= 0);
+fprintf(pidFid, '%d\n', feature('getpid'));
+fclose(pidFid);
+
 originalPath = path;
 pathCleanup = onCleanup(@() path(originalPath)); %#ok<NASGU>
 addpath(fullfile(sourceRoot, 'src'));
@@ -103,10 +113,6 @@ report = struct( ...
     'divmod_profile', divmodProfile, ...
     'top_functions', topFunctions);
 
-outputDirectory = fileparts(outputPath);
-if ~exist(outputDirectory, 'dir')
-    mkdir(outputDirectory);
-end
 fid = fopen(outputPath, 'w', 'n', 'UTF-8');
 assert(fid >= 0);
 fileCleanup = onCleanup(@() fclose(fid)); %#ok<NASGU>
