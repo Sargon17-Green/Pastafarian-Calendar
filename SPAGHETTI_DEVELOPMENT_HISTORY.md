@@ -31,3 +31,7 @@ Istoricul anterior, inclusiv rezultatul nativ v17 (115/115), este păstrat integ
 ### Acceptare nativă
 
 2026-11-28 — DISCOVERY 01 ACCEPTAT nativ, în starea intenționată EXPECTED_RED. Arhiva results(20261128-094801).zip, SHA256=12b2aee364bc300fed8ea8d5b4002a4b4ab009202aa638e2204d61e92a495818; CRC PASS; 27/27 înregistrări manifest verificate independent; patru loguri finale goale sunt în afara manifestului. Sursa executată: 4c93da154362e5f9ce0e9da4a9196760eb587a37, tree 048d84901bcd57bd7cffc7c6459663a4d5d89647; jurnalul runnerului confirmă 20/20 Git blob IDs (fișierele sursă nu sunt incluse în arhiva de rezultate). J9.7.1 j64 Windows; probe -js fără marker, fallback stdin reușit. 63/63 regresii Stage1, 17 fixtures, 18/18 martori Stage2, RED 0,1,2, control GREEN 3, receipt PASSED, exit 0. Contorizare independentă din stdout, stderr gol. Wrapper v19, runner intern v18. LAST_COMPLETED_STAGE=2. Etapa următoare: Stage 3 PATCH 01, păstrarea intactă a restVechi și a martorilor, strat suplimentar 0→M; nu a fost implementată. Data publică NOT_INTEGRATED. Nu se repetă v18/v19.
+
+## Stage 3 — PATCH 01
+
+Învelișul `salvarePatch01` cheamă dispecerul istoric, înlocuiește doar restul zero cu M și păstrează orice alt rest. Fișierul legacy rămâne intact. Ruta publică folosește noul înveliș; martorii istorici verifică dispecerul, iar aserțiunile normative neschimbate sunt obligatoriu GREEN. Execuția nativă este încă NOT_RUN; Stage 2 rămâne ultima etapă acceptată.

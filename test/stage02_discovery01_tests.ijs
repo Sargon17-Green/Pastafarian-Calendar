@@ -21,20 +21,10 @@ stage02Ruleaza=: 3 : 0
     actual=. calendarSalvareSpaghete intrare
     martor=. k { istoric2
     asteptat=. k { normativ2
-    (martor -: actual) stage02Verifica 'martor istoric ',":k
+    (martor -: dispecerRestVechi intrare) stage02Verifica 'martor istoric ',":k
     (64 = 3!:0 actual) stage02Verifica 'tip exact ',":k
-    esecAsteptat=. 0
-    try.
-      asteptat stage02AserteazaNormativ actual
-    catch.
-      esecAsteptat=. 1
-    end.
-    assert. esecAsteptat = (k < 3)
-    if. esecAsteptat do.
-      echo 'RED_STAGE02: ',":k
-    else.
-      echo 'GREEN_CONTROL_STAGE02: ',":k
-    end.
+    asteptat stage02AserteazaNormativ actual
+    echo 'GREEN_STAGE02: ',":k
   end.
   ((restVechi 0x) -: 0x) stage02Verifica 'zero istoric'
   ((restVechi _1x) -: m2-1x) stage02Verifica 'reziduu negativ'
@@ -43,7 +33,7 @@ stage02Ruleaza=: 3 : 0
   (128 = 3!:0 rat2) stage02Verifica 'fixture rational intreg'
   ((restVechi rat2) -: 3x) stage02Verifica 'reziduu rational intreg exact'
   ctx2=. m2 calendarDateSpaghettiBootstrap 0x
-  ((monsterContextRestVechi ctx2) -: 0x) stage02Verifica 'calea publica utilizeaza restul istoric'
+  ((monsterContextRestVechi ctx2) -: m2) stage02Verifica 'calea publica utilizeaza SAVE peste restul istoric'
   (MONSTER_STATUS_NOT_INTEGRATED -: monsterContextStatus ctx2) stage02Verifica 'data publica ramane neintegrata'
   ctx2b=. (m2+1x) calendarDateSpaghettiBootstrap 0x
   ((monsterContextRestVechi ctx2b) -: 1x) stage02Verifica 'context separat pentru alta invocare'
@@ -54,7 +44,14 @@ stage02Ruleaza=: 3 : 0
     respins2=. 1
   end.
   (respins2 = 1) stage02Verifica 'fractia este respinsa'
-  echo 'STAGE02_DISCOVERY01_EXPECTED_RED_COMPLETE'
+  echo 'STAGE02_PATCH01_GREEN_COMPLETE'
+  ((calendarSalvareSpaghete 0x) -: m2) stage02Verifica 'patch zero'
+  ((calendarSalvareSpaghete (-m2)) -: m2) stage02Verifica 'patch multiplu negativ'
+  ((calendarSalvareSpaghete _1x) -: m2-1x) stage02Verifica 'patch reziduu negativ'
+  ((calendarSalvareSpaghete 2x^240) -: 2x^113) stage02Verifica 'patch intreg foarte mare'
+  ((calendarSalvareSpaghete rat2) -: 3x) stage02Verifica 'patch rational intreg'
+  ((monsterContextRestVechi ctx2) -: m2) stage02Verifica 'patch context anterior intact'
+  echo 'STAGE03_PATCH01_GREEN_COMPLETE'
   1
 )
 stage02Ruleaza ''
