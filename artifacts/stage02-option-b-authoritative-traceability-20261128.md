@@ -11,7 +11,7 @@
 The authoritative Scroll is present in the source repository at:
 
 - Path: sources/מגילת העיתים.md
-- Git blob: 291353f7a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5
+- Git blob: 291353f4e5a83bb3d958b7f98e32040ee00b9f8a
 - SHA-256 recorded by sources/SHA256SUMS.txt: d36b0c944b4685d1aa1d89bb20a8dd530ee3167c897dcdf85161a7ec0dde9c96
 - Published reference recorded by CONFORMANCE.md: https://the-scroll-of-the-appointed-times.blogspot.com/2026/08/Megilat-HaItim.html
 
