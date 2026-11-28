@@ -3,6 +3,7 @@ load 'src/monster_base.ijs'
 load 'src/stage02_rest_vechi.ijs'
 load 'src/stage03_save_patch.ijs'
 load 'src/stage04_eticheta_veche.ijs'
+load 'src/stage05_eticheta_patch.ijs'
 
 NB. Calea publică folosește învelișul SAVE peste dispecerul istoric.
 NB. Data calendaristica completa nu este inca integrata.

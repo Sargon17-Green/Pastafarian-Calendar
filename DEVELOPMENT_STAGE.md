@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=4
-CURRENT_KIND=DISCOVERY
+CURRENT_STAGE=5
+CURRENT_KIND=PATCH
 CURRENT_PATCH=02
 LAST_COMPLETED_STAGE=4
-EXPECTED_REPOSITORY_STATE=EXPECTED_RED
+EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -16,7 +16,7 @@ MONSTER_ARCHITECTURE_GROWTH=context de bază, dispatcher neutru, validator neutr
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=YES
-HANDOFF_PACKAGE_PREPARED=YES
+HANDOFF_PACKAGE_PREPARED=NO
 
 Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/63 verificări, 17 fixture-uri, audit GREEN, exit code 0. Dovadă: results(20261102-191247).zip, SHA256=f0c43242323ce04c2734c969deb60a9461335056d63767cd7d39c4cebdbb5e2b; sursa testată este commit a836206fd842e18d60f3a5df6a07382cf81573bb, tree d00980351d0123b15fe72b7f01db5151ecce608d. Stage 2 — DISCOVERY 01 a urmat după această acceptare.
 
@@ -33,3 +33,7 @@ Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/
 Ipoteza greșită: eticheta zilei este întotdeauna 2 × distanța absolută față de Fundație. Modulul nou `src/stage04_eticheta_veche.ijs` păstrează exact această formulă, iar ruta publică introduce etichetele de calcul și țintă în context, la indicii 11 și 12, fără a modifica indexul SAVE. Oracolul de test și regresiile precedente rămân neschimbate. Pentru offseturile -2, -1, 0, +1, +2, rezultatele legacy sunt 4, 2, 0, 2, 4, iar cele normative sunt 4, 2, 1, 3, 5. Se cer controalele GREEN 0,1 și RED intenționate 2,3,4, 33 verificări Stage4 și toate regresiile anterioare. Nu există PATCH 02, nici integrarea datei publice. Execuția nativă încă nu a avut loc; LAST_COMPLETED_STAGE=3.
 
 2026-11-28 — Stage 4 DISCOVERY 02 ACCEPTAT nativ în starea EXPECTED_RED, J9.7.1 Windows x64, runner v22. Sursa executată: 2d980a1021896b92b2d4a446517d140f3de1d820, tree b22be59a91400bb1ba7b1ed673bb110132cb807a. Rezultate recuperate fără o nouă execuție: results.zip SHA256=37907439d6dd8ed30e7e472fc9f2d9b6cf5712d2ad2953b65491ecbafee0721e; arhiva de recuperare SHA256=dfab6945d33968c25de10d654af3bdadeccd245a1dc0ee0d62ceab78bdec104a. CRC PASS pentru ambele, manifest 29/29 verificat independent, 23/23 blob IDs conform jurnalului runnerului (sursa nu este inclusă în rezultate). Stage1 63/63 și 17 fixtures, Stage2 18/18 și GREEN 0,1,2,3, Stage3 6/6, Stage4 33/33, GREEN 0,1 și RED intenționat 2,3,4; receipt PASSED, native=true, exit 0, stderr gol. LAST_COMPLETED_STAGE=4. Data publică NOT_INTEGRATED. Stage5 nu a fost început; nu se repetă v22.
+
+## Stage 5 — PATCH 02
+
+Învelișul `etichetaZiPatch02` apelează dispecerul legacy intact. Pentru ziua Fundației și zilele ulterioare adaugă 1; păstrează separat garda istorică de la Fundație. Ruta publică folosește învelișul, iar martorii istorici verifică în continuare valorile vechi. Se cer 33 verificări Stage4, cinci marcaje GREEN, zero RED, 20 verificări Stage5 și toate regresiile anterioare. Execuția nativă NU A AVUT LOC; LAST_COMPLETED_STAGE=4. Data publică NOT_INTEGRATED. Fără Stage 6.

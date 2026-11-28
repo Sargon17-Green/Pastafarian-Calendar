@@ -17,28 +17,28 @@ stage04Ruleaza=: 3 : 0
   normativ=. 4x 2x 1x 3x 5x
   for_k. i. 5 do.
     zi=. k { zile
-    actual=. calendarEtichetaZiSpaghete zi
+    actual=. dispecerEtichetaZiVeche zi
     asteptat=. nr_dayCount zi
     (actual -: k { vechi) stage04Verifica 'martor legacy ',":k
     (asteptat -: k { normativ) stage04Verifica 'oracle si fixture ',":k
     (64 = 3!:0 actual) stage04Verifica 'tip exact ',":k
     if. k < 2 do.
-      (actual -: asteptat) stage04Verifica 'control normativ ',":k
+      ((actual -: asteptat) *. asteptat -: calendarEtichetaZiSpaghete zi) stage04Verifica 'control normativ ',":k
       echo 'GREEN_STAGE04: ',":k
     else.
-      ((actual + 1x) -: asteptat) stage04Verifica 'divergenta exacta ',":k
-      echo 'RED_STAGE04: ',":k
+      (((actual + 1x) -: asteptat) *. asteptat -: calendarEtichetaZiSpaghete zi) stage04Verifica 'divergenta legacy si reparatie ',":k
+      echo 'GREEN_STAGE04: ',":k
     end.
   end.
   mare=. 2x ^ 240
-  ((calendarEtichetaZiSpaghete FOUNDATION_DAY+mare) -: 2x*mare) stage04Verifica 'zi foarte mare dupa fundatie'
-  ((calendarEtichetaZiSpaghete FOUNDATION_DAY-mare) -: 2x*mare) stage04Verifica 'zi foarte mare inainte de fundatie'
+  ((dispecerEtichetaZiVeche FOUNDATION_DAY+mare) -: 2x*mare) stage04Verifica 'zi foarte mare dupa fundatie'
+  ((dispecerEtichetaZiVeche FOUNDATION_DAY-mare) -: 2x*mare) stage04Verifica 'zi foarte mare inainte de fundatie'
   rat4=. _15055670r1
   (128 = 3!:0 rat4) stage04Verifica 'fixture rational intreg'
-  ((calendarEtichetaZiSpaghete rat4) -: 2x) stage04Verifica 'rational intreg exact'
+  ((dispecerEtichetaZiVeche rat4) -: 2x) stage04Verifica 'rational intreg exact'
   ctx4=. FOUNDATION_DAY calendarDateSpaghettiBootstrap FOUNDATION_DAY+1x
-  ((monsterContextEtichetaCalcul ctx4) -: 0x) stage04Verifica 'ruta publica calcul legacy'
-  ((monsterContextEtichetaTinta ctx4) -: 2x) stage04Verifica 'ruta publica tinta legacy'
+  ((monsterContextEtichetaCalcul ctx4) -: 1x) stage04Verifica 'ruta publica calcul reparata'
+  ((monsterContextEtichetaTinta ctx4) -: 3x) stage04Verifica 'ruta publica tinta reparata'
   ctx4b=. (FOUNDATION_DAY-1x) calendarDateSpaghettiBootstrap FOUNDATION_DAY-2x
   ((monsterContextEtichetaCalcul ctx4b) -: 2x) stage04Verifica 'context separat calcul'
   ((monsterContextEtichetaTinta ctx4b) -: 4x) stage04Verifica 'context separat tinta'
@@ -52,7 +52,7 @@ stage04Ruleaza=: 3 : 0
     respins4=. 1
   end.
   (respins4 = 1) stage04Verifica 'fractia este respinsa'
-  echo 'STAGE04_DISCOVERY02_EXPECTED_RED_COMPLETE'
+  echo 'STAGE04_PATCH02_GREEN_COMPLETE'
   1
 )
 stage04Ruleaza ''
