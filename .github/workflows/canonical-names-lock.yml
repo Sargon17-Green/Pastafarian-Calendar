@@ -1212,6 +1212,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Revalidate completed Stage44 manifest from pinned predecessor run
+        if: github.event.before == 'b0a3de6d8453f178d2da929a56332ede330523bb'
+        shell: powershell
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Completed evidence recheck requires Windows PowerShell 5.1' }
+          $head = ((& git rev-parse HEAD) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $head -cne $env:GITHUB_SHA) { throw 'Completed evidence recheck exact checkout SHA mismatch' }
+          $verifierBlob = ((& git rev-parse HEAD:src/Stage44TrustedEvidence.ps1) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $verifierBlob -cne 'fed9e9137742c1bae7f54f03a11b81f23dd82682') { throw 'Completed evidence recheck verifier blob mismatch' }
+          . .\src\Stage44TrustedEvidence.ps1
+          $prior = Get-Stage44TrustedEvidence -Repository $env:GITHUB_REPOSITORY -RunId 46179787785 -ExpectedSha 'b0a3de6d8453f178d2da929a56332ede330523bb' -ExpectedBranch 'PowerShell+Tagalog' -Token $env:GITHUB_TOKEN -RepositoryRoot (Get-Location).Path
+          if ($prior.Evidence.Count -ne 20 -or $prior.ManifestValues.Count -ne 30) { throw 'Completed evidence recheck field count mismatch' }
+          Write-Host 'STAGE44_COMPLETED_RUN_RECHECK=PASS'
+          Write-Host ('STAGE44_COMPLETED_RUN_ID=' + $prior.Run.id)
+          Write-Host ('STAGE44_COMPLETED_RUN_SHA=' + $prior.Run.head_sha)
+          Write-Host ('STAGE44_COMPLETED_RUN_MANIFEST_FIELDS=' + $prior.ManifestValues.Count)
       - name: Independently acquire and bind Stage44 preflight evidence
         shell: powershell
         env:
