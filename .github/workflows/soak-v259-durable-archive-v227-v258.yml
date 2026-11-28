@@ -27,7 +27,7 @@ jobs:
           test ! -e qa/soak/archive/v227-v258
       - name: Acquire and verify original artifacts, logs, metadata, and v232 source
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p qa/soak/archive/v227-v258
