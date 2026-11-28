@@ -1,0 +1,84 @@
+name: MATLAB Stage55 Public Cost Diagnostic
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-public-cost-diagnostic.yml'
+      - 'tools/run_stage55_public_cost_diagnostic.m'
+      - 'tools/verify_stage55_public_cost_diagnostic.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-public-cost-diagnostic
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Download original certified audit ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15257835751/zip > audit.zip
+          echo '66a1b65e47f24bb3e20c45c4fb3b7c69c6d92c056a89f18e809b16f52a9d6504  audit.zip' | sha256sum -c -
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Prepare pinned expected rows and start independent watchdog
+        run: |
+          set -euo pipefail
+          python3 qa/tools/stage55_public_soak_pilot.py prepare source audit.zip pilot-output
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch pilot-output > pilot-output/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f pilot-output/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Run instrumented six-call native public diagnostic via licensed action
+        id: native
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 167
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            out=fullfile(base,'pilot-output');
+            fid=fopen(fullfile(out,'matlab.pid'),'w');
+            assert(fid>=0);
+            fprintf(fid,'%d',feature('getpid'));
+            fclose(fid);
+            maxNumCompThreads(1);
+            diary(fullfile(out,'session1.log'));
+            addpath(fullfile(base,'qa','tools'));
+            run_stage55_public_cost_diagnostic(fullfile(base,'source'),fullfile(out,'expected.json'),fullfile(out,'session1.jsonl'));
+            diary off;
+      - name: Verify native result and bounded watchdog evidence
+        if: always()
+        env:
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          set -euo pipefail
+          test -f pilot-output/summary.json
+          python3 qa/tools/stage55_public_soak_pilot.py verify pilot-output "$NATIVE_OUTCOME"
+      - name: Verify per-call phase timings (diagnostic only)
+        run: python3 qa/tools/verify_stage55_public_cost_diagnostic.py pilot-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-public-cost-diagnostic-${{ github.run_id }}
+          path: pilot-output/
+          if-no-files-found: warn
+          retention-days: 30
