@@ -8,19 +8,9 @@ WORD='76396b8dc72b209c9f273d7ebbab3c6a09b3424eff8ee71acd1566680641786e'
 COUNT='c0c08ac89c8faaaf589d1b3e076fe1e96405f2ad7172a15efa9d028fb43fb6f8'
 def sha(x): return hashlib.sha256(x).hexdigest()
 def dump(x): return json.dumps(x,ensure_ascii=False,separators=(',',':'))+'\n'
-def rss(pgid):
-    total=0
-    for p in pathlib.Path('/proc').iterdir():
-        if not p.name.isdigit(): continue
-        try:
-            s=(p/'stat').read_text().rsplit(')',1)[1].split()
-            if int(s[2])==pgid: total+=int(s[21])*os.sysconf('SC_PAGE_SIZE')
-        except (OSError,ValueError,IndexError): pass
-    return total
-def q(p): return "'"+str(p).replace("'","''")+"'"
-def main():
+def prepare():
     import zipfile
-    root,artifact,out=map(lambda p:pathlib.Path(p).resolve(),sys.argv[1:])
+    root,artifact,out=map(lambda p:pathlib.Path(p).resolve(),sys.argv[2:])
     out.mkdir(parents=True,exist_ok=False)
     assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()==SHA
     assert not subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=root,text=True).strip()
@@ -49,22 +39,73 @@ def main():
     exp=out/'expected.json'; exp.write_text(dump(dict(calculation_day=f['calculation_day'],first_day=lo,last_day=hi,rows=rows)),encoding='utf-8')
     summary=dict(source_sha=SHA,artifact_sha256=ARTIFACT,fixture_blob=FIXTURE,word_sha256=WORD,expected_sha256=sha(exp.read_bytes()),mode='pilot',stage55_accepted=False)
     sf=out/'summary.json'; sf.write_text(dump(summary))
-    log=out/'session1.jsonl'; stdout=out/'session1.log'
-    cmd=['matlab','-singleCompThread','-batch',f"addpath({q(pathlib.Path(__file__).resolve().parent)}); run_stage55_public_soak_pilot({q(root)},{q(exp)},{q(log)});"]
-    start=time.monotonic(); peak=0; reason=None
-    with stdout.open('wb') as output:
-        p=subprocess.Popen(cmd,cwd=root,stdout=output,stderr=subprocess.STDOUT,start_new_session=True,env={**os.environ,'OMP_NUM_THREADS':'1','MKL_NUM_THREADS':'1'})
+def atomic(path, value):
+    tmp=path.with_suffix('.tmp')
+    tmp.write_text(dump(value),encoding='utf-8')
+    tmp.replace(path)
+def processes():
+    result={}
+    for p in pathlib.Path('/proc').iterdir():
+        if not p.name.isdigit(): continue
         try:
-            while p.poll() is None:
-                peak=max(peak,rss(p.pid))
-                if peak>3*1024**3: reason='RSS_LIMIT'; break
-                if time.monotonic()-start>10000: reason='TIME_LIMIT'; break
-                time.sleep(.5)
-        finally:
-            if p.poll() is None: os.killpg(p.pid,signal.SIGKILL); p.wait()
-    summary.update(exit=p.returncode,reason=reason,seconds=time.monotonic()-start,peak_sampled_group_rss_bytes=peak)
-    sf.write_text(dump(summary))
-    assert p.returncode==0 and reason is None
+            s=(p/'stat').read_text().rsplit(')',1)[1].split()
+            result[int(p.name)]=(int(s[1]),int(s[19]),int(s[21])*os.sysconf('SC_PAGE_SIZE'))
+        except (OSError,ValueError,IndexError): pass
+    return result
+def tree(procs, pid):
+    found={pid}
+    while True:
+        more={p for p,v in procs.items() if v[0] in found}
+        if more<=found: return found & procs.keys()
+        found |= more
+def watch(out):
+    start=time.monotonic(); peak=0; samples=0; pid=None; identity=None; reason=None
+    atomic(out/'watch_started.json',dict(limit_seconds=10000,limit_bytes=3*1024**3))
+    try:
+        while True:
+            procs=processes()
+            marker=out/'matlab.pid'
+            if pid is None and marker.exists():
+                try: candidate=int(marker.read_text().strip())
+                except (ValueError,OSError): candidate=None
+                if candidate in procs:
+                    pid=candidate; identity=procs[pid][1]
+            active=pid is not None and pid in procs and procs[pid][1]==identity
+            members=tree(procs,pid) if active else set()
+            if members:
+                samples+=1
+                peak=max(peak,sum(procs[p][2] for p in members))
+            if peak>3*1024**3: reason='RSS_LIMIT'
+            if time.monotonic()-start>10000: reason=reason or 'TIME_LIMIT'
+            if reason:
+                for p in sorted(members,key=lambda p:p==pid):
+                    try:
+                        current=processes().get(p)
+                        if current and current[1]==procs[p][1]: os.kill(p,signal.SIGKILL)
+                    except ProcessLookupError: pass
+                break
+            if (out/'watch.stop').exists(): break
+            time.sleep(.5)
+    except BaseException as exc:
+        reason='WATCHDOG_ERROR:'+repr(exc)
+        raise
+    finally:
+        atomic(out/'watch.json',dict(reason=reason,samples=samples,peak_sampled_matlab_tree_rss_bytes=peak,seconds=time.monotonic()-start,pid=pid))
+def verify(out, outcome):
+    (out/'watch.stop').touch()
+    for _ in range(40):
+        if (out/'watch.json').exists(): break
+        time.sleep(.5)
+    sf=out/'summary.json'
+    summary=json.loads(sf.read_text())
+    monitor=json.loads((out/'watch.json').read_text())
+    summary.update(native_action_outcome=outcome,monitor=monitor)
+    atomic(sf,summary)
+    assert outcome=='success' and monitor['reason'] is None and monitor['samples']>0
+    assert monitor['peak_sampled_matlab_tree_rss_bytes']<=3*1024**3 and monitor['seconds']<=10000
+    log=out/'session1.jsonl'; stdout=out/'session1.log'
+    expected=json.loads((out/'expected.json').read_text())
+    lo,hi=expected['first_day'],expected['last_day']
     records=[json.loads(x) for x in log.read_text(encoding='utf-8').splitlines()]
     targets=[lo,lo,lo+2121,hi,lo+2121,lo]
     assert len(records)==len(targets)
@@ -73,6 +114,11 @@ def main():
     assert 'PUBLIC_SOAK_PASS mode=pilot session=1 calls=6' in stdout.read_text(errors='replace')
     cold=records[0]['seconds']; warm=max(r['seconds'] for r in records[1:])
     summary.update({'pass':True,'verified_calls':6,'cold_seconds':cold,'warm_max_seconds':warm,'estimated_full_seconds':cold+4248*warm,'within_budget':cold+4248*warm<10000,'log_sha256':sha(log.read_bytes())})
-    sf.write_text(dump(summary))
+    atomic(sf,summary)
     print(dump(summary))
-if __name__=='__main__': main()
+if __name__=='__main__':
+    mode=sys.argv[1]
+    if mode=='prepare': prepare()
+    elif mode=='watch': watch(pathlib.Path(sys.argv[2]).resolve())
+    elif mode=='verify': verify(pathlib.Path(sys.argv[2]).resolve(),sys.argv[3])
+    else: raise SystemExit('unknown mode')

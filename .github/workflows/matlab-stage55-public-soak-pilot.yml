@@ -35,8 +35,44 @@ jobs:
       - uses: matlab-actions/setup-matlab@v3
         with:
           release: R2026a
-      - name: Run six-call bounded native public pilot
-        run: python3 qa/tools/stage55_public_soak_pilot.py source audit.zip pilot-output
+      - name: Prepare pinned expected rows and start independent watchdog
+        run: |
+          set -euo pipefail
+          python3 qa/tools/stage55_public_soak_pilot.py prepare source audit.zip pilot-output
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch pilot-output > pilot-output/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f pilot-output/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Run six-call bounded native public pilot via licensed action
+        id: native
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 167
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            out=fullfile(base,'pilot-output');
+            fid=fopen(fullfile(out,'matlab.pid'),'w');
+            assert(fid>=0);
+            fprintf(fid,'%d',feature('getpid'));
+            fclose(fid);
+            maxNumCompThreads(1);
+            diary(fullfile(out,'session1.log'));
+            addpath(fullfile(base,'qa','tools'));
+            run_stage55_public_soak_pilot(fullfile(base,'source'),fullfile(out,'expected.json'),fullfile(out,'session1.jsonl'));
+            diary off;
+      - name: Verify native result and bounded watchdog evidence
+        if: always()
+        env:
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          set -euo pipefail
+          test -f pilot-output/summary.json
+          python3 qa/tools/stage55_public_soak_pilot.py verify pilot-output "$NATIVE_OUTCOME"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
