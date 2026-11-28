@@ -165,7 +165,7 @@ try {
  $r['trace_events']=@()
  $r['trace_next_expected']=$null
  $traceHeader=('APL_GERMAN_STAGE01_TRACE_V1|SOURCE='+$source+'|')
- if($meta.trace_header -cne $traceHeader -or $meta.trace_diagnostic_only -ne $true -or $meta.trace_tokens.Count -ne 100){throw 'TRACE_METADATA_CONTRACT_FAILED'}
+ if($meta.trace_header -cne $traceHeader -or $meta.trace_diagnostic_only -ne $true -or $meta.trace_tokens.Count -ne 122){throw 'TRACE_METADATA_CONTRACT_FAILED'}
  if($null -ne $suite.trace -and $suite.trace.StartsWith($traceHeader,[StringComparison]::Ordinal)){
    $body=$suite.trace.Substring($traceHeader.Length)
    if($body.Length % 5 -eq 0 -and $body.Length -le 5*$meta.trace_tokens.Count){
