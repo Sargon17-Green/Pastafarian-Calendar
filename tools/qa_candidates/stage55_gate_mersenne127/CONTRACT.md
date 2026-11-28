@@ -22,13 +22,13 @@ The patcher requires the exact baseline commit and exact original BigInt, GateQu
 
 ## Native test contract
 
-- Python arbitrary-precision divmod is the independent oracle.
+- Python arbitrary-precision divmod is the independent oracle for both floorDivMod and regularMod.
 - Deterministic vectors include positive/negative inputs, boundaries, the exact Mersenne modulus, one-limb divisors, and unrelated multi-limb divisors.
-- The original and candidate run the same 24 target days twice (48 direct GateQuestionEngine calls).
-- Each of the nine inner compatibility-route classes must be profiled exactly 48 times in each variant.
-- Every exact gap result must match between baseline and candidate.
+- The original and candidate run one profiled pass over the same 24 target days, plus two unprofiled timing passes (48 additional direct GateQuestionEngine calls).
+- Each of the nine inner compatibility-route classes must be profiled exactly 24 times in each variant.
+- All 48 unprofiled exact gap results must match between baseline and candidate; the first 24 must also match the profiled pass.
 - Each variant is bounded by a 3 GiB MATLAB process-tree RSS ceiling and 10,000 s watchdog.
-- Candidate performance gate: at least 1.5x faster in each of the two measured passes.
+- Candidate performance gate: at least 1.5x faster in each of the two unprofiled timing passes.
 
 ## Non-goals and acceptance boundary
 

@@ -49,14 +49,14 @@ def check_profile(profile: dict, expected_blob: str, vectors: list, manifest: di
     offsets = list(range(-12, 0)) + list(range(1, 13))
     assert profile["target_offsets"] == offsets
     assert profile["target_days"] == [-15055671 + offset for offset in offsets]
-    assert profile["repeat_count"] == 2
-    assert profile["gate_engine_profile_calls"] == 48
-    assert len(profile["gap_results"]) == 2
-    assert all(len(row) == 24 for row in profile["gap_results"])
-    assert len(profile["call_seconds"]) == 2
-    assert all(len(row) == 24 for row in profile["call_seconds"])
+    assert profile["profiled_gate_engine_calls"] == 24
+    assert len(profile["profile_gap_results"]) == 24
+    assert len(profile["gap_results"]) == 48
+    assert len(profile["call_seconds"]) == 48
+    assert len(profile["pass_seconds"]) == 2
+    assert profile["profile_gap_results"] == profile["gap_results"][:24]
     for route in ROUTES:
-        assert profile["route_counts"][route]["calls"] == 48, (
+        assert profile["route_counts"][route]["calls"] == 24, (
             route, profile["route_counts"][route]
         )
     assert profile["total_measured_gate_seconds"] > 0
@@ -104,8 +104,8 @@ def main() -> None:
     assert baseline["gap_results"] == candidate["gap_results"], (
         "the candidate changed at least one exact GateQuestionEngine gap"
     )
-    baseline_passes = [sum(row) for row in baseline["call_seconds"]]
-    candidate_passes = [sum(row) for row in candidate["call_seconds"]]
+    baseline_passes = baseline["pass_seconds"]
+    candidate_passes = candidate["pass_seconds"]
     pass_speedups = [b / c for b, c in zip(baseline_passes, candidate_passes)]
     total_speedup = baseline["total_measured_gate_seconds"] / candidate["total_measured_gate_seconds"]
     assert min(pass_speedups) >= 1.5, {
@@ -125,8 +125,9 @@ def main() -> None:
         "arithmetic_vectors": len(vectors),
         "vector_categories": vectors_manifest["categories"],
         "regularMod_independent_oracle": "PASS",
-        "physical_gate_engine_calls_per_variant": 48,
-        "physical_route_calls_per_route_per_variant": 48,
+        "profiled_gate_engine_calls_per_variant": 24,
+        "profiled_route_calls_per_route_per_variant": 24,
+        "timed_unprofiled_gate_calls_per_variant": 48,
         "gap_outputs_identical": True,
         "baseline_pass_seconds": baseline_passes,
         "candidate_pass_seconds": candidate_passes,
