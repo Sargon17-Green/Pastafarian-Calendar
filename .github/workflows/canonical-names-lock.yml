@@ -1506,3 +1506,43 @@ jobs:
           name: dart-hebrew-representative-memory-${{ matrix.workload }}-${{ matrix.comparison }}
           path: out/dart-hebrew-representative-memory/
           if-no-files-found: warn
+
+  dart-hebrew-production-gregorian-boundary:
+    if: github.ref == 'refs/heads/Dart+עברית'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - run: dart pub get
+      - name: Verify format and capture exact repair evidence
+        shell: bash
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib/src/gregorian_converter.dart bin/production_gregorian_tests.dart lib/pastafari_calendar.dart; then
+            dart format --output=write lib/src/gregorian_converter.dart bin/production_gregorian_tests.dart lib/pastafari_calendar.dart
+            for file in lib/src/gregorian_converter.dart bin/production_gregorian_tests.dart lib/pastafari_calendar.dart; do
+              echo "DART_CAPTURE_BEGIN:${file}"
+              base64 -w0 "${file}"
+              printf '\n'
+              echo "DART_CAPTURE_END:${file}"
+            done
+            exit 1
+          fi
+      - run: dart analyze
+      - name: Run exact civil date and calendar boundary checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/production-gregorian
+          git rev-parse HEAD | tee out/production-gregorian/source-sha.txt
+          dart --version 2>&1 | tee out/production-gregorian/sdk.txt
+          dart run bin/production_gregorian_tests.dart | tee out/production-gregorian/results.log
+          grep -q '^PRODUCTION_GREGORIAN_BOUNDARY_PASS checks=' out/production-gregorian/results.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dart-hebrew-production-gregorian-boundary
+          path: out/production-gregorian/
+          if-no-files-found: warn
