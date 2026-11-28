@@ -112,14 +112,16 @@ def run(index, outdir, runtime):
     def command_hook(op, old):
         def call(current):
             active.append(op)
-            watched=op in "pgxj"
+            watched=op in "pgxj{}k"
             if watched:
-                emit(["command",op,state(current),list(current.stack[0]),len(current.stack)])
+                emit(["command",op,state(current),list(current.stack[-1]),len(current.stack),
+                      [list(frame) for frame in current.stack.sstack] if op in "{}" else None])
             try:
                 result=old(current)
             finally:
                 if watched:
-                    emit(["return",op,state(current),list(current.stack[0]),len(current.stack)])
+                    emit(["return",op,state(current),list(current.stack[-1]),len(current.stack),
+                      [list(frame) for frame in current.stack.sstack] if op in "{}" else None])
                 active.pop()
             return result
         return call
@@ -130,19 +132,23 @@ def run(index, outdir, runtime):
         tick[0]+=1
         need(tick[0]<=750000 and len(self.ips)==1 and self.ips[0] is ip,"single-IP/step bound")
         need(self.space.space is watched,"space backing replaced")
+        need(not ip.fploaded,"fingerprint outside audit scope")
         del events[:]
         pre=state(ip)
         op=int(original["get"](ip.position))
         if tuple(ip.position)==fork.GATE and op==ord("|") and not ip.stringmode:
-            need(len(ip.stack[0])>0,"gate operand absent")
-            prev=ip.stack[0][-1]
+            toss=ip.stack[-1]
+            end=0 if ip.queuemode else -1
+            need(len(toss)>0,"gate operand absent")
+            prev=toss[end]
             if opposite:
-                ip.stack[0][-1]=0 if prev else 1
-            gate.append([tick[0],prev,ip.stack[0][-1]])
+                toss[end]=0 if prev else 1
+            gate.append([tick[0],prev,toss[end]])
         try:
             return old_step()
         finally:
             need(not active,"unbalanced dispatch")
+            need(not ip.fploaded,"fingerprint outside audit scope")
             need(self.space.space is watched,"space backing replaced")
             trace.write(json.dumps([tick[0],pre,op,events,state(ip) if self.ips else None],
                                    separators=(",",":"))+"\n")
@@ -161,9 +167,10 @@ def run(index, outdir, runtime):
         need(len(gate)==1,"owner intervention count")
         need(bool(gate[0][1])!=bool(gate[0][2]) if opposite else gate[0][1]==gate[0][2],
              "owner intervention identity")
-    receipt={"schema":"qa31cy-production-telemetry-v1","index":index,"case":label,
+    receipt={"schema":"qa31cy-production-telemetry-v2","index":index,"case":label,
         "fields":list(fields),"valid":valid,"opposite":opposite,"family":family,
         "source":PIN,"runtime":RUNTIME,"head":os.environ.get("QA_HEAD_SHA"),
+        "trace_sha256":hashlib.sha256(open(os.path.join(outdir,"%03d.jsonl.gz"%index),"rb").read()).hexdigest(),
         "ticks":tick[0],"gate":gate,"output":output,"reference":expected,
         "reference_equal":output==expected,"event_counts":counts,"stage1_accepted":False}
     with open(os.path.join(outdir,"%03d.json"%index),"wb") as f:
