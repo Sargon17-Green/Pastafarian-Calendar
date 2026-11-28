@@ -135,7 +135,7 @@ function Assert-Stage44ExactEntrySet {
         throw 'STAGE44_EVIDENCE_ZIP_ENTRY_COUNT'
     }
     foreach ($name in $ExpectedNames) {
-        if (-not $Entries.Contains($name)) {
+        if (@($Entries.Keys) -cnotcontains $name) {
             throw ('STAGE44_EVIDENCE_ZIP_ENTRY_MISSING:' + $name)
         }
     }
@@ -307,7 +307,7 @@ function Assert-Stage44ManifestMatches {
     )
     if ($Actual.Count -ne $Expected.Count) { throw 'STAGE44_EVIDENCE_MANIFEST_KEY_COUNT' }
     foreach ($key in $Expected.Keys) {
-        if (-not $Actual.Contains($key)) { throw ('STAGE44_EVIDENCE_MANIFEST_KEY_MISSING:' + $key) }
+        if (@($Actual.Keys) -cnotcontains $key) { throw ('STAGE44_EVIDENCE_MANIFEST_KEY_MISSING:' + $key) }
         Assert-Stage44EvidenceEqual $Actual[$key] ([string]$Expected[$key]) ('MANIFEST_' + $key)
     }
 }
