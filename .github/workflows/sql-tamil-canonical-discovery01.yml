@@ -1,0 +1,118 @@
+name: SQL Tamil canonical Stage02 Discovery01
+on:
+  push:
+    branches:
+      - 'SQL\+தமிழ்'
+    paths:
+      - 'artifacts/stage-02/canonical-discovery01/**'
+      - '.github/workflows/sql-tamil-canonical-discovery01.yml'
+permissions:
+  contents: read
+concurrency:
+  group: sql-tamil-canonical-discovery01-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  isolated-discovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Source locks and isolated PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/discovery-evidence" "$RUNNER_TEMP/discovery-src"
+          out="$RUNNER_TEMP/discovery-evidence"
+          src="$RUNNER_TEMP/discovery-src"
+          base=cac8fba51d2bb2a1a437187a1e58d73ec9fa512f
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$base" HEAD
+          printf 'PROJECT_ID=PC-BRANCH-SQL-TAMIL\nCHECKOUT=%s\nBASE=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$base" "$GITHUB_REF_NAME" | tee "$out/versions.txt"
+          while read -r expected path; do
+            mkdir -p "$src/$(dirname "$path")"
+            git show "$base:$path" > "$src/$path"
+            test "$(git hash-object "$src/$path")" = "$expected"
+            printf '%s %s\n' "$expected" "$path"
+          done <<'LOCKS' | tee "$out/baseline-git-locks.txt"
+          9ca6f6ea5b3932facbe92aee6a2b38f6557cedd5 sql/00_schema.sql
+          b28730931e26ee65eaf9108621320d73f458ba07 sql/01_source_language_catalog.sql
+          3367fe9c34e830b0bd99049ebef64398d150cd79 sql/02_monster_bootstrap.sql
+          ce17bf6fd166451b6904411c5e29d1b26d92e278 sql/test/10_normative_reference.sql
+          e198492857a0236284d25642f0e69e8c0bcc2ea7 sql/test/20_stage01_tests.sql
+          28a1a36f05afed1c1d4feffc585b54e657a44f00 sql/test/25_saved_sum_discriminator.sql
+          52dbe7659240826ec73a71e800bccef121123a15 sql/test/30_stage01_heavy_reference.sql
+          08115ed0461efb5f47e76abc174737156b4b1188 sql/test/40_production_isolation.sql
+          LOCKS
+          while read -r expected name; do
+            cp "artifacts/stage-02/canonical-discovery01/$name" "$src/$name"
+            test "$(git hash-object "$src/$name")" = "$expected"
+            printf '%s %s\n' "$expected" "$name"
+          done <<'LOCKS' | tee "$out/candidate-git-locks.txt"
+          1ce2241ce7bfc22283028e4c881a0f5fa593a33e 03_canonical_discovery01.sql
+          70cd4e2740da8fc45e830cf1157478a1fdb702af test_discovery01.sql
+          33d6eee1aa83a502e2df74888708348955e8c5f2 oracle_discovery01.sql
+          LOCKS
+          (cd "$src"; find . -type f -print0 | sort -z | xargs -0 sha256sum) > "$out/source-sha256.txt"
+          docker run -d --name sql-tamil-discovery01 --network none --cpus 2 --memory 2g -e POSTGRES_HOST_AUTH_METHOD=trust -v "$src:/work:ro" postgres:17.12
+          ready=0
+          for attempt in $(seq 1 60); do
+            if docker exec -u postgres sql-tamil-discovery01 pg_isready -q -U postgres; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1
+          docker exec -u postgres sql-tamil-discovery01 postgres --version | tee -a "$out/versions.txt"
+          docker exec -u postgres sql-tamil-discovery01 psql --version | tee -a "$out/versions.txt"
+          docker exec -u postgres sql-tamil-discovery01 psql -X -v ON_ERROR_STOP=1 -d postgres -c 'CREATE DATABASE baseline_ref'
+          docker exec -u postgres sql-tamil-discovery01 psql -X -v ON_ERROR_STOP=1 -d postgres -c 'CREATE DATABASE candidate_prod'
+      - name: Original Stage01 reference regression and independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/discovery-evidence"
+          rc=0
+          timeout 900s docker exec -e PGOPTIONS='-c statement_timeout=600000' -u postgres sql-tamil-discovery01 psql -X -v ON_ERROR_STOP=1 -d baseline_ref \
+            -f /work/sql/00_schema.sql -f /work/sql/01_source_language_catalog.sql -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/sql/test/10_normative_reference.sql -f /work/sql/test/20_stage01_tests.sql \
+            -c 'SELECT 1/((count(*)=52 AND bool_and(ok))::integer) AS ordinary_52_of_52 FROM stage01_assertions' \
+            -f /work/sql/test/25_saved_sum_discriminator.sql \
+            -c 'SELECT 1/((count(*)=7 AND bool_and(ok))::integer) AS saved_sum_7_of_7 FROM saved_sum_discriminator_assertions' \
+            -f /work/sql/test/30_stage01_heavy_reference.sql -f /work/oracle_discovery01.sql \
+            > "$out/reference.txt" 2>&1 || rc=$?
+          cat "$out/reference.txt"
+          printf 'REFERENCE_EXIT=%s\n' "$rc" | tee "$out/reference-exit.txt"
+          exit "$rc"
+      - name: Candidate production route, typed divergence and isolation
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/discovery-evidence"
+          rc=0
+          timeout 90s docker exec -e PGOPTIONS='-c statement_timeout=5000' -u postgres sql-tamil-discovery01 psql -X -v ON_ERROR_STOP=1 -d candidate_prod \
+            -f /work/sql/00_schema.sql -f /work/sql/01_source_language_catalog.sql -f /work/sql/02_monster_bootstrap.sql \
+            -f /work/03_canonical_discovery01.sql -f /work/test_discovery01.sql \
+            -f /work/sql/test/40_production_isolation.sql \
+            -c 'SELECT 1/((count(*)=4 AND bool_and(ok))::integer) AS isolation_4_of_4 FROM stage01_production_isolation_assertions' \
+            > "$out/candidate.txt" 2>&1 || rc=$?
+          cat "$out/candidate.txt"
+          printf 'CANDIDATE_EXIT=%s\n' "$rc" | tee "$out/candidate-exit.txt"
+          exit "$rc"
+      - name: Archive evidence hashes
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/discovery-evidence"
+          find . -maxdepth 1 -type f ! -name artifact-sha256.txt -print0 | sort -z | xargs -0 sha256sum > artifact-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canonical-discovery01-${{ github.run_id }}
+          path: ${{ runner.temp }}/discovery-evidence/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Cleanup
+        if: always()
+        run: docker rm -f sql-tamil-discovery01 2>/dev/null || true
