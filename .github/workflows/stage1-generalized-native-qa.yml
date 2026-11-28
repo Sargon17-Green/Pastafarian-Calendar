@@ -68,7 +68,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p build/generalized-native-qa/join
           ulimit -S -v 3145728
           ulimit -H -v 3145728
           /usr/bin/time -v -o build/generalized-native-qa/join.resources \
