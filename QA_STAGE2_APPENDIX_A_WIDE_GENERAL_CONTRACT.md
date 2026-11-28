@@ -4,9 +4,9 @@ PROJECT_ID: PC-BRANCH-LOGO-IDO
 QA_BRANCH: qa/logo-ido-stage2-wide-general-k3plus-20261122
 BASE_QA_HEAD: 1fea4a9a2b1f595151411b1f3457546deb8bd2e4
 CANONICAL_SOURCE_SHA: ad001c6aeeb6c758f5004b206a656fec5d6fc403
-STATUS: QA_CONTRACT_AND_INDEPENDENT_HOST_ORACLE_ONLY
+STATUS: QA_IMPLEMENTATION_AND_INDEPENDENT_HOST_ORACLE; K3_NATIVE_DIAGNOSTIC_PASS
 PRODUCTION_CHANGED: NO
-NATIVE: NOT_RUN
+NATIVE: INCREMENTAL_DIAGNOSTICS; FULL_K_ACCEPTANCE: NOT_RUN
 STAGE2_ACCEPTED: NO
 LAST_COMPLETED_STAGE: 1
 
@@ -135,10 +135,19 @@ The current WIDE2 Native run 44947067097 is already accepted at its exact SHA an
 - Canonical Logo+Ido HEAD remains ad001c6aeeb6c758f5004b206a656fec5d6fc403.
 - No canonical promotion, main, merge, publication or Stage-2 completion.
 - LAST_COMPLETED_STAGE remains 1.
-- Next: implement only monster.stage02.choose.wide.general on this QA branch, add the Native fixture generator and source-locked workflow, then verify the exact new SHA. Do not change the accepted k=2 reporter or D20's 0..31 contract.
+- Next: continue bounded Native width expansion (k4, k5, k6, then k32/k33/k64); preserve per-case markers and timeouts; do not promote Stage 2 until all required widths pass. Do not change the accepted k=2 reporter or D20's 0..31 contract.
 
 ## 9. Diagnostic update after exact-SHA timeout (2026-11-22)
 
 Full-k Native run 44960408541 / job 137017741464 completed FAILURE on c4371498a7bae80f3fae1dcf6a31aa2a08f1c6ef. Independent Python host enumerator (42,748 cases), fixture generation (48 / 138 planned checks), and pinned UCBLogo build passed. Native timed out after 1,200 seconds (exit 124); artifact 14729549954, ZIP SHA-256 25a0a2c043cd5dba9d8641f51e0126443e332cac39345e224f559445b5fcb4b7, contains a zero-byte Native log. No individual Native case or general-k PASS can be inferred. Generated invalid fixtures also referenced `nr.M`, but the normative reference was not loaded.
 
 This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replaces uninitialized `nr.M`, emits boot and case-start markers, and limits Native to four accepted-interface k=2 probes and four k=3 large-M probes plus 18 invalid guards: 26 cases / 50 checks; 300-second bounded runtime. This is NOT the full general-k acceptance gate, and a diagnostic PASS cannot be promoted to all-k PASS. Wider k=4,5,6,32,33,64 Native vectors are still unverified; keep Stage2 incomplete. Updated fixture-generator Git blob: 4e5eef7d8f8558579bf9a466adf7d126212e2bc2.
+
+
+## 10. Completed k2/k3 Native diagnostic evidence
+
+- Actions run 44997206360, job 137130705374, completed success at exact QA SHA 587a3e3969e9c3aba48636e2fdf43af32f64b3c0.
+- Canonical Names Lock run 44997206375, job 137130705583, completed success on the same SHA.
+- Native output: 26 cases, 50 checks, final WIDE_GENERAL_NATIVE_PASIS marker; no Logo error markers.
+- Artifact 14744865567, 4,616 bytes, SHA-256 30fa54c00d7a4890877e6c5a95b234944e010b3c8225713c382b90ee6c2ff88c. It contains the exact fixture, host/Native logs, source hashes and commit identity.
+- This proves only the bounded k2/k3 diagnostic. It does not accept k4, k5, k6, k32, k33, k64, or Stage 2 as a whole.
