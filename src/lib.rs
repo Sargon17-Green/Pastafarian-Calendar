@@ -13,6 +13,7 @@ pub mod patch02_work_counts;
 pub mod patch03_distance;
 pub mod patch04_stone_probe;
 pub mod patch05_hidden_probe;
+pub mod patch06_prior_probe;
 #[rustfmt::skip]
 pub mod source_language_catalog;
 
@@ -100,6 +101,7 @@ pub struct MonsterContext {
     pub discovery05_actual: Option<BigInt>,
     pub patch05_hidden_observation: Option<patch05_hidden_probe::Patch05HiddenObservation>,
     pub discovery06_prior_observation: Option<discovery06_prior_probe::PriorObservation>,
+    pub patch06_prior_observation: Option<discovery06_prior_probe::PriorObservation>,
 }
 
 impl MonsterContext {
@@ -133,6 +135,7 @@ impl MonsterContext {
             discovery05_actual: None,
             patch05_hidden_observation: None,
             discovery06_prior_observation: None,
+            patch06_prior_observation: None,
         }
     }
 }
