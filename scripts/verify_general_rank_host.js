@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+// QA only: compare host arithmetic transcription of generalized SV rank to pinned oracle.
+// timeout 120s node --max-old-space-size=512 scripts/verify_general_rank_host.js
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto');
+const src=fs.readFileSync(path.join(__dirname,'stage1_multivector_full_oracle.js'));
+const blob=crypto.createHash('sha1').update('blob '+src.length+'\0').update(src).digest('hex');
+if(blob!=='e228f43f2d33b9af59c5fb232281ca403455ca5c')throw Error('oracle pin');
+const suffix='fullTest(console.log);\n';
+if(!src.toString('utf8').endsWith(suffix))throw Error('oracle anchor');
+const sha256hex=hex=>crypto.createHash('sha256').update(Buffer.from(hex,'hex')).digest('hex');
+const core="\nfunction svRank(s,root){\n const a=save((s.Q[3]+213n)**2n+179n*s.Q[s.order[(s.order.indexOf(4)+1)%6]-1]+32n);\n const step=save((a+226n)**2n+193n*a+197n*s.Q[5])&1n?1n:-1n;\n let space=M,digits=1;while(space<root&&digits<253){space=(space<<127n)-space;digits++}\n check(space>=root,\"domain cap\");let wide=0n;\n for(let i=digits-1;i>=0;i--){const digit=save(a+step*BigInt(i))-1n;wide=(wide<<127n)-wide+digit}\n function rem(n,d){for(let k=127n;k>=0n;k--){let shifted=d<<k;if(n>=shifted)n-=shifted}check(n>=0n&&n<d,\"remainder\");return n}\n check(wide<space,\"wide range\");let limit=space-rem(space,root),accepted=wide+1n;\n if(accepted>limit)accepted=step===1n?1n:limit;\n return {rank:rem(accepted-1n,root)+1n,digits,step:Number(step),rejected:wide+1n>limit}\n}\nconst pins=[\n\"1f1db813c0d3c7932b7ce4d106f57e68af1ff29d87a50f1484e094d7c892abb7\",\n\"5b18428fecea6764dc90476754a2d54c4b22d90bdc075b829797e6d15f8d6efe\",\n\"0488e6cd82f84be3f32cd008d15de6bc492187c65982855333099fac95b02182\",\n\"6312280c94133462d4604997cfd632115216af7992358b53d887dc78a6af2b2b\",\n\"c64b94729890ca9773c115f48e0fbfaa60d4ee6c0aa917295714f9b623c8f211\"];\nconst gc=new Map([[0,F]]),results=[];\nfor(const [c,t,...expected] of vectors.slice(5)){\n const o=oracle(c,t,gc);check(o.cut.join()===expected.join(),\"cut\");\n const H=transfer(o.lengths),root=H[1][o.lengths[0]-1],s=sauce(c,o.open+1),ref=choose(s,4,32,root),v=svRank(s,root);\n check(v.rank===ref,\"rank mismatch\");\n const digest=sha256hex(v.rank.toString(16).padStart(8192,\"0\"));check(digest===pins[results.length],\"pinned rank digest\");\n results.push({c,t,year:o.cut[0],opening:o.open,days:o.close-o.open,rootBits:root.toString(2).length,rankBits:ref.toString(2).length,digits:v.digits,step:v.step,rejected:v.rejected,rankSHA256:digest});\n}\ncheck(results.length===5&&results.reduce((a,x)=>a+x.days,0)===20763,\"coverage\");\nresults;\n";
+const results=vm.runInNewContext(src.toString('utf8').slice(0,-suffix.length)+core,{sha256hex},{timeout:110000});
+console.log(JSON.stringify({status:'HOST_RANK_ARITHMETIC_MATCH',native:'NOT_RUN',foundationSkipped:true,results},null,2));
