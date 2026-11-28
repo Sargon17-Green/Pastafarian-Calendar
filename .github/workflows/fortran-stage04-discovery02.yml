@@ -1,0 +1,71 @@
+name: Fortran Stage04 Discovery02 Native
+on:
+  push:
+    branches:
+      - 'Fortran+English'
+permissions:
+  contents: read
+jobs:
+  stage04-discovery02-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Prepare evidence and exact source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence build
+          git rev-parse HEAD > evidence/source-commit.txt
+          git rev-parse HEAD^{tree} > evidence/source-tree.txt
+          test "$(cat evidence/source-commit.txt)" = "$GITHUB_SHA"
+          sha256sum src/big_integer.f90 src/bootstrap_infrastructure.f90 src/discovery02_day_tag.f90 test/normative_oracle_core.f90 test/stage04_discovery02.f90 > evidence/source-sha256.txt
+      - name: Install GNU Fortran
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gfortran
+          gfortran --version > evidence/compiler.txt
+      - name: Compile and observe raw divergence
+        shell: bash
+        run: |
+          set -euo pipefail
+          flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J build -I build)
+          set +e
+          (
+            set -e
+            gfortran "${flags[@]}" -c src/big_integer.f90 -o build/big_integer.o
+            gfortran "${flags[@]}" -c src/bootstrap_infrastructure.f90 -o build/bootstrap_infrastructure.o
+            gfortran "${flags[@]}" -c src/discovery02_day_tag.f90 -o build/discovery02_day_tag.o
+            gfortran "${flags[@]}" -c test/normative_oracle_core.f90 -o build/normative_oracle_core.o
+            gfortran "${flags[@]}" test/stage04_discovery02.f90 build/big_integer.o build/bootstrap_infrastructure.o build/discovery02_day_tag.o build/normative_oracle_core.o -o build/stage04_discovery02
+          ) > evidence/compile.log 2>&1
+          rc=$?
+          echo "$rc" > evidence/compile-exit.txt
+          cat evidence/compile.log
+          test "$rc" -eq 0 || exit 1
+          (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 30s build/stage04_discovery02) > evidence/native.stdout 2> evidence/native.stderr
+          rc=$?
+          echo "$rc" > evidence/native-exit.txt
+          set -e
+          cat evidence/native.stdout
+          cat evidence/native.stderr >&2
+          test "$rc" -eq 0
+          test ! -s evidence/native.stderr
+          test "$(grep -c '^CASE=' evidence/native.stdout)" -eq 17
+          grep -Fx 'STAGE04_DISCOVERY02 CASES=17 EXPECTED_RED=9 MATCH=8 COLLISIONS=8 ISOLATION=2 METRICS=1' evidence/native.stdout
+          grep -Fx 'STAGE04_DISCOVERY02_OBSERVATION_GATE_PASS_NOT_PATCH' evidence/native.stdout
+      - name: Manifest
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence
+          cd evidence
+          find . -maxdepth 1 -type f ! -name manifest.sha256 -print0 | sort -z | xargs -0 -r sha256sum > manifest.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fortran-stage04-discovery02-${{ github.sha }}
+          path: evidence/
+          if-no-files-found: error
