@@ -1,0 +1,126 @@
+# Stage02 bounded diagnostic; not a new slice or whole-stage gate.
+# Slice14/16 require integral days; nonfinite NUMERIC is not an integer.
+# Historic 108/112 and fast selector tests cover NULL/fraction/relative overflow, not these cases.
+# Absolute finite distance from foundation has no authorized cap. Do not probe huge finite inputs here.
+# Stage02 legacy calendar_date_spaghetti remains separate; no production edits.
+# Independent rejection oracle: mathematical domain Z; no normative SQL loaded.
+name: SQL Tamil Stage02 nonfinite input diagnostic PG17
+on:
+  push:
+    branches: ['SQL\+தமிழ்']
+    paths:
+      - '.github/workflows/sql-tamil-stage02-nonfinite-input-audit.yml'
+permissions:
+  contents: read
+jobs:
+  nonfinite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact production source and capture provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF_NAME" = 'SQL+தமிழ்'
+          printf 'SHA=%s\nBRANCH=%s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > evidence/versions.txt
+          cat > evidence/source-lock.txt <<'LOCK'
+          9ca6f6ea5b3932facbe92aee6a2b38f6557cedd5 sql/00_schema.sql
+          b28730931e26ee65eaf9108621320d73f458ba07 sql/01_source_language_catalog.sql
+          3367fe9c34e830b0bd99049ebef64398d150cd79 sql/02_monster_bootstrap.sql
+          72ae68d3ec009f65f081a099c8bf06e0dd3ed9d6 sql/03_stage02_production_core.sql
+          caed82dc41d7a259953dc817d5e0722038821310 sql/04_stage02_stone_states.sql
+          f465b466d4a00e24baa689561725a12e5478bf55 sql/05_stage02_hidden_drop.sql
+          caf2991b2ae89f99074d80814655d162f6c68b78 sql/06_stage02_visible_drops.sql
+          0ad25cc4054f46fba66c10dfeffcd81d49f32399 sql/07_stage02_bowls.sql
+          f84f0ac6c2b570aa3ef61038247a44e602014534 sql/08_stage02_bowl_round.sql
+          2f2f2e19e8851b3130f3c3d5edafd5dfbc6923f9 sql/09_stage02_post_stir_round.sql
+          c5c6be7c02c255382ae7c317bfbf17138a12788c sql/10_stage02_sauce.sql
+          b9339560c58cd7a6ab13871ad144257e01c26b84 sql/11_stage02_answer_stream.sql
+          bde130055cead8d3e5677acac516af7329819748 sql/12_stage02_choose_rank.sql
+          d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
+          be1d5450f37e3448f7683aea2a0cabdd4620a6c0 sql/14_stage02_gate_day_selector.sql
+          4d0ad4326b2488e8d2260ffff37f0a93ce49e4f9 sql/15_stage02_year5000_gate_candidates.sql
+          b2fd62c17b133c639f8751fe2eaa03e93ae167f5 sql/16_stage02_year5000.sql
+          116e330d0215f58e23e94b4b573071ad24d44664 sql/17_stage02_adjacent_year_navigation.sql
+          c204a314972b22a4a38f06a02c2fe1bd5bde7acf sql/18_stage02_target_year_navigation.sql
+          d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
+          42acfb80e9eabfd9d091176643763ee7d7bca9ee sql/20_stage02_cutlet_partition.sql
+          5d32a391e1b5609ef790d6a6731ae6713db85a28 sql/21_stage02_cutlet_names.sql
+          3a23c9a1b5ccae667e3e8990005f4b37480df7e4 sql/22_stage02_month_count.sql
+          0fdcaaa03121692ea9762f79cd08e9aedb0ca24c sql/23_stage02_month_lengths.sql
+          a48f611d205763ee5dc7c21da7ddf1c9cfa20e8c sql/24_stage02_month_weaving.sql
+          43c2a6f1071f3e2c9b3ca0225154e42dd2a0de53 sql/25_stage02_month_names.sql
+          faac634a06aee59354de207eb088e4e9996034fa sql/26_stage02_year_structure.sql
+          748d4bc1f7754f003c29a42a1756f26e08c1669b sql/27_stage02_calendar_date.sql
+          LOCK
+          while read -r sha file; do test "$(git hash-object "$file")" = "$sha"; done < evidence/source-lock.txt
+          awk '{print $2}' evidence/source-lock.txt | xargs sha256sum > evidence/source-sha256.txt
+      - name: Start fresh PostgreSQL and load production only
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name pg-input-audit --network none --cpus 2 --memory 2g -e POSTGRES_HOST_AUTH_METHOD=trust -v "$GITHUB_WORKSPACE:/work:ro" postgres:17.12
+          ready=0
+          for i in $(seq 1 45); do if docker exec -u postgres pg-input-audit pg_isready -q -U postgres; then ready=1; break; fi; sleep 2; done
+          test "$ready" = 1
+          docker exec -u postgres pg-input-audit postgres --version | tee -a evidence/versions.txt
+          args=()
+          while read -r sha file; do args+=(-f "/work/$file"); done < evidence/source-lock.txt
+          set +e
+          timeout -k 5s 90s docker exec -u postgres pg-input-audit psql -X -At -v ON_ERROR_STOP=1 -U postgres "${args[@]}" > evidence/load.log 2>&1
+          rc=$?
+          set -e
+          echo "LOAD_EXIT=$rc" | tee evidence/load-exit.txt
+          test "$rc" = 0
+          test "$(docker exec -u postgres pg-input-audit psql -X -At -v ON_ERROR_STOP=1 -U postgres -c "SELECT count(*) FROM pg_namespace WHERE nspname='pastafari_sql_tamil_test'")" = 0
+          echo 'ISOLATION=0' > evidence/isolation.txt
+      - name: Probe 24 distinct invalid cases, each bounded independently
+        shell: bash
+        run: |
+          set -euo pipefail
+          schema=pastafari_sql_tamil
+          f="$schema.foundation_day()"
+          printf 'case\texit\tverdict\n' > evidence/results.tsv
+          probe() {
+            local label="$1" query="$2" rc verdict
+            printf 'BEGIN READ ONLY;\nSET LOCAL statement_timeout = %s;\n%s;\nCOMMIT;\n' "'5s'" "$query" > "evidence/$label.sql"
+            set +e
+            timeout -k 2s 12s docker exec -i -u postgres pg-input-audit psql -X -At -v ON_ERROR_STOP=1 -U postgres < "evidence/$label.sql" > "evidence/$label.log" 2>&1
+            rc=$?
+            set -e
+            if [ "$rc" -eq 0 ] && grep -qx t "evidence/$label.log" && grep -qx COMMIT "evidence/$label.log"; then verdict=REJECTED; elif [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ] || grep -q 'statement timeout' "evidence/$label.log"; then verdict=TIMEOUT; elif [ "$rc" -ne 0 ]; then verdict=ERROR; else verdict=NOT_REJECTED; fi
+            printf '%s\t%s\t%s\n' "$label" "$rc" "$verdict" | tee -a evidence/results.tsv
+          }
+          for kind in nan posinf neginf; do
+            case "$kind" in nan) v="'NaN'::numeric";; posinf) v="'Infinity'::numeric";; neginf) v="'-Infinity'::numeric";; esac
+            probe "window_$kind" "SELECT NOT EXISTS (SELECT 1 FROM $schema.year5000_gate_window($v))"
+            probe "seed_$kind" "SELECT $schema.year5000($v) IS NOT DISTINCT FROM NULL::$schema.year_rec"
+            for fn in find_target_year calendar_date; do
+              typ=year_rec; if [ "$fn" = calendar_date ]; then typ=calendar_result_text; fi
+              probe "${fn}_${kind}_calc" "SELECT $schema.$fn($v,$f) IS NOT DISTINCT FROM NULL::$schema.$typ"
+              probe "${fn}_${kind}_target" "SELECT $schema.$fn($f,$v) IS NOT DISTINCT FROM NULL::$schema.$typ"
+              probe "${fn}_${kind}_both" "SELECT $schema.$fn($v,$v) IS NOT DISTINCT FROM NULL::$schema.$typ"
+            done
+          done
+          test "$(tail -n +2 evidence/results.tsv | cut -f1 | sort -u | wc -l)" = 24
+          test "$(tail -n +2 evidence/results.tsv | wc -l)" = 24
+          test "$(awk -F '\t' '$3=="REJECTED" && $2==0 {n++} END {print n+0}' evidence/results.tsv)" = 24
+          echo 'NONFINITE_REJECTION_24_OF_24=1' > evidence/completion.txt
+      - name: Final evidence hashes
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p evidence
+          find evidence -maxdepth 1 -type f ! -name artifact-sha256.txt -print0 | sort -z | xargs -0 -r sha256sum > evidence/artifact-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sql-tamil-stage02-nonfinite-input-audit
+          path: evidence/
+          if-no-files-found: error
+      - name: Stop disposable database
+        if: always()
+        run: docker rm -f pg-input-audit 2>/dev/null || true
