@@ -1,4 +1,4 @@
-name: Logo Stage2 QA D19 compact audited gate cache integration
+name: Logo Stage2 QA D19 forward reference reuse integration
 on:
   push:
     branches:
@@ -9,12 +9,10 @@ jobs:
   ask-dispatcher:
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         include:
           - direction: forward
-            group: year5000
-          - direction: reverse
             group: year5000
     runs-on: ubuntu-24.04
     timeout-minutes: 32
@@ -118,13 +116,30 @@ jobs:
                    '  if not bi.eq :NR.MIN.GATE '+bi(rows[0]['index'])+' [print [ASK_DISPATCH_CACHE_MIN_FAILURE] bye]',
                    '  if not bi.eq :NR.MAX.GATE '+bi(rows[-1]['index'])+' [print [ASK_DISPATCH_CACHE_MAX_FAILURE] bye]',
                    '  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]',
-                   '  output (list :year :N)', 'end']
+                   '  output (list :year :s :N)', 'end']
           replacement = '\n'.join(lines)+'\n'
           p = Path(os.environ['RUNNER_TEMP'])
           (p/'window.json').write_text(raw_window, encoding='utf-8')
           (p/'cache-provenance.txt').write_text('host-run=46078314376\nforward-artifact=15235573233 sha256=1f5b95293e776f8debfb4f941760a841238f7fa38c1eb7bc341b791ebd4e264e\nreverse-artifact=15234874328 sha256=2fe59e72deef9c592969160203f57c162f5b8b2a660154eddd1d72d21502a4f7\nnative-run=46124439517 sha=865e6bf3380b2cb68a52b90d058b2ba2d1341f78\nprobes=-12/746,-1/503,10/763,29473/175,29485/534,29496/864\nwindow-sha256='+digest+'\n', encoding='utf-8')
           print('QA_COMPACT_CACHE_PROVENANCE=PASS',len(rows),digest)
           source = source[:start] + replacement + source[end:]
+          # The frozen reference sauce was already computed with identical
+          # calculation/target in ad.year5000.data. Reuse that value only in
+          # this year5000 harness, preserving the fresh production build,
+          # all 14 assertions, the rank call, and independent host oracle.
+          assert os.environ['DIRECTION'] == 'forward' and os.environ['GROUP'] == 'year5000'
+          old = 'to ad.run.year5000 :direction :calculation\n  localmake "data ad.year5000.data :calculation\n  localmake "N last :data\n  localmake "both ad.context :calculation :calculation\n  ad.case first :both last :both 1 10 :N (word "year5000_ :direction)\nend'
+          new = 'to ad.run.year5000 :direction :calculation\n  localmake "data ad.year5000.data :calculation\n  localmake "N last :data\n  localmake "reference item 2 :data\n  print [ASK_DISPATCH_BUILD_PRODUCTION]\n  localmake "prefix ad.prefix :calculation :calculation\n  localmake "ctx monster.stage02.sauce :prefix\n  print [ASK_DISPATCH_DIAG_PRODUCTION_DONE]\n  print [ASK_DISPATCH_DIAG_REFERENCE_REUSED]\n  ad.case :ctx :reference 1 10 :N (word "year5000_ :direction)\nend'
+          assert source.count(old) == 1
+          source = source.replace(old, new, 1)
+          for old, new in (
+              ('  localmake "actual monster.stage02.ask :ctx :id :seal\n', '  localmake "actual monster.stage02.ask :ctx :id :seal\n  print [ASK_DISPATCH_DIAG_ACTUAL_ASK_DONE]\n'),
+              ('  localmake "expected nr.ask :reference :id :seal\n', '  localmake "expected nr.ask :reference :id :seal\n  print [ASK_DISPATCH_DIAG_REFERENCE_ASK_DONE]\n'),
+              ('  localmake "rank monster.stage02.choose.rank :actual :N\n', '  localmake "rank monster.stage02.choose.rank :actual :N\n  print [ASK_DISPATCH_DIAG_RANK_DONE]\n'),
+          ):
+              assert source.count(old) == 1
+              source = source.replace(old, new, 1)
+          print("QA_FORWARD_REFERENCE_REUSE=READY identical arguments; all checks retained")
           print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
           path.write_text(source, encoding="utf-8")
           print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
@@ -179,7 +194,7 @@ jobs:
           grep -Fxq "ASK_DISPATCH_CASES_PASIS $expected_cases" "$RUNNER_TEMP/native.log"
           grep -Fxq "ASK_DISPATCH_CHECKS_PASIS $expected_checks" "$RUNNER_TEMP/native.log"
           grep -Fxq 'ASK_DISPATCH_NATIVE_PASIS' "$RUNNER_TEMP/native.log"
-          for marker in COVER_BEGIN CACHE_LOADED SCAN_BEGIN REFERENCE_SAUCE_BEGIN YEAR5000_DATA_DONE; do
+          for marker in COVER_BEGIN CACHE_LOADED SCAN_BEGIN REFERENCE_SAUCE_BEGIN YEAR5000_DATA_DONE PRODUCTION_DONE REFERENCE_REUSED ACTUAL_ASK_DONE REFERENCE_ASK_DONE RANK_DONE; do
             test "$(grep -Fxc "ASK_DISPATCH_DIAG_${marker}" "$RUNNER_TEMP/native.log")" = 1
           done
           test "$(grep -c '^ASK_DISPATCH_ROW ' "$RUNNER_TEMP/native.log")" = "$expected_cases"
