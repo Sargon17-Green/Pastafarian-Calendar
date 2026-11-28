@@ -1,0 +1,108 @@
+name: MATLAB Stage55 Public Mersenne127 Candidate Pilot
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-public-mersenne127-pilot.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-public-mersenne127-pilot
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Lock source and independent expected rows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15257835751/zip > audit.zip
+          echo '66a1b65e47f24bb3e20c45c4fb3b7c69c6d92c056a89f18e809b16f52a9d6504  audit.zip' | sha256sum -c -
+          python3 qa/tools/stage55_public_soak_pilot.py prepare source audit.zip pilot-output
+          cp -a source candidate
+          python3 qa/tools/qa_candidates/stage55_gate_mersenne127/apply_mersenne127.py candidate pilot-output/candidate_manifest.json
+          test "$(git -C candidate hash-object src/+pastafari/BigInt.m)" = aa00d1e0aa711dccceb53ff482b6a7ac7553448f
+          echo 'd14b7af55202d5a9f674216442bcd1b16f9fb32c087fa37cdca74373124af83b  candidate/src/+pastafari/BigInt.m' | sha256sum -c -
+          test -z "$(git -C source status --porcelain)"
+          test "$(git -C candidate diff --name-only)" = src/+pastafari/BigInt.m
+          printf '%s\n' "$GITHUB_SHA" > pilot-output/qa_commit.txt
+          printf '%s\n' 'PC-BRANCH-MATLAB-POLSKI' > pilot-output/project_id.txt
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Start independent bounded watchdog
+        run: |
+          set -euo pipefail
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch pilot-output > pilot-output/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f pilot-output/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Native public converter six-call differential
+        id: native
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 167
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            out=fullfile(base,'pilot-output');
+            fid=fopen(fullfile(out,'matlab.pid'),'w'); assert(fid>=0);
+            fprintf(fid,'%d',feature('getpid')); fclose(fid);
+            maxNumCompThreads(1);
+            diary(fullfile(out,'session1.log'));
+            addpath(fullfile(base,'qa','tools'));
+            addpath(fullfile(base,'candidate','src'));
+            assert(strcmp(which('pastafari.BigInt'),fullfile(base,'candidate','src','+pastafari','BigInt.m')));
+            run_stage55_public_soak_pilot(fullfile(base,'candidate'),fullfile(out,'expected.json'),fullfile(out,'session1.jsonl'));
+            diary off;
+      - name: Verify differential, resource limits and projected soak feasibility
+        if: always()
+        env:
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          set -euo pipefail
+          if test -f pilot-output/watch_started.json; then
+            touch pilot-output/watch.stop
+          fi
+          python3 qa/tools/stage55_public_soak_pilot.py verify pilot-output "$NATIVE_OUTCOME"
+          test -z "$(git -C source status --porcelain)"
+          test "$(git -C candidate diff --name-only)" = src/+pastafari/BigInt.m
+          echo 'd14b7af55202d5a9f674216442bcd1b16f9fb32c087fa37cdca74373124af83b  candidate/src/+pastafari/BigInt.m' | sha256sum -c -
+          python3 - <<'PY'
+          import json, math, pathlib
+          p = pathlib.Path('pilot-output/summary.json')
+          s = json.loads(p.read_text())
+          assert s['stage55_accepted'] is False and s['verified_calls'] == 6
+          assert all(math.isfinite(s[k]) for k in ('cold_seconds','warm_max_seconds','estimated_full_seconds'))
+          assert s['estimated_full_seconds'] == s['cold_seconds'] + 4248*s['warm_max_seconds']
+          assert s['within_budget'] is (s['estimated_full_seconds'] < 10000)
+          s['candidate_public_pilot_accepted'] = s['within_budget']
+          s['production_adopted'] = False
+          s['full_soak_executed'] = False
+          p.write_text(json.dumps(s, indent=2)+'\n')
+          assert s['candidate_public_pilot_accepted'], 'Projected full soak exceeds strict budget'
+          print('MERSENNE127_PUBLIC_PILOT_FEASIBLE_ONLY')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-public-mersenne127-pilot-${{ github.run_id }}
+          path: pilot-output/
+          if-no-files-found: warn
+          retention-days: 30
