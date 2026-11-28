@@ -38,7 +38,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-cutlet-partition-20261128"
           git merge-base --is-ancestor ad001c6aeeb6c758f5004b206a656fec5d6fc403 HEAD
-          expected_files="$(printf '%s\\n' \
+          expected_files="$(printf '%s\n' \
             .github/workflows/logo-stage02-cutlet-partition-qa.yml \
             QA_STAGE2_CUTLET_PARTITION_CONTRACT_20261128.md \
             qa/logo_cutlet_partition_candidate.logo \
