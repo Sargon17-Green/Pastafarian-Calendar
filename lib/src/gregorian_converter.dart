@@ -103,4 +103,30 @@ final class PastafariGregorianConverter {
         requestedDate.toSerialDay(),
         maxTransitions: maxTransitions,
       );
+
+  /// Invert a Pastafarian date while keeping calculationDate fixed.
+  BigInt toSerialDay(
+    GregorianCivilDate calculationDate,
+    MonsterFiveFieldDate date, {
+    int maxTransitions = MonsterYearTraversal.maximumTransitions,
+  }) =>
+      _calendar.toSerialDay(
+        calculationDate.toSerialDay(),
+        date,
+        maxTransitions: maxTransitions,
+      );
+
+  /// Invert a Pastafarian date to its proleptic Gregorian civil date.
+  GregorianCivilDate toGregorian(
+    GregorianCivilDate calculationDate,
+    MonsterFiveFieldDate date, {
+    int maxTransitions = MonsterYearTraversal.maximumTransitions,
+  }) =>
+      GregorianCivilDate.fromSerialDay(
+        toSerialDay(
+          calculationDate,
+          date,
+          maxTransitions: maxTransitions,
+        ),
+      );
 }

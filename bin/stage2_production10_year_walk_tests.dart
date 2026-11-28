@@ -5,6 +5,7 @@ import '../lib/src/monster_visible_droplets.dart';
 import '../lib/src/monster_work_counts.dart';
 import '../lib/src/monster_year_selection.dart';
 import '../lib/src/monster_year_traversal.dart';
+import '../lib/src/gregorian_converter.dart';
 
 var checks = 0;
 var anchors = 0;
@@ -187,6 +188,8 @@ void main() {
   for (final c in <BigInt>[f, f - BigInt.one, f + BigInt.one]) {
     examine(c);
   }
+  final modern = GregorianCivilDate(BigInt.from(2026), 11, 28).toSerialDay();
+  examine(modern);
   final walk = MonsterYearTraversal();
   check(MonsterYearTraversal.signedGapOrdinal(BigInt.one) == BigInt.one,
       'Positive gap convention');
@@ -201,10 +204,10 @@ void main() {
     invalid = true;
   }
   check(invalid, 'Negative step budget rejected');
-  check(anchors == 3 && forwardCases == 3 && backwardCases == 3,
-      'Both directions for three anchors');
-  check(oracleCases == 6, 'Independent oracle over six transitions');
-  check(checks >= 85, 'Numerical and boundary assertion threshold');
+  check(anchors == 4 && forwardCases == 4 && backwardCases == 4,
+      'Both directions for four anchors');
+  check(oracleCases == 8, 'Independent oracle over eight transitions');
+  check(checks >= 150, 'Numerical and boundary assertion threshold');
   print('PRODUCTION10_YEAR_WALK_PASS; checks=$checks; anchors=$anchors; '
       'forward=$forwardCases; backward=$backwardCases; oracle=$oracleCases; '
       'year_component_ready=true; five_component_calendar_ready=false');

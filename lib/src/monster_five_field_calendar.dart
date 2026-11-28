@@ -25,6 +25,31 @@ final class MonsterFiveFieldDate {
     required this.dayInMonth,
   });
 
+  /// Construct input components; canonical Hebrew names are derived by index.
+  factory MonsterFiveFieldDate.fromComponents({
+    required BigInt yearNumber,
+    required int cutletCanonicalIndex,
+    required int dayInCutlet,
+    required int monthCanonicalIndex,
+    required int dayInMonth,
+  }) {
+    if (dayInCutlet < 1) {
+      throw ArgumentError.value(dayInCutlet, 'dayInCutlet', 'Must be positive.');
+    }
+    if (dayInMonth < 1) {
+      throw ArgumentError.value(dayInMonth, 'dayInMonth', 'Must be positive.');
+    }
+    return MonsterFiveFieldDate._(
+      yearNumber: yearNumber,
+      cutletCanonicalIndex: cutletCanonicalIndex,
+      cutletName: SourceLanguageCatalog.cutletText(cutletCanonicalIndex),
+      dayInCutlet: dayInCutlet,
+      monthCanonicalIndex: monthCanonicalIndex,
+      monthName: SourceLanguageCatalog.monthText(monthCanonicalIndex),
+      dayInMonth: dayInMonth,
+    );
+  }
+
   List<Object> get canonicalComponents => List<Object>.unmodifiable(<Object>[
         yearNumber,
         cutletCanonicalIndex,
@@ -32,6 +57,24 @@ final class MonsterFiveFieldDate {
         monthCanonicalIndex,
         dayInMonth,
       ]);
+}
+
+/// The inverse year-number search has a finite, explicit transition budget.
+final class IncompleteMonsterYearNumberTraversal implements Exception {
+  final BigInt calculationDay;
+  final BigInt requestedYearNumber;
+  final int completedTransitions;
+  final int maximumTransitions;
+
+  const IncompleteMonsterYearNumberTraversal(
+    this.calculationDay,
+    this.requestedYearNumber,
+    this.completedTransitions,
+    this.maximumTransitions,
+  );
+
+  @override
+  String toString() => 'Incomplete §R year-number traversal.';
 }
 
 /// Complete §X operation, without recomputing or mutating selected ranks.
@@ -75,6 +118,107 @@ final class MonsterFiveFieldCalendar {
       monthIds: weave.monthIds,
       monthNameIndices: names.nameIndices,
     );
+  }
+
+  /// Invert five numeric components to the exact serial day under fixed c.
+  /// Both the year-number walk and all partition questions retain calculationDay.
+  BigInt toSerialDay(
+    BigInt calculationDay,
+    MonsterFiveFieldDate date, {
+    int maxTransitions = MonsterYearTraversal.maximumTransitions,
+  }) {
+    final cutletName = SourceLanguageCatalog.cutletText(
+      date.cutletCanonicalIndex,
+    );
+    final monthName = SourceLanguageCatalog.monthText(
+      date.monthCanonicalIndex,
+    );
+    if (date.cutletName != cutletName || date.monthName != monthName) {
+      throw ArgumentError('Canonical names disagree with their indices.');
+    }
+    if (date.dayInCutlet < 1 || date.dayInMonth < 1) {
+      throw ArgumentError('Day ordinals must be positive.');
+    }
+    if (maxTransitions < 0 ||
+        maxTransitions > MonsterYearTraversal.maximumTransitions) {
+      throw RangeError.range(
+        maxTransitions,
+        0,
+        MonsterYearTraversal.maximumTransitions,
+      );
+    }
+
+    var year = MonsterTraversedYear.from5000(
+      traversal.anchor.select(calculationDay),
+    );
+    final delta = date.yearNumber - year.yearNumber;
+    final requiredTransitions = delta.abs();
+    if (requiredTransitions > BigInt.from(maxTransitions)) {
+      throw IncompleteMonsterYearNumberTraversal(
+        calculationDay,
+        date.yearNumber,
+        0,
+        maxTransitions,
+      );
+    }
+    final transitionCount = requiredTransitions.toInt();
+    for (var step = 0; step < transitionCount; step++) {
+      year = delta < BigInt.zero
+          ? traversal.previous(calculationDay, year)
+          : traversal.next(calculationDay, year);
+    }
+
+    final partition = cutletPlanner.partition(calculationDay, year);
+    final lengths = lengthPlanner.plan(calculationDay, year);
+    final weave = weavePlanner.plan(calculationDay, year, lengths);
+    final names = namePlanner.plan(calculationDay, year, lengths, weave);
+
+    final monthPosition = names.nameIndices.indexOf(date.monthCanonicalIndex);
+    if (monthPosition < 0) {
+      throw ArgumentError('Month name is not selected for this year.');
+    }
+    final monthLength = lengths.lengths[monthPosition];
+    if (date.dayInMonth > monthLength) {
+      throw RangeError.range(date.dayInMonth, 1, monthLength, 'dayInMonth');
+    }
+    final monthId = monthPosition + 1;
+    var occurrence = 0;
+    var offset = -1;
+    for (var day = 0; day < weave.monthIds.length; day++) {
+      if (weave.monthIds[day] == monthId) {
+        occurrence++;
+        if (occurrence == date.dayInMonth) {
+          offset = day;
+          break;
+        }
+      }
+    }
+    if (offset < 0) {
+      throw StateError('Selected month occurrence is missing from the weave.');
+    }
+    final requestedDay = year.candidate.openGate + BigInt.from(offset + 1);
+
+    final matchingCutlets = partition.meatballs
+        .where((cutlet) => cutlet.nameIndex == date.cutletCanonicalIndex)
+        .toList();
+    if (matchingCutlets.length != 1) {
+      throw ArgumentError('Cutlet name is not unique in this year.');
+    }
+    final cutlet = matchingCutlets.single;
+    final cutletLength = cutlet.closeGate - cutlet.openGate;
+    if (date.dayInCutlet > cutletLength.toInt()) {
+      throw RangeError.range(
+        date.dayInCutlet,
+        1,
+        cutletLength.toInt(),
+        'dayInCutlet',
+      );
+    }
+    final cutletDay = cutlet.openGate + BigInt.from(date.dayInCutlet);
+    if (cutletDay != requestedDay) {
+      throw ArgumentError('Cutlet and month components identify different days.');
+    }
+    return requestedDay;
   }
 
   /// Pure indexing seam for tiny independent synthetic-year oracles.
