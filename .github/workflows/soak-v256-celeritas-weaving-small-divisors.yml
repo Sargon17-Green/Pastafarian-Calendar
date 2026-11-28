@@ -1,0 +1,344 @@
+name: Soak v256 weaving active-block small-divisor recurrence (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v256-celeritas-weaving-small-divisors.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind prior native evidence and immutable candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "318d5d9ee5cb96f0c7c9b48e665c99d4d271b1ad"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v256-celeritas-weaving-small-divisors.yml"
+          mkdir -p evidence source/src source/include/pastafari
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15263230420/zip > v255.zip
+          echo "e05ca2924ca02ada882a5d936d0f0c9a9ec6f83f40c0d634e4b27b82b12bc25e  v255.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15262383754/zip > v254.zip
+          echo "66ad3cb52a99490c97df9d391e60db242337c5fc8c318700680ade4cc452520b  v254.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15262117547/zip > v253.zip
+          echo "9cab9e052261b2f5e6f2a122151de8c7e9d5124cd48bf73a8651ebb6b690e47c  v253.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15259858850/zip > v252.zip
+          echo "470ddff96d7d17d69a00f9cff3c7d820707a0467f491a8d56b27d0206497ebc7  v252.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15236391680/zip > v243.zip
+          echo "7f2c5f235d44f5fc967216026005917dca7619acd8e95e43140ea50299175a0b  v243.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,hashlib,zipfile,subprocess
+          from pathlib import Path
+          def load(v):
+              with zipfile.ZipFile(f"v{v}.zip") as z:
+                  assert z.testzip() is None
+                  return json.loads(z.read("result.json"))
+          a,b=load(252),load(243)
+          previous=load(253)
+          prof=load(254)
+          assert prof["schema"]=="SOAK_V254_ANCHOR_WINDOW_AB/1" and prof["comparison_completed"] and prof["source_commit"]==a["candidate_commit"]
+          assert previous["schema"]=="SOAK_V253_PERSISTENT_MIXED_ANCHORS/1" and previous["comparison_pass"] and previous["candidate_commit"]==a["candidate_commit"]
+          ref="87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065"
+          assert a["schema"]=="SOAK_V252_VERSIONED_SHARED_GATE_NATIVE/1" and a["versioned_candidate_pass"] and a["candidate_commit"]==ref
+          assert b["schema"]=="SOAK_V243_CELERITAS_VERSIONED_INTERVAL/1" and b["versioned_candidate_pass"] and b["candidate_commit"]=="408d80e43159eba06849b6a929e0010f32b9b91b"
+          assert a["whole_year_credit"]==b["whole_year_credit"]==0
+          frozen={}
+          for r in b["rows"]+a["rows"]:
+              k=(r["c"],r["t"])
+              val={"fields":r["fields"],"raw_names":r["raw_names"]}
+              if k in frozen:assert frozen[k]==val
+              frozen[k]=val
+          assert len(frozen)==11
+          # Interleave anchors and years before first-ever adjacent / boundary calls.
+          sequence=[
+            ("initial",739617,739617),
+            ("changed_c",739618,739618),
+            ("return_adjacent",739617,739618),
+            ("previous_year",739617,739528),
+            ("return_first",739617,739529),
+            ("next_year",739617,744004),
+            ("return_last",739617,744003),
+            ("negative_date",-377237,-377237),
+            ("remote_date",6875993,6875993),
+            ("negative_adjacent",-377237,-377236),
+            ("remote_adjacent",6875993,6875994),
+            ("repeat_original",739617,739617),
+            ("repeat_changed_c",739618,739618),
+            ("repeat_previous_year",739617,739528),
+          ]
+          assert set((c,t) for _,c,t in sequence)==set(frozen)
+          Path("source/cases.tsv").write_text("".join(f"{label}\t{c}\t{t}\n" for label,c,t in sequence))
+          Path("evidence/frozen.json").write_text(json.dumps([{"label":label,"c":c,"t":t,**frozen[c,t]} for label,c,t in sequence],indent=2)+"\n")
+          pins={"src/monster.cpp":"9a09f53c4bb54fa3e3861677bd0d367b7d4d5f78","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          files={}
+          for p,h in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==h
+              Path("source",p).write_bytes(raw)
+              files[p]={"blob":h,"sha256":hashlib.sha256(raw).hexdigest()}
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"files":files},indent=2)+"\n")
+          PY
+      - name: Construct reversible shared active-block ratio candidate
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+          ) > evidence/compiler.txt 2>&1
+          python3 - <<'PY'
+          import hashlib,json,zipfile
+          from pathlib import Path
+          p=Path("qa/issue29/archive/v207/v201.zip")
+          assert hashlib.sha256(p.read_bytes()).hexdigest()=="fc9828a2722fa6c84c82d442d6ec409e7e34a2bb9c81de211fd04fdad0095f22"
+          with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              data=json.loads(z.read("result.json"))
+          assert data["schema"]=="ISSUE29_V201_LENGTHS/1" and data["actual"]==data["expected"] and data["matched"]==45
+          L=data["actual"]
+          assert len(L)==45 and sum(L)==4244 and all(isinstance(x,int) and x>=2 for x in L)
+          Path("source/lengths.txt").write_text(" ".join(map(str,L))+"\n")
+          Path("evidence/lengths.json").write_text(json.dumps(data,indent=2)+"\n")
+          s=Path("source/src/monster.cpp").read_text()
+          begin=s.index("class FastLegalMonthWeavingCounterInternal {")
+          end=s.index("\nbool legalMonthWeavingRowInternal",begin)
+          old=s[begin:end]
+          a="""            bool chosen = false;
+                      for (int monthId = 1; monthId <= monthCount_; ++monthId) {"""
+          # Match original indentation explicitly.
+          a="            bool chosen = false;\n            for (int monthId = 1; monthId <= monthCount_; ++monthId) {"
+          b="""            bool chosen = false;
+                      const bool useRatios = accelerationsOn() && !fullHistoricalValidationOn();
+                      std::vector<Integer> activeBlocks;
+                      if (useRatios) activeBlocks = qaActiveBlocks(state);
+                      for (int monthId = 1; monthId <= monthCount_; ++monthId) {"""
+          c="                const Integer block = countState(next);"
+          d="""                const Integer block =
+                              (useRatios && monthId <= state.openedUpTo)
+                                  ? activeBlocks.at(static_cast<std::size_t>(monthId-1))
+                                  : countState(next);"""
+          m="    Integer countState(const LegalMonthWeavingStateInternal& state) {"
+          helper="""    // All legal decrements of already-open labels share the same
+              // suffix table entry. Compute the common active-extension product
+              // once, then update each binomial factor by its exact ratio.
+              std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state) {
+                  std::vector<Integer> blocks(static_cast<std::size_t>(monthCount_));
+                  std::vector<int> prefix(static_cast<std::size_t>(monthCount_));
+                  int active=0;
+                  Integer extensions=1;
+                  for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
+                      const std::size_t i=static_cast<std::size_t>(id-1);
+                      const int r=state.remaining.at(i);
+                      if(r<=0) throw BaseValidationError("QA corrupt active state");
+                      prefix[i]=active;
+                      extensions*=binomial(active+r-1,r-1);
+                      active+=r;
+                  }
+                  if(active==0)return blocks;
+                  const Integer common=extensions*suffixPerFixedActive_.at(
+                      static_cast<std::size_t>(state.openedUpTo)).at(static_cast<std::size_t>(active-1));
+                  Integer numerator=1,denominator=1;
+                  for(int id=state.openedUpTo;id>state.closedUpTo;--id){
+                      const std::size_t i=static_cast<std::size_t>(id-1);
+                      const int r=state.remaining.at(i),p=prefix[i];
+                      if(r>1){
+                          blocks[i]=(common*numerator*(r-1))/(denominator*(p+r-1));
+                      }else if(id==state.closedUpTo+1){
+                          // Closing the first active singleton deletes its
+                          // unit binomial factor. Later factors still shift.
+                          blocks[i]=(common*numerator)/denominator;
+                      }
+                      // For a decrement of an earlier label, this factor
+                      // changes C(p+r-1,r-1) to C(p+r-2,r-1).
+                      // The first active label has no earlier active label.
+                      if(id>state.closedUpTo+1){
+                          numerator*=p;
+                          denominator*=p+r-1;
+                      }
+                  }
+                  return blocks;
+              }
+
+          """
+          variant=old
+          for x,y in [(a,b),(c,d),(m,helper+m)]:
+              assert variant.count(x)==1,x
+              variant=variant.replace(x,y)
+          reverse=variant.replace(helper+m,m).replace(d,c).replace(b,a)
+          assert reverse==old
+          prior_variant=s[:begin]+variant+s[end:]
+          with zipfile.ZipFile("v255.zip") as z:
+              assert z.testzip() is None
+              prev=json.loads(z.read("result.json"))
+              pin=json.loads(z.read("ab-source.json"))
+          assert prev["schema"]=="SOAK_V255_WEAVING_ACTIVE_RATIOS_AB/1" and prev["comparison_completed"] and prev["full_words_equal"]
+          assert prev["source_commit"]=="87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065"
+          assert hashlib.sha256(prior_variant.encode()).hexdigest()==pin["variant_sha256"]
+          start=variant.index("        const Integer common=extensions*suffixPerFixedActive_.at(") if "        const Integer common=extensions*suffixPerFixedActive_.at(" in variant else -1
+          # Use exact trimmed anchor lines, retain prior surrounding source.
+          lines=variant.splitlines(keepends=True)
+          lo=[i for i,l in enumerate(lines) if l.strip()=="const Integer common=extensions*suffixPerFixedActive_.at("]
+          hi=[i for i,l in enumerate(lines) if l.strip()=="return blocks;"]
+          assert len(lo)==1 and len(hi)==1 and hi[0]>lo[0]
+          replacement="""        Integer tail=extensions*suffixPerFixedActive_.at(
+              static_cast<std::size_t>(state.openedUpTo)).at(static_cast<std::size_t>(active-1));
+          for(int id=state.openedUpTo;id>state.closedUpTo;--id){
+              const std::size_t i=static_cast<std::size_t>(id-1);
+              const int r=state.remaining.at(i),p=prefix[i];
+              const int divisor=p+r-1;
+              if(r>1){
+                  blocks[i]=tail;
+                  blocks[i]*=r-1;
+                  blocks[i]/=divisor;
+              }else if(id==state.closedUpTo+1){
+                  blocks[i]=tail;
+              }
+              // tail contains the original integer binomial factor for this
+              // label. Its substitution is exact before the next step.
+              if(id>state.closedUpTo+1 && r>1){
+                  tail*=p;
+                  tail/=divisor;
+              }
+          }
+          """
+          # Python indentation in the string is harmless C++ whitespace.
+          variant="".join(lines[:lo[0]])+replacement+"".join(lines[hi[0]:])
+          v=s[:begin]+variant+s[end:]
+          Path("evidence/v255-reference.json").write_text(json.dumps({"small":prev["modes"]["base"]["small"],"count_sha256":prev["modes"]["base"]["count_sha256"],"rows":[{k:x[k] for k in ("fraction","rank","word_sha256")} for x in prev["modes"]["base"]["rows"]]},indent=2)+"\n")
+          bridge=r'''
+          namespace pastafari {
+          std::vector<int> qaFastUnrank(const std::vector<int>& lengths,const Integer& rank) {
+              FastLegalMonthWeavingCounterInternal counter(lengths);
+              return counter.unrank1(rank);
+          }
+          }
+          '''
+          Path("source/src/base.cpp").write_text(s+bridge)
+          Path("source/src/variant.cpp").write_text(v+bridge)
+          Path("evidence/ab-source.json").write_text(json.dumps({"original_sha256":hashlib.sha256(s.encode()).hexdigest(),"variant_sha256":hashlib.sha256(v.encode()).hexdigest(),"reversible":True,"proof":"right-to-left tail contains original binomial factors for unprocessed labels and integer substituted factors for processed labels; each step replaces exactly one factor via multiplication and division by small integers, so each division is exact; singleton factor is 1; unopened moves unchanged","v255_sha256":pin["variant_sha256"],"bridge_only_for_QA":True},indent=2)+"\n")
+          PY
+          cat > source/probe.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include <algorithm>
+          #include <chrono>
+          #include <fstream>
+          #include <iostream>
+          #include <numeric>
+          #include <stdexcept>
+          #include <vector>
+          namespace pastafari { std::vector<int> qaFastUnrank(const std::vector<int>&,const Integer&); }
+          using namespace pastafari;
+          int main(){
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(true);
+              setFullHistoricalAccelerationValidation(false);
+              int checked=0,vectors=0;
+              for(int n=1;n<=4;++n){
+                  int limit=1;
+                  for(int j=0;j<n;++j)limit*=3;
+                  for(int code=0;code<limit;++code){
+                      int v=code;
+                      std::vector<int> L;
+                      for(int j=0;j<n;++j){L.push_back(1+v%3);v/=3;}
+                      if(std::accumulate(L.begin(),L.end(),0)>10)continue;
+                      const Integer count=exactLegalMonthWeavingCount(L);
+                      std::vector<Integer> ranks;
+                      if(count<=100){for(Integer k=1;k<=count;++k)ranks.push_back(k);}
+                      else{ranks={Integer{1},(count+1)/2,count};}
+                      for(const auto& k:ranks){
+                          if(qaFastUnrank(L,k)!=DPUnrankLegalWeaving(L,k))throw std::runtime_error("small full-state mismatch");
+                          ++checked;
+                      }
+                      ++vectors;
+                  }
+              }
+              std::cout<<"SMALL\t"<<vectors<<"\t"<<checked<<std::endl;
+              std::ifstream f("source/lengths.txt");
+              std::vector<int> L;
+              int len;
+              while(f>>len)L.push_back(len);
+              if(L.size()!=45||std::accumulate(L.begin(),L.end(),0)!=4244)return 2;
+              const Integer count=exactLegalMonthWeavingCount(L);
+              std::cout<<"COUNT\t"<<count<<std::endl;
+              // Interior ranks exercise active-block subtraction. Extremal
+              // ranks alone are poor performance witnesses.
+              for(int frac:{1,2,3}){
+                  const Integer k=1+((count-1)*frac)/4;
+                  const auto start=std::chrono::steady_clock::now();
+                  const auto row=DPUnrankLegalWeaving(L,k);
+                  const double sec=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+                  if(row.size()!=4244)return 3;
+                  std::vector<int> histogram(45);
+                  std::vector<int> first(45,-1),last(45,-1);
+                  for(int i=0;i<static_cast<int>(row.size());++i){
+                      const int m=row[i]-1;
+                      if(m<0||m>=45)return 4;
+                      ++histogram[m];if(first[m]<0)first[m]=i;last[m]=i;
+                  }
+                  if(histogram!=L||!std::is_sorted(first.begin(),first.end())||!std::is_sorted(last.begin(),last.end()))return 5;
+                  std::cout<<"ROW\t"<<frac<<"\t"<<sec<<"\t"<<k<<"\t";
+                  for(int m:row)std::cout<<m<<",";
+                  std::cout<<std::endl;
+              }
+          }
+          CPP
+          for mode in base variant; do
+            (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include "source/src/$mode.cpp" source/probe.cpp -o "source/$mode") > "evidence/$mode.build.log" 2>&1 || { cat "evidence/$mode.build.log"; exit 1; }
+          done
+          sha256sum source/base source/variant source/probe.cpp > evidence/build.sha256
+      - name: Compare against full-state small cases and exact full weaving words
+        run: |
+          set -euo pipefail
+          for mode in base variant; do
+            set +e
+            (ulimit -v 1572864; /usr/bin/time -v -o "evidence/$mode.time.txt" timeout -k 5s 150s "source/$mode") > "evidence/$mode.stdout" 2> "evidence/$mode.stderr"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$mode.exit"
+            cut -c1-100 "evidence/$mode.stdout"
+            cat "evidence/$mode.stderr"
+          done
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path("evidence");modes={}
+          for mode in ("base","variant"):
+              lines=(p/f"{mode}.stdout").read_text().splitlines()
+              code=int((p/f"{mode}.exit").read_text())
+              small=None;count=None;rows=[]
+              for l in lines:
+                  a=l.split("\t")
+                  if a[0]=="SMALL":small=list(map(int,a[1:]))
+                  elif a[0]=="COUNT":count=a[1]
+                  elif a[0]=="ROW":
+                      assert len(a)==5
+                      row=list(map(int,a[4].rstrip(",").split(",")))
+                      assert len(row)==4244
+                      rows.append({"fraction":int(a[1]),"seconds":float(a[2]),"rank":a[3],"word_sha256":hashlib.sha256(a[4].encode()).hexdigest()})
+              modes[mode]={"exit":code,"small":small,"count_sha256":hashlib.sha256(count.encode()).hexdigest() if count else None,"rows":rows,"stderr_empty":not (p/f"{mode}.stderr").read_text()}
+          a,b=modes["base"],modes["variant"]
+          ok=all(v["exit"]==0 and v["stderr_empty"] and v["small"] and v["small"][0]>100 and v["small"][1]>100 and len(v["rows"])==3 for v in modes.values())
+          ok=ok and a["small"]==b["small"] and a["count_sha256"]==b["count_sha256"] and all(all(x[k]==y[k] for k in ("fraction","rank","word_sha256")) for x,y in zip(a["rows"],b["rows"]))
+          prior=json.loads((p/"v255-reference.json").read_text())
+          ok=ok and a["small"]==prior["small"] and a["count_sha256"]==prior["count_sha256"] and [{k:x[k] for k in ("fraction","rank","word_sha256")} for x in a["rows"]]==prior["rows"]
+          out={"schema":"SOAK_V256_WEAVING_SMALL_DIVISORS_AB/1","source_commit":"87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065","modes":modes,"comparison_completed":bool(ok),"speedups":[x["seconds"]/y["seconds"] for x,y in zip(a["rows"],b["rows"])] if ok else [],"full_words_equal":bool(ok),"variant_diagnostic_only":True,"original_f_calls":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v256-weaving-small-divisors-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
