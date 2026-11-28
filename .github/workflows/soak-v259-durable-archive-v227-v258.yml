@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
-          test "$(git rev-parse HEAD^)" = "3d2be339f328d024118a80554d513b01863aa1b7"
+          test "$(git rev-parse HEAD^)" = "981fbce0c9dcc1b58f0297c07411849636011843"
           test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v259-durable-archive-v227-v258.yml"
           test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
           test ! -e qa/soak/archive/v227-v258
