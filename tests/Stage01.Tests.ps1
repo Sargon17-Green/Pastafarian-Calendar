@@ -93,6 +93,49 @@ Assert-StageTrue -Condition ($monsterText -notmatch 'Invoke-NormSauce|Get-NormCa
 $futureNames = @('oldRemainder','oldDayTag','oldDistance','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
 . (Join-Path $root 'src/StrictUtf8StageMetadata.ps1')
 $stagePointer = Get-StrictCurrentStage -Bytes ([IO.File]::ReadAllBytes((Join-Path $root 'DEVELOPMENT_STAGE.md')))
+
+function New-Stage01PointerBytes {
+    param([string]$Text)
+    $encoding = [System.Text.UTF8Encoding]::new($false, $true)
+    return ,$encoding.GetBytes($Text)
+}
+
+function Assert-Stage01PointerRejected {
+    param([byte[]]$Bytes,[string]$Name)
+    $rejected = $false
+    try {
+        [void](Get-StrictCurrentStage -Bytes $Bytes)
+    } catch {
+        $rejected = $true
+    }
+    Assert-StageTrue -Condition $rejected -Name ('Strict CURRENT_STAGE rejects ' + $Name)
+}
+
+$stagePointerBoundaryCases = @(
+    [pscustomobject]@{ Text='22'; Expected=22; LegacyGate=$true },
+    [pscustomobject]@{ Text='23'; Expected=23; LegacyGate=$false },
+    [pscustomobject]@{ Text='43'; Expected=43; LegacyGate=$false },
+    [pscustomobject]@{ Text='44'; Expected=44; LegacyGate=$false }
+)
+foreach ($case in $stagePointerBoundaryCases) {
+    $pointerBytes = New-Stage01PointerBytes -Text ('CURRENT_STAGE=' + $case.Text)
+    $parsedPointer = Get-StrictCurrentStage -Bytes $pointerBytes
+    Assert-StageEqual -Expected $case.Expected -Actual $parsedPointer -Name ('Strict CURRENT_STAGE parses boundary ' + $case.Text)
+    Assert-StageEqual -Expected $case.LegacyGate -Actual ($parsedPointer -lt 23) -Name ('Legacy-name gate boundary ' + $case.Text)
+}
+
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'LAST_COMPLETED_STAGE=42') -Name 'missing key'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text ('CURRENT_STAGE=43' + [char]10 + 'CURRENT_STAGE=43')) -Name 'duplicate identical key'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text ('CURRENT_STAGE=43' + [char]10 + 'CURRENT_STAGE=44')) -Name 'duplicate conflicting key'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=') -Name 'empty value'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=0') -Name 'zero'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=043') -Name 'leading zero'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=-1') -Name 'negative value'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=43x') -Name 'non-numeric suffix'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE=2147483648') -Name 'Int32 overflow'
+Assert-Stage01PointerRejected -Bytes (New-Stage01PointerBytes -Text 'CURRENT_STAGE:43') -Name 'malformed separator'
+Assert-Stage01PointerRejected -Bytes ([byte[]](0xFF,0xFE,0x41,0x3D,0x34,0x33)) -Name 'invalid UTF-8'
+
 if ($stagePointer -lt 23) { $futureNames += 'orderAt46Latch' }
 foreach ($name in $futureNames) {
     Assert-StageTrue -Condition ($monsterText -notmatch [regex]::Escape($name)) -Name "Walang future patch code: $name"
