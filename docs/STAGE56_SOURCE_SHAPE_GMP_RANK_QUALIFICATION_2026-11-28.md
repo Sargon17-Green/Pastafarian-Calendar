@@ -4,7 +4,7 @@
 
 ## Scope and branch isolation
 
-This QA work is based on the exact PHP+Bahasa-Melayu source commit  fcaf1674d2c4125b6794fd37312f68d11aa2a8dd  (2026-11-28). It is placed on the isolated branch  PHP+Bahasa-Melayu-source-shape-qa  so that the existing branch's long Stage56 provider and external-reference jobs are not rerun. The existing  canonical-names-lock.yml  jobs other than the general  verify  job are conditioned on the exact branch  PHP+Bahasa-Melayu ; they therefore do not execute on this QA branch. The new workflow is branch-scoped to the QA branch.
+This QA work is based on the exact PHP+Bahasa-Melayu source commit  fcaf1674d2c4125b6794fd37312f68d11aa2a8dd  (2026-11-28). It is placed on the isolated branch  PHP+Bahasa-Melayu-source-shape-qa  so that the existing branch's long Stage56 provider and external-reference jobs are not rerun. The existing Stage56 and audit jobs in  canonical-names-lock.yml  are conditioned on the exact branch  PHP+Bahasa-Melayu ; they therefore do not execute on this QA branch. A dedicated QA job is added to that existing workflow on this branch and is conditioned on the QA branch ref.
 
 The QA branch is not merged to  PHP+Bahasa-Melayu ,  main , or any protected branch. Production PHP files, runtime dependencies, provider wiring, release policy, and Stage56 acceptance state are unchanged.
 
