@@ -1461,6 +1461,45 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  stage56-isolated-gmp-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gmp
+          coverage: none
+      - name: Exact-SHA isolated GMP rank and row qualification
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-gmp-evidence
+          printf '%s\n' 'PC-BRANCH-PHP-MALAY' > stage56-gmp-evidence/PROJECT_ID.txt
+          git rev-parse HEAD > stage56-gmp-evidence/SHA.txt
+          test "$(cat stage56-gmp-evidence/SHA.txt)" = "$GITHUB_SHA" || exit 1
+          php -v > stage56-gmp-evidence/php-version.txt
+          php --ri gmp > stage56-gmp-evidence/gmp-version.txt || exit 1
+          sha256sum tools/stage56_gmp_qa/{row_microgate,rank_microgate}.py > stage56-gmp-evidence/source.sha256
+          timeout 240s python3 -B tools/stage56_gmp_qa/rank_microgate.py > stage56-gmp-evidence/rank.stdout 2> stage56-gmp-evidence/rank.stderr; rank=$?
+          timeout 3500s python3 -B tools/stage56_gmp_qa/row_microgate.py > stage56-gmp-evidence/row.stdout 2> stage56-gmp-evidence/row.stderr; row=$?
+          printf 'rank=%s\nrow=%s\n' "$rank" "$row" > stage56-gmp-evidence/exit.txt
+          cat stage56-gmp-evidence/{rank,row}.stdout
+          (cd stage56-gmp-evidence && sha256sum PROJECT_ID.txt SHA.txt *version.txt source.sha256 *.stdout *.stderr exit.txt > manifest.sha256)
+          test "$rank" -eq 0 && test "$row" -eq 0 && test ! -s stage56-gmp-evidence/rank.stderr && test ! -s stage56-gmp-evidence/row.stderr
+      - name: Retain isolated GMP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-gmp-${{ github.sha }}
+          path: stage56-gmp-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
   stage56-real-year-profile-b5-preflight-native:
     if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
     runs-on: ubuntu-latest
