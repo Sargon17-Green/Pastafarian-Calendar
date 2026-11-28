@@ -10,14 +10,14 @@ import sys
 
 from lx_workspace_probe import make_canary
 
-SOURCE_COMMIT = "4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371"
+SOURCE_COMMIT = "8712a5242e8626f7878a2415d4a2d907d3961486"
 EXPECTED_TOTAL_FUNCTIONS = 95
 SOURCE_FILES = [
     ("src/monster_bootstrap.apl", "cb94d203116afa32fb55b8ff74b8569d6e03d02c", 13),
     ("src/normative_oracle.apl", "5be0ef4186156968408578b9991fc8477ccd3a92", 69),
     ("src/source_language_catalog.apl", "f47575e1c32d915836fb96556b64b58226b90005", 6),
     ("test/stage01_fixtures.apl", "a6aa84274aa2880b053d5dd221b1654dbbd70a2c", 1),
-    ("test/stage01_tests.apl", "d974d2a349517afba0b5d68b2c8db5800fa11df7", 6),
+    ("test/stage01_tests.apl", "aacd7927a3d5cffe82921d8a87b62375ff431a28", 6),
 ]
 HELPER_LINES = [
     "z←name Stage01Fix source;fixed",
@@ -115,13 +115,14 @@ def load_locked_sources(repo_root: pathlib.Path, source_commit: str = SOURCE_COM
     for index, original, corrected in (
         (179, "AssertEqual (⊂17) (⊂⍴CUTLET_NAMES)", "AssertEqual (⊂,17) (⊂⍴CUTLET_NAMES)"),
         (180, "AssertEqual (⊂47) (⊂⍴MONTH_NAMES)", "AssertEqual (⊂,47) (⊂⍴MONTH_NAMES)"),
+        (230, "PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1", "PostStirSavedSum ((⊂1x 2x 3x 4x 5x 6x),(⊂1))"),
     ):
         original_bytes, corrected_bytes = original.encode("utf-8"), corrected.encode("utf-8")
         if expected_lines[index].count(original_bytes) != 1:
             raise ValueError("AUTHORIZED_TEST_SHAPE_ANCHOR_MISMATCH")
         expected_lines[index] = expected_lines[index].replace(original_bytes, corrected_bytes)
     if new_test != b"".join(expected_lines):
-        raise ValueError("AUTHORIZED_TWO_LINE_TEST_DIFF_MISMATCH")
+        raise ValueError("AUTHORIZED_THREE_LINE_TEST_DIFF_MISMATCH")
     files = []
     all_names = []
     all_blocks = []

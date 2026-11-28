@@ -9,10 +9,10 @@ if($Count -ne 95){throw 'STAGE01_95_REQUIRED'}
 New-Item -ItemType Directory -Force $Evidence | Out-Null
 $Evidence=(Resolve-Path -LiteralPath $Evidence).Path
 $expectedExe='192b7bd3c06a64ef57bfe1ea7f04e5d5d511ae9cd07323cfd211710891e2069d'
-$source='4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371'
+$source='8712a5242e8626f7878a2415d4a2d907d3961486'
 $indices=@((1..18 | ForEach-Object { $_ * 5 }) + @(91,92,93,94,95))
 if($indices.Count -ne 23 -or $indices[-1] -ne 95){throw 'STAGE01_TAIL_CHUNK_BOUNDARIES_INVALID'}
-$acceptToken='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371|FILES=5|FX=95|TEST=STAGE01_PASS'
+$acceptToken='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=8712a5242e8626f7878a2415d4a2d907d3961486|FILES=5|FX=95|TEST=STAGE01_PASS'
 $r=[ordered]@{
  schema='APL_GERMAN_STAGE01_NATIVE_CHUNKED_V1'
  status='STARTED'
@@ -71,7 +71,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_actual_ec','probe_actual_et','probe_actual_payload','probe_rank_ec','probe_rank_et','probe_rank_payload','probe_type_ec','probe_type_et','probe_type_payload','probe_match_ec','probe_match_et','probe_match_payload','probe_explicit_ec','probe_explicit_et','probe_explicit_payload','probe_assert_ec','probe_assert_et','probe_assert_payload')) {
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_actual_ec','probe_actual_et','probe_actual_payload','probe_rank_ec','probe_rank_et','probe_rank_payload','probe_type_ec','probe_type_et','probe_type_payload','probe_match_ec','probe_match_et','probe_match_payload','probe_explicit_ec','probe_explicit_et','probe_explicit_payload','probe_production_actual_ec','probe_production_actual_et','probe_production_actual_payload','probe_production_explicit_ec','probe_production_explicit_et','probe_production_explicit_payload','probe_assert_ec','probe_assert_et','probe_assert_payload')) {
    $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_stage01_chunked_suite_'+$key+'.txt')
    if($meta.suite_paths.$key -cne $expectedPath -or (Test-Path -LiteralPath $expectedPath)){throw 'SUITE_RECEIPT_PATH_INVALID_OR_PREEXISTS'}
  }
@@ -138,7 +138,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $suite=@{}
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_actual_ec','probe_actual_et','probe_actual_payload','probe_rank_ec','probe_rank_et','probe_rank_payload','probe_type_ec','probe_type_et','probe_type_payload','probe_match_ec','probe_match_et','probe_match_payload','probe_explicit_ec','probe_explicit_et','probe_explicit_payload','probe_assert_ec','probe_assert_et','probe_assert_payload')){
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_actual_ec','probe_actual_et','probe_actual_payload','probe_rank_ec','probe_rank_et','probe_rank_payload','probe_type_ec','probe_type_et','probe_type_payload','probe_match_ec','probe_match_et','probe_match_payload','probe_explicit_ec','probe_explicit_et','probe_explicit_payload','probe_production_actual_ec','probe_production_actual_et','probe_production_actual_payload','probe_production_explicit_ec','probe_production_explicit_et','probe_production_explicit_payload','probe_assert_ec','probe_assert_et','probe_assert_payload')){
    $path=[string]$meta.suite_paths.$key
    if(Test-Path -LiteralPath $path -PathType Leaf){
      Copy-Item -LiteralPath $path -Destination (Join-Path $Evidence ('suite_'+$key+'.txt')) -Force

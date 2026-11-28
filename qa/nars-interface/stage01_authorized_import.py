@@ -57,7 +57,9 @@ POST_STIR_PROBES = (
     ("type", "⎕DR PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
     ("match", "FIX_POST_STIR_A1_SUM≡PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1"),
     ("explicit", "PostStirSavedSum ((⊂1x 2x 3x 4x 5x 6x),(⊂1))"),
-    ("assert", "AssertEqual (⊂FIX_POST_STIR_A1_SUM) (⊂PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1) (⊂'Die A1-Lesart speichert Summe plus 149 mal Rührnummer als einen einzigen Wert')"),
+    ("production_actual", "QAS01Old←1x 2x 3x 4x 5x 6x ⋄ QAS01Stir←1 ⋄ PostStirSavedSum (⊂QAS01Old) QAS01Stir"),
+    ("production_explicit", "QAS01Old←1x 2x 3x 4x 5x 6x ⋄ QAS01Stir←1 ⋄ PostStirSavedSum ((⊂QAS01Old),(⊂QAS01Stir))"),
+    ("assert", "AssertEqual (⊂FIX_POST_STIR_A1_SUM) (⊂PostStirSavedSum ((⊂1x 2x 3x 4x 5x 6x),(⊂1))) (⊂'Die A1-Lesart speichert Summe plus 149 mal Rührnummer als einen einzigen Wert')"),
 )
 POST_STIR_KEYS = tuple(f"probe_{name}_{slot}" for name, _ in POST_STIR_PROBES for slot in ("ec", "et", "payload"))
 

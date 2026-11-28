@@ -31,7 +31,7 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           $ProgressPreference='SilentlyContinue'
-          $sourceLock='4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371'
+          $sourceLock='8712a5242e8626f7878a2415d4a2d907d3961486'
           $uri='https://www.nars2000.org/download/binaries/w64/NARS2000-0.5.14.11.exe'
           $installer='pinned_release/verified_release/NARS2000-0.5.14.11.exe'
           $expectedBytes=9430788
@@ -92,8 +92,8 @@ jobs:
           if (-not (Test-Path -LiteralPath $p) -or -not (Test-Path -LiteralPath $candidate)) { throw 'STAGE01_RECEIPTS_MISSING' }
           $r=Get-Content -LiteralPath $p -Raw | ConvertFrom-Json
           $c=Get-Content -LiteralPath $candidate -Raw | ConvertFrom-Json
-          $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371|FILES=5|FX=95|TEST=STAGE01_PASS'
-          if ($r.source_commit -cne '4b5b272b811d4a9f1c2e5f933ce8f3f6a6027371' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
+          $token='APL_GERMAN_STAGE01_NATIVE_PASS_V1|SOURCE=8712a5242e8626f7878a2415d4a2d907d3961486|FILES=5|FX=95|TEST=STAGE01_PASS'
+          if ($r.source_commit -cne '8712a5242e8626f7878a2415d4a2d907d3961486' -or $c.source_commit -cne $r.source_commit -or $c.marker_token -cne $token -or $c.final_expression -cne 'SAME_EC_AFTER_TEST') { throw 'STAGE01_SOURCE_OR_TEST_LOCK_FAILED' }
           if ($r.suite_start_exact -ne $true -or $r.suite_status -cne 'RETURNED_SUCCESS' -or $r.qa_commit -cne $env:GITHUB_SHA) { throw 'ORIGINAL_SUITE_EC_NOT_CONFIRMED' }
           if ($r.stage01 -cne 'ACCEPTED' -or $r.status -cne 'NATIVE_STAGE01_CHUNKED_ACCEPTED' -or $r.last_contiguous_after -ne 95 -or $r.noncontiguous_exact -ne $false -or $r.final_marker.exact -ne $true -or $r.checkpoints.Count -ne 23 -or $c.chunk_count -ne 23 -or $c.tail_chunk_size -ne 1 -or $c.function_count -ne 95) { throw 'NATIVE_STAGE01_EXACT_NOT_CONFIRMED' }
           if (@($r.checkpoints | Where-Object { $_.exact -ne $true }).Count -ne 0) { throw 'STAGE01_CHUNK_MARKER_MISMATCH' }
