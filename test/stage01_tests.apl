@@ -228,7 +228,7 @@
   AssertEqual (⊂2x) (⊂counts[5]) (⊂'Gleiche Tage haben Richtung zwei')
 
   AssertEqual (⊂FIX_STONE_ROW_2) (⊂STONES[2;]) (⊂'Alle fünf zweiten Steine stammen aus derselben alten Momentaufnahme')
-  AssertEqual (⊂FIX_POST_STIR_A1_SUM) (⊂PostStirSavedSum (⊂1x 2x 3x 4x 5x 6x) 1) (⊂'Die A1-Lesart speichert Summe plus 149 mal Rührnummer als einen einzigen Wert')
+  AssertEqual (⊂FIX_POST_STIR_A1_SUM) (⊂PostStirSavedSum ((⊂1x 2x 3x 4x 5x 6x),(⊂1))) (⊂'Die A1-Lesart speichert Summe plus 149 mal Rührnummer als einen einzigen Wert')
 
   hidden←BuildHidden counts
   AssertEqual (⊂7) (⊂⍴hidden) (⊂'Die normative Referenz erzeugt genau sieben verborgene Tropfen')
