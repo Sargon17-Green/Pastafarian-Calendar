@@ -200,7 +200,7 @@
                   (expect-literal! input "}")
                   (when-not (= -1 (.read input)) (parser-fail! :trailing-bytes {}))
                   {:profile profile :p position :rank-bytes (Arrays/copyOf rank-buffer rank-length)
-                   :rank-capacity (:B certificate) :frame-bytes frame-bytes :chunk-count chunk-count})))))))))
+                   :rank-capacity (:B certificate) :frame-bytes frame-bytes :chunk-count chunk-count}))))))))))
 (defn- byte-chunks [^bytes bytes chunk-size]
   (loop [offset 0 chunks []]
     (if (>= offset (alength bytes))
@@ -274,7 +274,7 @@
   ([{:keys [ledger watchdog]}]
    {:suffix-cache (new-lru-cache) :tail-cache (new-lru-cache)
     :writes (volatile! 0) :ledger ledger :watchdog watchdog
-    :peak-heap-bytes (volatile! (or (:baseline-heap-bytes watchdog) (used-heap-bytes)))})))
+    :peak-heap-bytes (volatile! (or (:baseline-heap-bytes watchdog) (used-heap-bytes)))}))
 
 (defn- hex-bytes [bytes]
   (let [digits "0123456789abcdef"]
@@ -774,6 +774,11 @@
        :month-name-index (bigint month-name-index)
        :day-in-month (bigint day-in-month)
        :date-components date-components})))
+
+(deftest discovery24-streaming-helpers-top-level-bound
+  (doseq [helper [#'byte-chunks #'canonical-request-frame #'parse-rank-after-admission
+             #'thrown-code #'streaming-parser-small-checks #'new-lru-cache #'cache-put! #'new-context]]
+    (is (bound? helper) (str "Unbound streaming helper: " helper))))
 
 (deftest discovery24-inplace-insertion-cross-check
   (println "DISCOVERY24_CLOJURE_INPLACE_BEGIN")
