@@ -6,7 +6,7 @@ Scope: QA-only. No production-source edits, no ASK(2,21) call, no canonical-bran
 
 ## API and bounds
 
-The frozen year-pair contract bounds the gate-index gap by 6 <= G <= 5778; this QA API also tests small mathematical edges 1 <= G <= 5778. The normative cutlet selector uses 6 <= K <= min(17,G). The API accepts the wider mathematical range 1 <= K <= G to make edge behavior explicit.
+The frozen year-pair contract requires at least 6 gate-index intervals and at most 5,778 elapsed days. Each interval is at least 42 days: nr.gate.gap returns 41 plus a rank in 1..922. Therefore production G is 6 <= G <= floor(5778/42) = 137. The candidate's defensive API ceiling is 5778; the tests exercise production boundary values and small mathematical edges. The normative cutlet selector uses 6 <= K <= min(17,G), while the API accepts 1 <= K <= G.
 
 G, K, and required are small integer coordinates, matching the normative caller's bi.to.small conversion. required is -1 (no required prefix) or an internal prefix r with 1 <= r < G.
 
@@ -29,7 +29,7 @@ The Logo candidate ranks subsets using the hockey-stick block formula:
 
 rank(S)=1+sum_i [C(n-s_(i-1),m-i+1)-C(n-s_i+1,m-i+1)], with s_0=0.
 
-Unranking binary-searches the next lexicographic block. When m>n/2, complement subsets are used and the rank order is reversed: rank(S)=C(n,m)-rank(S^c)+1. Binomials use BI multiplication and exact division, checking every remainder. There is no floating-point arithmetic or nr.M cap; C(5777,16) exceeds the 127-bit ASK modulus.
+Unranking binary-searches the next lexicographic block. When m>n/2, complement subsets are used and the rank order is reversed: rank(S)=C(n,m)-rank(S^c)+1. Binomials use BI multiplication and exact division, checking every remainder. Count/rank arithmetic uses BI, not floating-point values or modular reduction; the binary-search midpoint operates only on bounded small coordinates. The largest production count is C(136,16)=261429178502421685800, greater than 2^64-1 but below the 127-bit ASK modulus nr.M. The component imposes no modular cap.
 
 ## Independent oracle and tests
 
@@ -44,7 +44,7 @@ Host exhaustive audit: G=1..12, all K, and required=-1 plus every internal prefi
 
 Native small shard: exhaustive G=1..8, all K/prefixes: 204 domains, 1,024 valid rank/unrank pairs, plus invalid input and empty-domain gate cases.
 
-Native large-boundary shard: G={6,252,5778}, K={6,17} where valid, and required={-1,1,floor(G/2),G-1}: 20 domains and 84 rank/unrank pairs at first, second, middle, penultimate and last ranks. This includes BI counts beyond nr.M.
+Native large-boundary shard: G={6,71,137}, K={6,17} where valid, and required={-1,1,floor(G/2),G-1}: 20 domains and 84 rank/unrank pairs at first, second, middle, penultimate and last ranks. This includes counts above 64-bit range at G=137,K=17.
 
 Host and Native markers are distinct. Native acceptance requires both shards at the same QA commit SHA, exact counts, no Logo error markers, and retained logs/fixtures/SHA-256 manifests. Host PASS is not Native PASS; component PASS is not whole Stage 2 acceptance.
 

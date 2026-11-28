@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 
 MAX_G, HOST_G, NATIVE_G = 5778, 12, 8
-BOUNDARY_G, BOUNDARY_K = (6, 252, 5778), (6, 17)
+BOUNDARY_G, BOUNDARY_K = (6, 71, 137), (6, 17)
 
 
 def count(g, k, r):
