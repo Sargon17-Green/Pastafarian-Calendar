@@ -23,7 +23,10 @@ base AS MATERIALIZED (
   SELECT pastafari_sql_tamil.foundation_day() AS foundation,
          p_calculation_day-5778::numeric AS lower_day,
          p_calculation_day+5778::numeric AS upper_day
-  WHERE p_calculation_day=trunc(p_calculation_day)
+  -- PostgreSQL NUMERIC special values compare equal to their truncation.
+  -- Reject them before either recursive gate walk; finite integer domain unchanged.
+  WHERE p_calculation_day NOT IN ('NaN'::numeric,'Infinity'::numeric,'-Infinity'::numeric)
+    AND p_calculation_day=trunc(p_calculation_day)
 ),
 starts AS (
   SELECT 1::integer AS dir,0::numeric AS gate_index,

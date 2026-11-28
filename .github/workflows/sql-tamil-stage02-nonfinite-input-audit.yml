@@ -2,7 +2,8 @@
 # Slice14/16 require integral days; nonfinite NUMERIC is not an integer.
 # Historic 108/112 and fast selector tests cover NULL/fraction/relative overflow, not these cases.
 # Absolute finite distance from foundation has no authorized cap. Do not probe huge finite inputs here.
-# Stage02 legacy calendar_date_spaghetti remains separate; no production edits.
+# Stage02 legacy calendar_date_spaghetti remains separate.
+# Regression after witnessed 6 timeouts at 6a6ef610: only Slice14 base guard changed.
 # Independent rejection oracle: mathematical domain Z; no normative SQL loaded.
 name: SQL Tamil Stage02 nonfinite input diagnostic PG17
 on:
@@ -43,7 +44,7 @@ jobs:
           d4044e6a4f2f2ae94795233dd3aa14a7d7edaf9e sql/13_stage02_gate_gaps.sql
           be1d5450f37e3448f7683aea2a0cabdd4620a6c0 sql/14_stage02_gate_day_selector.sql
           4d0ad4326b2488e8d2260ffff37f0a93ce49e4f9 sql/15_stage02_year5000_gate_candidates.sql
-          b2fd62c17b133c639f8751fe2eaa03e93ae167f5 sql/16_stage02_year5000.sql
+          7671040bd0ec5a182ed811f6f3713d970b2f7c98 sql/16_stage02_year5000.sql
           116e330d0215f58e23e94b4b573071ad24d44664 sql/17_stage02_adjacent_year_navigation.sql
           c204a314972b22a4a38f06a02c2fe1bd5bde7acf sql/18_stage02_target_year_navigation.sql
           d9e11559c4b3a3a2497dc5cf903c66aba007af40 sql/19_stage02_cutlet_count.sql
