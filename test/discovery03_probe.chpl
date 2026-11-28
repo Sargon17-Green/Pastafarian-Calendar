@@ -1318,6 +1318,48 @@ proc probeSevenCutletPartitions() {
   }
 }
 
+// П'ять частин у [17,19] та [18,20], зі спільним лічильником.
+// Межі змінюються при кожній сумі 84..101, включно з порожніми
+// родинами. Повний лексикографічний оракул: цифри числа в основі 3,
+// не рекурсія DP. Коефіцієнти (1+x+x^2)^5 для зміщених сум:
+// 1,5,15,30,45,51,45,30,15,5,1.
+// 486 рангів + 36 потужностей = 522 твердження; разом 10141.
+// Збереження одного memo між конфігураціями перевіряє ізоляцію ключів.
+// Дослідження, не історичний свідок і не приймання Stage 6.
+proc probeShiftedBoundedCache() {
+  var tested: BoundedCompositionCounter;
+  tested.slotsTotal = 5;
+  for total in 84..101 {
+    for lower in 17..18 {
+      tested.totalValue = total;
+      tested.lo = lower;
+      tested.hi = lower+2;
+      var enumerated = 0;
+      for code in 0..242 {
+        var digits: [0..4] int;
+        var rest = code;
+        for p in 0..4 {
+          digits[4-p] = lower + rest%3;
+          rest /= 3;
+        }
+        if (+ reduce digits) != total then continue;
+        enumerated += 1;
+        const actual = tested.unrank1(new bigint(enumerated));
+        var equal = actual.size == 5;
+        if equal {
+          for p in 0..4 do
+            if actual[p] != digits[p] then equal = false;
+        }
+        check(equal, "Змінні межі: lo=" + lower:string +
+              ", N=" + total:string + ", ранг=" + enumerated:string);
+      }
+      check(tested.countAll() == enumerated,
+            "Змінні межі: незалежна потужність lo=" + lower:string +
+            ", N=" + total:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1332,6 +1374,7 @@ proc main() {
   probeFiveSlotBoundedCompositions();
   probeSixSlotBoundedCompositions();
   probeSevenSlotNarrowBoundedCompositions();
+  probeShiftedBoundedCache();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
