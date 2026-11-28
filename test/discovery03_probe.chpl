@@ -1360,6 +1360,64 @@ proc probeShiftedBoundedCache() {
   }
 }
 
+
+// Same-instance CutletPartitionCounter reconfiguration across multiple axes.
+// The oracle scans every divider mask in descending order, filters exactly
+// slots-1 internal dividers and the required boundary, then derives parts.
+// One memo is retained through A->B->C->D->E->A; no cache clear is allowed.
+proc probeCutletCacheCase(ref tested: CutletPartitionCounter,
+                          total: int, slots: int, boundary: int,
+                          expectedCount: int, caseName: string) {
+  tested.totalGaps = total;
+  tested.slotsTotal = slots;
+  tested.requiredBoundary = boundary;
+
+  const limit = 2 ** (total - 1);
+  var enumerated = 0;
+  for code in 0..(limit - 1) {
+    const mask = limit - 1 - code;
+    var dividers = new list(int);
+    var hitBoundary = boundary < 0;
+    for position in 1..(total - 1) {
+      const bit = 2 ** (total - 1 - position);
+      if (mask / bit) % 2 == 1 {
+        dividers.pushBack(position);
+        if position == boundary then hitBoundary = true;
+      }
+    }
+    if dividers.size != slots - 1 || !hitBoundary then continue;
+
+    enumerated += 1;
+    const actual = tested.unrank1(new bigint(enumerated));
+    var equal = actual.size == slots;
+    if equal {
+      var previousDivider = 0;
+      for slotIndex in 0..(slots - 2) {
+        if actual[slotIndex] != dividers[slotIndex] - previousDivider then
+          equal = false;
+        previousDivider = dividers[slotIndex];
+      }
+      if actual[slots - 1] != total - previousDivider then equal = false;
+    }
+    check(equal, "Переналаштування котлет: " + caseName +
+          ", ранг=" + enumerated:string);
+  }
+  check(enumerated == expectedCount,
+        "Переналаштування котлет: незалежна потужність " + caseName);
+  check(tested.countAll() == enumerated,
+        "Переналаштування котлет: DP-потужність " + caseName);
+}
+
+proc probeCutletCacheReconfiguration() {
+  var tested: CutletPartitionCounter;
+  probeCutletCacheCase(tested, 9, 4, -1, 56, "A 9/4/-1");
+  probeCutletCacheCase(tested, 9, 4, 4, 21, "B 9/4/4");
+  probeCutletCacheCase(tested, 9, 4, 2, 21, "C 9/4/2");
+  probeCutletCacheCase(tested, 10, 4, 4, 28, "D 10/4/4");
+  probeCutletCacheCase(tested, 9, 5, 4, 35, "E 9/5/4");
+  probeCutletCacheCase(tested, 9, 4, -1, 56, "A restored");
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1375,6 +1433,7 @@ proc main() {
   probeSixSlotBoundedCompositions();
   probeSevenSlotNarrowBoundedCompositions();
   probeShiftedBoundedCache();
+  probeCutletCacheReconfiguration();
   probeWeaving();
   probeThreeMonthWeaving();
   probeUnequalThreeMonthWeaving();
