@@ -1,0 +1,256 @@
+name: Soak v263 incremental active extension component AB (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v263-celeritas-incremental-extension-ab.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock archive and candidate source identities
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "39e836ada84c919d1011d565073a8880a054891e"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v263-celeritas-incremental-extension-ab.yml"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+      - name: Pin frozen inputs and exact candidate source
+        run: |
+          set -euo pipefail
+          mkdir -p evidence source/src source/include/pastafari
+          cp qa/soak/archive/v227-v258/v253.zip v253.zip
+          echo "9cab9e052261b2f5e6f2a122151de8c7e9d5124cd48bf73a8651ebb6b690e47c  v253.zip" | sha256sum -c -
+          cp qa/soak/archive/v227-v258/v258.zip v258.zip
+          echo "13db2c122e5e483a10f9ee0f206c84f4e1497faccb61af273cfb079101110f1b  v258.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess
+          from pathlib import Path
+          def member(zp,n):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  return z.read(n)
+          inventories={}
+          for zp in ("v253.zip","v258.zip"):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  inventories[zp]=[{"name":n,"sha256":hashlib.sha256(z.read(n)).hexdigest()} for n in z.namelist()]
+          Path("evidence/input-inventory.json").write_text(json.dumps(inventories,indent=2)+"\n")
+          frozen=json.loads(member("v253.zip","frozen.json"))
+          assert frozen==json.loads(member("v258.zip","frozen.json"))
+          cases="".join(f"{x['label']}\t{x['c']}\t{x['t']}\n" for x in frozen).encode("ascii")
+          Path("evidence/cases.tsv").write_bytes(cases)
+          prior=json.loads(member("v258.zip","result.json"))
+          candidate="4d6024f53f4b88f8bec7f72750a4d7f4caff657f"
+          assert prior["schema"]=="SOAK_V258_VERSIONED_WEAVING_NATIVE/1" and prior["versioned_candidate_pass"]
+          assert prior["candidate_commit"]==candidate and prior["candidate_blob"]=="73fe33e5e8649d2be6ff52c56865a8297efea0f3"
+          assert len(frozen)==len(prior["rows"])==14 and len(cases.decode().splitlines())==14
+          assert all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(frozen,prior["rows"]))
+          pins={"src/monster.cpp":(candidate,"73fe33e5e8649d2be6ff52c56865a8297efea0f3"),"include/pastafari/monster.hpp":(candidate,"4c24d36e3704dd10ecf5420e7bc11a3da958d441"),"include/pastafari/source_language_catalog.hpp":(candidate,"9f204d93166b2c33532bb236bc2bd929252f27be")}
+          for p,(ref,expected) in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==expected
+              Path("source",p).write_bytes(raw)
+          Path("source/cases.tsv").write_bytes(cases)
+          Path("evidence/frozen.json").write_text(json.dumps(frozen,indent=2)+"\n")
+          Path("evidence/v258-reference.json").write_text(json.dumps(prior,indent=2)+"\n")
+          original=Path("source/src/monster.cpp").read_text()
+          assert hashlib.sha256(original.encode()).hexdigest()=="cd280b2e50998831a88626fe7023cdd94071748278d5edbb2c34ad8ca9e9fd34"
+          import difflib
+          with zipfile.ZipFile("v258.zip") as z:
+              ref=json.loads(z.read("v256-reference.json"))
+              lens=json.loads(z.read("lengths.json"))
+          L=lens["actual"]
+          assert L==lens["expected"] and len(L)==45 and sum(L)==4244
+          Path("source/lengths.txt").write_text(" ".join(map(str,L))+"\n")
+          Path("evidence/reference.json").write_text(json.dumps(ref)+"\n")
+          start=original.index("class FastLegalMonthWeavingCounterInternal {")
+          end=original.index("\nbool legalMonthWeavingRowInternal",start)
+          s=original[start:end]
+          def replace(a,b):
+              global s
+              assert s.count(a)==1,a
+              s=s.replace(a,b)
+          replace("        Integer rank = rank1;\n","        Integer rank = rank1;\n        Integer extensions = 1;\n")
+          replace("            if (useRatios) activeBlocks = qaActiveBlocks(state);","            if (useRatios) {\n                if(totalLength<=10 && extensions!=qaRecomputeExtensions(state)) throw BaseValidationError(\"incremental extension mismatch\");\n                activeBlocks = qaActiveBlocks(state, extensions);\n            }")
+          replace("                state = next;\n","                if(useRatios) qaUpdateExtensions(state, monthId, extensions);\n                state = next;\n")
+          replace("    std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state) {","""    Integer qaRecomputeExtensions(const LegalMonthWeavingStateInternal& state) {
+                  Integer result=1;
+                  int p=0;
+                  for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
+                      int r=state.remaining.at(static_cast<std::size_t>(id-1));
+                      result*=binomial(p+r-1,r-1);
+                      p+=r;
+                  }
+                  return result;
+              }
+              void qaUpdateExtensions(const LegalMonthWeavingStateInternal& state,int chosen,Integer& extensions) {
+                  int active=0;
+                  for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id)
+                      active+=state.remaining.at(static_cast<std::size_t>(id-1));
+                  if(chosen>state.openedUpTo){
+                      const int r=state.remaining.at(static_cast<std::size_t>(chosen-1))-1;
+                      if(r>0) extensions*=binomial(active+r-1,r-1);
+                      return;
+                  }
+                  // Each substitution replaces one integer binomial factor.
+                  for(int id=state.openedUpTo;id>=chosen;--id){
+                      const int r=state.remaining.at(static_cast<std::size_t>(id-1));
+                      active-=r;
+                      if(r>1){
+                          extensions*=id==chosen?r-1:active;
+                          extensions/=active+r-1;
+                      }
+                  }
+              }
+              std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state,const Integer& extensions) {""")
+          replace("        Integer extensions=1;\n","")
+          replace("            extensions*=binomial(active+r-1,r-1);\n","")
+          variant=original[:start]+s+original[end:]
+          Path("evidence/variant.diff").write_text("".join(difflib.unified_diff(original.splitlines(True),variant.splitlines(True),fromfile="base",tofile="variant")))
+          Path("evidence/source.json").write_text(json.dumps({"candidate":candidate,"base_sha256":hashlib.sha256(original.encode()).hexdigest(),"variant_sha256":hashlib.sha256(variant.encode()).hexdigest(),"component_only":True},indent=2)+"\n")
+          bridge="\nnamespace pastafari { std::vector<int> qaFastUnrank(const std::vector<int>& lengths,const Integer& rank) { FastLegalMonthWeavingCounterInternal counter(lengths); return counter.unrank1(rank); } }\n"
+          for mode,src in (("base",original),("variant",variant)):
+              Path("source/src",mode+".cpp").write_text(src+bridge)
+          PY
+      - name: Compile bounded component AB
+        run: |
+          set -euo pipefail
+          cat > source/component.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include <algorithm>
+          #include <chrono>
+          #include <fstream>
+          #include <iostream>
+          #include <numeric>
+          #include <stdexcept>
+          #include <vector>
+          namespace pastafari { std::vector<int> qaFastUnrank(const std::vector<int>&,const Integer&); }
+          using namespace pastafari;
+          int main(){
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(true);
+              setFullHistoricalAccelerationValidation(false);
+              int checked=0,vectors=0;
+              for(int n=1;n<=4;++n){
+                  int limit=1;
+                  for(int j=0;j<n;++j)limit*=3;
+                  for(int code=0;code<limit;++code){
+                      int v=code;
+                      std::vector<int> L;
+                      for(int j=0;j<n;++j){L.push_back(1+v%3);v/=3;}
+                      if(std::accumulate(L.begin(),L.end(),0)>10)continue;
+                      const Integer count=exactLegalMonthWeavingCount(L);
+                      std::vector<Integer> ranks;
+                      if(count<=100){for(Integer k=1;k<=count;++k)ranks.push_back(k);}
+                      else{ranks={Integer{1},(count+1)/2,count};}
+                      for(const auto& k:ranks){
+                          if(qaFastUnrank(L,k)!=DPUnrankLegalWeaving(L,k))throw std::runtime_error("small full-state mismatch");
+                          ++checked;
+                      }
+                      ++vectors;
+                  }
+              }
+              std::cout<<"SMALL\t"<<vectors<<"\t"<<checked<<std::endl;
+              for(int mode=1;mode<=2;++mode){
+                  resetPersistentScarVaultsDiagnostic();
+                  setAccelerationScarsEnabled(mode!=1);
+                  setFullHistoricalAccelerationValidation(mode==2);
+                  for(const std::vector<int>& lens:std::vector<std::vector<int>>{{1,1,1},{2,3,2},{3,2,3,2}}){
+                      const Integer total=exactLegalMonthWeavingCount(lens);
+                      for(const Integer& rank:std::vector<Integer>{Integer{1},(total+1)/2,total}){
+                          if(qaFastUnrank(lens,rank)!=DPUnrankLegalWeaving(lens,rank))throw std::runtime_error("fallback mismatch");
+                      }
+                  }
+                  std::cout<<"FALLBACK\t"<<mode<<"\t9"<<std::endl;
+              }
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(true);
+              setFullHistoricalAccelerationValidation(false);
+              std::ifstream f("source/lengths.txt");
+              std::vector<int> L;
+              int len;
+              while(f>>len)L.push_back(len);
+              if(L.size()!=45||std::accumulate(L.begin(),L.end(),0)!=4244)return 2;
+              const Integer count=exactLegalMonthWeavingCount(L);
+              std::cout<<"COUNT\t"<<count<<std::endl;
+              // Interior ranks exercise active-block subtraction. Extremal
+              // ranks alone are poor performance witnesses.
+              for(int frac:{1,2,3}){
+                  const Integer k=1+((count-1)*frac)/4;
+                  const auto start=std::chrono::steady_clock::now();
+                  const auto row=DPUnrankLegalWeaving(L,k);
+                  const double sec=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+                  if(row.size()!=4244)return 3;
+                  std::vector<int> histogram(45);
+                  std::vector<int> first(45,-1),last(45,-1);
+                  for(int i=0;i<static_cast<int>(row.size());++i){
+                      const int m=row[i]-1;
+                      if(m<0||m>=45)return 4;
+                      ++histogram[m];if(first[m]<0)first[m]=i;last[m]=i;
+                  }
+                  if(histogram!=L||!std::is_sorted(first.begin(),first.end())||!std::is_sorted(last.begin(),last.end()))return 5;
+                  std::cout<<"ROW\t"<<frac<<"\t"<<sec<<"\t"<<k<<"\t";
+                  for(int m:row)std::cout<<m<<",";
+                  std::cout<<std::endl;
+              }
+          }
+          CPP
+          for mode in base variant; do
+            (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include "source/src/$mode.cpp" source/component.cpp -o "source/$mode") > "evidence/$mode-build.log" 2>&1 || { cat "evidence/$mode-build.log"; exit 1; }
+          done
+          sha256sum source/base source/variant source/component.cpp source/src/base.cpp source/src/variant.cpp > evidence/build.sha256
+      - name: Compare exact full words and small independent checks
+        run: |
+          set -euo pipefail
+          for mode in base variant; do
+            set +e
+            (ulimit -v 1572864; /usr/bin/time -v -o "evidence/$mode-time.txt" timeout -k 5s 150s "source/$mode") > "evidence/$mode-stdout.txt" 2> "evidence/$mode-stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$mode-exit.txt"
+            cut -c1-100 "evidence/$mode-stdout.txt"
+            cat "evidence/$mode-stderr.txt"
+          done
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path("evidence");ref=json.loads((p/"reference.json").read_text())
+          modes={}
+          for mode in ("base","variant"):
+              small=None;count=None;words=[];fallback=[];seconds=[]
+              for l in (p/f"{mode}-stdout.txt").read_text().splitlines():
+                  a=l.split("\t")
+                  if a[0]=="SMALL":small=list(map(int,a[1:]))
+                  elif a[0]=="FALLBACK":fallback.append(list(map(int,a[1:])))
+                  elif a[0]=="COUNT":count=hashlib.sha256(a[1].encode()).hexdigest()
+                  elif a[0]=="ROW":
+                      assert len(a)==5 and len(a[4].rstrip(",").split(","))==4244
+                      words.append({"fraction":int(a[1]),"rank":a[3],"word_sha256":hashlib.sha256(a[4].encode()).hexdigest()})
+                      seconds.append(float(a[2]))
+                  else:raise AssertionError(a[0])
+              ok=int((p/f"{mode}-exit.txt").read_text())==0 and not (p/f"{mode}-stderr.txt").read_text() and small==ref["small"]==[115,1285] and fallback==[[1,9],[2,9]] and count==ref["count_sha256"] and words==ref["rows"]
+              modes[mode]={"pass":bool(ok),"small":small,"fallback":fallback,"seconds":seconds,"words":words,"count_sha256":count}
+          passed=all(m["pass"] for m in modes.values())
+          speedup=sum(modes["base"]["seconds"])/sum(modes["variant"]["seconds"]) if passed else None
+          out={"schema":"SOAK_V263_INCREMENTAL_EXTENSION_AB/1","candidate_commit":"4d6024f53f4b88f8bec7f72750a4d7f4caff657f","component_pass":passed,"speedup":speedup,"modes":modes,"source":json.loads((p/"source.json").read_text()),"full_word_positions":12732 if passed else 0,"independent_new_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps({"schema":out["schema"],"component_pass":passed,"speedup":speedup,"seconds":{k:v["seconds"] for k,v in modes.items()}}))
+          assert passed
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v263-incremental-extension-ab-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
