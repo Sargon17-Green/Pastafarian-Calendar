@@ -1269,6 +1269,55 @@ proc probeSevenSlotNarrowBoundedCompositions() {
   }
 }
 
+// Сім додатних частин: N=6..11, B=-1 або кожна внутрішня межа.
+// Незалежний оракул: бітові маски шести роздільників серед N-1
+// позицій, від найбільшої маски до найменшої (лексикографічний порядок).
+// Зовнішній прямий перебір додатних кортежів підтвердив усі списки.
+// C(N-1,6) без межі, C(N-2,5) із межею; нуль при N<7.
+// 51 родина, 2310 рангів, 2361 твердження; очікувано 9619 загалом.
+// Лише дослідження, не історичний свідок і не приймання Stage 6.
+proc probeSevenCutletPartitions() {
+  for total in 6..11 {
+    const limit = 2 ** (total-1);
+    for boundary in -1..(total-1) {
+      if boundary == 0 then continue;
+      var tested: CutletPartitionCounter;
+      tested.totalGaps = total;
+      tested.slotsTotal = 7;
+      tested.requiredBoundary = boundary;
+      var enumerated = 0;
+      for code in 0..(limit-1) {
+        const mask = limit-1-code;
+        var dividers = new list(int);
+        var hit = boundary < 0;
+        for pos in 1..(total-1) {
+          if (mask / (2 ** (total-1-pos))) % 2 == 1 {
+            dividers.pushBack(pos);
+            if pos == boundary then hit = true;
+          }
+        }
+        if dividers.size != 6 || !hit then continue;
+        enumerated += 1;
+        const actual = tested.unrank1(new bigint(enumerated));
+        var equal = actual.size == 7;
+        if equal {
+          var previous = 0;
+          for i in 0..5 {
+            if actual[i] != dividers[i]-previous then equal = false;
+            previous = dividers[i];
+          }
+          if actual[6] != total-previous then equal = false;
+        }
+        check(equal, "Сім котлет: N=" + total:string +
+              ", B=" + boundary:string + ", ранг=" + enumerated:string);
+      }
+      check(tested.countAll() == enumerated,
+            "Сім котлет: потужність N=" + total:string +
+            ", B=" + boundary:string);
+    }
+  }
+}
+
 proc main() {
   writeln("DISCOVERY03_RESEARCH_ONLY=YES");
   probeCutletCompositions(7, 2);
@@ -1277,6 +1326,7 @@ proc main() {
   probeFourCutletPartitions();
   probeFiveCutletPartitions();
   probeSixCutletPartitions();
+  probeSevenCutletPartitions();
   probeBoundedCompositions(12, 4, 8);
   probeFourSlotBoundedCompositions();
   probeFiveSlotBoundedCompositions();
