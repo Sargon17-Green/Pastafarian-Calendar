@@ -1,0 +1,210 @@
+name: Soak v262 profile exact v258 candidate phases on frozen inputs (no soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v262-celeritas-candidate-phase-profile.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock archive and candidate source identities
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "39ebec4c0bf7161ee15f720b3a2fba2cf3e90ae0"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v262-celeritas-candidate-phase-profile.yml"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+      - name: Pin frozen inputs and exact candidate source
+        run: |
+          set -euo pipefail
+          mkdir -p evidence source/src source/include/pastafari
+          cp qa/soak/archive/v227-v258/v253.zip v253.zip
+          echo "9cab9e052261b2f5e6f2a122151de8c7e9d5124cd48bf73a8651ebb6b690e47c  v253.zip" | sha256sum -c -
+          cp qa/soak/archive/v227-v258/v258.zip v258.zip
+          echo "13db2c122e5e483a10f9ee0f206c84f4e1497faccb61af273cfb079101110f1b  v258.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess
+          from pathlib import Path
+          def member(zp,n):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  return z.read(n)
+          inventories={}
+          for zp in ("v253.zip","v258.zip"):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  inventories[zp]=[{"name":n,"sha256":hashlib.sha256(z.read(n)).hexdigest()} for n in z.namelist()]
+          Path("evidence/input-inventory.json").write_text(json.dumps(inventories,indent=2)+"\n")
+          frozen=json.loads(member("v253.zip","frozen.json"))
+          assert frozen==json.loads(member("v258.zip","frozen.json"))
+          cases="".join(f"{x['label']}\t{x['c']}\t{x['t']}\n" for x in frozen).encode("ascii")
+          Path("evidence/cases.tsv").write_bytes(cases)
+          prior=json.loads(member("v258.zip","result.json"))
+          candidate="4d6024f53f4b88f8bec7f72750a4d7f4caff657f"
+          assert prior["schema"]=="SOAK_V258_VERSIONED_WEAVING_NATIVE/1" and prior["versioned_candidate_pass"]
+          assert prior["candidate_commit"]==candidate and prior["candidate_blob"]=="73fe33e5e8649d2be6ff52c56865a8297efea0f3"
+          assert len(frozen)==len(prior["rows"])==14 and len(cases.decode().splitlines())==14
+          assert all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(frozen,prior["rows"]))
+          pins={"src/monster.cpp":(candidate,"73fe33e5e8649d2be6ff52c56865a8297efea0f3"),"include/pastafari/monster.hpp":(candidate,"4c24d36e3704dd10ecf5420e7bc11a3da958d441"),"include/pastafari/source_language_catalog.hpp":(candidate,"9f204d93166b2c33532bb236bc2bd929252f27be")}
+          for p,(ref,expected) in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==expected
+              Path("source",p).write_bytes(raw)
+          Path("source/cases.tsv").write_bytes(cases)
+          Path("evidence/frozen.json").write_text(json.dumps(frozen,indent=2)+"\n")
+          Path("evidence/v258-reference.json").write_text(json.dumps(prior,indent=2)+"\n")
+          original=Path("source/src/monster.cpp").read_text()
+          assert hashlib.sha256(original.encode()).hexdigest()=="cd280b2e50998831a88626fe7023cdd94071748278d5edbb2c34ad8ca9e9fd34"
+          s=original
+          for inc in ("#include <chrono>\n","#include <iostream>\n"):
+              if inc.strip() not in s:s=s.replace("#include <tuple>\n","#include <tuple>\n"+inc,1)
+          dispatch="FINAL_MAIN_DISPATCH:\n    ctx.subPhase = stage;"
+          instrument="""FINAL_MAIN_DISPATCH:
+              std::cerr << "OUTER\\t" << stage << "\\t"
+                        << std::chrono::duration_cast<std::chrono::nanoseconds>(
+                             std::chrono::steady_clock::now().time_since_epoch()).count()
+                        << std::endl;
+              ctx.subPhase = stage;"""
+          assert s.count(dispatch)==1
+          s=s.replace(dispatch,instrument)
+          start=s.index("SpaghettiYearStructure buildFinalYearStructure(")
+          end=s.index("\n} // namespace",start)
+          f=s[start:end]
+          begin="""    SpaghettiYearStructure out;
+              const Integer firstDay = year.openGateDay + 1;"""
+          prof="""    static std::uint64_t qaBuildSequence = 0;
+              const std::uint64_t qaBuildId = ++qaBuildSequence;
+              auto qaProfileLast = std::chrono::steady_clock::now();
+              std::cerr << "BUILD\\t" << qaBuildId << "\\tBEGIN" << std::endl;
+              auto qaProfileMark = [&](const char* name) {
+                  const auto now = std::chrono::steady_clock::now();
+                  std::cerr << "INNER\\t" << qaBuildId << "\\t" << name << "\\t"
+                  << std::chrono::duration<double>(now - qaProfileLast).count()
+                  << std::endl;
+                  qaProfileLast = now;
+              };
+              SpaghettiYearStructure out;
+              const Integer firstDay = year.openGateDay + 1;"""
+          assert f.count(begin)==1
+          f=f.replace(begin,prof)
+          marks=[
+            ("    const int gapCount = (year.closeGateIndex - year.openGateIndex).convert_to<int>();","    qaProfileMark(\"sauce\");\n"),
+            ("    out.cutletPartition = partitionDecision.semanticPartition;","    qaProfileMark(\"partition\");\n"),
+            ("    out.cutletNameIndices = cutletNameDecision.outputNameIndices;","    qaProfileMark(\"cutlet_names\");\n"),
+            ("    const int yearLength = (year.closeGateDay - year.openGateDay).convert_to<int>();","    qaProfileMark(\"cutlets\");\n"),
+            ("    out.monthCount = minMonths + monthCountRank.convert_to<int>() - 1;","    qaProfileMark(\"month_count\");\n"),
+            ("    out.monthLengths = monthLengthList.itemAt1(monthLengthRank);","    qaProfileMark(\"month_lengths\");\n"),
+            ("    out.monthWeaving = weavingDecision.outputWeaving;","    qaProfileMark(\"weaving\");\n"),
+            ("    out.monthNameIndices = monthNameDecision.outputNameIndices;","    qaProfileMark(\"month_names\");\n"),
+            ("    return out;","    qaProfileMark(\"complete\");\n")]
+          for anchor,prefix in marks:
+              assert f.count(anchor)==1,anchor
+              f=f.replace(anchor,prefix+anchor)
+          s=s[:start]+f+s[end:]
+          Path("source/src/profiled.cpp").write_text(s)
+          Path("evidence/instrumentation.json").write_text(json.dumps({"candidate_commit":candidate,"source_sha256":hashlib.sha256(original.encode()).hexdigest(),"instrumented_sha256":hashlib.sha256(s.encode()).hexdigest(),"instrumented_copy_only":True,"outer_stages":[0,10,20,30,40,50,60],"inner_stages":["sauce","partition","cutlet_names","cutlets","month_count","month_lengths","weaving","month_names","complete"],"production_source_modified":False},indent=2)+"\n")
+          PY
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+          ) > evidence/compiler.txt 2>&1
+          cat > source/probe.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+          using namespace pastafari;
+          std::size_t ci(const std::string& n){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& n){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("month");}
+          long long stamp(){return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();}
+          int main(){
+              resetPersistentScarVaultsDiagnostic();setAccelerationScarsEnabled(true);setFullHistoricalAccelerationValidation(false);
+              std::string label,cs,ts;int count=0;
+              while(std::cin>>label>>cs>>ts){
+                  const Integer c{cs},t{ts};const auto before=persistentScarMetricsDiagnostic();
+                  std::cerr<<"CALL\t"<<label<<"\t"<<stamp()<<std::endl;
+                  const auto start=std::chrono::steady_clock::now();const auto a=calendarDateSpaghetti(c,t);
+                  const auto end=std::chrono::steady_clock::now();std::cerr<<"CALL_END\t"<<label<<"\t"<<stamp()<<std::endl;
+                  const auto after=persistentScarMetricsDiagnostic();
+                  std::cout<<"DATE\t"<<label<<"\t"<<c<<"\t"<<t<<"\t"<<std::chrono::duration<double>(end-start).count()<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<"\t"<<after.patch28GateCalculated-before.patch28GateCalculated<<"\t"<<after.patch28GateResurrection-before.patch28GateResurrection<<"\t"<<after.patch27AncestralHit-before.patch27AncestralHit<<"\t"<<after.patch39FinalResultHit-before.patch39FinalResultHit<<std::endl;++count;
+              }
+              if(!std::cin.eof()||count!=14)return 2;std::cout<<"PROFILE_DONE\t"<<count<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include source/src/profiled.cpp source/probe.cpp -o source/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum source/probe source/probe.cpp source/src/profiled.cpp source/cases.tsv > evidence/build.sha256
+      - name: Profile all 14 frozen calls and verify outputs
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 3145728; /usr/bin/time -v -o evidence/time.txt timeout -k 5s 240s source/probe < source/cases.tsv) > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/exit.txt
+          python3 - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          p=Path("evidence");frozen=json.loads((p/"frozen.json").read_text());prior=json.loads((p/"v258-reference.json").read_text())
+          lines=(p/"stdout.txt").read_text().splitlines();rows=[]
+          for l in lines:
+              a=l.split("\t")
+              if a[0]=="DATE":
+                  assert len(a)==16
+                  rows.append({"label":a[1],"c":int(a[2]),"t":int(a[3]),"seconds":float(a[4]),"fields":list(map(int,a[5:10])),"raw_names":a[10:12],"gate_calculated":int(a[12]),"gate_resurrections":int(a[13]),"structure_hits":int(a[14]),"result_hits":int(a[15])})
+          stderr=(p/"stderr.txt").read_text().splitlines();calls={};builds={};current=None
+          for l in stderr:
+              a=l.split("\t")
+              if a[0]=="CALL":current=a[1];calls[current]={"outer":[],"builds":[]}
+              elif a[0]=="OUTER":calls[current]["outer"].append((int(a[1]),int(a[2])))
+              elif a[0]=="BUILD":
+                  b={"id":int(a[1]),"segments":[]};calls[current]["builds"].append(b);builds[b["id"]]=(current,b)
+              elif a[0]=="INNER":builds[int(a[1])][1]["segments"].append({"name":a[2],"seconds":float(a[3])})
+              elif a[0]=="CALL_END":calls[current]["end"]=int(a[2]);current=None
+              else:raise AssertionError(l)
+          exact=int((p/"exit.txt").read_text())==0 and len(calls)==len(rows)==14 and lines[-1]=="PROFILE_DONE\t14"
+          exact=exact and all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(rows,frozen))
+          exact=exact and all(all(x[k]==y[k] for k in ("gate_calculated","gate_resurrections","structure_hits","result_hits")) for x,y in zip(rows,prior["rows"]))
+          names=["sauce","partition","cutlet_names","cutlets","month_count","month_lengths","weaving","month_names","complete"]
+          for label,v in calls.items():
+              ev=v["outer"]
+              row=next(r for r in rows if r["label"]==label)
+              if row["result_hits"]==1:
+                  assert not ev and not v["builds"] and "end" in v
+                  v["stage_seconds"]={}
+                  continue
+              assert ev and ev[0][0]==0 and ev[-1][0]==60 and all(y[1]>=x[1] for x,y in zip(ev,ev[1:]))
+              v["stage_seconds"]={f"{s}_to_{s2}":(t2-t)/1e9 for (s,t),(s2,t2) in zip(ev,ev[1:])}
+              v["stage_seconds"]["60_to_return"]=(v["end"]-ev[-1][1])/1e9
+              for b in v["builds"]:assert [x["name"] for x in b["segments"]]==names
+          assert sum(len(v["builds"]) for v in calls.values())==6
+          agg={}
+          for n in names:
+              vals=[x["seconds"] for v in calls.values() for b in v["builds"] for x in b["segments"] if x["name"]==n]
+              agg[n]={"count":len(vals),"total_seconds":sum(vals),"median_seconds":statistics.median(vals) if vals else None,"max_seconds":max(vals) if vals else None}
+          out={"schema":"SOAK_V262_CANDIDATE_PHASE_PROFILE/1","candidate_commit":"4d6024f53f4b88f8bec7f72750a4d7f4caff657f","profiled_calls":len(rows),"build_count":sum(len(x["builds"]) for x in calls.values()),"exact_frozen_outputs":bool(exact),"rows":rows,"calls":calls,"inner_aggregate":agg,"instrumented_copy_only":True,"new_independent_input_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps({"schema":out["schema"],"exact_frozen_outputs":out["exact_frozen_outputs"],"profiled_calls":out["profiled_calls"],"build_count":out["build_count"],"inner_aggregate":agg,"rows":rows},indent=2))
+          assert exact
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v262-candidate-phase-profile-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
