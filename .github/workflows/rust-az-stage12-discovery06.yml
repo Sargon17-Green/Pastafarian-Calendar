@@ -1,0 +1,75 @@
+name: Rust Azerbaijani Stage12 DISCOVERY06 Native expected RED
+
+on:
+  push:
+    branches:
+      - 'Rust\+Azərbaycan-dili'
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'tools/stage12_discovery06_prior_oracle.py'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'DEVELOPMENT_STAGE.md'
+      - '.github/workflows/rust-az-stage12-discovery06.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rust-stage12-discovery06:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Exact identity and bounded evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          printf 'PROJECT_ID=PC-BRANCH-RUST-AZERBAIJANI\nSHA=%s\n' "$GITHUB_SHA" > evidence/sha.txt
+          rustc --version > evidence/toolchain.txt
+          cargo --version >> evidence/toolchain.txt
+          test "$GITHUB_REF_NAME" = 'Rust+Azərbaycan-dili'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fxq 'CURRENT_STAGE=11' DEVELOPMENT_STAGE.md
+          grep -Fxq 'LAST_COMPLETED_STAGE=11' DEVELOPMENT_STAGE.md
+          cargo fmt --all -- --check
+          set +e
+          timeout --signal=TERM --kill-after=5s 600s cargo test --test stage12_discovery06_prior -- --nocapture --test-threads=1 > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          printf '%s\n' "$code" > evidence/exit.txt
+          cat evidence/stdout.txt
+          test "$code" = 0
+          python3 tools/stage12_discovery06_prior_oracle.py evidence/stdout.txt | tee evidence/oracle.txt
+          grep -Fxq 'STAGE12_DISCOVERY06_ORACLE=PASS INPUTS=13 ROWS=1794 RED=143 CONTROL=1651 PREFIXES=598' evidence/oracle.txt
+          set +e
+          timeout --signal=TERM --kill-after=5s 120s env CARGO_TERM_COLOR=never cargo test --test stage12_discovery06_prior stage12_strict_red_prior_zero -- --exact --ignored --nocapture > evidence/stage12_strict_red.txt 2>&1
+          red=$?
+          timeout --signal=TERM --kill-after=5s 120s env CARGO_TERM_COLOR=never cargo test --test stage10_strict_red stage10_strict_red_k1_must_not_match -- --exact --ignored --nocapture > evidence/stage10_strict_red.txt 2>&1
+          oldred=$?
+          set -e
+          printf '%s\n' "$red" > evidence/stage12_strict_red_exit.txt
+          printf '%s\n' "$oldred" > evidence/stage10_strict_red_exit.txt
+          test "$red" = 101
+          test "$oldred" = 101
+          grep -Fq 'STAGE12 strict normative prior assertion' evidence/stage12_strict_red.txt
+          grep -Fq 'MissingVisibleSlot' evidence/stage12_strict_red.txt
+          grep -Fq 'test stage12_strict_red_prior_zero ... FAILED' evidence/stage12_strict_red.txt
+          grep -Fq 'strict RED witness must remain RED' evidence/stage10_strict_red.txt
+          grep -Fq 'test stage10_strict_red_k1_must_not_match ... FAILED' evidence/stage10_strict_red.txt
+          printf 'STAGE12_NATIVE=PASS\nSTAGE12_DIFFERENTIAL=PASS\nSTAGE12_STRICT_RED=CONFIRMED\nSTAGE10_STRICT_RED=CONFIRMED\nSTAGE12_CLOSURE=NOT_CLAIMED\n' > evidence/result.txt
+      - name: Upload evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-az-stage12-discovery06
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 30
