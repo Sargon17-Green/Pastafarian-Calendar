@@ -2683,12 +2683,18 @@ public:
         out.reserve(static_cast<std::size_t>(totalLength));
         while (static_cast<int>(out.size()) < totalLength) {
             bool chosen = false;
+            const bool useRatios = accelerationsOn() && !fullHistoricalValidationOn();
+            std::vector<Integer> activeBlocks;
+            if (useRatios) activeBlocks = qaActiveBlocks(state);
             for (int monthId = 1; monthId <= monthCount_; ++monthId) {
                 if (!legalMove(state, monthId)) {
                     continue;
                 }
                 const LegalMonthWeavingStateInternal next = applyMove(state, monthId);
-                const Integer block = countState(next);
+                const Integer block =
+                    (useRatios && monthId <= state.openedUpTo)
+                        ? activeBlocks.at(static_cast<std::size_t>(monthId-1))
+                        : countState(next);
                 if (rank > block) {
                     rank -= block;
                     continue;
@@ -2758,6 +2764,46 @@ private:
             next.closedUpTo = monthId;
         }
         return next;
+    }
+
+    // All legal decrements of already-open labels share the same
+    // suffix table entry. Compute the common active-extension product
+    // once, then update each binomial factor by its exact ratio.
+    std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state) {
+        std::vector<Integer> blocks(static_cast<std::size_t>(monthCount_));
+        std::vector<int> prefix(static_cast<std::size_t>(monthCount_));
+        int active=0;
+        Integer extensions=1;
+        for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
+            const std::size_t i=static_cast<std::size_t>(id-1);
+            const int r=state.remaining.at(i);
+            if(r<=0) throw BaseValidationError("QA corrupt active state");
+            prefix[i]=active;
+            extensions*=binomial(active+r-1,r-1);
+            active+=r;
+        }
+        if(active==0)return blocks;
+        Integer tail=extensions*suffixPerFixedActive_.at(
+    static_cast<std::size_t>(state.openedUpTo)).at(static_cast<std::size_t>(active-1));
+for(int id=state.openedUpTo;id>state.closedUpTo;--id){
+    const std::size_t i=static_cast<std::size_t>(id-1);
+    const int r=state.remaining.at(i),p=prefix[i];
+    const int divisor=p+r-1;
+    if(r>1){
+        blocks[i]=tail;
+        blocks[i]*=r-1;
+        blocks[i]/=divisor;
+    }else if(id==state.closedUpTo+1){
+        blocks[i]=tail;
+    }
+    // tail contains the original integer binomial factor for this
+    // label. Its substitution is exact before the next step.
+    if(id>state.closedUpTo+1 && r>1){
+        tail*=p;
+        tail/=divisor;
+    }
+}
+        return blocks;
     }
 
     Integer countState(const LegalMonthWeavingStateInternal& state) {
