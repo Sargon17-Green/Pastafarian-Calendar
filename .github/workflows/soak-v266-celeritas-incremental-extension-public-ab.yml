@@ -1,0 +1,224 @@
+name: Soak v266 exact v264 variant original public API AB (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v266-celeritas-incremental-extension-public-ab.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Lock archive and candidate source identities
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/qa/issue29-gmp-complete-small-family-v198"
+          test "$(git rev-parse HEAD^)" = "e8723ecb2dc258706ec2b28fea28bbde08eb9007"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v266-celeritas-incremental-extension-public-ab.yml"
+          test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
+      - name: Pin frozen inputs and exact candidate source
+        run: |
+          set -euo pipefail
+          mkdir -p evidence source/src source/include/pastafari
+          cp qa/soak/archive/v227-v258/v253.zip v253.zip
+          echo "9cab9e052261b2f5e6f2a122151de8c7e9d5124cd48bf73a8651ebb6b690e47c  v253.zip" | sha256sum -c -
+          cp qa/soak/archive/v227-v258/v258.zip v258.zip
+          echo "13db2c122e5e483a10f9ee0f206c84f4e1497faccb61af273cfb079101110f1b  v258.zip" | sha256sum -c -
+          test "$(git ls-remote origin refs/heads/qa/celeritas-short-rejection-v235-20261127 | cut -f1)" = "4d6024f53f4b88f8bec7f72750a4d7f4caff657f"
+          timeout -k 5s 60s gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15278400414/zip > v264.zip
+          echo "f13c72ed3068a66053541e62b55b07b10690fad293b73ec0a8e926368a9f9082  v264.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess
+          from pathlib import Path
+          def member(zp,n):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  return z.read(n)
+          inventories={}
+          for zp in ("v253.zip","v258.zip"):
+              with zipfile.ZipFile(zp) as z:
+                  assert z.testzip() is None
+                  inventories[zp]=[{"name":n,"sha256":hashlib.sha256(z.read(n)).hexdigest()} for n in z.namelist()]
+          Path("evidence/input-inventory.json").write_text(json.dumps(inventories,indent=2)+"\n")
+          frozen=json.loads(member("v253.zip","frozen.json"))
+          assert frozen==json.loads(member("v258.zip","frozen.json"))
+          cases="".join(f"{x['label']}\t{x['c']}\t{x['t']}\n" for x in frozen).encode("ascii")
+          Path("evidence/cases.tsv").write_bytes(cases)
+          prior=json.loads(member("v258.zip","result.json"))
+          candidate="4d6024f53f4b88f8bec7f72750a4d7f4caff657f"
+          assert prior["schema"]=="SOAK_V258_VERSIONED_WEAVING_NATIVE/1" and prior["versioned_candidate_pass"]
+          assert prior["candidate_commit"]==candidate and prior["candidate_blob"]=="73fe33e5e8649d2be6ff52c56865a8297efea0f3"
+          assert len(frozen)==len(prior["rows"])==14 and len(cases.decode().splitlines())==14
+          assert all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(frozen,prior["rows"]))
+          pins={"src/monster.cpp":(candidate,"73fe33e5e8649d2be6ff52c56865a8297efea0f3"),"include/pastafari/monster.hpp":(candidate,"4c24d36e3704dd10ecf5420e7bc11a3da958d441"),"include/pastafari/source_language_catalog.hpp":(candidate,"9f204d93166b2c33532bb236bc2bd929252f27be")}
+          for p,(ref,expected) in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==expected
+              Path("source",p).write_bytes(raw)
+          Path("source/cases.tsv").write_bytes(cases)
+          Path("evidence/frozen.json").write_text(json.dumps(frozen,indent=2)+"\n")
+          Path("evidence/v258-reference.json").write_text(json.dumps(prior,indent=2)+"\n")
+          original=Path("source/src/monster.cpp").read_text()
+          assert hashlib.sha256(original.encode()).hexdigest()=="cd280b2e50998831a88626fe7023cdd94071748278d5edbb2c34ad8ca9e9fd34"
+          import difflib
+          with zipfile.ZipFile("v258.zip") as z:
+              ref=json.loads(z.read("v256-reference.json"))
+              lens=json.loads(z.read("lengths.json"))
+          L=lens["actual"]
+          assert L==lens["expected"] and len(L)==45 and sum(L)==4244
+          Path("source/lengths.txt").write_text(" ".join(map(str,L))+"\n")
+          Path("evidence/reference.json").write_text(json.dumps(ref)+"\n")
+          start=original.index("class FastLegalMonthWeavingCounterInternal {")
+          end=original.index("\nbool legalMonthWeavingRowInternal",start)
+          s=original[start:end]
+          def replace(a,b):
+              global s
+              assert s.count(a)==1,a
+              s=s.replace(a,b)
+          replace("        Integer rank = rank1;\n","        Integer rank = rank1;\n        Integer extensions = 1;\n")
+          replace("            if (useRatios) activeBlocks = qaActiveBlocks(state);","            if (useRatios) {\n                if(totalLength<=10 && extensions!=qaRecomputeExtensions(state)) throw BaseValidationError(\"incremental extension mismatch\");\n                activeBlocks = qaActiveBlocks(state, extensions);\n            }")
+          replace("                state = next;\n","                if(useRatios) qaUpdateExtensions(state, monthId, extensions);\n                state = next;\n")
+          replace("    std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state) {","""    Integer qaRecomputeExtensions(const LegalMonthWeavingStateInternal& state) {
+                  Integer result=1;
+                  int p=0;
+                  for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
+                      int r=state.remaining.at(static_cast<std::size_t>(id-1));
+                      result*=binomial(p+r-1,r-1);
+                      p+=r;
+                  }
+                  return result;
+              }
+              void qaUpdateExtensions(const LegalMonthWeavingStateInternal& state,int chosen,Integer& extensions) {
+                  int active=0;
+                  for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id)
+                      active+=state.remaining.at(static_cast<std::size_t>(id-1));
+                  if(chosen>state.openedUpTo){
+                      const int r=state.remaining.at(static_cast<std::size_t>(chosen-1))-1;
+                      if(r>0) extensions*=binomial(active+r-1,r-1);
+                      return;
+                  }
+                  // Each substitution replaces one integer binomial factor.
+                  for(int id=state.openedUpTo;id>=chosen;--id){
+                      const int r=state.remaining.at(static_cast<std::size_t>(id-1));
+                      active-=r;
+                      if(r>1){
+                          extensions*=id==chosen?r-1:active;
+                          extensions/=active+r-1;
+                      }
+                  }
+              }
+              std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state,const Integer& extensions) {""")
+          replace("        Integer extensions=1;\n","")
+          replace("            extensions*=binomial(active+r-1,r-1);\n","")
+          variant=original[:start]+s+original[end:]
+          Path("evidence/variant.diff").write_text("".join(difflib.unified_diff(original.splitlines(True),variant.splitlines(True),fromfile="base",tofile="variant")))
+          Path("evidence/source.json").write_text(json.dumps({"candidate":candidate,"base_sha256":hashlib.sha256(original.encode()).hexdigest(),"variant_sha256":hashlib.sha256(variant.encode()).hexdigest(),"component_only":True},indent=2)+"\n")
+          with zipfile.ZipFile("v264.zip") as z:
+              assert z.testzip() is None
+              v264=json.loads(z.read("result.json"))
+              assert v264["schema"]=="SOAK_V264_INCREMENTAL_EXTENSION_AB/1" and v264["component_pass"] and v264["candidate_commit"]==candidate
+              assert v264["source"]["base_sha256"]==hashlib.sha256(original.encode()).hexdigest()
+              assert v264["source"]["variant_sha256"]==hashlib.sha256(variant.encode()).hexdigest()=="caed4039118e349ce7219367a8768d6cf07a2035a1bbf0dc43caf35191eb4041"
+              assert z.read("variant.diff")==Path("evidence/variant.diff").read_bytes()
+          Path("evidence/v264-reference.json").write_text(json.dumps(v264,indent=2)+"\n")
+          for mode,src in (("base",original),("variant",variant)):
+              Path("source/src",mode+".cpp").write_text(src)
+          Path("evidence/source.json").write_text(json.dumps({"candidate":candidate,"base_sha256":hashlib.sha256(original.encode()).hexdigest(),"variant_sha256":hashlib.sha256(variant.encode()).hexdigest(),"exact_v264_variant":True,"qa_bridge_added":False,"instrumented":False},indent=2)+"\n")
+          PY
+      - name: Compile exact uninstrumented original API AB
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+          ) > evidence/compiler.txt 2>&1
+          cat > source/probe.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+          using namespace pastafari;
+          std::size_t ci(const std::string& n){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& n){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("month");}
+          int main(){
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(true);
+              setFullHistoricalAccelerationValidation(false);
+              std::string label,cs,ts;
+              int count=0;
+              while(std::cin>>label>>cs>>ts){
+                  const Integer c{cs},t{ts};
+                  const auto before=persistentScarMetricsDiagnostic();
+                  const auto start=std::chrono::steady_clock::now();
+                  const auto a=calendarDateSpaghetti(c,t);
+                  const auto after=persistentScarMetricsDiagnostic();
+                  const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+                  std::cout<<"DATE\t"<<label<<"\t"<<c<<"\t"<<t<<"\t"<<seconds<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<"\t"<<after.patch28GateCalculated-before.patch28GateCalculated<<"\t"<<after.patch28GateResurrection-before.patch28GateResurrection<<"\t"<<after.patch27AncestralHit-before.patch27AncestralHit<<"\t"<<after.patch39FinalResultHit-before.patch39FinalResultHit<<std::endl;
+                  ++count;
+              }
+              if(!std::cin.eof()||count!=14)return 2;
+              std::cout<<"PERSISTENT_DONE\t"<<count<<std::endl;
+          }
+          CPP
+          for mode in base variant; do
+            (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include "source/src/$mode.cpp" source/probe.cpp -o "source/$mode") > "evidence/$mode-build.log" 2>&1 || { cat "evidence/$mode-build.log"; exit 1; }
+          done
+          sha256sum source/base source/variant source/probe.cpp source/src/base.cpp source/src/variant.cpp source/cases.tsv > evidence/build.sha256
+      - name: Compare all 14 original API calls and cache metrics
+        run: |
+          set -euo pipefail
+          for mode in base variant; do
+            set +e
+            (ulimit -v 3145728; /usr/bin/time -v -o "evidence/$mode-time.txt" timeout -k 5s 240s "source/$mode" < source/cases.tsv) > "evidence/$mode-stdout.txt" 2> "evidence/$mode-stderr.txt"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$mode-exit.txt"
+            cat "evidence/$mode-stdout.txt" "evidence/$mode-stderr.txt"
+          done
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path("evidence");frozen=json.loads((p/"frozen.json").read_text());prior=json.loads((p/"v258-reference.json").read_text())
+          modes={}
+          for mode in ("base","variant"):
+              lines=(p/f"{mode}-stdout.txt").read_text().splitlines()
+              rows=[]
+              for l in lines:
+                  a=l.split("\t")
+                  if a[0]=="DATE":
+                      assert len(a)==16
+                      rows.append({"label":a[1],"c":int(a[2]),"t":int(a[3]),"seconds":float(a[4]),"fields":list(map(int,a[5:10])),"raw_names":a[10:12],"gate_calculated":int(a[12]),"gate_resurrections":int(a[13]),"structure_hits":int(a[14]),"result_hits":int(a[15])})
+                  else:assert l=="PERSISTENT_DONE\t14"
+              ok=int((p/f"{mode}-exit.txt").read_text())==0 and len(rows)==len(frozen)==14 and lines[-1]=="PERSISTENT_DONE\t14" and not (p/f"{mode}-stderr.txt").read_text()
+              ok=ok and all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(rows,frozen))
+              ok=ok and all(all(x[k]==y[k] for k in ("gate_calculated","gate_resurrections","structure_hits","result_hits")) for x,y in zip(rows,prior["rows"]))
+              rss=re.search(r"Maximum resident set size \(kbytes\): (\d+)",(p/f"{mode}-time.txt").read_text())
+              modes[mode]={"pass":bool(ok),"rows":rows,"peak_rss_kib":int(rss.group(1)) if rss else None}
+          passed=all(m["pass"] for m in modes.values())
+          warm={"changed_c","previous_year","next_year","negative_date"}
+          totals={k:sum(r["seconds"] for r in m["rows"] if r["label"] in warm) for k,m in modes.items()}
+          out={"schema":"SOAK_V266_INCREMENTAL_EXTENSION_PUBLIC_AB/1","candidate_commit":"4d6024f53f4b88f8bec7f72750a4d7f4caff657f","comparison_pass":passed,"source":json.loads((p/"source.json").read_text()),"modes":modes,"warm_totals":totals,"warm_speedup":totals["base"]/totals["variant"] if passed and totals["variant"]>0 else None,"previously_frozen_unique_pairs":11,"independent_new_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert passed
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v266-incremental-extension-public-ab-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
