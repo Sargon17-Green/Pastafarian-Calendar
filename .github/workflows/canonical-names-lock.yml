@@ -1215,13 +1215,13 @@ jobs:
       - name: Independently acquire and bind Stage44 preflight evidence
         shell: powershell
         env:
-          GITHUB_TOKEN: __GITHUB_TOKEN__
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Stage44 evidence adjudication requires Windows PowerShell 5.1' }
           $head = ((& git rev-parse HEAD) -join '').Trim()
           if ($LASTEXITCODE -ne 0 -or $head -cne $env:GITHUB_SHA) { throw 'Stage44 evidence adjudication exact checkout SHA mismatch' }
-          . .\\src\\Stage44TrustedEvidence.ps1
+          . .\src\Stage44TrustedEvidence.ps1
           $result = Get-Stage44TrustedEvidence -Repository $env:GITHUB_REPOSITORY -RunId ([long]$env:GITHUB_RUN_ID) -ExpectedSha $env:GITHUB_SHA -ExpectedBranch 'PowerShell+Tagalog' -Token $env:GITHUB_TOKEN -RepositoryRoot (Get-Location).Path -CurrentRun
           $manifestLines = @()
           foreach ($key in ($result.ManifestValues.Keys | Sort-Object -CaseSensitive)) {
