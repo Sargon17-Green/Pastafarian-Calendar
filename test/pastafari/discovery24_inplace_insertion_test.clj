@@ -6,7 +6,8 @@
             [pastafari.normative-oracle :as oracle])
   (:import [java.nio.charset StandardCharsets]
            [java.security MessageDigest]
-           [java.util LinkedHashMap]))
+           [java.util LinkedHashMap ArrayList Collections Arrays]
+           [java.io ByteArrayInputStream SequenceInputStream PushbackInputStream]))
 
 (def ^:private cache-limit 2048)
 (def ^:private alternative-write-limit 5000000N)
@@ -16,6 +17,230 @@
 (def ^:private source-raming-var
   (or (ns-resolve 'pastafari.maandrang 'raming)
       (throw (ex-info "production raming Var is missing" {}))))
+
+
+(def ^:private alternative-scalar-limit 550000000000N)
+(def ^:private alternative-bit-limit 65000000000000000000000N)
+(def ^:private alternative-payload-limit 1000000000N)
+(def ^:private alternative-wall-limit-nanos 90000000000)
+(def ^:private alternative-heap-delta-limit-bytes (* 256 1024 1024))
+(def ^:private alternative-frame-limit-bytes 176120)
+(def ^:private alternative-chunk-limit-bytes 4096)
+(defn- used-heap-bytes []
+  (let [runtime (Runtime/getRuntime)] (- (.totalMemory runtime) (.freeMemory runtime))))
+(defn- integer-bit-length [value] (max 1 (.bitLength (biginteger value))))
+(defn- watchdog-check! [context]
+  (when-let [watchdog (:watchdog context)]
+    (let [now (System/nanoTime) used (used-heap-bytes)
+          delta (- used (:baseline-heap-bytes watchdog))]
+      (vswap! (:peak-heap-bytes context) max used)
+      (when (.isInterrupted (Thread/currentThread))
+        (throw (ex-info "Alternative C execution interrupted" {:code :alternative-c-interrupted})))
+      (when (> now (:deadline-nanos watchdog))
+        (throw (ex-info "Alternative C wall-clock watchdog exceeded"
+                        {:code :alternative-c-time-watchdog :elapsed-nanos (- now (:start-nanos watchdog))})))
+      (when (> delta (:heap-delta-limit-bytes watchdog))
+        (throw (ex-info "Alternative C heap-delta watchdog exceeded"
+                        {:code :alternative-c-heap-watchdog :heap-delta-bytes delta
+                         :heap-delta-limit-bytes (:heap-delta-limit-bytes watchdog)})))))
+  nil)
+(defn- ledger-op! [context operation a b result]
+  (when-let [ledger (:ledger context)]
+    (let [a-bits (integer-bit-length a) b-bits (integer-bit-length b)
+          cost (if (#{:mul :div :mod} operation) (*' a-bits b-bits) (+' (max a-bits b-bits) 1N))
+          arithmetic-count (vswap! (:primitive-count ledger) +' 1N)
+          bit-work (vswap! (:bit-work ledger) +' cost)
+          controls (bigint @(:control-count ledger))
+          total-primitives (+' arithmetic-count controls)
+          total-bit-work (+' bit-work (*' 64N controls))
+          result-bits (when (some? result) (integer-bit-length result))]
+      (when (or (> a-bits (:word-bits ledger)) (> b-bits (:word-bits ledger)))
+        (throw (ex-info "Alternative C operand exceeded W"
+                        {:code :alternative-c-word-width :a-bits a-bits :b-bits b-bits
+                         :limit (:word-bits ledger)})))
+      (vswap! (:ops ledger) update operation (fnil +' 0N) 1N)
+      (when result-bits (vswap! (:max-word-bits ledger) max a-bits b-bits result-bits))
+      (when (> total-primitives (:scalar-limit ledger))
+        (throw (ex-info "Alternative C scalar primitive limit exceeded"
+                        {:code :alternative-c-scalar-limit :observed total-primitives :limit (:scalar-limit ledger)})))
+      (when (> total-bit-work (:bit-limit ledger))
+        (throw (ex-info "Alternative C bit-work limit exceeded"
+                        {:code :alternative-c-bit-limit :observed total-bit-work :limit (:bit-limit ledger)})))
+      (when (and result-bits (> result-bits (:word-bits ledger)))
+        (throw (ex-info "Alternative C result exceeded W"
+                        {:code :alternative-c-word-width :observed result-bits :limit (:word-bits ledger)})))
+      (when (zero? (mod total-primitives 256N)) (watchdog-check! context))))
+  result)
+(defn- control-op! [context]
+  (when-let [ledger (:ledger context)]
+    (let [controls (vswap! (:control-count ledger) inc)]
+      (when (zero? (mod controls 256))
+        (let [total-primitives (+' @(:primitive-count ledger) (bigint controls))
+              total-bit-work (+' @(:bit-work ledger) (*' 64N (bigint controls)))]
+          (when (> total-primitives (:scalar-limit ledger))
+            (throw (ex-info "Alternative C scalar primitive limit exceeded"
+                            {:code :alternative-c-scalar-limit :observed total-primitives :limit (:scalar-limit ledger)})))
+          (when (> total-bit-work (:bit-limit ledger))
+            (throw (ex-info "Alternative C bit-work limit exceeded"
+                            {:code :alternative-c-bit-limit :observed total-bit-work :limit (:bit-limit ledger)})))
+          (watchdog-check! context)))))
+  nil)
+(defn- alt-add [context a b] (ledger-op! context :add a b (+' a b)))
+(defn- alt-sub [context a b]
+  (when (< a b) (throw (ex-info "Alternative C negative subtraction"
+                                {:code :alternative-c-negative-subtraction :a a :b b})))
+  (ledger-op! context :sub a b (-' a b)))
+(defn- alt-mul [context a b] (ledger-op! context :mul a b (*' a b)))
+(defn- alt-div-exact [context a b]
+  (when (zero? b) (throw (ex-info "Alternative C division by zero" {:code :alternative-c-division-by-zero})))
+  (let [remainder (rem a b) _ (ledger-op! context :mod a b remainder)]
+    (when-not (zero? remainder)
+      (throw (ex-info "Alternative C expected exact integer division"
+                      {:code :alternative-c-inexact-division :a a :b b :remainder remainder})))
+    (ledger-op! context :div a b (quot a b))))
+(defn- alt-gt? [context a b] (ledger-op! context :compare a b nil) (> a b))
+(defn- new-arithmetic-ledger [certificate]
+  {:ops (volatile! {:add 0N :sub 0N :mul 0N :div 0N :mod 0N :compare 0N})
+   :primitive-count (volatile! 0N) :control-count (volatile! 0)
+   :bit-work (volatile! 0N) :max-word-bits (volatile! 1N)
+   :word-bits (:W certificate) :scalar-limit alternative-scalar-limit
+   :bit-limit alternative-bit-limit :payload-limit alternative-payload-limit
+   :live-payload-upper-bound-bits (:payload certificate)})
+(defn- ceil-log2 [value]
+  (loop [power 1N bits 0N] (if (>= power value) bits (recur (*' power 2N) (inc bits)))))
+(defn- alternative-admission-certificate [profile position]
+  (let [m (bigint (count profile)) n (reduce +' 0N profile) p (bigint position)
+        B (+' (*' 2N n (ceil-log2 (inc m))) (*' 2N (ceil-log2 (inc n))) 8N)
+        W (+' (*' 2N B) 2N) Q (+' 1N (*' (dec p) m))
+        scalar (*' 256N (+' (*' Q (+' (*' (inc m) (inc n)) n m 1N))
+                            (*' p (*' (inc m) (inc m))) n p 1N))
+        chars (+' (*' 4N B) (*' 8N m) (*' 8N p) 256N)
+        bit (+' (*' 16N (*' (inc W) (inc W)) scalar)
+                (*' 32N chars (*' (inc W) (inc W))))
+        payload (+' (*' W (+' (*' 3N (inc n)) (*' 4N m) p 128N))
+                    (*' 8N chars) (*' 16N (inc W)))]
+    {:m m :n n :p p :B B :W W :Q Q :scalar scalar :chars chars :bit bit :payload payload}))
+(defn- alternative-admission-status [certificate rank-length limits]
+  (cond (> (bigint rank-length) (:B certificate)) :REFUSE_RANK_ENCODING
+        (some (fn [key] (> (get certificate key) (get limits key))) [:scalar :bit :payload])
+        :REFUSE_RESOURCE_BOUND :else :ADMIT_MODEL_ONLY))
+(defn- parser-fail! [code details]
+  (throw (ex-info (str "Alternative C streaming parser refused: " (name code))
+                  (assoc details :code code))))
+(defn- expect-literal! [^PushbackInputStream input literal]
+  (doseq [expected-byte (.getBytes literal StandardCharsets/US_ASCII)]
+    (let [actual (.read input) expected (bit-and (int expected-byte) 255)]
+      (when-not (= actual expected)
+        (parser-fail! (if (= actual -1) :truncated :grammar)
+                      {:expected expected :actual actual :literal literal}))))
+  nil)
+(defn- read-number-until! [^PushbackInputStream input delimiters max-digits]
+  (loop [digits 0 value 0]
+    (let [byte-value (.read input)]
+      (cond
+        (= byte-value -1) (parser-fail! :truncated {:field :number})
+        (<= 48 byte-value 57)
+        (do (when (and (zero? digits) (= byte-value 48))
+              (parser-fail! :leading-zero {:field :number}))
+            (when (>= digits max-digits)
+              (parser-fail! :number-width {:field :number :max-digits max-digits}))
+            (recur (inc digits) (+ (* value 10) (- byte-value 48))))
+        (contains? delimiters byte-value)
+        (if (zero? digits) (parser-fail! :empty-number {:field :number})
+            {:value value :delimiter byte-value})
+        :else (parser-fail! :grammar {:field :number :byte byte-value})))))
+(defn- parse-streamed-frame [chunks]
+  (let [chunks (vec chunks) chunk-count (count chunks)]
+    (when (or (empty? chunks)
+              (some (fn [chunk]
+                      (or (not (instance? (Class/forName "[B") chunk))
+                          (zero? (alength ^bytes chunk))
+                          (> (alength ^bytes chunk) alternative-chunk-limit-bytes))) chunks)
+      (parser-fail! :chunk-size {:chunk-count chunk-count}))
+    (let [frame-bytes (reduce + 0 (map #(alength ^bytes %) chunks))]
+      (when (> frame-bytes alternative-frame-limit-bytes)
+        (parser-fail! :frame-size {:frame-bytes frame-bytes}))
+      (let [streams (ArrayList.)]
+        (doseq [chunk chunks] (.add streams (ByteArrayInputStream. ^bytes chunk)))
+        (with-open [input (PushbackInputStream. (SequenceInputStream. (Collections/enumeration streams)) 1)]
+          (expect-literal! input "{\"profile\":[")
+          (let [profile
+                (loop [values [] total 0]
+                  (let [{value :value delimiter :delimiter} (read-number-until! input #{44 93} 3)]
+                    (when (or (< value 4) (> value 123) (>= (count values) 33) (> (+ total value) 3569))
+                      (parser-fail! :profile-scope {:value value :count (count values) :total (+ total value)}))
+                    (let [next-values (conj values (bigint value)) next-total (+ total value)]
+                      (if (= delimiter 93)
+                        (if (< (count next-values) 2)
+                          (parser-fail! :profile-scope {:count (count next-values)})
+                          next-values)
+                        (recur next-values next-total)))))]
+            (expect-literal! input ",\"p\":")
+            (let [{position :value delimiter :delimiter} (read-number-until! input #{44} 3)
+                  total-days (reduce + 0 profile)]
+              (when (or (not= delimiter 44) (< position 1) (>= position total-days) (> position 520))
+                (parser-fail! :position-scope {:position position :total-days total-days}))
+              (let [certificate (alternative-admission-certificate profile position)
+                    rank-buffer (byte-array (int (:B certificate)))]
+                (expect-literal! input "\"rank\":\"")
+                (let [rank-length
+                      (loop [index 0]
+                        (let [byte-value (.read input)]
+                          (cond
+                            (= byte-value -1) (parser-fail! :truncated {:field :rank})
+                            (= byte-value 34) (if (zero? index) (parser-fail! :empty-rank {}) index)
+                            (<= 48 byte-value 57)
+                            (do (when (and (zero? index) (= byte-value 48))
+                                  (parser-fail! :leading-zero {:field :rank}))
+                                (when (>= index (alength rank-buffer))
+                                  (parser-fail! :rank-width {:capacity (alength rank-buffer)}))
+                                (aset-byte rank-buffer index (unchecked-byte byte-value))
+                                (recur (inc index)))
+                            :else (parser-fail! :rank-encoding {:byte byte-value}))))]
+                  (expect-literal! input "}")
+                  (when-not (= -1 (.read input)) (parser-fail! :trailing-bytes {}))
+                  {:profile profile :p position :rank-bytes (Arrays/copyOf rank-buffer rank-length)
+                   :rank-capacity (:B certificate) :frame-bytes frame-bytes :chunk-count chunk-count})))))))))
+(defn- byte-chunks [^bytes bytes chunk-size]
+  (loop [offset 0 chunks []]
+    (if (>= offset (alength bytes))
+      chunks
+      (let [end (min (alength bytes) (+ offset chunk-size))]
+        (recur end (conj chunks (Arrays/copyOfRange bytes offset end)))))))
+(defn- canonical-request-frame [canonical-input position]
+  (str "{\"profile\":[" (string/join "," (map str (:profile canonical-input)))
+       "],\"p\":" position ",\"rank\":\"" (:rank canonical-input) "\"}"))
+(defn- parse-rank-after-admission [parsed certificate context]
+  (let [^bytes bytes (:rank-bytes parsed) length (alength bytes)]
+    (loop [index 0 value 0N]
+      (if (= index length) value
+          (let [digit (- (bit-and (int (aget bytes index)) 255) 48)
+                next-value (alt-add context (alt-mul context value 10N) (bigint digit))
+                bits (.bitLength (biginteger next-value))]
+            (when (> bits (:W certificate))
+              (parser-fail! :word-width {:bits bits :limit (:W certificate)}))
+            (recur (inc index) next-value))))))
+(defn- thrown-code [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo error (:code (ex-data error)))))
+(defn- streaming-parser-small-checks []
+  (let [sample (.getBytes "{\"profile\":[4,5],\"p\":3,\"rank\":\"35\"}" StandardCharsets/US_ASCII)
+        length (alength sample)]
+    (doseq [split (range 1 length)]
+      (let [parsed (parse-streamed-frame [(Arrays/copyOfRange sample 0 split)
+                                          (Arrays/copyOfRange sample split length)])]
+        (is (= [4N 5N] (:profile parsed)))
+        (is (= 3 (:p parsed)))
+        (is (= "35" (String. ^bytes (:rank-bytes parsed) StandardCharsets/US_ASCII)))))
+    (is (= :truncated (thrown-code #(parse-streamed-frame
+                                     [(Arrays/copyOfRange sample 0 (dec length))]))))
+    (is (= :leading-zero (thrown-code #(parse-streamed-frame
+                                        [(.getBytes "{\"profile\":[04,5],\"p\":3,\"rank\":\"35\"}"
+                                                    StandardCharsets/US_ASCII)]))))
+    (is (= :position-scope (thrown-code #(parse-streamed-frame
+                                          [(.getBytes "{\"profile\":[4,5],\"p\":9,\"rank\":\"35\"}"
+                                                      StandardCharsets/US_ASCII)]))))
+    {:two-chunk-splits (dec length) :truncated-refusal :passed
+     :leading-zero-refusal :passed :position-refusal :passed}))
 
 (defn- new-lru-cache []
   (LinkedHashMap. 16 (float 0.75) true))
@@ -28,10 +253,12 @@
       (.remove iterator)))
   value)
 
-(defn- new-context []
-  {:suffix-cache (new-lru-cache)
-   :tail-cache (new-lru-cache)
-   :writes (volatile! 0N)})
+(defn- new-context
+  ([] (new-context {}))
+  ([{:keys [ledger watchdog]}]
+   {:suffix-cache (new-lru-cache) :tail-cache (new-lru-cache)
+    :writes (volatile! 0N) :ledger ledger :watchdog watchdog
+    :peak-heap-bytes (volatile! (or (:baseline-heap-bytes watchdog) (used-heap-bytes)))})))
 
 (defn- hex-bytes [bytes]
   (let [digits "0123456789abcdef"]
@@ -56,14 +283,15 @@
     (.update digest bytes)
     (hex-bytes (.digest digest))))
 
-(defn- binomial [n k]
-  (loop [i 1 acc 1N]
-    (if (> i k)
-      acc
-      (recur (inc i)
-             (quot (*' acc (+ (- n k) i)) i)))))
+(defn- binomial
+  ([n k] (binomial nil n k))
+  ([context n k]
+   (loop [i 1 acc 1N]
+     (if (> i k) acc
+         (recur (inc i) (alt-div-exact context (alt-mul context acc (+ (- n k) i)) i))))))
 
 (defn- tail-factor-inplace [active-days unopened-counts first-constrained? context]
+  (watchdog-check! context)
   (let [^LinkedHashMap cache (:tail-cache context)
         key [(int active-days) (vec unopened-counts) (boolean first-constrained?)]]
     (if (.containsKey cache key)
@@ -97,7 +325,7 @@
                             (let [t (- n a)
                                   next-weight
                                   (if (and (>= k 2) (pos? t))
-                                    (quot (*' weight (+ t k -2)) t)
+                                    (alt-div-exact context (alt-mul context weight (+ t k -2)) t)
                                     weight)
                                   ways (if (>= k 2)
                                          next-weight
@@ -110,14 +338,15 @@
                                       (if (pos? a) 1N 0N)
                                       total)
                                     (if constrained? prefix total))
-                                  value (*' factor ways)
+                                  value (alt-mul context factor ways)
                                   _ (aset ^objects next-dp (inc a) value)
+                                  cell-control (control-op! context)
                                   next-prefix
                                   (if (and (some? dp) constrained?)
-                                    (-' prefix old)
+                                    (alt-sub context prefix old)
                                     prefix)]
                               (recur (dec a) next-weight next-prefix
-                                     (+' subtotal value)))))]
+                                     (alt-add context subtotal value)))))]
                     (when-not (nil? dp)
                       (aset ^objects next-dp 0 0N))
                     (let [next-writes (+' @(:writes context) (inc n))]
@@ -125,11 +354,13 @@
                         (throw (ex-info "alternative DP cell-write budget exceeded"
                                         {:code :alternative-dp-cell-write-budget-exceeded
                                          :writes next-writes})))
-                      (vreset! (:writes context) next-writes))
+                      (vreset! (:writes context) next-writes)
+                      (when (zero? (mod next-writes 256N)) (watchdog-check! context)))
                     (recur (+ n k) (next future) next-dp new-total (inc step))))))]
         (cache-put! cache key answer)))))
 
 (defn- suffix-count-inplace [state context]
+  (watchdog-check! context)
   (let [^LinkedHashMap cache (:suffix-cache context)]
     (if (.containsKey cache state)
       (.get cache state)
@@ -163,16 +394,13 @@
                         (if (>= index opened)
                           [active-days base]
                           (let [amount (nth counts index)
-                                next-active (+ active-days amount)
-                                next-base (*' base
-                                              (binomial (dec next-active)
+                                next-active (alt-add context active-days amount)
+                                next-base (alt-mul context base
+                                              (binomial context (dec next-active)
                                                         (dec amount)))]
                             (recur (inc index) next-active next-base))))]
-                  (*' base
-                      (tail-factor-inplace active-days
-                                           (subvec counts opened)
-                                           false
-                                           context))))]
+                  (alt-mul context base
+                           (tail-factor-inplace active-days (subvec counts opened) false context))))]
           (cache-put! cache state answer))))))
 
 (defn- legal-moves [state]
@@ -212,6 +440,7 @@
   ([profile ordinal target context]
    (rank-trace-inplace profile ordinal target context nil))
   ([profile ordinal target context production-budget]
+   (watchdog-check! context)
    (let [profile (vec profile)
          month-count (count profile)
          root [profile 0 0]
@@ -220,7 +449,8 @@
                     (every? #(>= % 2) profile)
                     (<= 1 target (reduce + 0 profile))
                     (integer? ordinal)
-                    (<= 1N ordinal total))
+                    (and (not (alt-gt? context 1N ordinal))
+                         (not (alt-gt? context ordinal total))))
        (throw (ex-info "invalid profile, rank, or target"
                        {:profile profile :rank ordinal :target target :total total})))
      (let [[first-month first-state] (first (legal-moves root))
@@ -237,12 +467,14 @@
               tested 0
               skipped 0
               snapshots {}]
+         (watchdog-check! context)
          (if (>= (count prefix) target)
            {:status :PREFIX_CERTIFIED
             :total total
             :prefix prefix
             :billed shared-cost
             :source-raming-cost source-cost
+            :state state
             :dp-cell-writes @(:writes context)
             :tested tested
             :skipped skipped
@@ -253,8 +485,11 @@
                  new (filterv (fn [[month _child]] (= month (inc opened))) legal)
                  active-charge
                  (when (seq active)
-                   (+' 1N (*' (- month-count opened)
-                               (reduce +' 0N counts))))]
+                   (alt-add context 1N
+                            (alt-mul context (- month-count opened)
+                                     (reduce (fn [total amount]
+                                               (alt-add context total amount))
+                                             0N counts))))]
              (if (and production-budget
                       active-charge
                       (> (+' shared-cost active-charge) production-budget))
@@ -268,7 +503,7 @@
                 :tested tested
                 :skipped skipped}
                (let [shared-after-active
-                     (if active-charge (+' shared-cost active-charge) shared-cost)
+                     (if active-charge (alt-add context shared-cost active-charge) shared-cost)
                      active-result
                      (loop [candidates (seq active)
                             rank current-rank
@@ -287,9 +522,10 @@
                                    (source-raming (first child) (second child)))
                                block (suffix-count-inplace child context)
                                next-tested (inc tested-count)]
-                           (if (> rank block)
+                           (control-op! context)
+                           (if (alt-gt? context rank block)
                              (recur (next candidates)
-                                    (-' rank block)
+                                    (alt-sub context rank block)
                                     next-source
                                     next-tested
                                     (inc skipped-count))
@@ -315,16 +551,19 @@
                             next-snapshots))
                    (let [new-charge
                          (when (seq new)
-                           (+' 1N (*' (- month-count opened 1)
-                                       (reduce +' 0N counts))))]
+                           (alt-add context 1N
+                                    (alt-mul context (- month-count opened 1)
+                                             (reduce (fn [total amount]
+                                                       (alt-add context total amount))
+                                                     0N counts))))]
                      (if (and production-budget
                               new-charge
-                              (> (+' shared-after-active new-charge) production-budget))
+                              (> (alt-add context shared-after-active new-charge) production-budget))
                        {:status :PRODUCTION_BUDGET_REFUSAL
                         :prefix prefix
                         :prefix-length (count prefix)
                         :billed-before shared-after-active
-                        :required-next (+' shared-after-active new-charge)
+                        :required-next (alt-add context shared-after-active new-charge)
                         :next-charge new-charge
                         :group :NEW
                         :tested (:tested active-result)
@@ -336,14 +575,15 @@
                                    (source-raming (first child) (second child)))
                                block (suffix-count-inplace child context)
                                next-tested (inc (:tested active-result))]
-                           (when (> (:rank active-result) block)
+                           (control-op! context)
+                           (when (alt-gt? context (:rank active-result) block)
                              (throw (ex-info "new candidate block is too small"
                                              {:rank (:rank active-result)
                                               :block block
                                               :state state})))
                            (let [next-prefix (conj prefix month)
                                  next-shared (if new-charge
-                                               (+' shared-after-active new-charge)
+                                               (alt-add context shared-after-active new-charge)
                                                shared-after-active)
                                  next-snapshots
                                  (maybe-snapshot snapshots next-prefix next-shared
@@ -527,11 +767,39 @@
   (let [small (small-family-summary)
         canonical-input (canonical/write-canonical-input!)
         python (run-python-reference (:path canonical-input))
-        context (new-context)
-        actual (rank-trace-inplace (:profile canonical-input)
-                                   (:rank canonical-input)
-                                   520
-                                   context)
+        frame (canonical-request-frame canonical-input 520)
+        frame-bytes (.getBytes frame StandardCharsets/US_ASCII)
+        chunks (byte-chunks frame-bytes alternative-chunk-limit-bytes)
+        parser-checks (streaming-parser-small-checks)
+        parsed (parse-streamed-frame chunks)
+        certificate (alternative-admission-certificate (:profile parsed) (:p parsed))
+        admission-limits {:scalar alternative-scalar-limit :bit alternative-bit-limit
+                          :payload alternative-payload-limit}
+        admission-status (alternative-admission-status
+                          certificate (alength ^bytes (:rank-bytes parsed)) admission-limits)
+        exact-cap-status (alternative-admission-status
+                          certificate (alength ^bytes (:rank-bytes parsed))
+                          {:scalar (:scalar certificate) :bit (:bit certificate) :payload (:payload certificate)})
+        admission-accepted (ensure-invariant! (= :ADMIT_MODEL_ONLY admission-status)
+                                              "Alternative C admission refused canonical p520"
+                                              {:admission-status admission-status :certificate certificate})
+        profile-accepted (ensure-invariant! (= (:profile parsed) (:profile canonical-input))
+                                            "streamed profile differs from canonical profile")
+        watchdog-start (System/nanoTime)
+        heap-before (used-heap-bytes)
+        watchdog {:start-nanos watchdog-start
+                  :deadline-nanos (+ watchdog-start alternative-wall-limit-nanos)
+                  :baseline-heap-bytes heap-before
+                  :heap-delta-limit-bytes alternative-heap-delta-limit-bytes}
+        ledger (new-arithmetic-ledger certificate)
+        context (new-context {:ledger ledger :watchdog watchdog})
+        rank (parse-rank-after-admission parsed certificate context)
+        rank-accepted (ensure-invariant! (= rank (:rank canonical-input))
+                                         "streamed decimal rank differs from canonical rank")
+        actual (rank-trace-inplace (:profile parsed) rank (:p parsed) context)
+        elapsed-ms (/ (- (System/nanoTime) watchdog-start) 1000000.0)
+        heap-peak @(:peak-heap-bytes context)
+        heap-delta (max 0 (- heap-peak heap-before))
         snapshots (:snapshots actual)
         p520 (get snapshots 520)
         gap-month-id (bigint (python-long python :GAP_P520_MONTH_ID))
@@ -571,6 +839,36 @@
                            :weaving-rank-digits (count (str (:rank canonical-input)))
                            :search-budget 128N
                            :production-shared-group-ceiling 5000000N}
+         :streaming-transport
+         {:status :passed :frame-bytes (:frame-bytes parsed) :chunk-count (:chunk-count parsed)
+          :max-chunk-bytes alternative-chunk-limit-bytes
+          :rank-digits (alength ^bytes (:rank-bytes parsed))
+          :rank-buffer-capacity (:rank-capacity parsed)
+          :rank-decoded-after-admission? true :small-parser-checks parser-checks}
+         :admission-certificate
+         {:status admission-status :m (:m certificate) :n (:n certificate) :p (:p certificate)
+          :B (:B certificate) :W (:W certificate) :Q (:Q certificate)
+          :scalar (:scalar certificate) :chars (:chars certificate)
+          :bit (:bit certificate) :payload (:payload certificate)
+          :exact-cap-status exact-cap-status
+          :live-payload-bound-type :analytical-upper-bound-not-measured}
+         :arithmetic-ledger
+         {:machine-semantics :jvm-clojure-bigint-java-math-biginteger
+          :operations (assoc @(:ops ledger) :control (bigint @(:control-count ledger)))
+          :scalar-primitives (+' @(:primitive-count ledger) (bigint @(:control-count ledger)))
+          :scalar-limit alternative-scalar-limit
+          :bit-work-upper-bound (+' @(:bit-work ledger) (*' 64N (bigint @(:control-count ledger))))
+          :bit-work-limit alternative-bit-limit :word-bits (:word-bits ledger)
+          :max-observed-word-bits @(:max-word-bits ledger)
+          :live-payload-upper-bound-bits (:live-payload-upper-bound-bits ledger)
+          :live-payload-limit-bits alternative-payload-limit
+          :dp-cell-writes (:dp-cell-writes actual)
+          :production-raming-diagnostic-included? false}
+         :jvm-watchdog
+         {:status :passed :elapsed-ms elapsed-ms :wall-limit-ms 90000
+          :heap-baseline-bytes heap-before :heap-peak-used-bytes heap-peak
+          :heap-delta-bytes heap-delta :heap-delta-limit-bytes alternative-heap-delta-limit-bytes
+          :heap-sampled-every-dp-writes 256}
          :small-exhaustive {:profiles (:profiles small)
                             :legal-words (:legal-words small)
                             :rank-position-checks (:rank-position-checks small)
@@ -606,6 +904,46 @@
                        "p520 five-field differential mismatch"
                        {:gap-date (:date-components gap-five-fields)
                         :inplace-date (:date-components inplace-five-fields)})
+    (ensure-invariant! (= :ADMIT_MODEL_ONLY exact-cap-status)
+                       "exact resource caps did not admit" {:certificate certificate})
+    (doseq [key [:scalar :bit :payload]]
+      (let [below (alternative-admission-status
+                   certificate (alength ^bytes (:rank-bytes parsed))
+                   (assoc admission-limits key (dec (get certificate key))))]
+        (ensure-invariant! (= :REFUSE_RESOURCE_BOUND below)
+                           "resource cap minus one did not refuse"
+                           {:resource key :status below :certificate certificate})))
+    (ensure-invariant! (= 42860N (:B certificate)) "rank decimal capacity drift" {:certificate certificate})
+    (ensure-invariant! (= 85722N (:W certificate)) "integer word width drift" {:certificate certificate})
+    (ensure-invariant! (= 17128N (:Q certificate)) "candidate query bound drift" {:certificate certificate})
+    (ensure-invariant! (= 548176392704N (:scalar certificate)) "scalar admission envelope drift" {:certificate certificate})
+    (ensure-invariant! (= 64451838941170797954816N (:bit certificate)) "bit admission envelope drift" {:certificate certificate})
+    (ensure-invariant! (= 987726308N (:payload certificate)) "payload admission envelope drift" {:certificate certificate})
+    (ensure-invariant! (<= (+' @(:primitive-count ledger) (bigint @(:control-count ledger)))
+                           alternative-scalar-limit)
+                       "measured scalar primitive ledger exceeded cap")
+    (ensure-invariant! (<= (+' @(:bit-work ledger) (*' 64N (bigint @(:control-count ledger))))
+                           alternative-bit-limit)
+                       "measured bit-work ledger exceeded cap")
+    (ensure-invariant! (<= @(:max-word-bits ledger) (:W certificate))
+                       "observed integer width exceeded W"
+                       {:observed @(:max-word-bits ledger) :W (:W certificate)})
+    (ensure-invariant! (<= heap-delta alternative-heap-delta-limit-bytes)
+                       "JVM heap watchdog exceeded" {:heap-delta heap-delta})
+    (ensure-invariant! (<= elapsed-ms 90000.0)
+                       "JVM wall-clock watchdog exceeded" {:elapsed-ms elapsed-ms})
+    (let [[counts opened closed] (:state actual)
+          first-seen (vec (distinct (:prefix actual)))
+          closed-last (mapv #(.lastIndexOf ^java.util.List (:prefix actual) %)
+                            (range 1 (inc closed)))]
+      (ensure-invariant! (= first-seen (vec (range 1 (inc (count first-seen)))))
+                         "p520 prefix first-occurrence order mismatch" {:first-seen first-seen})
+      (ensure-invariant! (every? true? (map < closed-last (rest closed-last)))
+                         "p520 completed-month last-occurrence order mismatch" {:closed-last closed-last})
+      (ensure-invariant! (and (<= closed opened (count counts))
+                              (every? zero? (subvec counts 0 closed))
+                              (every? pos? (subvec counts closed)))
+                         "p520 insertion state grammar mismatch" {:state (:state actual)}))
     (testing "small exhaustive profiles match the committed Python oracle"
       (is (= "PASS_MODEL_ONLY" (:RESULT python)))
       (is (= (:profiles small) (python-long python :SMALL_PROFILES)))
@@ -669,4 +1007,14 @@
              (:date-components inplace-five-fields))))
     (spit "qa/clojure-dutch/discovery24_inplace_five_field.edn"
           (str (pr-str report) "\n"))
-    (println "DISCOVERY24_CLOJURE_INPLACE_RESULT" (pr-str report))))
+    (spit "qa/clojure-dutch/discovery24_alternative_c_native.edn"
+          (str (pr-str report) "\n"))
+    (println "DISCOVERY24_CLOJURE_INPLACE_RESULT" (pr-str report))
+    (println "DISCOVERY24_ALTERNATIVE_C_NATIVE_RESULT"
+             (pr-str {:status :MODEL_ONLY_DIAGNOSTIC
+                      :source-sha (:source-sha canonical-input)
+                      :streaming (:streaming-transport report)
+                      :admission (:admission-certificate report)
+                      :ledger (:arithmetic-ledger report)
+                      :watchdog (:jvm-watchdog report)
+                      :five-fields (:five-field-differential report)}))))

@@ -45,10 +45,12 @@ jobs:
         run: clojure -Sdescribe
       - name: Native Stage 1 regression and Stage 2 DISCOVERY24 genuine end-to-end bounded numerical differential
         run: clojure -M:test
-      - name: Require exact-SHA p520 five-field differential evidence
+      - name: Require exact-SHA p520 and Alternative C evidence
         if: success()
         shell: bash
-        run: test -s qa/clojure-dutch/discovery24_inplace_five_field.edn
+        run: |
+          test -s qa/clojure-dutch/discovery24_inplace_five_field.edn
+          test -s qa/clojure-dutch/discovery24_alternative_c_native.edn
       - name: Preserve exact-SHA in-place insertion differential
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,6 +58,7 @@ jobs:
           name: clojure-dutch-inplace-five-field-differential
           path: |
             qa/clojure-dutch/discovery24_inplace_five_field.edn
+            qa/clojure-dutch/discovery24_alternative_c_native.edn
             qa/clojure-dutch/discovery24_canonical_dp_input.json
           if-no-files-found: warn
           retention-days: 90
