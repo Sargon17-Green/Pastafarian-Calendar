@@ -122,3 +122,80 @@ jobs:
     uses: ./.github/workflows/wat-stage02-b04-boundary-native.yml
     permissions:
       contents: read
+
+  wat-stage02-b02-integer-oracle:
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español' && contains(github.event.head_commit.message, 'B02')"
+    needs: wat-stage02-semantic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lock branch, HEAD and immutable selector source
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b02"
+          mkdir -p "$evidence"
+          test "$GITHUB_REF_NAME" = 'WAT+Español'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          actual_blob="$(git rev-parse HEAD:tests/normative_selector.wat)"
+          actual_source="$(sha256sum tests/normative_selector.wat | awk '{print $1}')"
+          actual_script="$(sha256sum tests/stage02_b02_integer_boundary_oracle.py | awk '{print $1}')"
+          actual_output="$(sha256sum artifacts/stage02-b02-integer-boundary-oracle-20261128.json | awk '{print $1}')"
+          test "$actual_blob" = 'e23f013ab96b498b0ac365dbb1b25273c845e790'
+          test "$actual_source" = '18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980'
+          test "$actual_script" = '09d84b24ddd248f7b58cfbc9f4a6d4ec909bf308a89ca38debb52666fc7c5baf'
+          test "$actual_output" = '68aacaea46b42ff92fc3fab76b09dc39b9dbd06cc30eae6d16d19e319c4a17b3'
+          {
+            printf 'PROJECT_ID\tPC-BRANCH-WAT-SPANISH\n'
+            printf 'BRANCH\t%s\n' "$GITHUB_REF_NAME"
+            printf 'HEAD_SHA\t%s\n' "$GITHUB_SHA"
+            printf 'BASE_WAT_GIT_BLOB\t%s\n' "$actual_blob"
+            printf 'BASE_WAT_SHA256\t%s\n' "$actual_source"
+            printf 'B02_SCRIPT_SHA256\t%s\n' "$actual_script"
+            printf 'B02_OUTPUT_SHA256\t%s\n' "$actual_output"
+            printf 'NATIVE_EXECUTED\tfalse\n'
+            printf 'CALENDAR_CALCULATIONS\t0\n'
+          } > "$evidence/manifest.tsv"
+          sha256sum tests/normative_selector.wat tests/stage02_b02_integer_boundary_oracle.py artifacts/stage02-b02-integer-boundary-oracle-20261128.json .github/workflows/canonical-names-lock.yml > "$evidence/source-sha256.txt"
+
+      - name: Run B02 oracle and compare exact committed output
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b02"
+          python3 -m py_compile tests/stage02_b02_integer_boundary_oracle.py
+          python3 tests/stage02_b02_integer_boundary_oracle.py > "$evidence/b02-oracle.json"
+          cmp "$evidence/b02-oracle.json" artifacts/stage02-b02-integer-boundary-oracle-20261128.json
+          python3 - "$evidence/b02-oracle.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding="utf-8") as stream:
+              data = json.load(stream)
+          checks = data["checks"]
+          assert checks["signed_values"] == 17
+          assert checks["ordered_operand_pairs"] == 289
+          assert checks["exact_round_trips"] == 17
+          assert checks["invalid_candidate_literals_rejected"] == 16
+          assert checks["normative_day_number_mapping_samples"] == 7
+          assert checks["positive_day_number_pairs"] == 64
+          assert checks["calendar_calculations"] == 0
+          assert checks["native_executed"] is False
+          assert checks["stage02_accepted"] is False
+          print("B02 exact-integer oracle PASS:", checks)
+          PY
+          cp artifacts/stage02-b02-integer-boundary-oracle-20261128.json "$evidence/committed-oracle.json"
+          sha256sum "$evidence/b02-oracle.json" "$evidence/committed-oracle.json" > "$evidence/output-sha256.txt"
+
+      - name: Preserve B02 oracle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-stage02-b02-oracle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wat-stage02-b02/
+          retention-days: 30
+          if-no-files-found: warn
