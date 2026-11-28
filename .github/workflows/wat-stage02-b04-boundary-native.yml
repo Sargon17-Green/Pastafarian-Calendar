@@ -1,0 +1,174 @@
+name: WAT Stage02 B04 Focused Native QA
+
+on:
+  push:
+    branches:
+      - 'WAT+Español'
+    paths:
+      - 'tests/stage02_b04_boundary_cases.wat.inc'
+      - 'tests/stage02_b04_build_module.py'
+      - 'tests/stage02_b04_boundary_oracle.py'
+      - 'tests/stage02_b04_boundary_differential.cjs'
+      - '.github/workflows/wat-stage02-b04-boundary-native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused-b04:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lock branch, HEAD and original selector source
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b04"
+          mkdir -p "$evidence"
+          test "$GITHUB_REF_NAME" = 'WAT+Español'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          actual_blob="$(git rev-parse HEAD:tests/normative_selector.wat)"
+          actual_source="$(sha256sum tests/normative_selector.wat | awk '{print $1}')"
+          test "$actual_blob" = 'e23f013ab96b498b0ac365dbb1b25273c845e790'
+          test "$actual_source" = '18e2c15a142b3a262ff38a1e084d86bdc1a139ce030b0318f279dbcdb23f8980'
+          {
+            printf 'PROJECT_ID\tPC-BRANCH-WAT-SPANISH\n'
+            printf 'BRANCH\t%s\n' "$GITHUB_REF_NAME"
+            printf 'HEAD_SHA\t%s\n' "$GITHUB_SHA"
+            printf 'BASE_WAT_GIT_BLOB\t%s\n' "$actual_blob"
+            printf 'BASE_WAT_SHA256\t%s\n' "$actual_source"
+            printf 'RUN_ID\t%s\n' "$GITHUB_RUN_ID"
+            printf 'RUN_ATTEMPT\t%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'RUNNER_OS\t%s\n' "$RUNNER_OS"
+            printf 'RUNNER_ARCH\t%s\n' "$RUNNER_ARCH"
+          } > "$evidence/manifest.tsv"
+          sha256sum tests/normative_selector.wat tests/stage02_b04_boundary_cases.wat.inc tests/stage02_b04_build_module.py tests/stage02_b04_boundary_oracle.py tests/stage02_b04_boundary_differential.cjs .github/workflows/wat-stage02-b04-boundary-native.yml > "$evidence/source-sha256.txt"
+
+      - name: Install WABT
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends wabt
+          wat2wasm --version | tee "$RUNNER_TEMP/wat-stage02-b04/wabt-version.txt"
+
+      - name: Install verified WasmKit 0.1.6
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = 'x86_64'
+          release='https://github.com/swiftwasm/WasmKit/releases/download/0.1.6/wasmkit-x86_64-swift-linux-musl.tar.gz'
+          expected='57085becd37769ed618a9057dee6d70303195e31d3b46d09dac1cfb5d477aa24'
+          archive="$RUNNER_TEMP/wasmkit-0.1.6.tar.gz"
+          curl --fail --location --retry 3 --silent --show-error "$release" -o "$archive"
+          printf '%s  %s\n' "$expected" "$archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          bin_dir="$RUNNER_TEMP/wasmkit-x86_64-swift-linux-musl"
+          test -x "$bin_dir/wasmkit"
+          printf '%s\n' "$bin_dir" >> "$GITHUB_PATH"
+          version="$("$bin_dir/wasmkit" --version)"
+          printf '%s\n' "$version" | tee "$RUNNER_TEMP/wat-stage02-b04/wasmkit-version.txt"
+          grep -Fq '0.1.6' <<< "$version"
+          {
+            printf 'WASMKIT_RELEASE\t0.1.6\n'
+            printf 'WASMKIT_ARCHIVE_SHA256\t%s\n' "$expected"
+            printf 'WASMKIT_VERSION_OUTPUT\t%s\n' "$version"
+          } >> "$RUNNER_TEMP/wat-stage02-b04/manifest.tsv"
+
+      - name: Build temporary B04-augmented WAT without editing the base
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b04"
+          python3 -m py_compile tests/stage02_b04_build_module.py
+          python3 tests/stage02_b04_build_module.py --output "$evidence/b04-augmented.wat" | tee "$evidence/build.json"
+          wat2wasm "$evidence/b04-augmented.wat" -o "$evidence/b04-augmented.wasm"
+          wasm-validate "$evidence/b04-augmented.wasm"
+          sha256sum "$evidence/b04-augmented.wat" "$evidence/b04-augmented.wasm" > "$evidence/generated-sha256.txt"
+
+      - name: Run independent BigInt literal-ring oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b04"
+          python3 -m py_compile tests/stage02_b04_boundary_oracle.py
+          python3 tests/stage02_b04_boundary_oracle.py | tee "$evidence/oracle.json"
+
+      - name: Differential-check exact Wasm memory against the independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b04"
+          node --version
+          node tests/stage02_b04_boundary_differential.cjs "$evidence/b04-augmented.wasm" "$evidence/oracle.json" | tee "$evidence/differential.json"
+
+      - name: Run five focused WasmKit Native exports with per-case resource limits
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/wat-stage02-b04"
+          module="$evidence/b04-augmented.wasm"
+          exports=(
+            test_b04_c1_short_backward_m
+            test_b04_c2_wide_backward_m_plus_one
+            test_b04_c3_wide_backward_reject_2m
+            test_b04_c4_wide_backward_reject_3m
+            test_b04_c5_c6_parametric
+          )
+          printf 'export\tstatus\texit_code\tmemory_limit_kib\ttime_limit_seconds\n' > "$evidence/native-cases.tsv"
+          passed=0
+          failed=0
+          total=0
+          for name in "${exports[@]}"; do
+            total=$((total + 1))
+            set +e
+            (
+              ulimit -v 1048576
+              timeout --signal=TERM --kill-after=2s 30s wasmkit run "$module" "$name"
+            ) > "$evidence/$name.stdout" 2> "$evidence/$name.stderr"
+            exit_code=$?
+            set -e
+            if [[ "$exit_code" -eq 0 ]] && grep -qxE '\[(I32|i32|WasmTypes[.]Value[.]i32)\(1\)\]' "$evidence/$name.stdout" && [[ ! -s "$evidence/$name.stderr" ]]; then
+              status='PASS'
+              passed=$((passed + 1))
+            elif [[ "$exit_code" -eq 124 ]]; then
+              status='TIMEOUT'
+              failed=$((failed + 1))
+            elif [[ "$exit_code" -eq 137 ]]; then
+              status='KILLED_OR_RESOURCE_LIMIT'
+              failed=$((failed + 1))
+            elif [[ "$exit_code" -ne 0 ]]; then
+              status='RUNTIME_ERROR'
+              failed=$((failed + 1))
+            else
+              status='UNEXPECTED_RESULT'
+              failed=$((failed + 1))
+            fi
+            printf '%s\t%s\t%s\t1048576\t30\n' "$name" "$status" "$exit_code" >> "$evidence/native-cases.tsv"
+            printf '%d/5 %s %s (exit=%s)\n' "$total" "$name" "$status" "$exit_code"
+          done
+          {
+            printf 'EXPECTED=5\n'
+            printf 'EXECUTED=%d\n' "$total"
+            printf 'PASSED=%d\n' "$passed"
+            printf 'FAILED=%d\n' "$failed"
+            printf 'COMPLETE=%s\n' "$([[ "$total" -eq 5 && "$failed" -eq 0 ]] && echo yes || echo no)"
+          } > "$evidence/native-summary.txt"
+          if [[ "$total" -ne 5 || "$passed" -ne 5 || "$failed" -ne 0 ]]; then
+            echo 'B04 focused WasmKit Native gate NOT ACCEPTED.'
+            exit 1
+          fi
+          echo 'B04 focused WasmKit Native 5/5 completed with exact i32(1) results.'
+
+      - name: Preserve all evidence on success or failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wat-stage02-b04-focused-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wat-stage02-b04/
+          retention-days: 30
+          if-no-files-found: warn
