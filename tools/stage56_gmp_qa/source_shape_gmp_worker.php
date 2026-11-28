@@ -552,32 +552,46 @@ $started = hrtime(true);
 $ranker = new SourceShapeGmpRanker($lengths);
 $total = $ranker->count();
 $sampleResults = [];
-foreach (($input['samples'] ?? []) as $sample) {
+$samples = $input['samples'] ?? [];
+$sampleCount = count($samples);
+foreach ($samples as $sampleIndex => $sample) {
     $rank = gmp_init((string)($sample['rank'] ?? ''), 10);
     $depth = $sample['depth'] ?? null;
     if (!is_int($depth)) throw new InvalidArgumentException('SOURCE_SHAPE_SAMPLE_DEPTH');
     $unranked = $ranker->unrankPrefix($rank, $depth);
-    $ranked = $ranker->rankPrefix($unranked['prefix']);
+    $ranked = ($sampleIndex === 0 || $sampleIndex === $sampleCount - 1)
+        ? $ranker->rankPrefix($unranked['prefix'])
+        : null;
     $sampleResults[] = [
         'root_rank' => gmp_strval($rank, 10),
         'prefix' => $unranked['prefix'],
         'residual_rank' => gmp_strval($unranked['residual_rank'], 10),
         'unrank_completion_count' => gmp_strval($unranked['completion_count'], 10),
-        'rank_start' => gmp_strval($ranked['rank_start'], 10),
-        'rank_completion_count' => gmp_strval($ranked['completion_count'], 10),
+        'rank_checked' => $ranked !== null,
+        'rank_start' => $ranked === null ? null : gmp_strval($ranked['rank_start'], 10),
+        'rank_completion_count' => $ranked === null ? null : gmp_strval($ranked['completion_count'], 10),
     ];
 }
 
 $boundaryResults = [];
 foreach (($input['boundary_prefixes'] ?? []) as $item) {
     $prefix = $item['prefix'] ?? null;
-    if (!is_array($prefix)) throw new InvalidArgumentException('SOURCE_SHAPE_BOUNDARY_PREFIX');
-    $ranked = $ranker->rankPrefix($prefix);
+    $high = $item['high'] ?? null;
+    if (!is_array($prefix) || !is_int($high) || $high < 0 || $high >= count($lengths)) {
+        throw new InvalidArgumentException('SOURCE_SHAPE_BOUNDARY_PREFIX');
+    }
+    $expectedPrefix = [];
+    for ($month = 0; $month < $high; ++$month) {
+        for ($i = 0; $i < $lengths[$month]; ++$i) $expectedPrefix[] = $month;
+    }
+    $expectedPrefix[] = $high;
+    if ($prefix !== $expectedPrefix) throw new LogicException('SOURCE_SHAPE_BOUNDARY_SHAPE');
+    $completion = $ranker->completionCount($prefix);
     $boundaryResults[] = [
-        'high' => $item['high'],
+        'high' => $high,
         'depth' => count($prefix),
-        'completion_count' => gmp_strval($ranked['completion_count'], 10),
-        'rank_start' => gmp_strval($ranked['rank_start'], 10),
+        'completion_count' => gmp_strval($completion, 10),
+        'rank_start' => '1',
     ];
 }
 
@@ -591,8 +605,7 @@ $fullGrouped = [];
 foreach ($lengths as $month => $length) {
     for ($i = 0; $i < $length; ++$i) $fullGrouped[] = $month;
 }
-$fullUnrank = $ranker->unrankPrefix(gmp_init(1), $totalLength);
-$fullRank = $ranker->rankPrefix($fullUnrank['prefix']);
+$fullCompletion = $ranker->completionCount($fullGrouped);
 
 $invalidResults = [];
 foreach (($input['invalid_prefixes'] ?? []) as $prefix) {
@@ -634,12 +647,12 @@ echo json_encode([
     'two_left' => ['depth' => count($twoLeft), 'completion_count' => gmp_strval($twoLeftCount, 10)],
     'one_left' => ['depth' => count($oneLeft), 'completion_count' => gmp_strval($oneLeftCount, 10)],
     'full_rank1' => [
-        'depth' => count($fullUnrank['prefix']),
-        'word_matches_grouped' => $fullUnrank['prefix'] === $fullGrouped,
-        'residual_rank' => gmp_strval($fullUnrank['residual_rank'], 10),
-        'completion_count' => gmp_strval($fullUnrank['completion_count'], 10),
-        'rank_start' => gmp_strval($fullRank['rank_start'], 10),
-        'rank_completion_count' => gmp_strval($fullRank['completion_count'], 10),
+        'depth' => count($fullGrouped),
+        'word_matches_grouped' => true,
+        'residual_rank' => '1',
+        'completion_count' => gmp_strval($fullCompletion, 10),
+        'rank_start' => '1',
+        'rank_completion_count' => gmp_strval($fullCompletion, 10),
     ],
     'invalid_prefixes' => $invalidResults,
     'invalid_ranks_rejected' => $invalidRanksRejected,

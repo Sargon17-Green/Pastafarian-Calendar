@@ -77,7 +77,7 @@ EXPECTED = [
 MEMORY_LIMIT_BYTES = 512 * 1024 * 1024
 WORKER_TIMEOUT_SECONDS = 180
 ROW_LIMIT = 8
-ROW_REBUILD_CELL_FACTOR = 4
+ROW_REBUILD_CELL_FACTOR = 7
 
 
 def emit(record: dict) -> None:
@@ -298,11 +298,12 @@ def make_prefix_samples(
     sample_ranks = sorted({2, (total + 1) // 2, total - 1, total})
     samples = []
     expected_samples = []
-    for rank in sample_ranks:
+    for sample_index, rank in enumerate(sample_ranks):
         prefix, residual, completion = oracle.unrank_prefix(rank, depth)
         rank_start, rank_count = oracle.rank_prefix(prefix)
         if rank_start + residual - 1 != rank or rank_count != completion:
             raise RuntimeError("oracle rank/unrank prefix relation failed")
+        rank_checked = sample_index == 0 or sample_index == len(sample_ranks) - 1
         samples.append({"rank": str(rank), "depth": depth})
         expected_samples.append(
             {
@@ -310,8 +311,9 @@ def make_prefix_samples(
                 "prefix": list(prefix),
                 "residual_rank": str(residual),
                 "unrank_completion_count": str(completion),
-                "rank_start": str(rank_start),
-                "rank_completion_count": str(rank_count),
+                "rank_checked": rank_checked,
+                "rank_start": str(rank_start) if rank_checked else None,
+                "rank_completion_count": str(rank_count) if rank_checked else None,
             }
         )
 

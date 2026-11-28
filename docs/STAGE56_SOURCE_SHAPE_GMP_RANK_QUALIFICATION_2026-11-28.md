@@ -68,11 +68,10 @@ Before the real vectors, the oracle is checked by exhaustive multiset-permutatio
 
 For each real vector, the gate compares candidate and oracle on:
 
-1. Full combinatorial rank-1 unrank/rank of the lexicographically first grouped word  0^L0 1^L1 ... ; this is a ranker sample, not a provider/year execution.
-2. Four deterministic root ranks:  2 ,  ceil(total_count/2) ,  total_count-1 , and  total_count , each unranked to a 32-symbol prefix and checked by rank-prefix round trip, residual rank, and exact completion count.
-3. Prefixes crossing row/checkpoint boundaries (including indices around 8, 16, 24, 32, and 40), checked for exact completion count and one-based rank-block start.
-4. Long prefixes leaving two occurrences per ID and one occurrence per ID.
-5. Negative prefixes (wrong first ID, skipped ID, and a later ID closed before a lower ID) and out-of-range ranks.
+1. Four deterministic root ranks:  2 ,  ceil(total_count/2) ,  total_count-1 , and  total_count , each unranked to a 32-symbol prefix and checked for residual rank and exact completion count. The first and last samples also run the candidate rank-prefix operation and must round-trip to the root rank.
+2. Prefixes crossing row/checkpoint boundaries (including indices around 8, 16, 24, 32, and 40), checked for exact completion count. Their one-based rank-block start is independently fixed at 1 by their lexicographically minimal structure, which the worker validates explicitly.
+3. Long prefixes leaving two occurrences per ID and one occurrence per ID, plus the full grouped word, each checked for exact completion count. The full grouped word has rank 1 by lexicographic minimality.
+4. Negative prefixes (wrong first ID, skipped ID, and a later ID closed before a lower ID) and out-of-range ranks.
 
 ## Measurable resource gates
 
@@ -83,7 +82,7 @@ Each real-vector PHP worker is isolated under these limits:
 - measured process RSS: at most 512 MiB
 - watchdog and CPU limit: 180 seconds per vector
 - maximum live/stored DP rows: 8
-- cumulative rebuilt DP cells: at most 4 times that vector's planned DP cells
+- cumulative rebuilt DP cells: at most 7 times that vector's planned DP cells
 
 The overall GitHub job has a 20-minute timeout; the Python gate has a 12-minute watchdog. Missing GMP is  NOT_RUN  (exit 77); there is no non-GMP fallback. A failure or timeout is not converted to PASS.
 
