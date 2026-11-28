@@ -1,0 +1,9 @@
+# Stage44 fail-closed phase routing — 2026-11-28
+
+Base 23d87941ec0c025dfbb064d4cb5cd87fc1b7629b, exact run 46127983796: 18/18 jobs; 20 nonexpired exact-SHA artifacts. Jobs 140926722862, 140926722970, 140926722805: numerical preflight 5027/0, classifier 240/0 shape only, direct boundary 8/0, Stage43 2215/0, finalizer twice exit0/stderr0 unchanged EF31C98A432EBF68275014FDBAC26EE3927E5C5A5B1E0829A20779EA968D18AC. Artifact IDs 15256144167, 15257100110, 15256856940, 15256721266: upload log and API digest match; ZIP bytes not independently rehashed.
+
+Single byte snapshot -> strict predecessor gateway -> exact frozen LF/uniform CRLF or one of three validated activated shapes. Route labels are candidate labels only; no provenance acceptance. The existing verify job emits a dedicated phase output on branch pushes. Reusable frozen-only job requires RESEARCH_PREFLIGHT and successful verify. All candidate routes explicitly fail verify until actual phase-specific evidence gates are wired. Existing reusable job's independent frozen guard remains unchanged. No additional CI job or metadata transition.
+
+All 12 canonical raw lifecycle reads had an adjacent validated predecessor gateway; replace raw lines with key/value lines from that same validated predecessor map, preserving historical tests and avoiding ambiguous duplicate reads. Stage01 uses strict parsed CURRENT_STAGE with positive canonical Int32 representation; threshold 23 remains unchanged. Separate synthetic route (12) and pointer (9) counts do not alter prior 240/8/5027 budgets. Tests are planned, not yet executed on this change. Existing evidence-binding tests remain independent; synthetic records do not authenticate run/job/artifact identity.
+
+NEXT: verify exact-SHA automatic CI including route/pointer counters and verify job phase output; design/implement phase-specific Native/seal entry points and evidence validation before any activation. No PENDING_NATIVE, main, merge or release.

@@ -179,3 +179,42 @@ if($script:checks44 -ne 240){throw ('Stage44 classifier count mismatch: '+$scrip
 Write-Host ('STAGE44_CLASSIFIER_ASSERTIONS_PASSED='+$script:checks44)
 Write-Host 'STAGE44_CLASSIFIER_ASSERTIONS_FAILED=0'
 Write-Host 'STAGE44_CLASSIFIER_RESULT=PASS_SHAPE_ONLY'
+
+# Separate counters: preserve historical classifier and numerical assertion budgets.
+$script:route44Checks=0
+function Check44Route([byte[]]$bytes,[string]$expected) {
+    $actual=''
+    try { $actual=Get-Stage44ExecutionRoute -Bytes $bytes -RepositoryRoot $root }
+    catch { $actual='REJECT' }
+    if ($actual -cne $expected) { throw ('Stage44 route mismatch: '+$actual+' expected '+$expected) }
+    $script:route44Checks++
+}
+Check44Route $frozen44 'RESEARCH_PREFLIGHT'
+Check44Route ($strict44.GetBytes($baseText44.Replace($lf44,$crlf44))) 'RESEARCH_PREFLIGHT'
+Check44Route ([byte[]](@(0xEF,0xBB,0xBF)+$frozen44)) 'REJECT'
+Check44Route ($strict44.GetBytes($baseText44+$lf44)) 'REJECT'
+Check44Route ($strict44.GetBytes($baseText44+$lf44+'CURRENT_STAGE=43')) 'REJECT'
+Check44Route ([byte[]](0xC0,0xAF)) 'REJECT'
+foreach($n in 1..3) {
+    $m=Fixture44 $n
+    Check44Route (Encode44 $m) @('IMPLEMENTATION_CANDIDATE','NATIVE_EVIDENCE_CANDIDATE','SEAL_RECHECK_CANDIDATE')[$n-1]
+    $m['STAGE44_PLANNED_ASSERTIONS']='5026'
+    Check44Route (Encode44 $m) 'REJECT'
+}
+if ($script:route44Checks -ne 12) { throw 'Stage44 route count mismatch' }
+Write-Host 'STAGE44_ROUTE_ASSERTIONS_PASSED=12'
+Write-Host 'STAGE44_ROUTE_ASSERTIONS_FAILED=0'
+$script:pointerChecks=0
+function CheckStagePointer([string]$source,[int]$expected) {
+    $actual=-1
+    try { $actual=Get-StrictCurrentStage -Bytes ($strict44.GetBytes($source)) } catch {}
+    if ($actual -ne $expected) { throw ('Stage pointer mismatch: '+$actual+' expected '+$expected) }
+    $script:pointerChecks++
+}
+foreach($n in @(22,23,43,44)) { CheckStagePointer ('CURRENT_STAGE='+$n) $n }
+foreach($bad in @('OTHER=23','CURRENT_STAGE=abc','CURRENT_STAGE=023','CURRENT_STAGE=2147483648',('CURRENT_STAGE=22'+$lf44+'CURRENT_STAGE=44'))) {
+    CheckStagePointer $bad -1
+}
+if ($script:pointerChecks -ne 9) { throw 'Stage pointer count mismatch' }
+Write-Host 'STRICT_POINTER_ASSERTIONS_PASSED=9'
+Write-Host 'STRICT_POINTER_ASSERTIONS_FAILED=0'

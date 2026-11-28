@@ -91,10 +91,9 @@ Assert-StageEqual ([System.Numerics.BigInteger]9) $ctx1.semanticCommitted['x'] '
 $monsterText = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'src/MonsterSkeleton.ps1')
 Assert-StageTrue -Condition ($monsterText -notmatch 'Invoke-NormSauce|Get-NormCalendarDate') -Name 'Hindi tumatawag sa oracle ang production skeleton'
 $futureNames = @('oldRemainder','oldDayTag','oldDistance','biasedLegacyPick','LEGACY_YEAR_MAX','VirtualLegacyList','oldContiguousMonthDayGuess')
-$stageMetadata = Get-Content -Raw -Encoding UTF8 (Join-Path $root 'DEVELOPMENT_STAGE.md')
-$stageMatch = [regex]::Match($stageMetadata, '(?m)^CURRENT_STAGE=([0-9]+)\s*$')
-if (-not $stageMatch.Success) { throw 'Missing CURRENT_STAGE metadata' }
-if ([int]$stageMatch.Groups[1].Value -lt 23) { $futureNames += 'orderAt46Latch' }
+. (Join-Path $root 'src/StrictUtf8StageMetadata.ps1')
+$stagePointer = Get-StrictCurrentStage -Bytes ([IO.File]::ReadAllBytes((Join-Path $root 'DEVELOPMENT_STAGE.md')))
+if ($stagePointer -lt 23) { $futureNames += 'orderAt46Latch' }
 foreach ($name in $futureNames) {
     Assert-StageTrue -Condition ($monsterText -notmatch [regex]::Escape($name)) -Name "Walang future patch code: $name"
 }

@@ -10,8 +10,29 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      stage44_phase: ${{ steps.stage44-route.outputs.phase }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Classify exact Stage44 execution phase
+        id: stage44-route
+        if: github.event_name == 'push' && github.ref == 'refs/heads/PowerShell+Tagalog'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sha = ((& git rev-parse HEAD) -join '').Trim()
+          if ($LASTEXITCODE -ne 0 -or $sha -cne $env:GITHUB_SHA) { throw 'Stage44 route checkout SHA mismatch' }
+          . ./src/StageMetadataState.ps1
+          $bytes = [IO.File]::ReadAllBytes((Join-Path (Get-Location).Path 'DEVELOPMENT_STAGE.md'))
+          $phase = Get-Stage44ExecutionRoute -Bytes $bytes -RepositoryRoot (Get-Location).Path
+          Write-Host ('STAGE44_EXECUTION_PHASE=' + $phase)
+          ('phase=' + $phase) | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      - name: Refuse unwired Stage44 candidate execution
+        if: github.event_name == 'push' && github.ref == 'refs/heads/PowerShell+Tagalog' && steps.stage44-route.outputs.phase != 'RESEARCH_PREFLIGHT'
+        shell: pwsh
+        run: throw 'Stage44 candidate execution requires phase-specific evidence gates; activation prohibited'
       - name: Verify canonical names lock
         shell: bash
         run: |
@@ -41,9 +62,9 @@ jobs:
             throw ('Windows PowerShell 5.1 required: ' + $PSVersionTable.PSVersion.ToString())
           }
           Write-Host ('NATIVE_RUNTIME=' + $PSVersionTable.PSVersion.ToString())
-          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -373,9 +394,9 @@ jobs:
           try {
             & .\tests\Stage32.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage32 canonical research failed' }
-            $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
             . .\src\StageMetadataState.ps1
             $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
             $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
@@ -443,9 +464,9 @@ jobs:
           try {
             & .\tests\Stage33.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage33 native research failed' }
-            $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
             . .\src\StageMetadataState.ps1
             $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
             $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage35Allowed = (($stageLines -contains 'CURRENT_STAGE=35') -and
                               ($stageLines -contains 'LAST_COMPLETED_STAGE=34') -and
@@ -512,9 +533,9 @@ jobs:
             & .\tests\Stage34.Tests.ps1
             if ($LASTEXITCODE -ne 0) { throw 'Stage34 third-axis research failed' }
             Write-Host ('STAGE34_NATIVE_SHA=' + $sha)
-            $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
             . .\src\StageMetadataState.ps1
             $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+            $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
             $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -562,9 +583,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage35 checkout SHA mismatch' }
-          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
             $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
             $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -623,9 +644,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage36 exact checkout SHA mismatch' }
-          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($stageLines -contains 'CURRENT_STAGE=39') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=38') -and ($stageLines -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -688,9 +709,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage37 Native exact checkout SHA mismatch' }
-          $stageLines = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $stageLines = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage37Pending = (($stageLines -contains 'CURRENT_STAGE=37') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=36') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage38Pending = (($stageLines -contains 'CURRENT_STAGE=38') -and ($stageLines -contains 'LAST_COMPLETED_STAGE=37') -and ($stageLines -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($stageLines -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($stageLines -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -752,9 +773,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage38 exact checkout SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $md = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage38Pending = (($md -contains 'CURRENT_STAGE=38') -and ($md -contains 'LAST_COMPLETED_STAGE=37') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Pending = (($md -contains 'CURRENT_STAGE=39') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -806,9 +827,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage39 exact checkout SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $md = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage39Pending = (($md -contains 'CURRENT_STAGE=39') -and ($md -contains 'LAST_COMPLETED_STAGE=38') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage39Sealed = ((($md -contains 'CURRENT_STAGE=39') -or ($md -contains 'CURRENT_STAGE=40') -or ($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -864,9 +885,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage40 preflight exact SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $md = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage40Pending = (($md -contains 'CURRENT_STAGE=40') -and (($md -contains 'LAST_COMPLETED_STAGE=39') -or (($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED')) -or ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41Pending = (($md -contains 'CURRENT_STAGE=41') -and ($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -922,9 +943,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage41 Native exact checkout SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $md = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage41Pending = (($md -contains 'CURRENT_STAGE=41') -and ($md -contains 'LAST_COMPLETED_STAGE=40') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=PENDING_NATIVE') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41Sealed = ((($md -contains 'CURRENT_STAGE=41') -or ($md -contains 'CURRENT_STAGE=42')) -and (($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE41_PREFLIGHT_CI_RUN=44373929661') -and ($md -contains 'STAGE41_PREFLIGHT_JOBS=15_OF_15_SUCCESS') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_PASSED=481') -and ($md -contains 'STAGE41_PREFLIGHT_ASSERTIONS_FAILED=0') -and ($md -contains 'STAGE40_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE39_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE38_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE37_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE36_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED') -and ($md -contains 'STAGE35_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
@@ -981,9 +1002,9 @@ jobs:
           if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Windows PowerShell 5.1 required' }
           $sha = ((& git rev-parse HEAD) -join '').Trim()
           if ($sha -cne $env:GITHUB_SHA) { throw 'Stage42 exact checkout SHA mismatch' }
-          $md = @(Get-Content -Encoding UTF8 .\DEVELOPMENT_STAGE.md)
           . .\src\StageMetadataState.ps1
           $stage43State = Assert-Stage43MetadataCompatibility -RepositoryRoot (Get-Location).Path
+          $md = @(foreach ($key in $stage43State.Values.Keys) { $key + '=' + $stage43State.Values[$key] })
           $stage43Allowed = @('PENDING_SHAPE_ONLY','IMPLEMENTING_SHA_SHAPE_ONLY','SEALED_SHAPE_ONLY') -ccontains $stage43State.Profile
           $stage41PriorSealed = ((($md -contains 'LAST_COMPLETED_STAGE=41') -or (($md -contains 'LAST_COMPLETED_STAGE=42') -and ($md -contains 'STAGE42_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))) -and ($md -contains 'STAGE41_SEAL_COMMIT_NATIVE_RECHECK=PASS') -and ($md -contains 'STAGE41_SEAL_CI_RUN=44633607543') -and ($md -contains 'STAGE41_RUNTIME_VERIFICATION=EVIDENCE_ONLY_CONFIRMED'))
           $stage41PriorSealed = $stage41PriorSealed -or $stage43Allowed
@@ -1153,7 +1174,8 @@ jobs:
 
   stage44-moving-gate-preflight:
     name: Stage44 bounded moving-gate preflight (not activation)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/PowerShell+Tagalog'
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PowerShell+Tagalog' && needs.verify.outputs.stage44_phase == 'RESEARCH_PREFLIGHT'
     uses: ./.github/workflows/powershell-tagalog-stage44-preflight.yml
     permissions:
       contents: read

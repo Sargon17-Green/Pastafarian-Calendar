@@ -209,3 +209,16 @@ function Read-StrictStageMetadataFile {
 
     return ConvertFrom-StrictStageMetadataBytes -Bytes $bytes -RequiredKeys $RequiredKeys
 }
+
+# Stage01 needs a lexical pointer, not a full late-stage lifecycle classifier.
+function Get-StrictCurrentStage {
+    param([Parameter(Mandatory=$true)][AllowEmptyCollection()][byte[]]$Bytes)
+    $parsed = ConvertFrom-StrictStageMetadataBytes -Bytes $Bytes -RequiredKeys @('CURRENT_STAGE')
+    if (-not $parsed.Success) { throw ('Invalid CURRENT_STAGE metadata: ' + $parsed.ReasonCode) }
+    $value = $parsed.Values['CURRENT_STAGE']
+    $number = 0
+    if ($value -cnotmatch '\A[1-9][0-9]*\z' -or -not [int]::TryParse($value,[ref]$number)) {
+        throw 'Invalid CURRENT_STAGE numeric pointer'
+    }
+    return $number
+}

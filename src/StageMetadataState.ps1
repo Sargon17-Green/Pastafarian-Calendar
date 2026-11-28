@@ -482,3 +482,23 @@ function Assert-Stage44PreflightMetadata {
         throw 'Stage44 preflight requires frozen Stage43 metadata bytes (LF or uniform CRLF checkout)'
     }
 }
+
+# Candidate routes are not evidence acceptance. No route is emitted for invalid input.
+function Get-Stage44ExecutionRoute {
+    param([Parameter(Mandatory=$true)][AllowEmptyCollection()][byte[]]$Bytes,
+          [Parameter(Mandatory=$true)][string]$RepositoryRoot)
+    $state = Get-Stage43PredecessorCompatibilityState -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+    if (-not $state.Success -or $state.Profile -cne 'SEALED_SHAPE_ONLY') {
+        throw 'Stage44 routing requires a valid sealed predecessor'
+    }
+    if ($null -eq $state.PSObject.Properties['Stage44Profile']) {
+        Assert-Stage44PreflightMetadata -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+        return 'RESEARCH_PREFLIGHT'
+    }
+    switch -CaseSensitive ($state.Stage44Profile) {
+        'STAGE44_PENDING_SHAPE_ONLY' { return 'IMPLEMENTATION_CANDIDATE' }
+        'STAGE44_IMPLEMENTING_SHAPE_ONLY' { return 'NATIVE_EVIDENCE_CANDIDATE' }
+        'STAGE44_SEALED_SHAPE_ONLY' { return 'SEAL_RECHECK_CANDIDATE' }
+        default { throw 'Unknown Stage44 execution profile' }
+    }
+}
