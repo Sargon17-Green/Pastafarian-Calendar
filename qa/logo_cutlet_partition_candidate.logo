@@ -205,7 +205,7 @@ to qa.cp.expand.required :compressed :required
   localmake "out []
   localmake "inserted "false
   while [not emptyp :rest] [
-    if and (not :inserted) (first :rest > :required) [
+    if and (not :inserted) ((first :rest) > :required) [
       make "out lput :required :out
       make "inserted "true
     ]

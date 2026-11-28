@@ -47,7 +47,7 @@ jobs:
           test "$actual_files" = "$expected_files"
           test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
           test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
-          test "$(git hash-object qa/logo_cutlet_partition_candidate.logo)" = 8345a4fa2dead77ad36154ace18134678134ab8f
+          test "$(git hash-object qa/logo_cutlet_partition_candidate.logo)" = a5397270fdba58b364b5ff37bd07168662f17e4e
           test "$(git hash-object qa/logo_cutlet_partition_oracle.py)" = 6c3cb9beb7428711ac0b4f32956ea8930dd34866
           test "$(git hash-object QA_STAGE2_CUTLET_PARTITION_CONTRACT_20261128.md)" = 6661b04ccaa1f5517d5d35e4e97c52031f23f81a
       - name: Run independent Python-int oracle and generate fixed Native shard
