@@ -14,6 +14,7 @@ on:
       - 'scripts/verify_general_h_lex_chain.py'
       - 'tests/pcal_stage1_oracle_pkg.sv'
       - 'tests/tb_weave_general_rank.sv'
+      - 'tests/tb_native_general_year.sv'
       - 'tests/tb_weave_native_general_h.sv'
       - 'tests/tb_weave_native_general_lex.sv'
   workflow_dispatch:
@@ -60,10 +61,28 @@ jobs:
           check_blob f488271db07743b6a2d1f55259aa9c9925126eaa scripts/verify_general_h_lex_chain.py
           check_blob 89b59176033b8b9808f6a5f7d8cc4bbe998fdd1d tests/pcal_stage1_oracle_pkg.sv
           check_blob 9befa35ae6b4c02ff371083057159eb138533746 tests/tb_weave_general_rank.sv
+          check_blob c30f08a08dc5ceb680bcac2d64d31cf82b8753ce tests/tb_native_general_year.sv
           check_blob dea946e1f1e1bca0ffde60acf6f042f88750368b tests/tb_weave_native_general_h.sv
           check_blob 265c61c933bdefe47da93150be00b4271e8fc97e tests/tb_weave_native_general_lex.sv
           mkdir -p build/generalized-native-qa
           git rev-parse HEAD > build/generalized-native-qa/checked-head.txt
+      - name: Native generalized year selection (18 pinned cases)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          out=build/generalized-native-qa
+          /usr/bin/time -v -o "$out/year-compile.resources" \
+            timeout -k 5s 60s iverilog -g2012 -s tb_native_general_year \
+            -o "$out/year.vvp" tests/pcal_stage1_oracle_pkg.sv tests/tb_native_general_year.sv \
+            2>&1 | tee "$out/year-compile.log"
+          /usr/bin/time -v -o "$out/year-runtime.resources" \
+            timeout -k 5s 240s vvp "$out/year.vvp" \
+            2>&1 | tee "$out/year-runtime.log"
+          test "$(grep -c '^NATIVE_YEAR_CASE_PASS ' "$out/year-runtime.log")" -eq 18
+          test "$(grep -c '^NATIVE_GENERAL_YEAR_PASS cases=18 QA_ONLY$' "$out/year-runtime.log")" -eq 1
+          rm -f "$out/year.vvp"
       - name: Bounded Native multivector join and five tuple mutations
         shell: bash
         run: |
