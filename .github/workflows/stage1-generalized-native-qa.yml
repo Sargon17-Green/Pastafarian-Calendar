@@ -1,7 +1,7 @@
 name: Stage1 generalized Native QA (test-only; Foundation H45 skipped)
 on:
   push:
-    branches: ['SystemVerilog+Kalaallisut']
+    branches: ['qa/systemverilog-generalized-native-c32472ae']
     paths:
       - '.github/workflows/stage1-systemverilog.yml'
       - '.github/workflows/stage1-generalized-native-qa.yml'
@@ -45,7 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$GITHUB_REF" = 'refs/heads/SystemVerilog+Kalaallisut'
+          test "$GITHUB_REF" = 'refs/heads/qa/systemverilog-generalized-native-c32472ae'
           check_blob() {
             local expected="$1" path="$2" actual
             actual="$(git hash-object "$path")"
