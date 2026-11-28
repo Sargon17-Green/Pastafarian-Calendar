@@ -288,8 +288,13 @@ try {
     [void](Invoke44TestGit @('config','user.email','stage44-qa@example.invalid'))
     [void](Invoke44TestGit @('config','core.autocrlf','false'))
     [void](Invoke44TestGit @('config','commit.gpgsign','false'))
-    # Keep the frozen blob in this independent object database.
+    # The Stage43 compatibility gate also resolves the pinned Stage42 blob.
+    # Seed both exact frozen objects; do not bypass the predecessor validator.
+    [byte[]]$frozen42ForRuntime44=Get-FrozenStage42BlobBytes -RepositoryRoot $root
+    [void](Commit44TestMetadata $frozen42ForRuntime44 'frozen Stage42 prerequisite')
+    if ((Invoke44TestGit @('rev-parse','HEAD:DEVELOPMENT_STAGE.md')).Trim() -cne 'a3f53b67e4445bdc835179cd484fe27b3e2648f7') { throw 'Fixture Stage42 blob mismatch' }
     $ancestor1=Commit44TestMetadata $frozen44 'frozen baseline'
+    if ((Invoke44TestGit @('rev-parse','HEAD:DEVELOPMENT_STAGE.md')).Trim() -cne '91f8dd0237903bc4db9131ba506bc398c92c3258') { throw 'Fixture Stage43 blob mismatch' }
     $ancestor2=Commit44TestMetadata ([byte[]]($frozen44+10)) 'synthetic historical native'
     $ancestor3=Commit44TestMetadata ([byte[]]($frozen44+10+10)) 'synthetic historical seal'
     $ancestors=@($ancestor1,$ancestor2,$ancestor3)
