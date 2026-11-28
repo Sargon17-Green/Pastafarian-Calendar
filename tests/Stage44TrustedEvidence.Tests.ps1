@@ -61,46 +61,46 @@ Expect-Stage44EvidenceThrow { Get-Stage44UniqueLineValue -Text ('B=two' + $lf) -
 
 $baseJobs = @()
 foreach ($name in $script:Stage44TrustedEvidenceRequiredJobs) {
-    $baseJobs += [pscustomobject]@{ name=$name; status='completed'; conclusion='success'; id=1; steps=@() }
+    $baseJobs += [pscustomobject]@{ name=$name; status='completed'; conclusion='success'; id=1; run_id=456; steps=@() }
 }
 $currentJobs = @($baseJobs + [pscustomobject]@{
-    name=$script:Stage44TrustedEvidenceJobName; status='in_progress'; conclusion=$null; id=99; steps=@()
+    name=$script:Stage44TrustedEvidenceJobName; status='in_progress'; conclusion=$null; id=99; run_id=456; steps=@()
 })
 $completedJobs = @($baseJobs + [pscustomobject]@{
-    name=$script:Stage44TrustedEvidenceJobName; status='completed'; conclusion='success'; id=99; steps=@()
+    name=$script:Stage44TrustedEvidenceJobName; status='completed'; conclusion='success'; id=99; run_id=456; steps=@()
 })
-$jobSet = Assert-Stage44EvidenceJobSet -Jobs $currentJobs -CurrentRun
+$jobSet = Assert-Stage44EvidenceJobSet -Jobs $currentJobs -RunId 456 -CurrentRun
 Confirm-Stage44EvidenceTest ($jobSet.Count -eq 19) 'current exact 18+adjudicator job set'
-$completedSet = Assert-Stage44EvidenceJobSet -Jobs $completedJobs
+$completedSet = Assert-Stage44EvidenceJobSet -Jobs $completedJobs -RunId 456
 Confirm-Stage44EvidenceTest ($completedSet.Count -eq 19) 'completed exact 18+adjudicator job set'
 
 $missingJob = @($currentJobs | Where-Object { $_.name -cne $script:Stage44TrustedEvidenceRequiredJobs[0] })
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $missingJob -CurrentRun } 'missing canonical job'
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $missingJob -RunId 456 -CurrentRun } 'missing canonical job'
 $failedJob = @($currentJobs)
-$failedJob[0] = [pscustomobject]@{ name=$failedJob[0].name; status='completed'; conclusion='failure'; id=1; steps=@() }
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $failedJob -CurrentRun } 'failed canonical job'
+$failedJob[0] = [pscustomobject]@{ name=$failedJob[0].name; status='completed'; conclusion='failure'; id=1; run_id=456; steps=@() }
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $failedJob -RunId 456 -CurrentRun } 'failed canonical job'
 $duplicateJob = @($currentJobs + $currentJobs[0])
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $duplicateJob -CurrentRun } 'duplicate canonical job'
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $duplicateJob -RunId 456 -CurrentRun } 'duplicate canonical job'
 $unknownJob = @($currentJobs)
-$unknownJob[-1] = [pscustomobject]@{ name='unrecognized job'; status='in_progress'; conclusion=$null; id=99; steps=@() }
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $unknownJob -CurrentRun } 'unknown extra job'
+$unknownJob[-1] = [pscustomobject]@{ name='unrecognized job'; status='in_progress'; conclusion=$null; id=99; run_id=456; steps=@() }
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $unknownJob -RunId 456 -CurrentRun } 'unknown extra job'
 $wrongCurrent = @($completedJobs)
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $wrongCurrent -CurrentRun } 'current adjudicator must be in progress'
-Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $currentJobs } 'completed adjudicator must be successful'
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $wrongCurrent -RunId 456 -CurrentRun } 'current adjudicator must be in progress'
+Expect-Stage44EvidenceThrow { Assert-Stage44EvidenceJobSet -Jobs $currentJobs -RunId 456 } 'completed adjudicator must be successful'
 
 $validArtifact = [pscustomobject]@{
     id=123
     expired=$false
     digest=('sha256:' + ('a' * 64))
-    workflow_run=[pscustomobject]@{ id=456; head_sha=('b' * 40); head_branch='PowerShell+Tagalog' }
+    workflow_run=[pscustomobject]@{ id=456; repository_id=100; head_repository_id=100; head_sha=('b' * 40); head_branch='PowerShell+Tagalog' }
 }
 Assert-Stage44ArtifactBinding -Artifact $validArtifact -RunId 456 -ExpectedSha ('b' * 40) -ExpectedBranch 'PowerShell+Tagalog'
 Confirm-Stage44EvidenceTest $true 'artifact run/SHA/branch/digest binding'
-$wrongRun = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=457; head_sha=('b' * 40); head_branch='PowerShell+Tagalog' } }
+$wrongRun = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=457; repository_id=100; head_repository_id=100; head_sha=('b' * 40); head_branch='PowerShell+Tagalog' } }
 Expect-Stage44EvidenceThrow { Assert-Stage44ArtifactBinding -Artifact $wrongRun -RunId 456 -ExpectedSha ('b' * 40) -ExpectedBranch 'PowerShell+Tagalog' } 'artifact wrong run'
-$wrongSha = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=456; head_sha=('c' * 40); head_branch='PowerShell+Tagalog' } }
+$wrongSha = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=456; repository_id=100; head_repository_id=100; head_sha=('c' * 40); head_branch='PowerShell+Tagalog' } }
 Expect-Stage44EvidenceThrow { Assert-Stage44ArtifactBinding -Artifact $wrongSha -RunId 456 -ExpectedSha ('b' * 40) -ExpectedBranch 'PowerShell+Tagalog' } 'artifact wrong SHA'
-$wrongBranch = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=456; head_sha=('b' * 40); head_branch='main' } }
+$wrongBranch = [pscustomobject]@{ id=123; expired=$false; digest=$validArtifact.digest; workflow_run=[pscustomobject]@{ id=456; repository_id=100; head_repository_id=100; head_sha=('b' * 40); head_branch='main' } }
 Expect-Stage44EvidenceThrow { Assert-Stage44ArtifactBinding -Artifact $wrongBranch -RunId 456 -ExpectedSha ('b' * 40) -ExpectedBranch 'PowerShell+Tagalog' } 'artifact wrong branch'
 $expiredArtifact = [pscustomobject]@{ id=123; expired=$true; digest=$validArtifact.digest; workflow_run=$validArtifact.workflow_run }
 Expect-Stage44EvidenceThrow { Assert-Stage44ArtifactBinding -Artifact $expiredArtifact -RunId 456 -ExpectedSha ('b' * 40) -ExpectedBranch 'PowerShell+Tagalog' } 'expired artifact'
