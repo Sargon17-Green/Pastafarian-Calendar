@@ -63,6 +63,15 @@ jobs:
               grep -Fxq 'LAST_COMPLETED_STAGE=11' DEVELOPMENT_STAGE.md
               grep -Fxq 'EXPECTED_REPOSITORY_STATE=PATCH05_STAGE11_ACCEPTED_HOLD_NO_STAGE12' DEVELOPMENT_STAGE.md
             fi
+          elif grep -Fxq 'CURRENT_STAGE=12' DEVELOPMENT_STAGE.md; then
+            grep -Fxq 'CURRENT_KIND=DISCOVERY06' DEVELOPMENT_STAGE.md
+            grep -Fxq 'CURRENT_PATCH=PATCH05' DEVELOPMENT_STAGE.md
+            if grep -Fxq 'LAST_COMPLETED_STAGE=11' DEVELOPMENT_STAGE.md; then
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY06_STAGE12_PENDING_NATIVE' DEVELOPMENT_STAGE.md
+            else
+              grep -Fxq 'LAST_COMPLETED_STAGE=12' DEVELOPMENT_STAGE.md
+              grep -Fxq 'EXPECTED_REPOSITORY_STATE=DISCOVERY06_STAGE12_ACCEPTED_HOLD_NO_STAGE13' DEVELOPMENT_STAGE.md
+            fi
           else
             exit 1
           fi
