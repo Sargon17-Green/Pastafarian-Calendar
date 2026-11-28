@@ -59,7 +59,7 @@
                         {:code :alternative-c-word-width :a-bits a-bits :b-bits b-bits
                          :limit (:word-bits ledger)})))
       (vswap! (:ops ledger) update operation (fnil +' 0N) 1N)
-      (when result-bits (vswap! (:max-word-bits ledger) max a-bits b-bits result-bits))
+      (vswap! (:max-word-bits ledger) max a-bits b-bits (or result-bits 1N))
       (when (> total-primitives (:scalar-limit ledger))
         (throw (ex-info "Alternative C scalar primitive limit exceeded"
                         {:code :alternative-c-scalar-limit :observed total-primitives :limit (:scalar-limit ledger)})))
@@ -273,7 +273,7 @@
   ([] (new-context {}))
   ([{:keys [ledger watchdog]}]
    {:suffix-cache (new-lru-cache) :tail-cache (new-lru-cache)
-    :writes (volatile! 0N) :ledger ledger :watchdog watchdog
+    :writes (volatile! 0) :ledger ledger :watchdog watchdog
     :peak-heap-bytes (volatile! (or (:baseline-heap-bytes watchdog) (used-heap-bytes)))})))
 
 (defn- hex-bytes [bytes]
@@ -304,7 +304,7 @@
   ([context n k]
    (loop [i 1 acc 1N]
      (if (> i k) acc
-         (recur (inc i) (alt-div-exact context (alt-mul context acc (+ (- n k) i)) i))))))
+         (recur (inc i) (alt-div-exact context (alt-mul context acc (alt-add context (alt-sub context n k) i)) i))))))
 
 (defn- tail-factor-inplace [active-days unopened-counts first-constrained? context]
   (watchdog-check! context)
@@ -365,7 +365,7 @@
                                      (alt-add context subtotal value)))))]
                     (when-not (nil? dp)
                       (aset ^objects next-dp 0 0N))
-                    (let [next-writes (+' @(:writes context) (inc n))]
+                    (let [next-writes (+ @(:writes context) (inc n))]
                       (when (> next-writes alternative-write-limit)
                         (throw (ex-info "alternative DP cell-write budget exceeded"
                                         {:code :alternative-dp-cell-write-budget-exceeded
@@ -508,12 +508,12 @@
                                              0N counts))))]
              (if (and production-budget
                       active-charge
-                      (> (+' shared-cost active-charge) production-budget))
+                      (alt-gt? context (alt-add context shared-cost active-charge) production-budget))
                {:status :PRODUCTION_BUDGET_REFUSAL
                 :prefix prefix
                 :prefix-length (count prefix)
                 :billed-before shared-cost
-                :required-next (+' shared-cost active-charge)
+                :required-next (alt-add context shared-cost active-charge)
                 :next-charge active-charge
                 :group :ACTIVE
                 :tested tested

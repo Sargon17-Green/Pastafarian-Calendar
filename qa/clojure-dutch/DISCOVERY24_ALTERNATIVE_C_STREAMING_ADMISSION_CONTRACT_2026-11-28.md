@@ -34,6 +34,7 @@ For canonical year 5000, m=33, n=3569, p=520: B=42,860; W=85,722; Q=17,128; S=54
 - Native arithmetic uses Clojure arbitrary-precision integers backed by java.math.BigInteger; no signed-64-bit wraparound is permitted.
 - The execution ledger counts BigInteger add/subtract/multiply/divide/remainder/compare operations plus explicit DP-cell and candidate-control steps.
 - Bit work is a conservative schoolbook upper bound: multiplication/division/remainder use operand bit-length products; addition/subtraction/comparison use the larger operand width plus one. Every result and operand is checked against W.
+- The DP-write counter is a bounded Long; each individual DP cell and candidate step is separately counted by the control ledger, so the counter itself does not add unmetered BigInteger work.
 - Logical live-payload is reported as the admission formula's analytical upper bound, not misrepresented as measured heap. Actual JVM heap use is sampled separately.
 - Native execution has a 90-second wall watchdog and a 256-MiB heap-delta watchdog. Heap samples occur at least every 256 counted arithmetic/control operations and at candidate boundaries. Exceeding either limit is an explicit refusal/failure, never an indefinite wait.
 - The existing source raming diagnostic is reported separately and is excluded from the Alternative C arithmetic ledger.
