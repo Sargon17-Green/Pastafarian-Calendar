@@ -4655,6 +4655,44 @@ BEGIN {
     }
     expect_exact("wide original hundred-nineteenth+1 hundred-twentieth-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
 
+    # Hundred-twentieth-digit to hundred-twenty-first-digit transition at original M=2^127-1.
+    # Independent reverse-Horner BigInt vs closed-form weighted sums 4/4:
+    # boundary/backward 4588 decimal digits; forward rejection rank 1; wrap 4552.
+    WIDE_HUNDRED_TWENTIETH=bi_mul(WIDE_HUNDRED_NINETEENTH,M)
+    STREAM_FIRST=bi_sub(M,"120"); STREAM_STEP=1
+    choose_rank_wide(WIDE_HUNDRED_TWENTIETH)
+    EXPECTED_HUNDRED_TWENTIETH=WIDE_HUNDRED_TWENTIETH
+    QA_POWER="1"
+    for (QA_I=0;QA_I<120;QA_I++) {
+        EXPECTED_HUNDRED_TWENTIETH=bi_sub(EXPECTED_HUNDRED_TWENTIETH,bi_mul_small(QA_POWER,120-QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original hundred-twentieth hundred-twentieth-digit boundary", CHOSEN_RANK, EXPECTED_HUNDRED_TWENTIETH)
+
+    WIDE_N=bi_add(WIDE_HUNDRED_TWENTIETH,"1")
+    choose_rank_wide(WIDE_N)
+    expect_exact("wide original hundred-twentieth+1 hundred-twenty-first-digit forward rejection", CHOSEN_RANK, "1")
+    STREAM_FIRST=M; STREAM_STEP=-1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_BACK=WIDE_HUNDRED_TWENTIETH
+    QA_POWER=M
+    for (QA_I=1;QA_I<120;QA_I++) {
+        EXPECTED_BACK=bi_sub(EXPECTED_BACK,bi_mul_small(QA_POWER,QA_I))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    EXPECTED_BACK=bi_sub(EXPECTED_BACK,M)
+    EXPECTED_BACK=bi_add(EXPECTED_BACK,"121")
+    expect_exact("wide original hundred-twentieth+1 hundred-twenty-first-digit backward acceptance", CHOSEN_RANK, EXPECTED_BACK)
+    STREAM_STEP=1
+    choose_rank_wide(WIDE_N)
+    EXPECTED_WRAP=bi_sub(M,"119")
+    QA_POWER=bi_square(M)
+    for (QA_I=2;QA_I<120;QA_I++) {
+        EXPECTED_WRAP=bi_add(EXPECTED_WRAP,bi_mul_small(QA_POWER,QA_I-1))
+        QA_POWER=bi_mul(QA_POWER,M)
+    }
+    expect_exact("wide original hundred-twentieth+1 hundred-twenty-first-digit forward wrap", CHOSEN_RANK, EXPECTED_WRAP)
+
     if (FAILURES) {
         printf "FAIL: %d of %d AWK native boundary assertions\n", FAILURES, CASES
         exit 1
