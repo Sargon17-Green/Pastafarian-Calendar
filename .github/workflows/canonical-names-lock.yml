@@ -1550,6 +1550,46 @@ jobs:
           path: out/production-gregorian/
           if-no-files-found: warn
 
+
+  dart-hebrew-production-inverse-previous:
+    if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-streaming-q]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - run: dart pub get
+      - name: Verify format and capture exact repair evidence
+        shell: bash
+        run: |
+          file=bin/production_inverse_previous_tests.dart
+          if ! dart format --output=none --set-exit-if-changed "$file"; then
+            dart format --output=write "$file"
+            echo "DART_CAPTURE_BEGIN:${file}"
+            base64 -w0 "$file"
+            printf '\n'
+            echo "DART_CAPTURE_END:${file}"
+            exit 1
+          fi
+      - run: dart analyze
+      - name: Run conditioned independent previous-year boundary inverse
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/production-inverse-previous
+          git rev-parse HEAD | tee out/production-inverse-previous/source-sha.txt
+          dart --version 2>&1 | tee out/production-inverse-previous/sdk.txt
+          timeout 1000s dart run bin/production_inverse_previous_tests.dart | tee out/production-inverse-previous/results.log
+          grep -q '^PRODUCTION_INVERSE_PREVIOUS_PASS checks=' out/production-inverse-previous/results.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dart-hebrew-production-inverse-previous
+          path: out/production-inverse-previous/
+          if-no-files-found: warn
+
   dart-hebrew-production-streaming-q:
     if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-streaming-q]')
     runs-on: ubuntu-latest
@@ -1583,6 +1623,7 @@ jobs:
           git rev-parse HEAD | tee out/production-streaming-q/source-sha.txt
           dart --version 2>&1 | tee out/production-streaming-q/sdk.txt
           timeout 1000s dart run bin/production_streaming_q_tests.dart --modern | tee out/production-streaming-q/results.log
+          grep -q '^PRODUCTION_STREAMING_Q_BUDGET_PASS checks=' out/production-streaming-q/results.log
           grep -q '^PRODUCTION_STREAMING_Q_SYNTHETIC_NEAR_PASS checks=' out/production-streaming-q/results.log
           grep -q '^PRODUCTION_STREAMING_Q_MODERN_PASS checks=' out/production-streaming-q/results.log
       - uses: actions/upload-artifact@v4

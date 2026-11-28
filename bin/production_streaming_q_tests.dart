@@ -120,7 +120,76 @@ void rejectBudget(BigInt day, int budget) {
   throw StateError('Missing budget rejection');
 }
 
+
+void exactBudgetBoundary() {
+  // With c=F=0 and constant gap 42, the strict sentinels are ±5796.
+  // Each side requires exactly 138 calls; no production enumeration
+  // is needed to derive these expected values.
+  var calls = 0;
+  BigInt gap(BigInt ordinal) {
+    calls++;
+    require(ordinal != BigInt.zero, 'nonzero budget probe ordinal');
+    return BigInt.from(42);
+  }
+
+  final window = MonsterYearLocator.streamGateWindow(
+    BigInt.zero,
+    BigInt.zero,
+    gap,
+    maximumGapCalls: 276,
+  );
+  require(calls == 276, 'exact total budget succeeds');
+  require(window.length == 277, 'exact window size');
+  for (var i = -138; i <= 138; i++) {
+    require(window[i] == BigInt.from(i * 42), 'closed-form gate position');
+  }
+  calls = 0;
+  var exhausted = false;
+  try {
+    MonsterYearLocator.streamGateWindow(
+      BigInt.zero,
+      BigInt.zero,
+      gap,
+      maximumGapCalls: 275,
+    );
+  } on IncompleteMonsterYearDomain {
+    exhausted = true;
+  }
+  require(exhausted && calls == 275, 'one-short total budget fails closed');
+
+  for (final budget in <int>[0, 400001]) {
+    calls = 0;
+    var rejected = false;
+    try {
+      MonsterYearLocator.streamGateWindow(
+        BigInt.zero,
+        BigInt.zero,
+        gap,
+        maximumGapCalls: budget,
+      );
+    } on RangeError {
+      rejected = true;
+    }
+    require(rejected && calls == 0, 'invalid budget before gap evaluation');
+  }
+  calls = 0;
+  var unreachable = false;
+  try {
+    MonsterYearLocator.streamGateWindow(
+      BigInt.one << 190,
+      BigInt.zero,
+      gap,
+      maximumGapCalls: 400000,
+    );
+  } on IncompleteMonsterYearDomain {
+    unreachable = true;
+  }
+  require(unreachable && calls == 0, 'unreachable preflight uses no gaps');
+  print('PRODUCTION_STREAMING_Q_BUDGET_PASS checks=$checks');
+}
+
 void main(List<String> args) {
+  exactBudgetBoundary();
   for (final gap in <BigInt Function(BigInt)>[
     (_) => BigInt.from(42),
     (_) => BigInt.from(963),
