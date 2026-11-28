@@ -1,0 +1,489 @@
+{
+  "cases": [
+    {
+      "artifact": 14745206712,
+      "b_stored_at_5_1691": 0,
+      "dynamic_stored_and_fetched": 62,
+      "fetch_count": 1,
+      "fetch_next_delta": [
+        1,
+        0
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        0
+      ],
+      "input": "1 0 0 100",
+      "last_writer_chain": [
+        [
+          "p",
+          [
+            5,
+            1691
+          ],
+          10664,
+          0,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          10900,
+          0,
+          10664
+        ],
+        [
+          "p",
+          [
+            19,
+            1696
+          ],
+          11135,
+          0,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          11332,
+          0,
+          10664
+        ],
+        [
+          "g",
+          [
+            19,
+            1696
+          ],
+          24722,
+          0,
+          11135
+        ],
+        [
+          "p",
+          [
+            1500,
+            1860
+          ],
+          24795,
+          62,
+          null
+        ],
+        [
+          "fetch",
+          [
+            1500,
+            1860
+          ],
+          24823,
+          62,
+          24795
+        ]
+      ],
+      "manifest_count": 12,
+      "n_stored_at_11_1693": 100,
+      "opcode_counts": {
+        "!": 49,
+        "#": 10,
+        "$": 1,
+        "%": 16,
+        "*": 5111,
+        "+": 5441,
+        "-": 478,
+        ".": 7,
+        "/": 8,
+        "0": 3260,
+        "1": 911,
+        "2": 349,
+        "3": 446,
+        "4": 444,
+        "5": 480,
+        "6": 350,
+        "7": 472,
+        "8": 301,
+        "9": 441,
+        "<": 92,
+        ">": 148,
+        "@": 1,
+        "]": 2,
+        "^": 93,
+        "_": 1,
+        "`": 33,
+        "a": 5027,
+        "b": 3,
+        "c": 1,
+        "d": 4,
+        "e": 1,
+        "g": 195,
+        "j": 36,
+        "k": 1,
+        "p": 107,
+        "v": 98,
+        "w": 1,
+        "x": 423,
+        "|": 1,
+        "~": 10
+      },
+      "owner_value": 0,
+      "pg_count": 302,
+      "reads": 2,
+      "sha256": "ea247b7c907d9cd0e1fb8e211619ff538b99b435dd43bcdaef70f084f6e499be",
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout": "-1 -1 -1 -1 -1 -1 -1 ",
+      "stdout_length": 21,
+      "stdout_sha256": "5abdb9b68376f375671dbf51591f3d23a0843b4cdab2a9007addeec8a5dc89e9",
+      "steps": 24853,
+      "storage_offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "artifact": 14775400606,
+      "b_stored_at_5_1691": 1,
+      "dynamic_stored_and_fetched": 118,
+      "fetch_count": 1,
+      "fetch_next_delta": [
+        0,
+        1
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        1
+      ],
+      "input": "1 1 0 100",
+      "last_writer_chain": [
+        [
+          "p",
+          [
+            5,
+            1691
+          ],
+          10664,
+          1,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          10900,
+          1,
+          10664
+        ],
+        [
+          "p",
+          [
+            19,
+            1696
+          ],
+          11135,
+          1,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          11332,
+          1,
+          10664
+        ],
+        [
+          "g",
+          [
+            19,
+            1696
+          ],
+          24722,
+          1,
+          11135
+        ],
+        [
+          "p",
+          [
+            1500,
+            1860
+          ],
+          24795,
+          118,
+          null
+        ],
+        [
+          "fetch",
+          [
+            1500,
+            1860
+          ],
+          24823,
+          118,
+          24795
+        ]
+      ],
+      "manifest_count": 10,
+      "n_stored_at_11_1693": 100,
+      "opcode_counts": {
+        "!": 49,
+        "#": 10,
+        "$": 1,
+        "%": 16,
+        "*": 5142,
+        "+": 5472,
+        "-": 471,
+        ".": 7,
+        "/": 8,
+        "0": 3257,
+        "1": 923,
+        "2": 350,
+        "3": 449,
+        "4": 445,
+        "5": 481,
+        "6": 351,
+        "7": 482,
+        "8": 303,
+        "9": 444,
+        "<": 92,
+        ">": 146,
+        "@": 1,
+        "]": 2,
+        "^": 93,
+        "_": 1,
+        "`": 33,
+        "a": 5058,
+        "b": 3,
+        "c": 1,
+        "d": 4,
+        "e": 1,
+        "g": 202,
+        "j": 36,
+        "k": 1,
+        "p": 107,
+        "v": 100,
+        "w": 1,
+        "x": 423,
+        "|": 1,
+        "~": 10
+      },
+      "owner_value": 1,
+      "pg_count": 309,
+      "reads": 2,
+      "sha256": "a8a48737663cdcfcae6df4c93bc62dde81f02c5159803a7d3484aee7363c9db1",
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout": "30111341 30111543 102 60222884 3 170141183460469231731687303715884105726 100 ",
+      "stdout_length": 77,
+      "stdout_sha256": "dd8ca101f718fa8b3bb0c7989885e6e277267f2c8839c11c043b9cd0360884b7",
+      "steps": 24977,
+      "storage_offset": [
+        0,
+        0
+      ]
+    },
+    {
+      "artifact": 14865377417,
+      "b_stored_at_5_1691": 2,
+      "dynamic_stored_and_fetched": 118,
+      "fetch_count": 1,
+      "fetch_next_delta": [
+        0,
+        1
+      ],
+      "gate_pre_stack": [
+        1,
+        1,
+        2
+      ],
+      "input": "1 2 0 100",
+      "last_writer_chain": [
+        [
+          "p",
+          [
+            5,
+            1691
+          ],
+          10664,
+          2,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          10900,
+          2,
+          10664
+        ],
+        [
+          "p",
+          [
+            19,
+            1696
+          ],
+          11135,
+          1,
+          null
+        ],
+        [
+          "g",
+          [
+            5,
+            1691
+          ],
+          11332,
+          2,
+          10664
+        ],
+        [
+          "g",
+          [
+            19,
+            1696
+          ],
+          24722,
+          1,
+          11135
+        ],
+        [
+          "p",
+          [
+            1500,
+            1860
+          ],
+          24795,
+          118,
+          null
+        ],
+        [
+          "fetch",
+          [
+            1500,
+            1860
+          ],
+          24823,
+          118,
+          24795
+        ]
+      ],
+      "manifest_count": 9,
+      "n_stored_at_11_1693": 100,
+      "opcode_counts": {
+        "!": 49,
+        "#": 10,
+        "$": 1,
+        "%": 16,
+        "*": 5142,
+        "+": 5472,
+        "-": 471,
+        ".": 7,
+        "/": 8,
+        "0": 3257,
+        "1": 923,
+        "2": 350,
+        "3": 449,
+        "4": 445,
+        "5": 481,
+        "6": 351,
+        "7": 482,
+        "8": 303,
+        "9": 444,
+        "<": 92,
+        ">": 146,
+        "@": 1,
+        "]": 2,
+        "^": 93,
+        "_": 1,
+        "`": 33,
+        "a": 5058,
+        "b": 3,
+        "c": 1,
+        "d": 4,
+        "e": 1,
+        "g": 202,
+        "j": 36,
+        "k": 1,
+        "p": 107,
+        "v": 100,
+        "w": 1,
+        "x": 423,
+        "|": 1,
+        "~": 10
+      },
+      "owner_value": 1,
+      "pg_count": 309,
+      "reads": 2,
+      "sha256": "bc05038212ebd4bf48a62103fc192e0adfd068f0baf9dd9c134fd90200666252",
+      "source_body_sha": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+      "status": "HALT",
+      "stdout": "30111339 30111543 103 60222882 3 170141183460469231731687303715884105725 100 ",
+      "stdout_length": 77,
+      "stdout_sha256": "026b5047164fc72cd7fb3c330d99bf26fa7a53e00fb34b7ebd29c38a691baaf4",
+      "steps": 24977,
+      "storage_offset": [
+        0,
+        0
+      ]
+    }
+  ],
+  "detached_mutations_rejected": [
+    "missing write",
+    "wrong stored byte",
+    "forged gate intermediate",
+    "wrong input buffer",
+    "wrong EOF direction",
+    "changed source glyph",
+    "spliced stack prefix",
+    "shifted owner address",
+    "nonzero offset",
+    "missing code fetch",
+    "forged fetched byte",
+    "forged output",
+    "lost terminal"
+  ],
+  "first_differences": {
+    "0/1": {
+      "input_read": 292,
+      "memory": 2601,
+      "output": 24828,
+      "post_stack": 2554,
+      "pre_stack": 2555,
+      "route": 24823
+    },
+    "0/2": {
+      "input_read": 292,
+      "memory": 2601,
+      "output": 24828,
+      "post_stack": 2554,
+      "pre_stack": 2555,
+      "route": 24823
+    },
+    "1/2": {
+      "input_read": 292,
+      "memory": 2601,
+      "output": 24844,
+      "post_stack": 2554,
+      "pre_stack": 2555,
+      "route": null
+    }
+  },
+  "new_native_runs": 0,
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "schema": "qa31cg-original-source-replay-v1",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "stage1_accepted": false,
+  "truncated_pair_rejected_as_equal": true
+}

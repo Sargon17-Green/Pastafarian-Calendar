@@ -1,0 +1,52 @@
+name: Befunge QA31H signed last-writer/reader audit
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31h_last_writer_reader_audit.py'
+      - '.github/workflows/befunge-qa31h-signed-last-writer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa31h-original-signed-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original source and QA31H auditor
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31h_last_writer_reader_audit.py
+          mkdir -p qa31h-output
+      - name: Download historical QA31G evidence only, without new Native
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 2 \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/13037899716/zip" \
+            -o qa31h-output/qa31g-original.zip
+          echo "e74e4ad35d5653ffd1610827e1351fce62552b0912dc78430908cc288f4e1161  qa31h-output/qa31g-original.zip" | sha256sum -c -
+      - name: Independently audit all three exact signed physical traces
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31h_last_writer_reader_audit.py \
+            src/interleaved_work_counts.b98 qa31h-output/qa31g-original.zip \
+            --output qa31h-output/qa31h_audit.json | tee qa31h-output/audit.log
+          grep -q "QA31H_SIGNED_PHYSICAL_STEPS 5860" qa31h-output/audit.log
+          grep -q "QA31H_FORGERIES_REJECTED 10" qa31h-output/audit.log
+          grep -q "QA31H_NO_NEW_NATIVE_NO_STAGE1_PASS" qa31h-output/audit.log
+      - name: Archive QA31H audit (not historical QA31G copy)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31h-signed-last-writer-reader-audit
+          path: |
+            qa31h-output/audit.log
+            qa31h-output/qa31h_audit.json
+          if-no-files-found: warn

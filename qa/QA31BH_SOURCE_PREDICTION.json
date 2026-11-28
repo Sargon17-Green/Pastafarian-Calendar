@@ -1,0 +1,175 @@
+{
+  "source_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "scope": "conditional unchanged source, symbolic memory, no new Native or physical cohort replay",
+  "source_root_read_step": 901,
+  "other_read_step": 882,
+  "boundary": [
+    "(G882+R)"
+  ],
+  "first_use": {
+    "step": 1270,
+    "pos": [
+      860,
+      205
+    ],
+    "op": "%",
+    "operands": [
+      "(G882+R)",
+      "170141183460469231731687303715884105727"
+    ]
+  },
+  "write": {
+    "step": 1309,
+    "pos": [
+      1440,
+      575
+    ],
+    "op": "p",
+    "operands": [
+      "((G882+R)%170141183460469231731687303715884105727)",
+      "61",
+      "1706"
+    ]
+  },
+  "extinction": 1309,
+  "extension_x": 13,
+  "read_after_write": [
+    {
+      "step": 1354,
+      "pos": [
+        385,
+        753
+      ],
+      "address": [
+        67,
+        1707
+      ]
+    },
+    {
+      "step": 1395,
+      "pos": [
+        1136,
+        575
+      ],
+      "address": [
+        47,
+        1703
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "pos": [
+        385,
+        1333
+      ],
+      "old": "1",
+      "replacement": "2",
+      "altered_divisor": "270141183460469231731687303715884105727"
+    },
+    {
+      "pos": [
+        385,
+        1322
+      ],
+      "old": "1",
+      "replacement": "2",
+      "altered_divisor": "170241183460469231731687303715884105727"
+    },
+    {
+      "pos": [
+        385,
+        1155
+      ],
+      "old": "1",
+      "replacement": "2",
+      "altered_divisor": "170141283460469231731687303715884105727"
+    },
+    {
+      "pos": [
+        778,
+        385
+      ],
+      "old": "6",
+      "replacement": "7",
+      "altered_divisor": "170141183470469231731687303715884105727"
+    },
+    {
+      "pos": [
+        670,
+        1422
+      ],
+      "old": "6",
+      "replacement": "7",
+      "altered_divisor": "170141183460479231731687303715884105727"
+    },
+    {
+      "pos": [
+        1238,
+        1620
+      ],
+      "old": "1",
+      "replacement": "2",
+      "altered_divisor": "170141183460469232731687303715884105727"
+    },
+    {
+      "pos": [
+        1226,
+        1620
+      ],
+      "old": "1",
+      "replacement": "2",
+      "altered_divisor": "170141183460469231732687303715884105727"
+    },
+    {
+      "pos": [
+        765,
+        482
+      ],
+      "old": "3",
+      "replacement": "4",
+      "altered_divisor": "170141183460469231731687403715884105727"
+    },
+    {
+      "pos": [
+        479,
+        290
+      ],
+      "old": "7",
+      "replacement": "8",
+      "altered_divisor": "170141183460469231731687303815884105727"
+    },
+    {
+      "pos": [
+        463,
+        290
+      ],
+      "old": "8",
+      "replacement": "9",
+      "altered_divisor": "170141183460469231731687303715894105727"
+    },
+    {
+      "pos": [
+        1240,
+        1138
+      ],
+      "old": "0",
+      "replacement": "1",
+      "altered_divisor": "170141183460469231731687303715884115727"
+    },
+    {
+      "pos": [
+        860,
+        203
+      ],
+      "old": "7",
+      "replacement": "8",
+      "altered_divisor": "170141183460469231731687303715884105728"
+    }
+  ],
+  "assumptions": [
+    "The second x is executed at (540,195) and lands at (575,670).",
+    "Executed cells contain the pinned source instructions. Each later g read is held at its recorded or symbolic value.",
+    "The calculation ends at offset +1536. No physical corpus counts follow from source alone."
+  ]
+}

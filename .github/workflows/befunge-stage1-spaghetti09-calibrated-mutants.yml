@@ -1,0 +1,80 @@
+name: Befunge QA09C Calibrated Native Counterfactuals
+on:
+  push:
+    branches:
+      - 'qa-befunge98-stage1-order-isolation-20261008'
+    paths:
+      - 'qa/stage1_spaghetti09_calibrated_mutants.py'
+      - '.github/workflows/befunge-stage1-spaghetti09-calibrated-mutants.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa09c-calibrated-mutants:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: cwesson/funge-plus-plus
+          ref: cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          path: third_party/funge-plus-plus
+          submodules: recursive
+          persist-credentials: false
+      - name: Pin original engine, QA09 source and calibrated verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          test "$(git hash-object qa/spaghetti09_17d_two_shard_eighty_opcode_candidate.beq)" = 275cec0add8705565d27da4233860bf42d134a27
+          test "$(git hash-object qa/stage1_spaghetti09_eighty_native.py)" = 311020fb33a9778bbda02fab538c3cc9fb3ade0a
+          test "$(git hash-object qa/stage1_spaghetti09_calibrated_mutants.py)" = 7954aca7f0bf70c79ab6c1c2967923cfe1fd6dbb
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          python3 -m py_compile qa/stage1_spaghetti09_eighty_native.py qa/stage1_spaghetti09_calibrated_mutants.py
+          echo "QA09C_EXACT_HEAD $(git rev-parse HEAD)"
+      - name: Build and smoke-test pristine pinned Funge++ without approving upstream Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          make -C third_party/funge-plus-plus funge
+          test "$(timeout 12 third_party/funge-plus-plus/bin/funge third_party/funge-plus-plus/test/example5d.beq)" = "Hello World"
+      - name: Patch only this isolated CI engine checkout for native lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("third_party/funge-plus-plus/src/FungeUniverse.cpp")
+          content=path.read_text()
+          t=chr(9)
+          before="\n".join([t*4+"threads.pop();",t*4+"delete thread;",
+                            t*3+"}",t*3+"mutex.unlock();",t*2+"}else{"])
+          after=before.replace(t*3+"mutex.unlock();",
+                    t*3+"cv.notify_all(); // qa09c isolated scheduler wakeup\n"+t*3+"mutex.unlock();")
+          assert content.count(before)==1, "Pinned upstream shutdown structure drift"
+          path.write_text(content.replace(before,after))
+          PY
+          make -C third_party/funge-plus-plus funge
+          test "$(git -C third_party/funge-plus-plus rev-parse HEAD)" = cd6d7f005b4fc33b486fcc2380b35406f6125ca4
+          echo "QA09C_TEMPORARY_ENGINE_PATCH_ONLY"
+      - name: Execute same-bound shams and twenty actual Native source counterfactuals
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --kill-after=5s 850s python3 -u qa/stage1_spaghetti09_calibrated_mutants.py \
+             | tee spaghetti09_calibrated_mutants_console.log
+          grep -q QA09C_SAME_BOUND_UNMODIFIED_AND_SHAM_PASS spaghetti09_calibrated_mutants_console.log
+          grep -q QA09C_FOUR_UNMODIFIED_AND_TWO_SAME_BYTE_SHAMS_PASS spaghetti09_calibrated_mutants_console.log
+          grep -q QA09C_TWENTY_CALIBRATED_CHANGED_SOURCE_CHALLENGES_OBSERVED spaghetti09_calibrated_mutants_console.log
+          grep -q QA09C_FINITE_TIMEOUTS_ARE_NOT_NONTERMINATION_PROOFS_STAGE1_OPEN spaghetti09_calibrated_mutants_console.log
+          test -s spaghetti09_calibrated_mutant_receipt.json
+      - name: Preserve calibrated Native observations and diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: spaghetti09-calibrated-mutant-native-receipts
+          path: |
+            spaghetti09_calibrated_mutant_receipt.json
+            spaghetti09_calibrated_mutants_console.log
+          if-no-files-found: warn

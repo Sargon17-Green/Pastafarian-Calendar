@@ -1,0 +1,139 @@
+{
+  "schema": "qa31an-frozen-original-200-candidate-target-counts-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "signed_input_archive_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "9aebc80a4b9a1c7b8b32482ec2eaeaf0849bbaef382bfc019e5a7e5a5bfe8124",
+  "cases": 200,
+  "steps": 3628390,
+  "cases_with_candidate": 140,
+  "events": 1710,
+  "physical_counter_put_events_from_candidates": 0,
+  "canonical_counter_put_events_elsewhere": 2920,
+  "sources": [
+    [
+      [
+        96,
+        480
+      ],
+      140,
+      [
+        1500,
+        1860
+      ]
+    ],
+    [
+      [
+        195,
+        958
+      ],
+      140,
+      [
+        61,
+        1706
+      ]
+    ],
+    [
+      [
+        292,
+        1430
+      ],
+      140,
+      [
+        3,
+        1690
+      ]
+    ],
+    [
+      [
+        369,
+        575
+      ],
+      140,
+      [
+        7,
+        1692
+      ]
+    ],
+    [
+      [
+        384,
+        575
+      ],
+      140,
+      [
+        11,
+        1693
+      ]
+    ],
+    [
+      [
+        575,
+        959
+      ],
+      225,
+      [
+        59,
+        1705
+      ]
+    ],
+    [
+      [
+        577,
+        1430
+      ],
+      140,
+      [
+        83,
+        1711
+      ]
+    ],
+    [
+      [
+        860,
+        99
+      ],
+      225,
+      [
+        53,
+        1704
+      ]
+    ],
+    [
+      [
+        860,
+        1142
+      ],
+      140,
+      [
+        79,
+        1710
+      ]
+    ],
+    [
+      [
+        948,
+        860
+      ],
+      140,
+      [
+        73,
+        1709
+      ]
+    ],
+    [
+      [
+        1332,
+        480
+      ],
+      140,
+      [
+        19,
+        1696
+      ]
+    ]
+  ],
+  "new_native_runs": 0,
+  "global_unreachability_proven": false,
+  "stage1_pass": false
+}

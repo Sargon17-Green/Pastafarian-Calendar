@@ -1,0 +1,93 @@
+name: Befunge QA31CR Native work_counts lexical contract
+
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - .github/workflows/befunge-qa31cr-work-counts-lexical.yml
+      - qa/qa31cr_work_counts_lexical_native.py
+      - qa/QA31CR_WORK_COUNTS_RAW_LEXICAL_CONTRACT_2026-11-25.md
+      - src/work_counts.b98
+      - reference/work_counts.b98
+      - reference/save.b98
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-work-counts-lexical:
+    if: github.ref_name == 'qa-befunge98-stage1-order-isolation-20261008'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Pin exact production source, independent references and test harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/work_counts.b98)" = "7418e1ec5fe88fe5c14b75710dea2d5607527f28"
+          test "$(sha256sum src/work_counts.b98 | cut -d ' ' -f1)" = "a59c1066843abfde9b059e9ec62b2c9daf0483f116095bbd78c19cf28ab59137"
+          test "$(git hash-object reference/work_counts.b98)" = "f941efc793c9eee4accf5d03873f8ed029b16725"
+          test "$(git hash-object reference/save.b98)" = "7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44"
+          test "$(git hash-object qa/qa31cr_work_counts_lexical_native.py)" = "ce4e6e98dfb0b4a9bd9034b323ea9f9399945b9f"
+          python3 -m py_compile qa/qa31cr_work_counts_lexical_native.py
+          echo QA31CR_SOURCE_AND_ORACLE_IDENTITIES_PASS
+
+      - name: Download and pin Native PyFunge-98 interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+
+      - name: Run nine raw-negative probes and nine independent positive controls in Native
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/qa31cr-lexical"
+          mkdir -p "$evidence"
+          {
+            echo "GITHUB_SHA=$GITHUB_SHA"
+            echo "SOURCE_BLOB=7418e1ec5fe88fe5c14b75710dea2d5607527f28"
+            echo "SOURCE_SHA256=a59c1066843abfde9b059e9ec62b2c9daf0483f116095bbd78c19cf28ab59137"
+            echo "REFERENCE_WORK_COUNTS_BLOB=f941efc793c9eee4accf5d03873f8ed029b16725"
+            echo "REFERENCE_SAVE_BLOB=7b5e79aa6e2bfb636717cb018a3db6a13fb2bb44"
+            echo "PYFUNGE_TARBALL_SHA256=e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac"
+          } > "$evidence/identity.txt"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$evidence:/evidence" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              pyfunge --version > /evidence/pyfunge-version.txt 2>&1
+              set +e
+              timeout --kill-after=5s 360s python -u qa/qa31cr_work_counts_lexical_native.py /evidence/qa31cr_work_counts_lexical.json > /evidence/native.log 2>&1
+              rc=$?
+              set -e
+              cat /evidence/native.log
+              printf "%s\n" "$rc" > /evidence/exit-code.txt
+              exit "$rc"
+            '
+
+      - name: Hash retained Native evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/qa31cr-lexical"
+          if [ -d "$evidence" ]; then
+            (cd "$evidence" && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS.txt)
+          fi
+
+      - name: Upload exact Native receipts, log and identity
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31cr-work-counts-lexical-native
+          path: ${{ runner.temp }}/qa31cr-lexical/
+          retention-days: 60

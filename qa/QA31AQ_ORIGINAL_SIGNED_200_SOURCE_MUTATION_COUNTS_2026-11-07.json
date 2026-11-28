@@ -1,0 +1,68 @@
+{
+  "schema": "qa31aq-signed-original-200-selfmod-selector-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_ZIP_SHA256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "evidence_zip_sha256": "1f5fd14d0a4cfb44f2be57bb3b8489690eee97632728d43645b3fc8cfc537aaf",
+  "signed_cases": 200,
+  "original_signed_steps": 3628390,
+  "source_original_cell": {
+    "xy": [
+      1500,
+      1750
+    ],
+    "byte": 32
+  },
+  "physical_writer_source": {
+    "xy": [
+      1335,
+      1354
+    ],
+    "opcode": 112
+  },
+  "physical_writes": 365,
+  "physical_execute_mutated_cell": 365,
+  "write_to_execute_step_gap": 20,
+  "mutated_byte_counts": {
+    "62": 140,
+    "118": 225
+  },
+  "case_profiles": [
+    {
+      "profile": [],
+      "cases": 60
+    },
+    {
+      "profile": [
+        62
+      ],
+      "cases": 5
+    },
+    {
+      "profile": [
+        118,
+        62
+      ],
+      "cases": 45
+    },
+    {
+      "profile": [
+        118,
+        118,
+        62
+      ],
+      "cases": 90
+    }
+  ],
+  "j185_original_executions": 1800,
+  "j185_operand_counts": {
+    "0": 700,
+    "61": 1100
+  },
+  "original_x_executions": 1570,
+  "original_raw_pair_comparisons": 11,
+  "hostile_report_mutants_rejected": 20,
+  "new_native_runs": 0,
+  "real_new_raw_stdin_qm_witness": null,
+  "stage1_pass": false
+}

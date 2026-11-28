@@ -1,0 +1,63 @@
+{
+  "schema": "qa31ar-original-signed-200-memory-source-byte-counts-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_QA31AI_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "new_evidence_zip_sha256": "fda420633fea3e9fc869504fd7b50672af692b7b0016da18d517c20ab0ec2253",
+  "signed_cases": 200,
+  "signed_steps": 3628390,
+  "initial_memory_writer_site": [
+    280,
+    860
+  ],
+  "memory_update_writer_site": [
+    399,
+    195
+  ],
+  "memory_read_for_byte": [
+    196,
+    1335
+  ],
+  "memory_update_read": [
+    664,
+    1050
+  ],
+  "selected_source_put": [
+    1335,
+    1354
+  ],
+  "memory_cell": [
+    29,
+    1698
+  ],
+  "rewritten_source_cell": [
+    1500,
+    1750
+  ],
+  "replayed_code_byte_source_paths": 365,
+  "replayed_memory_div10_update_paths": 225,
+  "owner_counts": {
+    "280,860": 140,
+    "399,195": 225
+  },
+  "put_code_byte_counts": {
+    "62": 140,
+    "118": 225
+  },
+  "raw_final_ASCII_two_digit_match_cases": 100,
+  "read_to_code_put_STEPS": 56,
+  "source_code_byte_expression": "62 + 56 * (mem[29,1698] != 0)",
+  "source_memory_update_expression": "trunc(mem[29,1698]/10)",
+  "source_byte_path": "g!*!78**6a*2++1a*5+a*01a*1+a*0+a*3+0xv+a*0+1a*7+a*5+a*0+p",
+  "memory_update_path": "ga/2a*9+02a*4+a*9+-08a*5+a*5+-x>1a*6+a*9+a*8+p",
+  "prior_qa31aq_j185_events": 1800,
+  "prior_qa31aq_j185_operands": {
+    "0": 700,
+    "61": 1100
+  },
+  "independent_hostile_controls_rejected": 18,
+  "fresh_native_executions": 0,
+  "new_full_corpus_GitHub_CI_runs": 0,
+  "natural_input_q_or_m_put_witness": null,
+  "stage1_pass": false
+}

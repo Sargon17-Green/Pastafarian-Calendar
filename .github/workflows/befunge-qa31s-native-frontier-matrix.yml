@@ -1,0 +1,60 @@
+name: Befunge QA31S bounded original Native frontier matrix
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31s_native_frontier_matrix.py'
+      - 'qa/stage1_qa31s_independent_frontier_audit.py'
+      - 'qa/QA31S_BOUNDED_ORIGINAL_NATIVE_FRONTIER_CONTRACT_2026-11-03.md'
+      - '.github/workflows/befunge-qa31s-native-frontier-matrix.yml'
+permissions:
+  contents: read
+jobs:
+  qa31s-original-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin source and Python3 independent verifier
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/stage1_qa31s_independent_frontier_audit.py
+          mkdir -p qa31s-output
+      - name: Fetch pinned PyFunge 0.5-rc2 (SHA256 checked)
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Twelve original-source, untouched-IP, finite Native input traces
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31s-output:/qa31s" -w /work \
+            python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 840s python -u qa/stage1_qa31s_native_frontier_matrix.py /qa31s
+            ' | tee qa31s-output/native.log
+          grep -q QA31S_12_NATIVE_CASES_RECORDED qa31s-output/native.log
+      - name: Replay signed original p-g-stdin physical traces; reject 18 forgeries
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31s_independent_frontier_audit.py \
+            src/interleaved_work_counts.b98 qa31s-output | tee qa31s-output/audit.log
+          grep -q QA31S_HOSTILE_CONTROLS.18.OF_18_REJECTED qa31s-output/audit.log
+          grep -q QA31S_STAGE1_REMAINS_OPEN qa31s-output/audit.log
+      - name: Preserve partial or completed finite receipts (not Stage1 PASS)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31s-original-native-frontier-finite
+          path: qa31s-output/
+          if-no-files-found: warn
+          retention-days: 30

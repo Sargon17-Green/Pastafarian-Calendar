@@ -1,0 +1,19 @@
+name: Befunge98 QA31BB derived original signed causality fixture
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31bb_portable_gate.py'
+      - 'qa/QA31BB_ORIGINAL_SIGNED_200_CAUSAL_FIXTURE_2026-11-07.json'
+      - 'qa/QA31BB_ORIGINAL_SIGNED_NONX_SELECTOR_REVIEW_2026-11-07.md'
+      - '.github/workflows/befunge-qa31bb-derived-causality.yml'
+  workflow_dispatch:
+jobs:
+  derived-fixture-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify QA31BB finite original-derived fixture and 24 hostile mutants (NOT native)
+        run: python qa/stage1_qa31bb_portable_gate.py qa/QA31BB_ORIGINAL_SIGNED_200_CAUSAL_FIXTURE_2026-11-07.json

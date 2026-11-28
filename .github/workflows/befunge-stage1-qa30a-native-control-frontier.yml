@@ -1,0 +1,94 @@
+name: Befunge QA30A Original Native Dynamic Control Frontiers
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa30a_native_control_frontier.py'
+      - '.github/workflows/befunge-stage1-qa30a-native-control-frontier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-directed-source-frontier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify production blob and independent Python3 audit syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa30a_native_control_frontier.py
+      - name: Verify four original historical GitHub Native sources
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          for pair in \
+            39423789058:6fbc0828c4ef78affb3899f5924e57e0a0025ed5 \
+            39761821210:d0a1c686c4f9244121246aa5b70266c072c3ddce \
+            39841651046:68bfc0d8118a6705d0a0af318f4a48a38e3a159f \
+            39945902093:0d6ab84dafc406cc8512c8664a66ba68edc69d0b; do
+            run="$(printf '%s' "$pair" | cut -d: -f1)"
+            sha="$(printf '%s' "$pair" | cut -d: -f2)"
+            got="$(gh run view "$run" --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')"
+            test "$got" = "success:$sha" || { echo "::error::original Native CI identity mismatch $run"; exit 1; }
+          done
+      - name: Recover original SHA-pinned QA18 21-cell source roles
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa30a/sources"
+          gh run download 39423789058 --repo "$GITHUB_REPOSITORY" --name qa18-native-source-glyph-physical-contact --dir "$RUNNER_TEMP/qa30a/sources"
+          echo "263a73a40afa17a8a9b1c831a01239be671d9ea0a9c331fd3f725f83cf1cfea7  $RUNNER_TEMP/qa30a/sources/qa18_glyph_roles.json" | sha256sum -c -
+      - name: Recover 12 original Native route artifacts with finite transport retries
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          get_one() {
+            local run="$1" name="$2" dest="$3" attempt
+            mkdir -p "$dest"
+            for attempt in 1 2 3 4 5; do
+              if gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$name" --dir "$dest"; then return 0; fi
+              echo "::warning::original artifact transport retry $attempt: $run $name"
+              sleep $((attempt * 10))
+            done
+            echo "::error::original Native artifact unavailable: $run $name"
+            return 1
+          }
+          for shard in 0 1 2 3; do
+            get_one 39761821210 "qa20-shard-$shard" "$RUNNER_TEMP/qa30a/QA20/shard$shard"
+            get_one 39841651046 "qa24-original-native-shard-$shard" "$RUNNER_TEMP/qa30a/QA24/shard$shard"
+            get_one 39945902093 "qa26-original-native-shard-$shard" "$RUNNER_TEMP/qa30a/QA26/shard$shard"
+          done
+      - name: Audit all 136 authentic Native routes for observed control edges, nearest 15 original cells
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa30a_native_control_frontier.py \
+            --source src/interleaved_work_counts.b98 \
+            --qa18 "$RUNNER_TEMP/qa30a/sources/qa18_glyph_roles.json" \
+            --root "$RUNNER_TEMP/qa30a" \
+            --output "$RUNNER_TEMP/qa30a/qa30a_native_control_frontier.json" \
+            | tee "$RUNNER_TEMP/qa30a/qa30a_original_audit.log"
+          grep -q QA30A_ORIGINAL_136_NATIVE_CONTROL_ROUTE_AUDIT_PASS "$RUNNER_TEMP/qa30a/qa30a_original_audit.log"
+          grep -q QA30A_NEGATIVE_NATIVE_EDGE_CONTROLS_REJECTED "$RUNNER_TEMP/qa30a/qa30a_original_audit.log"
+          grep -q QA30A_FIFTEEN_CONTROL_NEIGHBORHOODS_DOCUMENTED_NO_DEAD_CODE_CLAIM "$RUNNER_TEMP/qa30a/qa30a_original_audit.log"
+          python3 -c 'import json,sys; x=json.load(open(sys.argv[1])); assert x["original_native_steps_reaudited"]==4513423 and x["original_programs_reaudited"]==136 and x["negative_provenance_and_directed_edge_controls_rejected"]==70 and x["original_15_source_cells_not_certified_dead"] and not x["stage1_complete"]' \
+            "$RUNNER_TEMP/qa30a/qa30a_native_control_frontier.json"
+      - name: Preserve original finite geometrical audit result even on RED
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa30a-136-original-native-control-frontiers
+          path: |
+            ${{ runner.temp }}/qa30a/qa30a_native_control_frontier.json
+            ${{ runner.temp }}/qa30a/qa30a_original_audit.log
+          if-no-files-found: warn

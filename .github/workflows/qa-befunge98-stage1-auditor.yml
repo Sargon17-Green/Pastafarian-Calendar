@@ -1,0 +1,220 @@
+name: Befunge-98 Stage 1 QA Auditor
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/test_stage1_native_four_cell_pg_event_coverage.py'
+      - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
+      - 'qa/test_stage1_native_four_cell_same_interpreter_order_isolation.py'
+      - 'qa/stage1_native_peer_write_guard.py'
+      - 'qa/stage1_native_peer_store_s_probe.py'
+      - 'qa/test_stage1_native_peer_write_guard.py'
+      - 'qa/test_stage1_native_peer_runtime_identity.py'
+      - 'qa/test_stage1_native_peer_fault_isolation.py'
+      - 'qa/test_stage1_native_nonturning_vector.py'
+      - 'qa/test_stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_current_fork_route_differential.py'
+      - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
+      - 'qa/stage1_native_strict_evidence_json.py'
+      - 'qa/test_stage1_native_strict_evidence_json.py'
+      - 'qa/stage1_native_four_cell_grid_full_postfork_audit.py'
+      - '.github/workflows/qa-befunge98-stage1-auditor.yml'
+  pull_request:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/test_stage1_native_four_cell_pg_event_coverage.py'
+      - 'qa/stage1_native_four_cell_full_postfork_trace_audit.py'
+      - 'qa/test_stage1_native_four_cell_same_interpreter_order_isolation.py'
+      - 'qa/stage1_native_peer_write_guard.py'
+      - 'qa/stage1_native_peer_store_s_probe.py'
+      - 'qa/test_stage1_native_peer_write_guard.py'
+      - 'qa/test_stage1_native_peer_runtime_identity.py'
+      - 'qa/test_stage1_native_peer_fault_isolation.py'
+      - 'qa/test_stage1_native_nonturning_vector.py'
+      - 'qa/test_stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_pg_physical_address.py'
+      - 'qa/stage1_native_current_fork_route_differential.py'
+      - 'qa/stage1_native_pg_stringmode_receipt_probe.py'
+      - 'qa/stage1_native_strict_evidence_json.py'
+      - 'qa/test_stage1_native_strict_evidence_json.py'
+      - 'qa/stage1_native_four_cell_grid_full_postfork_audit.py'
+      - '.github/workflows/qa-befunge98-stage1-auditor.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthetic-native-receipt-auditor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate Python syntax
+        run: python -m py_compile qa/test_stage1_native_four_cell_pg_event_coverage.py qa/stage1_native_four_cell_full_postfork_trace_audit.py qa/test_stage1_native_nonturning_vector.py qa/stage1_native_pg_physical_address.py qa/test_stage1_native_pg_physical_address.py qa/stage1_native_peer_write_guard.py qa/test_stage1_native_peer_write_guard.py qa/test_stage1_native_peer_runtime_identity.py qa/stage1_native_peer_store_s_probe.py qa/stage1_native_current_fork_route_differential.py qa/stage1_native_pg_stringmode_receipt_probe.py qa/stage1_native_strict_evidence_json.py qa/test_stage1_native_strict_evidence_json.py qa/stage1_native_four_cell_grid_full_postfork_audit.py qa/test_stage1_native_peer_fault_isolation.py
+      - name: Verify physical p/g receipts, gate, stringmode, and terminal opcode
+        run: python -B qa/test_stage1_native_four_cell_pg_event_coverage.py
+      - name: Verify fixed-turn physical axes before and after the fork
+        run: python -B qa/test_stage1_native_nonturning_vector.py
+      - name: Repeat with Python assertions disabled
+        run: python -O -B qa/test_stage1_native_four_cell_pg_event_coverage.py
+      - name: Verify fixed-turn physical axes with assertions disabled
+        run: python -O -B qa/test_stage1_native_nonturning_vector.py
+      - name: Verify native physical p/g coordinate and underflow contracts
+        run: python -B qa/test_stage1_native_pg_physical_address.py
+      - name: Verify physical p/g contracts with assertions disabled
+        run: python -O -B qa/test_stage1_native_pg_physical_address.py
+      - name: Verify independent physical p write ownership across live Programs
+        run: python -B qa/test_stage1_native_peer_write_guard.py
+      - name: Repeat live Program p target ownership tests with assertions disabled
+        run: python -O -B qa/test_stage1_native_peer_write_guard.py
+      - name: Reject peer runtime object substitution on native p/s writes
+        run: python -B qa/test_stage1_native_peer_runtime_identity.py
+      - name: Repeat peer runtime ownership mutations with assertions disabled
+        run: python -O -B qa/test_stage1_native_peer_runtime_identity.py
+      - name: Preserve peer ownership despite injected Native p/s faults
+        run: python -B qa/test_stage1_native_peer_fault_isolation.py
+      - name: Repeat Native fault isolation under optimized Python
+        run: python -O -B qa/test_stage1_native_peer_fault_isolation.py
+      - name: Reject duplicate keys and hostile numeric literals in Native evidence
+        run: python -B qa/test_stage1_native_strict_evidence_json.py
+      - name: Repeat strict JSON evidence tests with assertions disabled
+        run: python -O -B qa/test_stage1_native_strict_evidence_json.py
+      - name: Verify original 49-grid manifest falsification guards
+        run: python -B qa/stage1_native_four_cell_grid_full_postfork_audit.py --selftest
+
+  native-same-interpreter-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and authenticate pinned PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Real PyFunge same-interpreter sequential and interleaved Program isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/stage1_native_same_interpreter_isolation.py
+            '
+  native-full-grid-49:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and authenticate pinned PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Record all 49 real Native PyFunge routes and independent Befunge oracle outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/evidence/native-grid"
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$GITHUB_WORKSPACE/evidence/native-grid:/full-grid-route" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 3300s python -u qa/stage1_native_four_cell_grid_full_postfork.py
+            '
+      - name: Independently replay all 49 complete physical opcode traces and bind SHA-256 receipts
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from qa import stage1_native_four_cell_full_postfork_trace_audit as audit
+          from qa.stage1_native_strict_evidence_json import strict_evidence_loads
+          root=Path("evidence/native-grid")
+          doc=strict_evidence_loads((root/"native_full_postfork_signed_grid_49.json").read_text())
+          assert doc["schema"]=="befunge-stage1-four-cell-49-complete-native-postfork-v2"
+          assert doc["original_native_candidate_executions"]==49
+          assert len(doc["records"])==49
+          assert doc["lower_literal_reached"]==21 and doc["upper_literal_not_reached"]==28
+          source=(root/"four_cell_candidate.b98").read_bytes().split(b"\n")
+          assert audit.gitblob((root/"four_cell_candidate.b98").read_bytes())==audit.CANDIDATE
+          for i, entry in enumerate(doc["records"]):
+              assert entry["index"]==i
+              content=(root/entry["trace_filename"]).read_bytes()
+              assert hashlib.sha256(content).hexdigest()==entry["trace_file_sha256"]
+              record=strict_evidence_loads(content)
+              assert record["index"]==i and record["fields"]==entry["fields"]
+              raw=(" ".join(map(str,entry["fields"]))+"\n").encode("ascii")
+              assert record["input_sha256"]==entry["input_sha256"]==hashlib.sha256(raw).hexdigest()
+              assert record["reference_output"]==entry["reference_output"]
+              assert record["run"]["output"]==record["reference_output"]
+              verified=audit.verify_run(record["run"],source,require_prefork=True,require_gate_anchor=True)
+              assert verified["complete_postfork_events"]==entry["complete_postfork_steps"]
+              print("NATIVE_49_INDEPENDENT_RECEIPT_AUDIT",i+1,"/49",flush=True)
+          print("NATIVE_49_COMPLETE_SHA256_AND_PHYSICAL_GATE_AUDIT_PASS")
+          PY
+      - name: Preserve Native evidence even when independent audit fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: befunge-stage1-native49-qa-evidence
+          path: evidence/native-grid/
+          if-no-files-found: warn
+          retention-days: 14
+
+  native-candidate-order-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and authenticate pinned PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Alternate 14 executions and interleave three pairs of the four-cell Native candidate in one interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 650s python -u qa/test_stage1_native_four_cell_same_interpreter_order_isolation.py
+            '
+
+  native-peer-store-character:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch SHA-256 pinned PyFunge-98 interpreter
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Verify native s stores only in its owning Funge-space
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 120s python -u qa/stage1_native_peer_store_s_probe.py
+            '

@@ -1,0 +1,25 @@
+name: Befunge QA31BJ read-fates mechanism (not full original evidence)
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - qa/stage1_qa31bj_read_fates.py
+      - qa/QA31BJ_READ_FATES_CONTRACT_2026-11-19.md
+      - .github/workflows/befunge-qa31bj-read-fates.yml
+  workflow_dispatch:
+jobs:
+  selftests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and run 18 mechanism checks (does not accept Stage1)
+        run: |
+          python -m py_compile qa/stage1_qa31bj_read_fates.py
+          python qa/stage1_qa31bj_read_fates.py --self-test

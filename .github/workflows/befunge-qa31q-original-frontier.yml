@@ -1,0 +1,72 @@
+name: Befunge QA31Q Original Source 15-Cell Frontier
+
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/stage1_qa31q_original_frontier.py'
+      - 'qa/QA31Q_ORIGINAL_15_CONTROL_FRONTIER_2026-11-02.md'
+      - '.github/workflows/befunge-qa31q-original-frontier.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  finite-original-source-frontier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch pre-existing immutable QA18 and QA20 receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qa31q" 
+          for item in '12265002965 qa18' '12419050654 qa20'; do
+            read -r id label <<< "$item"
+            curl --fail --location --silent --show-error --retry 2 \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${id}/zip" \
+              -o "$RUNNER_TEMP/qa31q/${label}.zip"
+            unzip -t "$RUNNER_TEMP/qa31q/${label}.zip" >/dev/null
+          done
+          unzip -p "$RUNNER_TEMP/qa31q/qa18.zip" qa18_glyph_roles.json > "$RUNNER_TEMP/qa31q/qa18.json"
+          unzip -p "$RUNNER_TEMP/qa31q/qa20.zip" qa20_native_48_aggregate.json > "$RUNNER_TEMP/qa31q/qa20.json"
+          echo '263a73a40afa17a8a9b1c831a01239be671d9ea0a9c331fd3f725f83cf1cfea7' " $RUNNER_TEMP/qa31q/qa18.json" | sha256sum -c -
+          echo '75d2ee07eaf998fcb69bcb238d5fcb2163ab8305efe4abe4378af95f41385117' " $RUNNER_TEMP/qa31q/qa20.json" | sha256sum -c -
+      - name: Verify immutable original source and independent 15-cell frontier
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/stage1_qa31q_original_frontier.py
+          python3 qa/stage1_qa31q_original_frontier.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/qa31q/qa18.json" \
+            "$RUNNER_TEMP/qa31q/qa20.json" \
+            --out "$RUNNER_TEMP/qa31q/qa31q_frontier.json" \
+            | tee "$RUNNER_TEMP/qa31q/qa31q.log"
+          python3 - "$RUNNER_TEMP/qa31q/qa31q_frontier.json" <<'PY'
+          import json,sys
+          a=json.load(open(sys.argv[1]))
+          assert a['historically_unvisited_count']==15
+          assert a['hypothetical_source_segment_cases']==291
+          assert a['source_and_receipt_forgeries_rejected']==18
+          assert a['fresh_native']==0 and a['stage1_pass'] is False
+          print('QA31Q_EXACT_SOURCE_JSON_GATE_PASS')
+          PY
+      - name: Preserve independently verifiable finite evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31q-original-15-frontier
+          path: |
+            ${{ runner.temp }}/qa31q/qa31q_frontier.json
+            ${{ runner.temp }}/qa31q/qa31q.log
+          retention-days: 30

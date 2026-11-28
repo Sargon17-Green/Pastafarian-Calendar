@@ -1,0 +1,74 @@
+{
+  "schema": "qa31ax-signed-two-donor-original-source-negative-candidate-fixture-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "original_source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_QA31AI_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "source_pin_sha256": {
+    "row11_gate": "570dc07da27206e51eab0548078c10e21a1f54633e62040df5b4cd6a588eb61b",
+    "row11_alt": "090341ac93738bad7a395dbe86fed93e2283786f8879b96960fb83714f058afd",
+    "row44_reject": "bd392e166c108ecab5fb6334f9ab298554e69f0a311cbc930725e2e96dcba57a"
+  },
+  "original_signed_donors": {
+    "pair_30_30": {
+      "raw_hex": "312030203020303030",
+      "original_signed_steps": 17875,
+      "sha256": "3c6650510eca52dd3614ab136cc4b090c07a8b41520486b1a64e52474f18603a"
+    },
+    "pair_30_20": {
+      "raw_hex": "312030203020303020",
+      "original_signed_step_limit": 25000
+    }
+  },
+  "candidate_raw_hex": "3120302030203030302030",
+  "candidate_ascii": "1 0 0 000 0",
+  "original_prefix_input_chars": 9,
+  "original_prefix_reused_signed_step_count": 9597,
+  "candidate_source_predicted": {
+    "extra_space_t": 9598,
+    "q_after_space": 4,
+    "m_after_space": 0,
+    "extra_digit_t": 11020,
+    "q_at_row11": 4,
+    "positive_j113_11_t": 11524,
+    "j_offset": 61,
+    "next_ip": [
+      175,
+      11
+    ],
+    "x235_11_t": 11571,
+    "vector": [
+      -225,
+      33
+    ],
+    "destination": [
+      10,
+      44
+    ],
+    "row44_at_HALT_t": 11741,
+    "prints": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+    ],
+    "candidate_counter_gate_reached": false
+  },
+  "independent_oracles": 2,
+  "synthetic_nonnoop_mutations_rejected": 25,
+  "final_zip_replay_both_passed": true,
+  "evidence_zip_sha256": "71276d49be1156cb58a5e568519ee4c8b70fe1a95d7149f9f15d2a8e0efde97e",
+  "evidence_zip_size": 19245,
+  "evidence_member_crc_pass": 13,
+  "evidence_member_sha_pass": 12,
+  "source_only_conditional_proof": true,
+  "new_original_native_runs": 0,
+  "new_full_original_GitHub_CI_runs": 0,
+  "new_valid_counter_target_witness": false,
+  "stage1_global_pass": false,
+  "stage1_functional_pass": false,
+  "stage1_geometric_pass": false,
+  "next": "QA31AY"
+}

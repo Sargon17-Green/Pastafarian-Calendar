@@ -1,0 +1,142 @@
+{
+  "archived_final_east_fetches": 17,
+  "archived_iterations": 102,
+  "cases": [
+    {
+      "case": "zero_equal",
+      "east_gate_tick": 11254,
+      "first_gate_tick": 11254,
+      "loops": 0
+    },
+    {
+      "case": "foundation_cross",
+      "east_gate_tick": 41546,
+      "first_gate_tick": 22938,
+      "loops": 8
+    },
+    {
+      "case": "forward_short",
+      "east_gate_tick": 13580,
+      "first_gate_tick": 11254,
+      "loops": 1
+    },
+    {
+      "case": "reverse_short",
+      "east_gate_tick": 13580,
+      "first_gate_tick": 11254,
+      "loops": 1
+    },
+    {
+      "case": "mixed_small",
+      "east_gate_tick": 13504,
+      "first_gate_tick": 11178,
+      "loops": 1
+    },
+    {
+      "case": "positive_negative",
+      "east_gate_tick": 45628,
+      "first_gate_tick": 24694,
+      "loops": 9
+    },
+    {
+      "case": "negative_positive",
+      "east_gate_tick": 45552,
+      "first_gate_tick": 24618,
+      "loops": 9
+    },
+    {
+      "case": "large_values",
+      "east_gate_tick": 165808,
+      "first_gate_tick": 75094,
+      "loops": 39
+    },
+    {
+      "case": "invalid_zero_sign",
+      "east_gate_tick": 11178,
+      "first_gate_tick": 11178,
+      "loops": 0
+    },
+    {
+      "case": "invalid_big_sign",
+      "east_gate_tick": 17574,
+      "first_gate_tick": 12922,
+      "loops": 2
+    },
+    {
+      "case": "epoch_forward_one",
+      "east_gate_tick": 13580,
+      "first_gate_tick": 11254,
+      "loops": 1
+    },
+    {
+      "case": "epoch_reverse_one",
+      "east_gate_tick": 13580,
+      "first_gate_tick": 11254,
+      "loops": 1
+    },
+    {
+      "case": "recent_anchor_equal",
+      "east_gate_tick": 37616,
+      "first_gate_tick": 21334,
+      "loops": 7
+    },
+    {
+      "case": "recent_anchor_next",
+      "east_gate_tick": 37616,
+      "first_gate_tick": 21334,
+      "loops": 7
+    },
+    {
+      "case": "foundation_neighbor_forward",
+      "east_gate_tick": 41546,
+      "first_gate_tick": 22938,
+      "loops": 8
+    },
+    {
+      "case": "foundation_neighbor_reverse",
+      "east_gate_tick": 41546,
+      "first_gate_tick": 22938,
+      "loops": 8
+    },
+    {
+      "case": "invalid_target_zero_sign",
+      "east_gate_tick": 11254,
+      "first_gate_tick": 11254,
+      "loops": 0
+    }
+  ],
+  "exit": "east iff both quotients are zero; same IP, incoming delta and empty stack",
+  "geometry_sha256": "938f4643876db0758e9d068726dbb84bb171c246109f0b52281e08422f52f236",
+  "payload_arithmetic": "not evaluated symbolically beyond rank/control",
+  "period": 2326,
+  "physical_iteration_steps": 237252,
+  "rank": "max(B,D)",
+  "rank_update": "(B,D) -> (floor(B/10),floor(D/10))",
+  "reads": 23,
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "source_mutations_rejected": [
+    [
+      1338,
+      670,
+      "a",
+      "9",
+      "rank divisor is not ten"
+    ],
+    [
+      663,
+      1050,
+      "a",
+      "b",
+      "rank divisor is not ten"
+    ],
+    [
+      200,
+      1335,
+      "7",
+      "0",
+      "wrong rewritten loop direction"
+    ]
+  ],
+  "stage1_accepted": false,
+  "writes": 12
+}

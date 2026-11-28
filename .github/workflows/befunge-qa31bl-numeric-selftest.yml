@@ -1,0 +1,20 @@
+name: Befunge QA31BL exact-integer numeric selftest (mechanism only)
+on:
+  push:
+    paths:
+      - 'qa/stage1_qa31bl_numeric_chain.py'
+      - '.github/workflows/befunge-qa31bl-numeric-selftest.yml'
+  workflow_dispatch:
+jobs:
+  mechanism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Python compilation and seven numeric toy gates (NOT signed-corpus acceptance)
+        run: |
+          python -m py_compile qa/stage1_qa31bl_numeric_chain.py
+          python qa/stage1_qa31bl_numeric_chain.py --self-test

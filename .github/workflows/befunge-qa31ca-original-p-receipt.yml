@@ -1,0 +1,89 @@
+name: Befunge QA31CA original signed p receipt (original-only)
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/qa31ca_original_native_receipt.py'
+      - 'qa/qa31ca_independent_original_audit.py'
+      - '.github/workflows/befunge-qa31ca-original-p-receipt.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  signed-original-p-receipt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify original source and compile independent auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/qa31ca_independent_original_audit.py
+          mkdir -p qa31ca-signed qa31ca-output
+      - name: Fetch exactly one immutable original QA31V shard0 artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            'https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/13257568625/zip' \
+            -o qa31ca-output/original-qa31v-shard0.zip
+          echo "5732cdf515a81c37982c8e79e5c4368e11e7a3b4e35fb1eae82bed2e17e24553  qa31ca-output/original-qa31v-shard0.zip" | sha256sum -c -
+          unzip -q qa31ca-output/original-qa31v-shard0.zip -d qa31ca-signed
+          python3 qa/qa31ca_independent_original_audit.py \
+            --archive qa31ca-output/original-qa31v-shard0.zip \
+            --source src/interleaved_work_counts.b98 \
+            --report qa31ca-output/preflight.json | tee qa31ca-output/preflight.log
+          test -f qa31ca-signed/qa31g_pair_30_30.jsonl.gz
+      - name: Fetch immutable PyFunge interpreter archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay ONLY original exact pair_30_30 Native with full STEP match
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31ca-output:/qa31ca-output:rw" -w /work \
+            python:2.7-slim sh -ceu "
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 800s python -u qa/qa31ca_original_native_receipt.py /work/qa31ca-signed /qa31ca-output
+            " | tee qa31ca-output/native.log
+          grep -q 'QA31CA_CHANGED_NATIVE_NOT_RUN_STAGE1_OPEN' qa31ca-output/native.log
+      - name: Independently verify original Native receipts and detached corruptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/qa31ca_independent_original_audit.py \
+            --archive qa31ca-output/original-qa31v-shard0.zip \
+            --source src/interleaved_work_counts.b98 \
+            --native-dir qa31ca-output \
+            --report qa31ca-output/audit.json | tee qa31ca-output/audit.log
+          python3 - <<'PY'
+          import json
+          v=json.load(open('qa31ca-output/audit.json'))
+          assert v['new_native_original_replay']=='FULL_SIGNED_MATCH_PASS'
+          assert v['independent_detached_hostiles_rejected']>=12
+          assert v['new_native_changed_run']=='NOT_RUN'
+          assert v['stage1_accepted'] is False
+          PY
+      - name: Preserve original full STEP evidence and logs even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31ca-original-only-receipts
+          path: qa31ca-output/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6

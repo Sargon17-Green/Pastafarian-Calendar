@@ -1,0 +1,42 @@
+name: Befunge QA31CY pinned runtime archive
+on:
+  push:
+    branches: [qa-befunge98-stage1-order-isolation-20261008]
+    paths:
+      - '.github/workflows/befunge-qa31cy-runtime-archive.yml'
+permissions:
+  contents: read
+jobs:
+  archive-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Retain exact runtime bytes without installing or executing
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/qa31cy-runtime-evidence"
+          mkdir -p "$out"
+          trap 'rc=$?; printf "%s\n" "$rc" > "$out/exit_code.txt"' EXIT
+          git rev-parse HEAD > "$out/head_sha.txt"
+          test "$(cat "$out/head_sha.txt")" = "$GITHUB_SHA"
+          git hash-object src/work_counts.b98 > "$out/candidate_blob.txt"
+          test "$(cat "$out/candidate_blob.txt")" = 7418e1ec5fe88fe5c14b75710dea2d5607527f28
+          url='https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz'
+          pin='e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac'
+          printf '%s\n' "$url" > "$out/archive_url.txt"
+          printf '%s\n' "$pin" > "$out/expected_sha256.txt"
+          curl --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 60 --max-filesize 10485760 -fsSL "$url" -o "$RUNNER_TEMP/qa31cy-runtime.part" 2> "$out/download.log"
+          printf '%s  %s\n' "$pin" "$RUNNER_TEMP/qa31cy-runtime.part" | sha256sum -c - | tee "$out/hash_check.log"
+          mv "$RUNNER_TEMP/qa31cy-runtime.part" "$out/PyFunge-0.5-rc2.tar.gz"
+          wc -c < "$out/PyFunge-0.5-rc2.tar.gz" > "$out/archive_bytes.txt"
+          (cd "$out" && sha256sum PyFunge-0.5-rc2.tar.gz > SHA256SUMS)
+      - name: Upload archive and provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31cy-runtime-archive
+          path: ${{ runner.temp }}/qa31cy-runtime-evidence/
+          if-no-files-found: error
+          retention-days: 30

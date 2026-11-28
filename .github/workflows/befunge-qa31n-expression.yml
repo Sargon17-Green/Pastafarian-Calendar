@@ -1,0 +1,51 @@
+name: Befunge QA31N original finite stack-expression provenance
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31n_stack_expression.py'
+      - '.github/workflows/befunge-qa31n-expression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qa31n-expression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Preflight original source and Python
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31m_original_native_route_audit.py qa/stage1_qa31m_signed_owner_route.py qa/stage1_qa31n_stack_expression.py
+          mkdir -p qa31n-output
+      - name: Download EXISTING signed original QA31L Native artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 2 -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H 'Accept: application/vnd.github+json' \
+            'https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/13057227833/zip' \
+            -o qa31n-output/qa31l-original.zip
+          echo '7de4556fda1b3d0b746c5b08e1600e029abb8d3a3565b976ddff804b9d4043b7  qa31n-output/qa31l-original.zip' | sha256sum -c -
+      - name: Original source, signed physical STEPs, arithmetic, hostile controls
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31n_stack_expression.py \
+            src/interleaved_work_counts.b98 qa31n-output/qa31l-original.zip \
+            --out qa31n-output/expression.json | tee qa31n-output/audit.log
+          grep -q QA31N_EXPRESSION_PROVENANCE_PASS qa31n-output/audit.log
+          grep -q QA31N_HOSTILE_13_OF_13 qa31n-output/audit.log
+          grep -q QA31N_NO_NATIVE_NO_STAGE1_PASS qa31n-output/audit.log
+      - name: Persist finite receipt even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31n-original-expression-audit
+          path: |
+            qa31n-output/expression.json
+            qa31n-output/audit.log
+          if-no-files-found: warn

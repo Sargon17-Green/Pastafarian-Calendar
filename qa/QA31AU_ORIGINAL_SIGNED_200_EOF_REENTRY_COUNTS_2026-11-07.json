@@ -1,0 +1,99 @@
+{
+  "schema": "qa31au-original-200-signed-eof-memory-source-fixture-v1",
+  "project_id": "PC-BRANCH-BEFUNGE98-KYRGYZ",
+  "source_git_blob": "560d6aa5807a7f766213a33835cce85eab0fa40c",
+  "original_signed_QA31AI_ZIP_sha256": "9e9d4a8d058f91046e9c7d35cd68270ddf1e4676fe3bbd9917033785dcf17f49",
+  "signed_cases": 200,
+  "original_signed_steps": 3628390,
+  "raw_stdin_byte_reads": 1800,
+  "real_EOF_reflections": 140,
+  "cases_HALT_before_EOF": 60,
+  "preEOF_ingress": [
+    {
+      "ip": [
+        309,
+        14
+      ],
+      "vector": [
+        -299,
+        -9
+      ],
+      "count": 100
+    },
+    {
+      "ip": [
+        405,
+        26
+      ],
+      "vector": [
+        -395,
+        -21
+      ],
+      "count": 40
+    }
+  ],
+  "preEOF_source_arrow": [
+    10,
+    5
+  ],
+  "preEOF_source_bridge": [
+    11,
+    5
+  ],
+  "EOF_source_ip": [
+    13,
+    5
+  ],
+  "EOF_next_ip": [
+    12,
+    5
+  ],
+  "EOF_row6_source_slice": ">00a*0+a*0+a*0+a*6+a*3+-       00a*0+a*0+a*0+a*2+a*3++       x",
+  "EOF_row6_source_sha256": "3e77526e07f663323ef4450860368929f3a2c114747f9a8bf766b9a67dbd5050",
+  "EOF_ray_source_opcodes_per_event": 49,
+  "EOF_exit_source_x": [
+    73,
+    6
+  ],
+  "EOF_exit_vector": [
+    -63,
+    23
+  ],
+  "EOF_exit_destination": [
+    10,
+    29
+  ],
+  "actual_EOF_exit_replays": 140,
+  "byte_memory_cell": [
+    0,
+    49
+  ],
+  "original_memory_initializer": [
+    58,
+    2
+  ],
+  "original_memory_input_writer": [
+    60,
+    5
+  ],
+  "byte_memory_initialization_events": 200,
+  "byte_memory_input_events": 1800,
+  "byte_memory_reads_after_EOF": 0,
+  "byte_memory_writes_after_EOF": 0,
+  "byte_input_reentry_after_EOF": 0,
+  "signed_byte_gate_events_first": 1800,
+  "signed_byte_gate_events_second": 700,
+  "signed_byte_gate_source_cells_rewritten": 0,
+  "EOF_corridor_source_cells_rewritten": 0,
+  "physical_byte_gate_corridor_visits_after_EOF": 0,
+  "independent_full_original_signed_replays": 2,
+  "hostile_nonnoop_mutants_rejected": 28,
+  "full_original_native_new_runs": 0,
+  "full_corpus_GitHub_CI_new_runs": 0,
+  "new_natural_raw_stdin_reaching_q_m_counter_from_candidate_put": null,
+  "global_unreachability_proven": false,
+  "stage1_global_pass": false,
+  "stage1_functional_pass": false,
+  "stage1_geometric_pass": false,
+  "evidence_zip_sha256": "08cb07c88b9fbc26b99d8efc2d80c911fe5278894c0e677bddfe665119ed6e58"
+}

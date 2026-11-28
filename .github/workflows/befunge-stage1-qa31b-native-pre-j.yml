@@ -1,0 +1,80 @@
+name: Befunge Stage1 QA31B Original Native Pre-J Stack
+on:
+  push:
+    branches: ['qa-befunge98-stage1-order-isolation-20261008']
+    paths:
+      - 'qa/stage1_qa31b_native_pre_j_stack.py'
+      - 'qa/stage1_qa31b_independent_pre_j_audit.py'
+      - '.github/workflows/befunge-stage1-qa31b-native-pre-j.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-native-pre-j:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin source and check auditor syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = 560d6aa5807a7f766213a33835cce85eab0fa40c
+          python3 -m py_compile qa/stage1_qa31b_native_pre_j_stack.py qa/stage1_qa31b_independent_pre_j_audit.py
+      - name: Retrieve authenticated original Native witnesses
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh run view 39761821210 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:d0a1c686c4f9244121246aa5b70266c072c3ddce'
+          test "$(gh run view 40280436139 --repo "$GITHUB_REPOSITORY" --json conclusion,headSha --jq '.conclusion + ":" + .headSha')" = 'success:df91dbb0ff836bf5c8c9951338ab92895fc504b0'
+          mkdir -p "$RUNNER_TEMP/qa31b/valid00" "$RUNNER_TEMP/qa31b/invalid18" "$RUNNER_TEMP/qa31b/signed"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-0 --dir "$RUNNER_TEMP/qa31b/valid00"
+          gh run download 39761821210 --repo "$GITHUB_REPOSITORY" --name qa20-shard-1 --dir "$RUNNER_TEMP/qa31b/invalid18"
+          gh run download 40280436139 --repo "$GITHUB_REPOSITORY" --name qa31a-136-original-native-outcome-variation --dir "$RUNNER_TEMP/qa31b/signed"
+          echo "782fb868a11a105550ef5af6f8f7cd39e4ba9de77d9565f7549e310549b0073a  $RUNNER_TEMP/qa31b/valid00/qa20_manifest.json" | sha256sum -c -
+          echo "9c5af6212cfd7c1ab58e9603f385767e64b10799c90be416a86c4f09d613bfdd  $RUNNER_TEMP/qa31b/invalid18/qa20_manifest.json" | sha256sum -c -
+          echo "39f017ea8cb4b6865df031639763f8546fb87427ca94b487e18493fc475a189c  $RUNNER_TEMP/qa31b/signed/qa31a_native_outcome_variation.json" | sha256sum -c -
+      - name: Fetch pin-checked original PyFunge rc2
+        run: |
+          set -euo pipefail
+          curl -fsSL https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Replay all signed physical Native steps and measure real pre-j operands
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$RUNNER_TEMP/qa31b:/qa31b" -w /work python:2.7-slim sh -ceu '
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 1300s python -u qa/stage1_qa31b_native_pre_j_stack.py /qa31b /qa31b/signed/qa31a_native_outcome_variation.json
+            ' | tee "$RUNNER_TEMP/qa31b/native.log"
+          grep -q QA31B_NATIVE_FULL_SIGNED_PARITY "$RUNNER_TEMP/qa31b/native.log"
+          grep -q QA31B_MEASURED_J_OPERANDS "$RUNNER_TEMP/qa31b/native.log"
+          grep -q QA31B_INPUT_CAUSALITY_NOT_PROVEN_STAGE1_OPEN "$RUNNER_TEMP/qa31b/native.log"
+      - name: Independently reject 28 forged Native stack/STEP receipts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/stage1_qa31b_independent_pre_j_audit.py \
+            src/interleaved_work_counts.b98 \
+            "$RUNNER_TEMP/qa31b/signed/qa31a_native_outcome_variation.json" \
+            "$RUNNER_TEMP/qa31b" "$RUNNER_TEMP/qa31b/qa31b_native_pre_j.json" \
+            "$RUNNER_TEMP/qa31b/independent.json" | tee "$RUNNER_TEMP/qa31b/audit.log"
+          grep -q QA31B_INDEPENDENT_FORGERIES_REJECTED "$RUNNER_TEMP/qa31b/audit.log"
+          grep -q QA31B_INPUT_TO_STACK_CAUSALITY_UNPROVEN "$RUNNER_TEMP/qa31b/audit.log"
+      - name: Preserve signed Native evidence and RED diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: qa31b-original-native-pre-j-stack
+          path: |
+            ${{ runner.temp }}/qa31b/qa31b_native_pre_j.json
+            ${{ runner.temp }}/qa31b/independent.json
+            ${{ runner.temp }}/qa31b/native.log
+            ${{ runner.temp }}/qa31b/audit.log
+          if-no-files-found: warn

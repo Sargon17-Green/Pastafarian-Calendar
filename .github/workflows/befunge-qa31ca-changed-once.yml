@@ -1,0 +1,86 @@
+name: Befunge QA31CA one-shot altered Native p-value (62 to 118)
+on:
+  push:
+    branches:
+      - qa-befunge98-stage1-order-isolation-20261008
+    paths:
+      - 'qa/qa31ca_changed_native_once.py'
+      - 'qa/qa31ca_independent_changed_audit.py'
+      - '.github/workflows/befunge-qa31ca-changed-once.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  one-intervened-native-case:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pin immutable original source, syntax and exact original receipt
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git hash-object src/interleaved_work_counts.b98)" = '560d6aa5807a7f766213a33835cce85eab0fa40c'
+          python3 -m py_compile qa/qa31ca_changed_native_once.py qa/qa31ca_independent_changed_audit.py
+          mkdir -p qa31ca-control qa31ca-altered
+          curl -fsSL --retry 3 \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            'https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/14717136552/zip' \
+            -o qa31ca-control/original_control_artifact.zip
+          echo '988045a5a51fde51cfa544ca3fdbba23b7b33fa76f7e9e89b9a942c0ab3d707c  qa31ca-control/original_control_artifact.zip' | sha256sum -c -
+          unzip -q qa31ca-control/original_control_artifact.zip -d qa31ca-control
+          echo '5732cdf515a81c37982c8e79e5c4368e11e7a3b4e35fb1eae82bed2e17e24553  qa31ca-control/original-qa31v-shard0.zip' | sha256sum -c -
+          python3 qa/qa31ca_independent_original_audit.py \
+            --archive qa31ca-control/original-qa31v-shard0.zip \
+            --source src/interleaved_work_counts.b98 \
+            --native-dir qa31ca-control \
+            --report qa31ca-altered/previous-original-audit.json \
+            | tee qa31ca-altered/previous-original-audit.log
+      - name: Fetch immutable PyFunge 0.5-rc2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://files.pythonhosted.org/packages/source/P/PyFunge/PyFunge-0.5-rc2.tar.gz' -o "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz"
+          echo "e72d8beec82082134a752c9e23f131092bf1fe9e0f39d2c20c9de25bfbcfd4ac  $RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz" | sha256sum -c -
+      - name: Execute exactly one altered Native pair_30_30, no original Native rerun
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -e PYFUNGE_NO_PSYCO=1 -e PYTHONPATH=/work/qa \
+            -v "$GITHUB_WORKSPACE:/work:ro" \
+            -v "$RUNNER_TEMP/PyFunge-0.5-rc2.tar.gz:/tmp/PyFunge-0.5-rc2.tar.gz:ro" \
+            -v "$GITHUB_WORKSPACE/qa31ca-altered:/qa31ca-altered:rw" -w /work \
+            python:2.7-slim sh -ceu "
+              pip install --no-cache-dir /tmp/PyFunge-0.5-rc2.tar.gz >/dev/null
+              timeout --kill-after=5s 900s python -u qa/qa31ca_changed_native_once.py /work/qa31ca-control /qa31ca-altered
+            " | tee qa31ca-altered/changed-native.log
+      - name: Independent changed STEP, p/g, stdin, stdout and forgery audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -u qa/qa31ca_independent_changed_audit.py \
+            --original-artifact qa31ca-control/original_control_artifact.zip \
+            --source src/interleaved_work_counts.b98 \
+            --changed-dir qa31ca-altered \
+            --report qa31ca-altered/independent-audit.json \
+            | tee qa31ca-altered/independent-audit.log
+          python3 - <<'PY'
+          import json
+          v=json.load(open('qa31ca-altered/independent-audit.json'))
+          assert v['differential_gate']=='FINITE_NATIVE_ONE_INTERVENTION_PASS_NOT_STAGE1'
+          assert v['independent_detached_hostiles_rejected'] >= 12
+          assert v['stage1_accepted'] is False
+          PY
+      - name: Upload complete changed physical trace and diagnostics even if failed
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: befunge-qa31ca-one-altered-native-physical-receipt
+          path: qa31ca-altered/
+          if-no-files-found: warn
+          retention-days: 30
+          compression-level: 6
