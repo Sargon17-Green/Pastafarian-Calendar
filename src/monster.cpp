@@ -97,6 +97,7 @@ struct BuriedGate {
     bool verifiedThroughLegacyGapPath = false;
     bool poisoned = false;
     std::string semanticFingerprint{};
+    int verifiedGap = 0;
 };
 
 std::map<GateGraveyardKey, BuriedGate> gateGraveyard;
@@ -7110,7 +7111,11 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
             const Integer previousDay = gates_.at(n - 1);
             Integer resolvedDay{};
             bool resurrected = false;
-            const GateGraveyardKey key{stage56CorrectedSauce_, n};
+            // PATCH 43: canonical saved-sum geometry is shared by both stage flags.
+            // Preserve stage-specific keys during full historical validation.
+            const GateGraveyardKey key{
+                (accelerationsOn() && !fullHistoricalValidationOn())
+                    ? true : stage56CorrectedSauce_, n};
 
             if (accelerationsOn()) {
                 BuriedGate corpse{};
@@ -7140,7 +7145,8 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
                 }
                 if (foundCorpse) {
                     const Integer rememberedGap = corpse.day - previousDay;
-                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963;
+                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963 &&
+                        rememberedGap == corpse.verifiedGap;
                     if (corpseValid && fullHistoricalValidationOn()) {
                         const Integer historicalGap = positiveGateGap(n);
                         scarBump(&PersistentScarMetrics::patch28GateCalculated);
@@ -7171,7 +7177,8 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
                         28,
                         true,
                         false,
-                        persistentSemanticFingerprint()
+                        persistentSemanticFingerprint(),
+                        gap.convert_to<int>()
                     };
                     std::lock_guard<std::mutex> guard(gateGraveyardMutex);
                     const auto existing = gateGraveyard.find(key);
@@ -7194,7 +7201,11 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
             const Integer nextDay = gates_.at(n + 1);
             Integer resolvedDay{};
             bool resurrected = false;
-            const GateGraveyardKey key{stage56CorrectedSauce_, n};
+            // PATCH 43: canonical saved-sum geometry is shared by both stage flags.
+            // Preserve stage-specific keys during full historical validation.
+            const GateGraveyardKey key{
+                (accelerationsOn() && !fullHistoricalValidationOn())
+                    ? true : stage56CorrectedSauce_, n};
 
             if (accelerationsOn()) {
                 BuriedGate corpse{};
@@ -7224,7 +7235,8 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
                 }
                 if (foundCorpse) {
                     const Integer rememberedGap = nextDay - corpse.day;
-                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963;
+                    bool corpseValid = rememberedGap >= 42 && rememberedGap <= 963 &&
+                        rememberedGap == corpse.verifiedGap;
                     if (corpseValid && fullHistoricalValidationOn()) {
                         const Integer historicalGap = negativeGateGap(-n);
                         scarBump(&PersistentScarMetrics::patch28GateCalculated);
@@ -7255,7 +7267,8 @@ Integer Patch18YearWalkWorkspace::ensureGateIndex(const Integer& index) {
                         28,
                         true,
                         false,
-                        persistentSemanticFingerprint()
+                        persistentSemanticFingerprint(),
+                        gap.convert_to<int>()
                     };
                     std::lock_guard<std::mutex> guard(gateGraveyardMutex);
                     const auto existing = gateGraveyard.find(key);
