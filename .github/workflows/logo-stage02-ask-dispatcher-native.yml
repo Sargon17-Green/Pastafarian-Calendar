@@ -1,4 +1,4 @@
-name: Logo Stage2 fresh Native signed gap boundary probes
+name: Logo Stage2 QA D19 compact audited gate cache integration
 on:
   push:
     branches:
@@ -6,45 +6,140 @@ on:
 permissions:
   contents: read
 jobs:
-  native-gap:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
+  ask-dispatcher:
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
         include:
-          - gate: -12
-            expected: 746
-          - gate: -1
-            expected: 503
-          - gate: 10
-            expected: 763
-          - gate: 29473
-            expected: 175
-          - gate: 29485
-            expected: 534
-          - gate: 29496
-            expected: 864
+          - direction: forward
+            group: year5000
+          - direction: reverse
+            group: year5000
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify locked inputs
+      - name: Verify exact source and generate the fixed runner
         shell: bash
+        env:
+          DIRECTION: ${{ matrix.direction }}
+          GROUP: ${{ matrix.group }}
         run: |
           set -euo pipefail
-          mkdir -p evidence
-          git rev-parse HEAD > evidence/commit.txt
-          test "$(cat evidence/commit.txt)" = "$GITHUB_SHA"
-          git merge-base --is-ancestor c3e34663db5e33712f35fbebd3190443125babc4 HEAD
-          git diff --exit-code c21646e1b06f25b3f75fb672dd432ead8e664875 HEAD -- src test
-          test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = ad001c6aeeb6c758f5004b206a656fec5d6fc403
-          test "$(git hash-object qa/logo_signed_gap_oracle.py)" = 0bbce1ed67f4eb7c12986b4a3431eff9b27a4974
-          git ls-tree -r HEAD src test > evidence/source-blobs.txt
-          test "$(sha256sum evidence/source-blobs.txt | cut -d' ' -f1)" = 0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123
-          sha256sum src/exact_integer.logo test/normative_reference.logo qa/logo_signed_gap_oracle.py > evidence/input-sha256.txt
-          printf '%s\n' 'host-run=46078314376' 'forward-artifact=15235573233 sha256=1f5b95293e776f8debfb4f941760a841238f7fa38c1eb7bc341b791ebd4e264e' 'reverse-artifact=15234874328 sha256=2fe59e72deef9c592969160203f57c162f5b8b2a660154eddd1d72d21502a4f7' > evidence/host-provenance.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "c21646e1b06f25b3f75fb672dd432ead8e664875" HEAD
+          test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = "ad001c6aeeb6c758f5004b206a656fec5d6fc403"
+          git diff --exit-code "c21646e1b06f25b3f75fb672dd432ead8e664875" HEAD -- src test
+          mkdir -p "$RUNNER_TEMP/qa-bundle"
+          unzip -q qa/logo_ido_ask_dispatcher_code_bundle.zip -d "$RUNNER_TEMP/qa-bundle"
+          (cd "$RUNNER_TEMP/qa-bundle" && sha256sum -c qa/bundle.sha256)
+          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_common.logo" qa/
+          cp "$RUNNER_TEMP/qa-bundle/qa/logo_stage2_ask_dispatcher_oracle.py" qa/
+          cp "$RUNNER_TEMP/qa-bundle/QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md" .
+          # Gate reporters return BI lists; the row logger must also nest binary SENTENCE inputs.
+          # explicitly discard those values when they are used as loop commands.
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("qa/logo_stage2_ask_dispatcher_common.logo")
+          source = path.read_text(encoding="utf-8")
+          replacements = (
+              ("  print sentence [ASK_DISPATCH_ROW] :tag :step [A] (bi.digits :firstValue) [N] (bi.digits :N) [R] (bi.digits :rank)\n",
+               "  print (sentence [ASK_DISPATCH_ROW] (sentence :tag (sentence :step (sentence [A] (sentence (bi.digits :firstValue) (sentence [N] (sentence (bi.digits :N) (sentence [R] (bi.digits :rank)))))))))\n", 1),
+              ("    nr.gate.extend.forward\n", "    ignore nr.gate.extend.forward\n", 1),
+              ("[nr.gate.extend.backward]", "[ignore nr.gate.extend.backward]", 2),
+              ("[nr.gate.extend.forward]", "[ignore nr.gate.extend.forward]", 2),
+          )
+          changed = 0
+          for old, new, expected in replacements:
+              actual = source.count(old)
+              if actual != expected:
+                  raise SystemExit(f"expected {expected} occurrences of {old!r}; found {actual}")
+              source = source.replace(old, new)
+              changed += actual
+          if changed != 6:
+              raise SystemExit(f"expected six QA harness fixes; changed {changed}")
+          # QA-only cache, from independently audited host ZIPs and six fresh Native probes.
+          import hashlib, json, os, sys
+          sys.path.insert(0, 'qa')
+          from logo_signed_gap_oracle import gap
+          windows = {'forward': ("{\"center\":-15055671,\"gates\":[{\"day\":-15061829,\"gap\":746,\"index\":-12},{\"day\":-15061083,\"gap\":546,\"index\":-11},{\"day\":-15060537,\"gap\":51,\"index\":-10},{\"day\":-15060486,\"gap\":488,\"index\":-9},{\"day\":-15059998,\"gap\":414,\"index\":-8},{\"day\":-15059584,\"gap\":558,\"index\":-7},{\"day\":-15059026,\"gap\":890,\"index\":-6},{\"day\":-15058136,\"gap\":433,\"index\":-5},{\"day\":-15057703,\"gap\":759,\"index\":-4},{\"day\":-15056944,\"gap\":329,\"index\":-3},{\"day\":-15056615,\"gap\":441,\"index\":-2},{\"day\":-15056174,\"gap\":503,\"index\":-1},{\"day\":-15055671,\"gap\":null,\"index\":0},{\"day\":-15055326,\"gap\":345,\"index\":1},{\"day\":-15054508,\"gap\":818,\"index\":2},{\"day\":-15053677,\"gap\":831,\"index\":3},{\"day\":-15053459,\"gap\":218,\"index\":4},{\"day\":-15052605,\"gap\":854,\"index\":5},{\"day\":-15052469,\"gap\":136,\"index\":6},{\"day\":-15051795,\"gap\":674,\"index\":7},{\"day\":-15051146,\"gap\":649,\"index\":8},{\"day\":-15050529,\"gap\":617,\"index\":9},{\"day\":-15049766,\"gap\":763,\"index\":10}],\"high\":-15049893,\"low\":-15061449}", 'db4dedb55d5af07e47320a748db14174ed57180c094f996a5fa3d35bce74ccb8'),
+                     'reverse': ("{\"center\":-278522,\"gates\":[{\"day\":-284481,\"gap\":175,\"index\":29473},{\"day\":-283769,\"gap\":712,\"index\":29474},{\"day\":-283005,\"gap\":764,\"index\":29475},{\"day\":-282734,\"gap\":271,\"index\":29476},{\"day\":-282370,\"gap\":364,\"index\":29477},{\"day\":-281500,\"gap\":870,\"index\":29478},{\"day\":-280691,\"gap\":809,\"index\":29479},{\"day\":-280256,\"gap\":435,\"index\":29480},{\"day\":-279517,\"gap\":739,\"index\":29481},{\"day\":-279457,\"gap\":60,\"index\":29482},{\"day\":-278714,\"gap\":743,\"index\":29483},{\"day\":-278115,\"gap\":599,\"index\":29484},{\"day\":-277581,\"gap\":534,\"index\":29485},{\"day\":-276682,\"gap\":899,\"index\":29486},{\"day\":-276341,\"gap\":341,\"index\":29487},{\"day\":-275686,\"gap\":655,\"index\":29488},{\"day\":-275167,\"gap\":519,\"index\":29489},{\"day\":-274777,\"gap\":390,\"index\":29490},{\"day\":-274625,\"gap\":152,\"index\":29491},{\"day\":-274218,\"gap\":407,\"index\":29492},{\"day\":-274124,\"gap\":94,\"index\":29493},{\"day\":-273922,\"gap\":202,\"index\":29494},{\"day\":-273092,\"gap\":830,\"index\":29495},{\"day\":-272228,\"gap\":864,\"index\":29496}],\"high\":-272744,\"low\":-284300}", '73a635dbb56a62817ee2f8a0e6557d90a56ff0d575b4b59dfbab956b3d8e886e')}
+          raw_window, digest = windows[os.environ['DIRECTION']]
+          assert hashlib.sha256(raw_window.encode()).hexdigest() == digest
+          w = json.loads(raw_window)
+          rows = w['gates']
+          assert len(rows) == (23 if os.environ['DIRECTION'] == 'forward' else 24)
+          assert rows[0]['day'] <= w['low'] < rows[1]['day'] and rows[-2]['day'] < w['high'] <= rows[-1]['day']
+          assert w['high'] - w['center'] == w['center'] - w['low'] == 5778
+          for row in rows:
+              k = row['index']
+              assert row['gap'] == (gap(k) if k else None)
+          for x,y in zip(rows, rows[1:]):
+              assert y['index'] == x['index']+1 and y['day']-x['day'] == (x['gap'] if x['index'] < 0 else y['gap'])
+          def bi(n):
+              sign = (n > 0) - (n < 0)
+              if not sign: return 'bi.zero'
+              n, ds = abs(n), []
+              while n:
+                  n, d = divmod(n,10000)
+                  ds.append(d)
+              return '(bi.make '+str(sign)+' ['+' '.join(map(str,ds))+'])'
+          cache = ['  make "NR.GATES []', '  make "NR.MIN.GATE '+bi(rows[0]['index']), '  make "NR.MAX.GATE '+bi(rows[-1]['index'])]
+          cache += ['  nr.gate.store '+bi(x['index'])+' '+bi(x['day']) for x in rows]
+          cache += ['  print [ASK_DISPATCH_DIAG_CACHE_LOADED]']
+          start_marker = 'to ad.year5000.data :calculation\n'
+          assert source.count(start_marker) == 1
+          start = source.index(start_marker)
+          end = source.index('\nend\n', start) + len('\nend\n')
+          original = source[start:end]
+          assert 'bi.small 139' in original and 'bi.small 274' in original and 'nr.year5000.scan.i' in original and 'nr.year.pair.sort' in original
+          lines = ['to ad.year5000.data :calculation', '  print [ASK_DISPATCH_DIAG_COVER_BEGIN]',
+                   '  if not bi.eq :calculation '+bi(w['center'])+' [print [ASK_DISPATCH_CACHE_CENTER_FAILURE] bye]'] + cache + [
+                   '  localmake "low bi.sub :calculation bi.small 5778',
+                   '  localmake "high bi.add :calculation bi.small 5778',
+                   '  if not bi.le (nr.gate.known :NR.MIN.GATE) :low [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] bye]',
+                   '  if not bi.ge (nr.gate.known :NR.MAX.GATE) :high [print [ASK_DISPATCH_GATE_COVERAGE_FAILURE] bye]',
+                   '  print [ASK_DISPATCH_DIAG_SCAN_BEGIN]',
+                   '  localmake "raw nr.year5000.scan.i :NR.MIN.GATE :NR.MAX.GATE :calculation',
+                   '  localmake "candidates nr.year.pair.sort :raw',
+                   '  print (sentence [ASK_DISPATCH_DIAG_CANDIDATES] (count :candidates))',
+                   '  if emptyp :candidates [print [ASK_DISPATCH_YEAR5000_EMPTY_FAILURE] bye]',
+                   '  localmake "N bi.small count :candidates',
+                   '  print [ASK_DISPATCH_DIAG_REFERENCE_SAUCE_BEGIN]',
+                   '  localmake "s nr.sauce :calculation :calculation',
+                   '  localmake "stream nr.ask :s 1 10',
+                   '  localmake "rank nr.choose.rank :stream :N',
+                   '  localmake "chosen item bi.to.small :rank :candidates',
+                   '  localmake "year nr.year.make bi.small 5000 (item 1 :chosen) (item 2 :chosen)',
+                   '  if not bi.eq :NR.MIN.GATE '+bi(rows[0]['index'])+' [print [ASK_DISPATCH_CACHE_MIN_FAILURE] bye]',
+                   '  if not bi.eq :NR.MAX.GATE '+bi(rows[-1]['index'])+' [print [ASK_DISPATCH_CACHE_MAX_FAILURE] bye]',
+                   '  print [ASK_DISPATCH_DIAG_YEAR5000_DATA_DONE]',
+                   '  output (list :year :N)', 'end']
+          replacement = '\n'.join(lines)+'\n'
+          p = Path(os.environ['RUNNER_TEMP'])
+          (p/'window.json').write_text(raw_window, encoding='utf-8')
+          (p/'cache-provenance.txt').write_text('host-run=46078314376\nforward-artifact=15235573233 sha256=1f5b95293e776f8debfb4f941760a841238f7fa38c1eb7bc341b791ebd4e264e\nreverse-artifact=15234874328 sha256=2fe59e72deef9c592969160203f57c162f5b8b2a660154eddd1d72d21502a4f7\nnative-run=46124439517 sha=865e6bf3380b2cb68a52b90d058b2ba2d1341f78\nprobes=-12/746,-1/503,10/763,29473/175,29485/534,29496/864\nwindow-sha256='+digest+'\n', encoding='utf-8')
+          print('QA_COMPACT_CACHE_PROVENANCE=PASS',len(rows),digest)
+          source = source[:start] + replacement + source[end:]
+          print("ASK_DISPATCH_DAY_WINDOW_DIAGNOSTIC=READY year5000 only")
+          path.write_text(source, encoding="utf-8")
+          print("ASK_DISPATCH_GATE_REPORTER_PATCH=PASS 6/6")
+          PY
+          git rev-parse HEAD > "$RUNNER_TEMP/commit.txt"
+          git ls-tree -r HEAD src test > "$RUNNER_TEMP/source-blobs.txt"
+          sha256sum qa/logo_ido_ask_dispatcher_code_bundle.zip qa/logo_stage2_ask_dispatcher_common.logo qa/logo_stage2_ask_dispatcher_oracle.py QA_STAGE2_ASK_DISPATCHER_INTEGRATION_CONTRACT_20261125.md .github/workflows/logo-stage02-ask-dispatcher-native.yml > "$RUNNER_TEMP/qa-hashes.txt"
+          test "$(sha256sum "$RUNNER_TEMP/source-blobs.txt" | cut -d' ' -f1)" = "0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123"
+          test "$(git hash-object qa/logo_signed_gap_oracle.py)" = "0bbce1ed67f4eb7c12986b4a3431eff9b27a4974"
+          git diff --exit-code HEAD -- src test
+          cat > "$RUNNER_TEMP/native.logo" <<EOF
+          make "AD.DIRECTION "$DIRECTION
+          make "AD.GROUP "$GROUP
+          load "qa/logo_stage2_ask_dispatcher_common.logo
+          ad.run
+          EOF
       - name: Build pinned UCBLogo 6.2.5
         shell: bash
         run: |
@@ -59,55 +154,61 @@ jobs:
           make -j2
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
-      - name: Fresh unmodified reference versus audited host probe
+      - name: Run bounded Native selector group
         shell: bash
         env:
-          GATE: ${{ matrix.gate }}
-          EXPECTED: ${{ matrix.expected }}
+          GROUP: ${{ matrix.group }}
         run: |
           set -euo pipefail
-          python3 -u - <<'PY'
-          import json, os, re, subprocess, sys, time
-          from pathlib import Path
-          sys.path.insert(0, 'qa')
-          from logo_signed_gap_oracle import gap
-          k, expected = int(os.environ['GATE']), int(os.environ['EXPECTED'])
-          assert k != 0 and 42 <= expected <= 963 and gap(k) == expected
-          # bi.small accepts a single base-10000 limb; use normalized limbs for every index.
-          n, digits = abs(k), []
-          while n:
-              n, r = divmod(n, 10000)
-              digits.append(r)
-          assert sum(x*10000**i for i,x in enumerate(digits)) == abs(k)
-          assert all(0 <= x < 10000 for x in digits)
-          signed = '(bi.make ' + str(1 if k > 0 else -1) + ' [' + ' '.join(map(str,digits)) + '])'
-          p = Path('evidence')
-          script = p/'probe.logo'
-          script.write_text('\n'.join(['load "src/exact_integer.logo', 'load "test/normative_reference.logo',
-              'print [NATIVE_BEGIN]', 'make "PROBE.INDEX ' + signed,
-              'print (sentence [NATIVE_INDEX] (sentence (bi.sign :PROBE.INDEX) (bi.digits :PROBE.INDEX)))',
-              'make "PROBE.GAP nr.gate.gap :PROBE.INDEX',
-              'print (sentence [NATIVE_GAP] (bi.to.small :PROBE.GAP))',
-              'print [NATIVE_DONE]', 'bye'])+'\n')
-          t = time.monotonic()
-          with (p/'native.log').open('w') as f:
-              proc = subprocess.run(['timeout','--signal=TERM','--kill-after=5s','600','stdbuf','-oL','-eL',os.environ['LOGO_BIN'],str(script)],stdin=subprocess.DEVNULL,stdout=f,stderr=subprocess.STDOUT)
-          elapsed = time.monotonic()-t
-          log = (p/'native.log').read_text(errors='replace')
-          print(log,flush=True)
-          markers = [line.strip() for line in log.splitlines() if line.strip().startswith('NATIVE_')]
-          errors = re.findall(r"don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|ERORO:", log,re.I)
-          ok = proc.returncode == 0 and not errors and markers == ['NATIVE_BEGIN','NATIVE_INDEX ' + str(1 if k > 0 else -1) + ' ' + ' '.join(map(str,digits)),f'NATIVE_GAP {expected}','NATIVE_DONE']
-          result = dict(index=k,limbs=digits,expected=expected,markers=markers,exit=proc.returncode,elapsed=elapsed,errors=errors,qualification='FRESH_NATIVE_SIGNED_GAP_ONLY',passed=ok)
-          (p/'result.json').write_text(json.dumps(result,indent=2)+'\n')
-          print('NATIVE_SIGNED_GAP_PASS' if ok else 'NATIVE_SIGNED_GAP_NOT_ACCEPTED',result,flush=True)
-          sys.exit(0 if ok else 1)
-          PY
-      - name: Preserve source lock, probe and results
+          started=$SECONDS
+          set +e
+          echo bye | timeout --signal=TERM --kill-after=5s 1200 stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/native.logo" > "$RUNNER_TEMP/native.log" 2>&1
+          code=$?
+          set -e
+          echo "$code" > "$RUNNER_TEMP/exit.txt"
+          echo "$((SECONDS-started))" > "$RUNNER_TEMP/elapsed.txt"
+          cat "$RUNNER_TEMP/native.log"
+          test "$code" = 0
+          expected_cases=1
+          expected_checks=14
+          if [ "$GROUP" = structure ]; then
+            expected_cases=5
+            expected_checks=70
+          fi
+          grep -Fxq "ASK_DISPATCH_CASES_PASIS $expected_cases" "$RUNNER_TEMP/native.log"
+          grep -Fxq "ASK_DISPATCH_CHECKS_PASIS $expected_checks" "$RUNNER_TEMP/native.log"
+          grep -Fxq 'ASK_DISPATCH_NATIVE_PASIS' "$RUNNER_TEMP/native.log"
+          for marker in COVER_BEGIN CACHE_LOADED SCAN_BEGIN REFERENCE_SAUCE_BEGIN YEAR5000_DATA_DONE; do
+            test "$(grep -Fxc "ASK_DISPATCH_DIAG_${marker}" "$RUNNER_TEMP/native.log")" = 1
+          done
+          test "$(grep -c '^ASK_DISPATCH_ROW ' "$RUNNER_TEMP/native.log")" = "$expected_cases"
+          if grep -Eq 'ASK_DISPATCH_FAILURE|ASK_DISPATCH_.*FAILURE|I don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|FALIIS' "$RUNNER_TEMP/native.log"; then exit 1; fi
+      - name: Independent Python integer oracle
+        shell: bash
+        env:
+          DIRECTION: ${{ matrix.direction }}
+          GROUP: ${{ matrix.group }}
+        run: |
+          set -euo pipefail
+          python3 qa/logo_stage2_ask_dispatcher_oracle.py --log "$RUNNER_TEMP/native.log" --direction "$DIRECTION" --group "$GROUP" > "$RUNNER_TEMP/host.log" 2>&1
+          cat "$RUNNER_TEMP/host.log"
+          grep -Fxq 'ASK_DISPATCH_HOST_ORACLE=PASS' "$RUNNER_TEMP/host.log"
+      - name: Preserve exact-SHA evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-native-signed-gap-${{ matrix.gate }}
-          path: evidence/
-          if-no-files-found: error
+          name: logo-ask-dispatch-${{ matrix.direction }}-${{ matrix.group }}
+          path: |
+            ${{ runner.temp }}/commit.txt
+            ${{ runner.temp }}/source-blobs.txt
+            ${{ runner.temp }}/window.json
+            ${{ runner.temp }}/cache-provenance.txt
+            qa/logo_stage2_ask_dispatcher_common.logo
+            ${{ runner.temp }}/qa-hashes.txt
+            ${{ runner.temp }}/native.logo
+            ${{ runner.temp }}/native.log
+            ${{ runner.temp }}/host.log
+            ${{ runner.temp }}/exit.txt
+            ${{ runner.temp }}/elapsed.txt
+          if-no-files-found: warn
           retention-days: 30
