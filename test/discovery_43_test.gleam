@@ -144,12 +144,7 @@ fn verify(
   }
 
   let assert Ok(result) =
-    score.dispatch_discovery_43(
-      context,
-      ids,
-      left_bands,
-      right_bands,
-    )
+    score.dispatch_discovery_43(context, ids, left_bands, right_bands)
   let assert Ok(previous) =
     discovery_42_mixed_directional_coverage.dispatch_discovery_42(
       context,
@@ -280,32 +275,17 @@ pub fn discovery_43_wide_inverted_and_error_priority_test() {
   let _ = verify([3, 5, 2, 4], left, right)
 
   let context = bootstrap.new_context(11, 21)
-  score.dispatch_discovery_43(
-    context,
-    [7],
-    [],
-    [],
-  )
+  score.dispatch_discovery_43(context, [7], [], [])
   |> should.equal(Error(discovery_19_interval_value.InvalidBowlId))
 
   let invalid = bootstrap.MonsterContext(..context, retry_budget: -1)
-  score.dispatch_discovery_43(
-    invalid,
-    [7],
-    [],
-    [],
-  )
+  score.dispatch_discovery_43(invalid, [7], [], [])
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRetryBudget,
     )),
   )
-  score.dispatch_discovery_43(
-    invalid,
-    [],
-    [],
-    [],
-  )
+  score.dispatch_discovery_43(invalid, [], [], [])
   |> should.equal(
     Error(discovery_19_interval_value.InvalidContext(
       bootstrap.InvalidRetryBudget,
