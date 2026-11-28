@@ -68,7 +68,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p build/generalized-native-qa/join
+          # The join runner creates its own fresh evidence directory.
+          mkdir -p build/generalized-native-qa
           ulimit -S -v 3145728
           ulimit -H -v 3145728
           /usr/bin/time -v -o build/generalized-native-qa/join.resources \
