@@ -1,0 +1,144 @@
+name: FALSE Arabic Stage23 interleaving timeout localization
+on:
+  push:
+    branches: ['FALSE\+العربية']
+    paths:
+      - '.github/workflows/false-arabic-stage23-interleave-diagnostic.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native:
+    if: github.ref == 'refs/heads/FALSE+العربية'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        case: [prefix_only, instrumented_interleaving]
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      SOURCE_PIN: 422874de123623dc262eecc80e3624fc9f02c281
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      CASE_NAME: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 422874de123623dc262eecc80e3624fc9f02c281
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: false-arabic-stage23-replay-prepare
+          run-id: 46180051751
+          github-token: ${{ github.token }}
+          path: prepared
+      - name: Verify preparation and build pinned interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/native upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git rev-parse HEAD HEAD^{tree} > evidence/native/source.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/native/runtime_observed.txt
+          test "$(cat evidence/native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+          gcc --version > evidence/native/compiler_version.txt
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src upstream/interpreter.c upstream/src/false.c upstream/utils/file.c upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c upstream/src/token.c -o upstream/false_int > evidence/native/compiler_stdout.txt 2> evidence/native/compiler_stderr.txt
+          printf '%s' '4 7 1ø.%%' > evidence/native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/native/unicode_pick.false > evidence/native/unicode_pick.stdout 2> evidence/native/unicode_pick.stderr
+          test "$(cat evidence/native/unicode_pick.stdout)" = '4'
+      - name: Localize interleaving timeout (diagnostic only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PYTHONPATH=tools python3 - <<'PY'
+          import json, os, pathlib, signal, subprocess, time, hashlib
+          import stage23_measure as m
+          P=pathlib.Path("prepared/stage23_replay_mutant_prepare")
+          E=pathlib.Path("evidence/native")
+          r=json.loads((P/"receipt.json").read_text())
+          assert r["project_id"]=="PC-BRANCH-FALSE-ARABIC"
+          assert r["source_pin"]==os.environ["SOURCE_PIN"] and r["runtime_pin"]==os.environ["RUNTIME_PIN"]==m.RT
+          assert r["timeout_seconds"]==600 and r["address_space_limit_bytes"]==m.LIMIT
+          for name,digest in r["source_sha256"].items():
+              data=(P/"source"/name).read_bytes()
+              assert m.sha(data)==digest and data==pathlib.Path(name).read_bytes()==subprocess.check_output(["git","show",r["source_pin"]+":"+name])
+          original=(P/"interleaving.false").read_bytes()
+          assert m.sha(original)=="b02b8d24649189785874b463e000a98479c360cd6dafee9542d2b57b4ec93b38"
+          (E/"original.false").write_bytes(original)
+          (E/"preparation_receipt.json").write_bytes((P/"receipt.json").read_bytes())
+          m.E=E
+          m.framing_preflight()
+          case=os.environ["CASE_NAME"]
+          s=original.decode("utf-8")
+          def mark_before(anchor,tag):
+              global s
+              assert s.count(anchor)==1, anchor
+              s=s.replace(anchor,'"'+tag+';"\n'+anchor,1)
+          def mark_after(anchor,tag):
+              global s
+              assert s.count(anchor)==1, anchor
+              s=s.replace(anchor,anchor+'\n"'+tag+';"',1)
+          mark_before("k;l:\nz;e:1a;!","DIAG_BOOT")
+          mark_after('d;6+g;!6-0=~["S23_INTER_FIRST_BEFORE_6"0 0/]?',"DIAG_FIRST_OK")
+          boundary='z;y:\nk;w:\nb;40h;!!o:'
+          mark_before(boundary,"DIAG_BEFORE_FULL")
+          mark_after(boundary,"DIAG_FULL_RETURN")
+          mark_before('d;0+g;!6-0=~["S23_INTER_FIRST_AFTER_FULL_0"0 0/]?', "DIAG_FULL_ASSERTIONS_OK")
+          mark_before("m;34h;!!p:", "DIAG_BEFORE_SECOND")
+          mark_after("m;34h;!!p:", "DIAG_SECOND_RETURN")
+          mark_before('z;r:"S23_HEAP_BITS_LSB="', "DIAG_INTER_ASSERTIONS_OK")
+          mark_after('[z;0>][%z;1-z:]#', "DIAG_CLEANUP_OK")
+          if case=="prefix_only":
+              cut='"DIAG_FIRST_OK;"'
+              assert s.count(cut)==1
+              s=s.split(cut)[0]+cut+'\n[z;0>][%z;1-z:]#\n"DIAG_PREFIX_CLEANUP_OK;"\n'
+          else:
+              assert case=="instrumented_interleaving"
+          path=E/"diagnostic.false"; path.write_bytes(s.encode("utf-8"))
+          probe=E/"unbuffered_probe.false";probe.write_text('"DIAG_PROBE;"\n')
+          p=subprocess.run(["stdbuf","-o0","upstream/false_int","-e",str(probe)],capture_output=True,timeout=15,preexec_fn=m.limits)
+          assert p.returncode==0 and p.stdout==b"DIAG_PROBE;" and not p.stderr
+          started=time.monotonic()
+          samples=[]
+          with (E/"stdout.txt").open("wb") as out,(E/"stderr.txt").open("wb") as err:
+              with subprocess.Popen(["stdbuf","-o0","upstream/false_int","-e",str(path)],stdout=out,stderr=err,start_new_session=True,preexec_fn=m.limits) as proc:
+                  while proc.poll() is None:
+                      elapsed=time.monotonic()-started
+                      if elapsed>=600:
+                          os.killpg(proc.pid,signal.SIGKILL);proc.wait();code=124;break
+                      try:
+                          status=pathlib.Path(f"/proc/{proc.pid}/status").read_text()
+                          rss=next((line for line in status.splitlines() if line.startswith("VmRSS:")),None)
+                          vm=next((line for line in status.splitlines() if line.startswith("VmSize:")),None)
+                      except (FileNotFoundError,ProcessLookupError):
+                          rss=vm=None
+                      samples.append(dict(elapsed=round(elapsed,3),rss=rss,vm=vm,stdout=(E/"stdout.txt").read_bytes().decode("ascii",errors="replace")[:4096]))
+                      time.sleep(min(1,max(0,600-elapsed)))
+                  else:
+                      code=proc.returncode
+          elapsed=time.monotonic()-started
+          out=(E/"stdout.txt").read_bytes();err=(E/"stderr.txt").read_bytes()
+          (E/"samples.json").write_text(json.dumps(samples,indent=2)+"\n")
+          (E/"exit_code.txt").write_text(str(code)+"\n")
+          report=dict(project_id=r["project_id"],source_pin=r["source_pin"],runtime_pin=r["runtime_pin"],case=case,original_sha256=m.sha(original),diagnostic_sha256=m.sha(path.read_bytes()),stdout_sha256=m.sha(out),stderr_sha256=m.sha(err),stdout=out.decode("ascii",errors="replace"),exit_code=code,elapsed_seconds=round(elapsed,3),timeout_seconds=600,address_space_limit_bytes=m.LIMIT,diagnostic_only=True,stage_acceptance=False,retained_heap_double_full_assessed=False)
+          (E/"receipt.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(json.dumps(report),flush=True)
+          # Preserve evidence even on an actual diagnostic failure; do not relabel it PASS.
+          expected=b"DIAG_PREFIX_CLEANUP_OK;" if case=="prefix_only" else b"DIAG_CLEANUP_OK;"
+          assert code==0 and not err and out.endswith(expected), "Diagnostic did not reach terminal checkpoint"
+          PY
+      - name: Preserve diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage23-interleave-diagnostic-${{ matrix.case }}
+          path: evidence/native/
+          if-no-files-found: error
+          retention-days: 30
