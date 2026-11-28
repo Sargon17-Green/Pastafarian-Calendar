@@ -7,6 +7,7 @@ pub mod discovery02_work_counts_probe;
 pub mod discovery03_stone_probe;
 pub mod discovery04_stone_probe;
 pub mod discovery05_hidden_probe;
+pub mod discovery06_prior_probe;
 pub mod patch01_save;
 pub mod patch02_work_counts;
 pub mod patch03_distance;
@@ -98,6 +99,7 @@ pub struct MonsterContext {
     pub discovery05_requested_k: Option<usize>,
     pub discovery05_actual: Option<BigInt>,
     pub patch05_hidden_observation: Option<patch05_hidden_probe::Patch05HiddenObservation>,
+    pub discovery06_prior_observation: Option<discovery06_prior_probe::PriorObservation>,
 }
 
 impl MonsterContext {
@@ -130,6 +132,7 @@ impl MonsterContext {
             discovery05_requested_k: None,
             discovery05_actual: None,
             patch05_hidden_observation: None,
+            discovery06_prior_observation: None,
         }
     }
 }
