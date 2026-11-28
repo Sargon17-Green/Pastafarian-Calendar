@@ -1,0 +1,168 @@
+name: Soak v253 exact candidate persistent mixed anchors and year boundaries (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v253-celeritas-persistent-mixed-anchors.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind prior native evidence and immutable candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "d43e969adaf3c1878db7154f394230e5e9a128fa"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v253-celeritas-persistent-mixed-anchors.yml"
+          mkdir -p evidence source/src source/include/pastafari
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15259858850/zip > v252.zip
+          echo "470ddff96d7d17d69a00f9cff3c7d820707a0467f491a8d56b27d0206497ebc7  v252.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15236391680/zip > v243.zip
+          echo "7f2c5f235d44f5fc967216026005917dca7619acd8e95e43140ea50299175a0b  v243.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,hashlib,zipfile,subprocess
+          from pathlib import Path
+          def load(v):
+              with zipfile.ZipFile(f"v{v}.zip") as z:
+                  assert z.testzip() is None
+                  return json.loads(z.read("result.json"))
+          a,b=load(252),load(243)
+          ref="87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065"
+          assert a["schema"]=="SOAK_V252_VERSIONED_SHARED_GATE_NATIVE/1" and a["versioned_candidate_pass"] and a["candidate_commit"]==ref
+          assert b["schema"]=="SOAK_V243_CELERITAS_VERSIONED_INTERVAL/1" and b["versioned_candidate_pass"] and b["candidate_commit"]=="408d80e43159eba06849b6a929e0010f32b9b91b"
+          assert a["whole_year_credit"]==b["whole_year_credit"]==0
+          frozen={}
+          for r in b["rows"]+a["rows"]:
+              k=(r["c"],r["t"])
+              val={"fields":r["fields"],"raw_names":r["raw_names"]}
+              if k in frozen:assert frozen[k]==val
+              frozen[k]=val
+          assert len(frozen)==11
+          # Interleave anchors and years before first-ever adjacent / boundary calls.
+          sequence=[
+            ("initial",739617,739617),
+            ("changed_c",739618,739618),
+            ("return_adjacent",739617,739618),
+            ("previous_year",739617,739528),
+            ("return_first",739617,739529),
+            ("next_year",739617,744004),
+            ("return_last",739617,744003),
+            ("negative_date",-377237,-377237),
+            ("remote_date",6875993,6875993),
+            ("negative_adjacent",-377237,-377236),
+            ("remote_adjacent",6875993,6875994),
+            ("repeat_original",739617,739617),
+            ("repeat_changed_c",739618,739618),
+            ("repeat_previous_year",739617,739528),
+          ]
+          assert set((c,t) for _,c,t in sequence)==set(frozen)
+          Path("source/cases.tsv").write_text("".join(f"{label}\t{c}\t{t}\n" for label,c,t in sequence))
+          Path("evidence/frozen.json").write_text(json.dumps([{"label":label,"c":c,"t":t,**frozen[c,t]} for label,c,t in sequence],indent=2)+"\n")
+          pins={"src/monster.cpp":"9a09f53c4bb54fa3e3861677bd0d367b7d4d5f78","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          files={}
+          for p,h in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==h
+              Path("source",p).write_bytes(raw)
+              files[p]={"blob":h,"sha256":hashlib.sha256(raw).hexdigest()}
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"files":files},indent=2)+"\n")
+          PY
+      - name: Build exact original public API with persistent driver
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          cat > source/probe.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+          using namespace pastafari;
+          std::size_t ci(const std::string& n){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& n){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("month");}
+          int main(){
+              resetPersistentScarVaultsDiagnostic();
+              setAccelerationScarsEnabled(true);
+              setFullHistoricalAccelerationValidation(false);
+              std::string label,cs,ts;
+              int count=0;
+              while(std::cin>>label>>cs>>ts){
+                  const Integer c{cs},t{ts};
+                  const auto before=persistentScarMetricsDiagnostic();
+                  const auto start=std::chrono::steady_clock::now();
+                  const auto a=calendarDateSpaghetti(c,t);
+                  const auto after=persistentScarMetricsDiagnostic();
+                  const double seconds=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
+                  std::cout<<"DATE\t"<<label<<"\t"<<c<<"\t"<<t<<"\t"<<seconds<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<"\t"<<after.patch28GateCalculated-before.patch28GateCalculated<<"\t"<<after.patch28GateResurrection-before.patch28GateResurrection<<"\t"<<after.patch27AncestralHit-before.patch27AncestralHit<<"\t"<<after.patch39FinalResultHit-before.patch39FinalResultHit<<std::endl;
+                  ++count;
+              }
+              if(!std::cin.eof()||count!=14)return 2;
+              std::cout<<"PERSISTENT_DONE\t"<<count<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include source/src/monster.cpp source/probe.cpp -o source/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum source/probe source/probe.cpp source/cases.tsv > evidence/build.sha256
+      - name: Run 14 public calls in one process without cache resets
+        run: |
+          set -euo pipefail
+          set +e
+          (ulimit -v 3145728; /usr/bin/time -v -o evidence/time.txt timeout -k 5s 240s source/probe < source/cases.tsv) > evidence/stdout.txt 2> evidence/stderr.txt
+          code=$?
+          set -e
+          echo "$code" > evidence/exit.txt
+          cat evidence/stdout.txt evidence/stderr.txt
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path("evidence")
+          frozen=json.loads((p/"frozen.json").read_text())
+          rows=[]
+          lines=(p/"stdout.txt").read_text().splitlines()
+          for l in lines:
+              a=l.split("\t")
+              if a[0]!="DATE":continue
+              assert len(a)==16
+              rows.append({"label":a[1],"c":int(a[2]),"t":int(a[3]),"seconds":float(a[4]),"fields":list(map(int,a[5:10])),"raw_names":a[10:12],"gate_calculated":int(a[12]),"gate_resurrections":int(a[13]),"structure_hits":int(a[14]),"result_hits":int(a[15])})
+          code=int((p/"exit.txt").read_text())
+          exact=code==0 and len(rows)==len(frozen)==14 and lines[-1]=="PERSISTENT_DONE\t14" and not (p/"stderr.txt").read_text()
+          exact=exact and all(all(x[k]==y[k] for k in ("label","c","t","fields","raw_names")) for x,y in zip(rows,frozen))
+          by={r["label"]:r for r in rows}
+          intervals=["return_adjacent","return_first","return_last","negative_adjacent","remote_adjacent"]
+          repeated=["repeat_original","repeat_changed_c","repeat_previous_year"]
+          isolated=["changed_c","previous_year","next_year","negative_date","remote_date"]
+          guards=exact and all(by[k]["gate_calculated"]==by[k]["gate_resurrections"]==0 and by[k]["structure_hits"]==1 and by[k]["result_hits"]==0 for k in intervals)
+          guards=guards and all(by[k]["gate_calculated"]==by[k]["gate_resurrections"]==0 and by[k]["result_hits"]==1 for k in repeated)
+          guards=guards and all(by[k]["structure_hits"]==by[k]["result_hits"]==0 for k in isolated)
+          # Shared geometry is global: prior gates should survive anchor changes.
+          # This is a measurement and separate performance criterion, not a
+          # mathematical requirement on all possible inputs or cache capacities.
+          gate_reuse=exact and by["initial"]["gate_calculated"]==31487 and by["changed_c"]["gate_calculated"]==by["negative_date"]["gate_calculated"]==0 and 0<by["remote_date"]["gate_calculated"]<43793
+          m=re.search(r"Maximum resident set size \(kbytes\): (\d+)",(p/"time.txt").read_text())
+          out={"schema":"SOAK_V253_PERSISTENT_MIXED_ANCHORS/1","candidate_commit":"87868f6fd4176dc0a94a8a6787e1c2b0e8d3e065","exit":code,"rows":rows,"exact_dates":bool(exact),"interval_and_result_isolation_pass":bool(guards),"cross_anchor_gate_reuse":bool(gate_reuse),"peak_rss_kib":int(m.group(1)) if m else None,"comparison_pass":bool(exact and guards and gate_reuse),"previously_frozen_unique_pairs":11,"independent_new_pairs":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert out["comparison_pass"]
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v253-persistent-mixed-anchors-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
