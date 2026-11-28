@@ -14,3 +14,15 @@ canonical-names-lock.yml has 12 raw metadata reads at lines 44,376,446,515,565,6
 
 ## Proposed phase output contract, not yet wired
 Single byte snapshot; strict classifier precedes route output. Frozen Stage43 exact LF or uniform CRLF -> RESEARCH_PREFLIGHT; valid STAGE44_PENDING_SHAPE_ONLY -> IMPLEMENTATION_CANDIDATE; valid STAGE44_IMPLEMENTING_SHAPE_ONLY -> NATIVE_EVIDENCE_CANDIDATE; valid STAGE44_SEALED_SHAPE_ONLY -> SEAL_RECHECK_CANDIDATE. All other states fail closed with no route output. Candidate output never authenticates provenance: bind actual exact run/job/artifact/SHA through the existing evidence validation separately. Preserve Stage43 predecessor compatibility as a separate profile. Test each route, reject altered bytes, duplicate keys, malformed UTF8, unrecognized profile, and mismatched evidence; ensure no activated shape can call the frozen-only entry point. Gate outputs and dedicated workflow routing must be verified on unchanged Stage43 metadata before any PENDING_NATIVE transition. No lifecycle or production change made in this audit.
+
+
+## Revalidation against the live branch (2026-11-28)
+
+The two parser findings in the original audit were historical, not still-current defects:
+
+- At audit commit \`608a4578dc3e726ce1db64cb2b5cfb184b183225\`, \`tests/Stage01.Tests.ps1\` blob \`6be04d4d5be64c075d5bf849127b87c78bb9dea3\` extracted \`CURRENT_STAGE\` with a first-match regular expression. That finding was accurate for that commit.
+- By commit \`26d41224ef09425cd3117f6cfdeeeea15b32a02d\`, the file had changed to blob \`613dceb098946ba8bc2de5e41802b41880bc392d\`: it dot-sources \`StrictUtf8StageMetadata.ps1\` and calls \`Get-StrictCurrentStage\`. The strict parser rejects duplicate keys, malformed input, invalid UTF-8, non-positive values, leading zeroes and Int32 overflow.
+- The 12 previously flagged \`Assert-Stage43MetadataCompatibility\` consumers are not unvalidated raw reads at commit \`c1bc46969676b309792c45a828f3ff3d1d9017ed\`. Each calls the strict compatibility gate and constructs its \`$stageLines\`/\`$md\` membership view from \`$stage43State.Values\`. A thirteenth call site, the Stage43 evidence-output job, was added at line 1123. The Stage44 route classifier separately calls \`Get-Stage44ExecutionRoute -Bytes\`, which also uses the strict parser.
+- Consequently, replacing those consumers with another parser would duplicate validation without fixing an extant defect. Keep their exact key/value comparisons over the validated map.
+
+**Remaining test gap addressed:** commit \`8fd4e559db7ae381e3458fe92536b750f8933724\` adds Stage01 boundary tests for 22, 23, 43 and 44, including the legacy-name threshold at 23, plus rejection cases for missing, duplicate, empty, zero, leading-zero, negative, nonnumeric, overflowing, malformed and invalid-UTF-8 pointers. These tests are implemented but remain unaccepted until their exact-SHA CI run completes successfully.
