@@ -811,7 +811,9 @@
                                               "Alternative C admission refused canonical p520"
                                               {:admission-status admission-status :certificate certificate})
         profile-accepted (ensure-invariant! (= (:profile parsed) (:profile canonical-input))
-                                            "streamed profile differs from canonical profile")
+                                            "streamed profile differs from canonical profile"
+                                            {:streamed-profile (:profile parsed)
+                                             :canonical-profile (:profile canonical-input)})
         watchdog-start (System/nanoTime)
         heap-before (used-heap-bytes)
         watchdog {:start-nanos watchdog-start
@@ -822,7 +824,9 @@
         context (new-context {:ledger ledger :watchdog watchdog})
         rank (parse-rank-after-admission parsed certificate context)
         rank-accepted (ensure-invariant! (= rank (:rank canonical-input))
-                                         "streamed decimal rank differs from canonical rank")
+                                         "streamed decimal rank differs from canonical rank"
+                                         {:streamed-rank-digits (count (str rank))
+                                          :canonical-rank-digits (count (str (:rank canonical-input)))})
         actual (rank-trace-inplace (:profile parsed) rank (:p parsed) context)
         elapsed-ms (/ (- (System/nanoTime) watchdog-start) 1000000.0)
         heap-peak @(:peak-heap-bytes context)
@@ -948,10 +952,14 @@
     (ensure-invariant! (= 987726308N (:payload certificate)) "payload admission envelope drift" {:certificate certificate})
     (ensure-invariant! (<= (+' @(:primitive-count ledger) (bigint @(:control-count ledger)))
                            alternative-scalar-limit)
-                       "measured scalar primitive ledger exceeded cap")
+                       "measured scalar primitive ledger exceeded cap"
+                       {:observed (+' @(:primitive-count ledger) (bigint @(:control-count ledger)))
+                        :limit alternative-scalar-limit})
     (ensure-invariant! (<= (+' @(:bit-work ledger) (*' 64N (bigint @(:control-count ledger))))
                            alternative-bit-limit)
-                       "measured bit-work ledger exceeded cap")
+                       "measured bit-work ledger exceeded cap"
+                       {:observed (+' @(:bit-work ledger) (*' 64N (bigint @(:control-count ledger))))
+                        :limit alternative-bit-limit})
     (ensure-invariant! (<= @(:max-word-bits ledger) (:W certificate))
                        "observed integer width exceeded W"
                        {:observed @(:max-word-bits ledger) :W (:W certificate)})
