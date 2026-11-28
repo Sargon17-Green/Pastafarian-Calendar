@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   verify:
+    if: github.ref != 'refs/heads/PHP+Bahasa-Melayu-source-shape-qa' || !contains(github.event.head_commit.message, '[sauce-trace-only]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -1943,7 +1944,7 @@ jobs:
 
 
   stage56-source-shape-gmp-rank-qa:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu-source-shape-qa'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu-source-shape-qa' && !contains(github.event.head_commit.message, '[sauce-trace-only]')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -2009,3 +2010,58 @@ jobs:
           path: source-shape-evidence/
           if-no-files-found: warn
           retention-days: 30
+
+  stage56-sauce-sequential-trace-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu-source-shape-qa' && contains(github.event.head_commit.message, '[sauce-trace-only]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cce849efab36b023ffb3c9c8e5b5fa89f4d14790
+          path: qa
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: fcaf1674d2c4125b6794fd37312f68d11aa2a8dd
+          path: production
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Sargon17-Green/pastafari-calendar
+          ref: cc2cf0b422757a5e7c33218ce30cffa8f99c6786
+          path: canonical
+          persist-credentials: false
+      - name: Run only pinned sequential sauce diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p trace-evidence
+          printf '%s\n' "$GITHUB_SHA" > trace-evidence/workflow-head.txt
+          for d in qa production canonical; do
+            git -C "$d" rev-parse HEAD > "trace-evidence/$d-head.txt"
+            git -C "$d" status --porcelain --untracked-files=all > "trace-evidence/$d-status-before.txt"
+          done
+          test "$(cat trace-evidence/qa-head.txt)" = cce849efab36b023ffb3c9c8e5b5fa89f4d14790
+          test "$(git -C qa hash-object tools/stage56_gmp_qa/sauce_first_divergence.py)" = ce22f6aafc47741d78a90682220400e597d7dc72
+          php -v > trace-evidence/php-version.txt
+          python3 --version > trace-evidence/python-version.txt
+          sha256sum qa/tools/stage56_gmp_qa/sauce_first_divergence.py > trace-evidence/qa-script.sha256
+          set +e
+          timeout -k 10s 9m python3 -B qa/tools/stage56_gmp_qa/sauce_first_divergence.py --php-root production --canonical-root canonical --output trace-evidence/trace.json > trace-evidence/stdout.txt 2> trace-evidence/stderr.txt
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > trace-evidence/exit-code.txt
+          cat trace-evidence/stdout.txt trace-evidence/stderr.txt
+          for d in qa production canonical; do
+            git -C "$d" status --porcelain --untracked-files=all > "trace-evidence/$d-status-after.txt"
+          done
+          (cd trace-evidence && sha256sum * > SHA256SUMS.tmp && mv SHA256SUMS.tmp SHA256SUMS)
+          exit "$rc"
+      - name: Preserve trace evidence regardless of result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-sauce-sequential-trace-${{ github.sha }}
+          path: trace-evidence/
+          if-no-files-found: error
