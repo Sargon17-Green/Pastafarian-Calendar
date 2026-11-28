@@ -49,4 +49,4 @@ For canonical year 5000, m=33, n=3569, p=520: B=42,860; W=85,722; Q=17,128; S=54
 
 ## Acceptance boundary
 
-This code commit is [skip ci] and is not a Native result. Static checks and parser/admission tests do not make Stage2 accepted. Acceptance requires a later completed exact-SHA Native run, its raw job log and artifact, all p520 five-field comparisons, and both watchdogs passing. Until then, Stage2/DISCOVERY24 remain OPEN.
+The implementation commit was [skip ci]. The repository workflow has no workflow_dispatch trigger; its Native Stage02 job runs on a normal push to this branch. This follow-up commit is that push-trigger for the exact current source. Static checks and parser/admission tests do not make Stage2 accepted. Acceptance requires a completed exact-SHA Native run, its raw job log and artifact, all p520 five-field comparisons, the arithmetic/resource ledger within caps, and both watchdogs passing. Until those gates pass, Stage2/DISCOVERY24 remain OPEN.

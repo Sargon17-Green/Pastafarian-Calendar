@@ -239,8 +239,24 @@
     (is (= :position-scope (thrown-code #(parse-streamed-frame
                                           [(.getBytes "{\"profile\":[4,5],\"p\":9,\"rank\":\"35\"}"
                                                       StandardCharsets/US_ASCII)]))))
+    (is (= :profile-scope (thrown-code #(parse-streamed-frame
+                                         [(.getBytes "{\"profile\":[3,5],\"p\":3,\"rank\":\"35\"}"
+                                                     StandardCharsets/US_ASCII)]))))
+    (is (= :chunk-size (thrown-code #(parse-streamed-frame
+                                      [(byte-array (inc alternative-chunk-limit-bytes))]))))
+    (is (= :frame-size
+           (thrown-code
+            #(parse-streamed-frame
+              (vec (repeat 44 (byte-array alternative-chunk-limit-bytes)))))))
+    (is (= :trailing-bytes
+           (thrown-code
+            #(let [trailing (Arrays/copyOf sample (inc length))]
+               (aset-byte trailing length (byte 32))
+               (parse-streamed-frame [trailing])))))
     {:two-chunk-splits (dec length) :truncated-refusal :passed
-     :leading-zero-refusal :passed :position-refusal :passed}))
+     :leading-zero-refusal :passed :position-refusal :passed
+     :profile-scope-refusal :passed :chunk-cap-refusal :passed
+     :frame-cap-refusal :passed :trailing-byte-refusal :passed}))
 
 (defn- new-lru-cache []
   (LinkedHashMap. 16 (float 0.75) true))
