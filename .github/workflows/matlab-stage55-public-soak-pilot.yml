@@ -1,0 +1,46 @@
+name: MATLAB Stage55 Public Soak Pilot
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-public-soak-pilot.yml'
+      - 'tools/stage55_public_soak_pilot.py'
+      - 'tools/run_stage55_public_soak_pilot.m'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-public-soak-pilot
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Download original certified audit ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15257835751/zip > audit.zip
+          echo '66a1b65e47f24bb3e20c45c4fb3b7c69c6d92c056a89f18e809b16f52a9d6504  audit.zip' | sha256sum -c -
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Run six-call bounded native public pilot
+        run: python3 qa/tools/stage55_public_soak_pilot.py source audit.zip pilot-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-public-soak-pilot-${{ github.run_id }}
+          path: pilot-output/
+          if-no-files-found: warn
+          retention-days: 30
