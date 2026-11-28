@@ -1,0 +1,79 @@
+name: stage56-source-shape-gmp-rank-qa
+
+"on":
+  push:
+    branches:
+      - 'PHP+Bahasa-Melayu-source-shape-qa'
+
+permissions:
+  contents: read
+
+jobs:
+  source-shape-gmp-rank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact QA commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP with GMP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gmp
+          coverage: none
+
+      - name: Set up Python oracle runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Capture source identity and runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA='fcaf1674d2c4125b6794fd37312f68d11aa2a8dd'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git merge-base HEAD "$BASE_SHA")" = "$BASE_SHA"
+          mkdir -p source-shape-evidence
+          git rev-parse HEAD > source-shape-evidence/head.txt
+          git rev-parse HEAD^ > source-shape-evidence/parent.txt
+          git status --short > source-shape-evidence/git-status.txt
+          php -v > source-shape-evidence/php-version.txt
+          php --ri gmp > source-shape-evidence/gmp-info.txt 2>&1 || true
+          python3 --version > source-shape-evidence/python-version.txt
+          sha256sum \
+            tools/stage56_gmp_qa/row_microgate.py \
+            tools/stage56_gmp_qa/source_shape_rank_gate.py \
+            tools/stage56_gmp_qa/source_shape_gmp_worker.php \
+            src/BigInt.php \
+            src/Patches/MonthWeavingInterleaving56.php \
+            src/Patches/YearStructureProvider56.php \
+            > source-shape-evidence/source-sha256.txt
+
+      - name: Run independent oracle and bounded GMP rank/unrank qualification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source-shape-evidence
+          set +e
+          timeout 12m python3 -B tools/stage56_gmp_qa/source_shape_rank_gate.py \
+            --output-dir source-shape-evidence \
+            > source-shape-evidence/gate.stdout.jsonl \
+            2> source-shape-evidence/gate.stderr.txt
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > source-shape-evidence/gate.exit-code
+          sha256sum source-shape-evidence/* > source-shape-evidence/SHA256SUMS
+          exit "$rc"
+
+      - name: Upload source-shape QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-source-shape-gmp-rank-${{ github.sha }}
+          path: source-shape-evidence/
+          if-no-files-found: error
+          retention-days: 30
