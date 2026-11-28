@@ -34,4 +34,4 @@ This checks the five-field inverse at year, month and cutlet boundaries without 
 
 Required markers: PRODUCTION_INVERSE_DIFFERENTIAL_PASS samples>=3 fixed_c=2026-11-28 year=5000 transitions=0; and PRODUCTION_INVERSE_FIXED_C_PASS checks>=18 modern_calculation_day=2026-11-28 fixed_c=true transitions=1 differential_samples>=3 elapsed_ms<=450000. Differential timing is emitted separately and bounded to 330000 ms; the complete inverse test is bounded to 450000 ms. Dart 3.13.2 formatting must report zero changes; dart analyze must report no issues. This is a branch-only readiness gate, not a release or a claim that the overall converter is production complete.
 
-Required marker: PRODUCTION_INVERSE_FIXED_C_PASS checks>=18 modern_calculation_day=2026-11-28 fixed_c=true transitions=1 elapsed_ms<=240000; timing is emitted separately before the bound assertion. Dart 3.13.2 formatting must report zero changes; dart analyze must report no issues. This is a branch-only readiness gate, not a release or a claim that the overall converter is production complete.
+

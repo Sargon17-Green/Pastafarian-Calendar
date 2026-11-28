@@ -23,7 +23,6 @@ String _formatCivilDate(GregorianCivilDate date) =>
     '-' +
     date.day.toString().padLeft(2, '0');
 
-
 void differentialBoundaryOracle() {
   final differentialWatch = Stopwatch()..start();
   final checksAtStart = checks;
@@ -88,7 +87,8 @@ void differentialBoundaryOracle() {
     referenceNext.openGateDay == referenceYear.closeGateDay,
     'Independent successor shares the closing boundary',
   );
-  compareYear(referencePrevious, productionPrevious, 'Independent §R year 4999');
+  compareYear(
+      referencePrevious, productionPrevious, 'Independent §R year 4999');
   compareYear(referenceNext, productionNext, 'Independent §R year 5001');
 
   final independentlyClosedGate =
@@ -103,7 +103,7 @@ void differentialBoundaryOracle() {
     'Fixed calculation day lies in independently selected year 5000',
   );
 
-  final structureSauce = reference.sauce(
+  final structureSauce = normative.NormativeReference.sauce(
     calculationDay,
     referenceYear.openGateDay + BigInt.one,
   );
@@ -123,8 +123,7 @@ void differentialBoundaryOracle() {
     referenceCutletNames,
   );
 
-  final productionCutlets =
-      productionCalendar.cutletPlanner.partition(
+  final productionCutlets = productionCalendar.cutletPlanner.partition(
     calculationDay,
     productionYear,
   );
@@ -150,7 +149,8 @@ void differentialBoundaryOracle() {
     );
     require(
       actual.openGate == reference.ensureGateIndex(expected.openGateIndex) &&
-          actual.closeGate == reference.ensureGateIndex(expected.closeGateIndex),
+          actual.closeGate ==
+              reference.ensureGateIndex(expected.closeGateIndex),
       'Independent §T cutlet gates ' + (i + 1).toString(),
     );
     require(
@@ -262,8 +262,7 @@ void differentialBoundaryOracle() {
       break;
     }
   }
-  final cutletBoundary =
-      independentCutletBoundary ?? fallbackCutletBoundary;
+  final cutletBoundary = independentCutletBoundary ?? fallbackCutletBoundary;
   if (cutletBoundary != null) {
     addSample(cutletBoundary, 'cutlet-boundary');
   }
@@ -285,7 +284,8 @@ void differentialBoundaryOracle() {
   if (monthBoundary != null) {
     addSample(monthBoundary, 'month-boundary');
   }
-  require(cutletBoundary != null, 'Independent interior cutlet boundary exists');
+  require(
+      cutletBoundary != null, 'Independent interior cutlet boundary exists');
   require(monthBoundary != null, 'Independent interior month boundary exists');
   require(samples.length >= 3, 'At least three distinct boundary samples');
 
@@ -312,8 +312,7 @@ void differentialBoundaryOracle() {
     final cutlet = referenceCutlets.singleWhere(
       (item) => item.nameCanonicalIndex == cutletIndex,
     );
-    final cutletProjection =
-        cutlet.firstDay + tuple.dayInCutlet - BigInt.one;
+    final cutletProjection = cutlet.firstDay + tuple.dayInCutlet - BigInt.one;
 
     final monthPosition = referenceMonthNames.indexOf(monthIndex);
     if (monthPosition < 0) {
@@ -322,9 +321,7 @@ void differentialBoundaryOracle() {
     final monthId = monthPosition + 1;
     var occurrence = BigInt.zero;
     BigInt? monthProjection;
-    for (var offset = 0;
-        offset < productionWeave.monthIds.length;
-        offset++) {
+    for (var offset = 0; offset < productionWeave.monthIds.length; offset++) {
       if (productionWeave.monthIds[offset] == monthId) {
         occurrence += BigInt.one;
         if (occurrence == tuple.dayInMonth) {
