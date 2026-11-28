@@ -26,8 +26,8 @@ Toate calculele normative folosesc întregi extinși J (`x`) și, unde este nece
 
 ## Starea dezvoltării
 
-Vezi `DEVELOPMENT_STAGE.md`. Etapa următoare după un Bootstrap valid este Stage 2 — DISCOVERY 01.
+Vezi `DEVELOPMENT_STAGE.md`. Stage 1 și Stage 2 DISCOVERY 01 sunt acceptate; următoarea etapă este Stage 3 PATCH 01.
 
 ## Realiniere canonica Stage 2
 
-Dupa auditul specificatiei originale, istoricul anterior este conservat la commit 842f6044b2689f20b39a28afad56be5da23c893e. Nu se ruleaza din nou v16/v17. Pentru noul DISCOVERY 01 se ruleaza separat generatorul de fixtures Stage 1, testele Stage 1 si test/stage02_discovery01_tests.ijs cu J9.7.1. Nu se foloseste complete_stage01.ijs, deoarece acesta rescrie starea etapei. Se cer trei RED normative si un control GREEN, cu martori si regresii GREEN. Stage 2 inca neacceptat.
+Dupa auditul specificatiei originale, istoricul anterior este conservat la commit 842f6044b2689f20b39a28afad56be5da23c893e. Nu se ruleaza din nou v16/v17. Pentru noul DISCOVERY 01 se ruleaza separat generatorul de fixtures Stage 1, testele Stage 1 si test/stage02_discovery01_tests.ijs cu J9.7.1. Nu se foloseste complete_stage01.ijs, deoarece acesta rescrie starea etapei. Se cer trei RED normative si un control GREEN, cu martori si regresii GREEN. Stage 2 acceptat nativ: 63/63 regresii, 18/18 martori, trei RED intenționate și un control GREEN. Vezi DEVELOPMENT_STAGE.md. PATCH 01 nu este încă implementat.

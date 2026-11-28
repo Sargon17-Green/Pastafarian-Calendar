@@ -15,3 +15,5 @@ Orice manager, flag, cache sau rută specifică unui defect viitor este interzis
 ## Stage 2 — DISCOVERY 01
 
 Modulul src/stage02_rest_vechi.ijs păstrează modulo obișnuit cu M pozitiv, inclusiv zero la multipli. Dispecerul legacy este apelat de ruta publică de salvare, iar calendarDateSpaghettiBootstrap stochează rezultatul pentru ziua de calcul în semanticPending (index 9). Fiecare apel are context separat. Nu se importă oracle-ul; nu se introduce PATCH 01. Testele verifică explicit divergența cerută și controlul M+1. NOT_INTEGRATED rămâne obligatoriu.
+
+DISCOVERY 01 este acceptat nativ în starea EXPECTED_RED la sursa 4c93da154362e5f9ce0e9da4a9196760eb587a37. Martorii și regresiile sunt verificate; PATCH 01 rămâne etapa următoare, neimplementată. Vezi DEVELOPMENT_STAGE.md.
