@@ -97,7 +97,11 @@ function Read-Stage44ZipEntries {
             [System.IO.Compression.ZipArchiveMode]::Read,
             $false
         )
+        if ($archive.Entries.Count -gt 64) { throw 'STAGE44_EVIDENCE_ZIP_ENTRY_LIMIT' }
+        [long]$totalUncompressed = 0
         foreach ($entry in $archive.Entries) {
+            $totalUncompressed += [long]$entry.Length
+            if ([long]$entry.Length -gt 5242880 -or $totalUncompressed -gt 10485760) { throw 'STAGE44_EVIDENCE_ZIP_UNCOMPRESSED_SIZE_LIMIT' }
             $name = $entry.FullName.Replace('\', '/')
             if ($name.EndsWith('/')) { continue }
             if ([string]::IsNullOrWhiteSpace($name) -or
