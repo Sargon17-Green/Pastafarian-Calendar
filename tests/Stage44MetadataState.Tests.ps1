@@ -336,6 +336,11 @@ try {
     Remove-Item -LiteralPath $sandbox44 -Recurse -Force -ErrorAction Stop
 }
 if ($script:runtime44Checks -ne 18) { throw 'Stage44 runtime count mismatch' }
+# The final negative ancestry probe intentionally makes git merge-base return 1.
+# Keep that expected rejection from leaking into the GitHub Actions shell exit wrapper.
+if ($LASTEXITCODE -ne 1) { throw ('Expected non-ancestor Git probe exit 1; actual ' + $LASTEXITCODE) }
+$LASTEXITCODE = 0
+$global:LASTEXITCODE = 0
 Write-Host 'STAGE44_RUNTIME_GATE_ASSERTIONS_PASSED=18'
 Write-Host 'STAGE44_RUNTIME_GATE_ASSERTIONS_FAILED=0'
 Write-Host 'STAGE44_RUNTIME_GATE_RESULT=PASS_SYNTHETIC_GIT_ONLY'
