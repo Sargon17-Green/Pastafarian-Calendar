@@ -109,7 +109,7 @@ String _required(Map<String, String> options, String key) {
 }
 
 GregorianCivilDate _parseCivilDate(String value) {
-  final match = RegExp(r'^([+-]?\\d+)-(\\d{1,2})-(\\d{1,2})$')
+  final match = RegExp(r'^([+-]?\d+)-(\d{1,2})-(\d{1,2})$')
       .firstMatch(value);
   if (match == null) {
     throw FormatException('Date must use signed-year YYYY-MM-DD syntax.');
