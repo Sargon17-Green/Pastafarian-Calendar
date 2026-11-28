@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout exact isolated QA commit
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Verify branch, parent and frozen source locks
         shell: bash
         run: |
