@@ -1,0 +1,128 @@
+name: Logo Stage2 Cutlet Partition QA (isolated)
+
+on:
+  push:
+    branches:
+      - 'qa/logo-ido-stage2-cutlet-partition-20261128'
+permissions:
+  contents: read
+jobs:
+  cutlet-partition-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: small-exhaustive
+            expected_domains: 204
+            expected_partitions: 1024
+            expected_checks: 4528
+            expected_invalid: 21
+            expected_shard_marker: 'CP_NATIVE_SMALL_DOMAINS 204'
+          - shard: large-boundary
+            expected_domains: 20
+            expected_partitions: 84
+            expected_checks: 376
+            expected_invalid: 0
+            expected_shard_marker: 'CP_NATIVE_LARGE_DOMAINS 20'
+    steps:
+      - name: Checkout exact isolated QA commit
+        uses: actions/checkout@v4
+      - name: Verify branch, parent and frozen source locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-cutlet-partition-20261128"
+          test "$(git rev-parse HEAD^)" = ad001c6aeeb6c758f5004b206a656fec5d6fc403
+          test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
+          test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
+          test "$(git hash-object qa/logo_cutlet_partition_candidate.logo)" = 8345a4fa2dead77ad36154ace18134678134ab8f
+          test "$(git hash-object qa/logo_cutlet_partition_oracle.py)" = 0df660733cdab3efe6796e3666fefd2b47eb608b
+          test "$(git hash-object QA_STAGE2_CUTLET_PARTITION_CONTRACT_20261128.md)" = 3fb7ea4b04b1a9dba50493ee8d7bf9ab5a4e0b8a
+      - name: Run independent Python-int oracle and generate fixed Native shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 qa/logo_cutlet_partition_oracle.py \
+            --shard "${{ matrix.shard }}" \
+            --output "$RUNNER_TEMP/cp-${{ matrix.shard }}.logo" \
+            | tee "$RUNNER_TEMP/cp-${{ matrix.shard }}-host.log"
+          host="$RUNNER_TEMP/cp-${{ matrix.shard }}-host.log"
+          grep -Fxq 'CP_HOST_EXHAUSTIVE_DOMAINS 650' "$host"
+          grep -Fxq 'CP_HOST_EXHAUSTIVE_COMPOSITIONS 4095' "$host"
+          grep -Fxq 'CP_HOST_EXHAUSTIVE_EMPTY_DOMAINS 66' "$host"
+          grep -Fxq 'CP_HOST_EXHAUSTIVE_INDEX_PAIRS 24576' "$host"
+          grep -Fxq 'CP_HOST_ORACLE=PASS' "$host"
+          grep -Fxq 'CP_HOST_NATIVE_SHARD ${{ matrix.shard }}' "$host"
+          grep -Fxq 'CP_HOST_NATIVE_DOMAINS ${{ matrix.expected_domains }}' "$host"
+          grep -Fxq 'CP_HOST_NATIVE_PARTITIONS ${{ matrix.expected_partitions }}' "$host"
+          grep -Fxq 'CP_HOST_NATIVE_FIXTURES=PASS' "$host"
+      - name: Build pinned headless UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          source_dir="$RUNNER_TEMP/ucblogo-source"
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$source_dir"
+          actual="$(git -C "$source_dir" rev-parse HEAD)"
+          test "$actual" = a0215433f07384e4c42fe247525867f11e6f32f7
+          cd "$source_dir"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Run bounded Native differential on exact QA SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/cp-${{ matrix.shard }}-native.log"
+          if printf 'bye\n' | timeout --signal=TERM --kill-after=5s 900s stdbuf -oL -eL "$LOGO_BIN" "$RUNNER_TEMP/cp-${{ matrix.shard }}.logo" >"$log" 2>&1; then
+            cat "$log"
+          else
+            code=$?
+            cat "$log"
+            echo "::error::Cutlet partition Native failure/timeout exit=$code"
+            exit 1
+          fi
+          grep -Fxq 'CP_NATIVE_PASIS' "$log"
+          grep -Fxq 'CP_NATIVE_CHECKS ${{ matrix.expected_checks }}' "$log"
+          grep -Fxq 'CP_NATIVE_DOMAINS ${{ matrix.expected_domains }}' "$log"
+          grep -Fxq 'CP_NATIVE_PARTITIONS ${{ matrix.expected_partitions }}' "$log"
+          grep -Fxq 'CP_NATIVE_INVALID_CASES ${{ matrix.expected_invalid }}' "$log"
+          grep -Fxq '${{ matrix.expected_shard_marker }}' "$log"
+          if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
+            echo "::error::Native failure text present"
+            exit 1
+          fi
+          echo "NATIVE_CUTLET_PARTITION_${{ matrix.shard }}=PASS"
+      - name: Preserve generated fixture and exact logs
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=()
+          for path in \
+            "$RUNNER_TEMP/cp-${{ matrix.shard }}.logo" \
+            "$RUNNER_TEMP/cp-${{ matrix.shard }}-host.log" \
+            "$RUNNER_TEMP/cp-${{ matrix.shard }}-native.log"; do
+            if test -f "$path"; then files+=("$path"); fi
+          done
+          if ((${#files[@]})); then
+            sha256sum "${files[@]}" | tee "$RUNNER_TEMP/cp-${{ matrix.shard }}-sha256.txt"
+          fi
+      - name: Upload host and Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cutlet-partition-${{ matrix.shard }}-evidence
+          path: |
+            ${{ runner.temp }}/cp-${{ matrix.shard }}.logo
+            ${{ runner.temp }}/cp-${{ matrix.shard }}-host.log
+            ${{ runner.temp }}/cp-${{ matrix.shard }}-native.log
+            ${{ runner.temp }}/cp-${{ matrix.shard }}-sha256.txt
+          if-no-files-found: warn
+          retention-days: 30

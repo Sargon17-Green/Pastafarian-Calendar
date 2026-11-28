@@ -1,0 +1,265 @@
+; QA-only exact-BI cutlet partition count/rank/unrank.
+; Independent representation: choose K-1 ordered breakpoints in 1..G-1.
+; When required>=1, the required breakpoint is fixed and removed by order-preserving compression.
+; No production files are modified; this module never calls ASK.
+
+to qa.cp.valid.domain :G :K :required
+  if not numberp :G [output "false]
+  if not (equalp :G (int :G)) [output "false]
+  if or (:G < 1) (:G > 5778) [output "false]
+  if not numberp :K [output "false]
+  if not (equalp :K (int :K)) [output "false]
+  if or (:K < 1) (:K > :G) [output "false]
+  if not numberp :required [output "false]
+  if not (equalp :required (int :required)) [output "false]
+  if :required <> -1 [
+    if or (:required < 1) (:required >= :G) [output "false]
+  ]
+  output "true
+end
+
+; Exact binomial coefficient using BI multiplication and exact division.
+; n and k are bounded small integer coordinates; the result is arbitrary precision.
+to qa.cp.choose :n :k
+  if or (:n < 0) (:k < 0) [output bi.zero]
+  if :k > :n [output bi.zero]
+  localmake "kk :k
+  if :kk > (:n - :kk) [make "kk (:n - :kk)]
+  output qa.cp.choose.work :n :kk 1 (bi.small 1)
+end
+
+to qa.cp.choose.work :n :k :i :acc
+  if :i > :k [output :acc]
+  localmake "scaled bi.mul.small :acc (:n - :k + :i)
+  localmake "division bi.divmod.floor :scaled (bi.small :i)
+  if not (bi.eq (last :division) bi.zero) [output []]
+  output qa.cp.choose.work :n :k (:i + 1) (first :division)
+end
+
+to qa.cp.count :G :K :required
+  if not (qa.cp.valid.domain :G :K :required) [output []]
+  if :required = -1 [output qa.cp.choose (:G - 1) (:K - 1)]
+  if :K = 1 [output bi.zero]
+  output qa.cp.choose (:G - 2) (:K - 2)
+end
+
+; Lexicographic rank for a subset of size m from 1..n, one-based.
+to qa.cp.subset.rank.direct :n :items
+  localmake "rest :items
+  localmake "previous 0
+  localmake "rank0 bi.zero
+  while [not emptyp :rest] [
+    localmake "x first :rest
+    localmake "remaining count :rest
+    if or (:x <= :previous) (:x > (:n - :remaining + 1)) [output []]
+    localmake "all qa.cp.choose (:n - :previous) :remaining
+    localmake "tail qa.cp.choose (:n - :x + 1) :remaining
+    make "rank0 bi.add :rank0 (bi.sub :all :tail)
+    make "previous :x
+    make "rest butfirst :rest
+  ]
+  output bi.add :rank0 (bi.small 1)
+end
+
+; Complement preserves the reverse of lexicographic order:
+; rank(S)=C(n,m)-rank(complement(S))+1 when |S|>n/2.
+to qa.cp.subset.complement :n :items
+  localmake "rest :items
+  localmake "x 1
+  localmake "out []
+  while [:x <= :n] [
+    localmake "take "true
+    if not emptyp :rest [
+      if :x = first :rest [
+        make "rest butfirst :rest
+        make "take "false
+      ]
+    ]
+    if :take [make "out lput :x :out]
+    make "x (:x + 1)
+  ]
+  output :out
+end
+
+to qa.cp.subset.rank :n :m :items
+  if not listp :items [output []]
+  if (count :items) <> :m [output []]
+  if or (:m < 0) (:m > :n) [output []]
+  localmake "total qa.cp.choose :n :m
+  if :m <= (:n - :m) [output qa.cp.subset.rank.direct :n :items]
+  localmake "missing qa.cp.subset.complement :n :items
+  localmake "missingRank qa.cp.subset.rank.direct :n :missing
+  if not (monster.stage02.bi.canonical :missingRank) [output []]
+  output bi.add (bi.sub :total :missingRank) (bi.small 1)
+end
+
+to qa.cp.subset.skip :n :remaining :previous :x
+  localmake "all qa.cp.choose (:n - :previous) :remaining
+  localmake "tail qa.cp.choose (:n - :x + 1) :remaining
+  output bi.sub :all :tail
+end
+
+; Binary-search the unique lexicographic block containing rank0.
+to qa.cp.subset.pick :n :remaining :previous :rank0 :lo :hi
+  if :lo = :hi [output :lo]
+  localmake "mid int ((:lo + :hi + 1) / 2)
+  localmake "skip qa.cp.subset.skip :n :remaining :previous :mid
+  if bi.le :skip :rank0 [
+    output qa.cp.subset.pick :n :remaining :previous :rank0 :mid :hi
+  ]
+  output qa.cp.subset.pick :n :remaining :previous :rank0 :lo (:mid - 1)
+end
+
+to qa.cp.subset.unrank.direct :n :m :rank1
+  localmake "remaining :m
+  localmake "previous 0
+  localmake "rank0 bi.sub :rank1 (bi.small 1)
+  localmake "out []
+  while [:remaining > 0] [
+    localmake "lo (:previous + 1)
+    localmake "hi (:n - :remaining + 1)
+    localmake "x qa.cp.subset.pick :n :remaining :previous :rank0 :lo :hi
+    localmake "skip qa.cp.subset.skip :n :remaining :previous :x
+    make "rank0 bi.sub :rank0 :skip
+    make "out lput :x :out
+    make "previous :x
+    make "remaining (:remaining - 1)
+  ]
+  output :out
+end
+
+to qa.cp.subset.unrank :n :m :rank1
+  if not (monster.stage02.bi.canonical :rank1) [output []]
+  if bi.lt :rank1 (bi.small 1) [output []]
+  if or (:m < 0) (:m > :n) [output []]
+  localmake "total qa.cp.choose :n :m
+  if bi.gt :rank1 :total [output []]
+  if :m <= (:n - :m) [output qa.cp.subset.unrank.direct :n :m :rank1]
+  localmake "missingRank bi.add (bi.sub :total :rank1) (bi.small 1)
+  localmake "missing qa.cp.subset.unrank.direct :n (:n - :m) :missingRank
+  output qa.cp.subset.complement :n :missing
+end
+
+to qa.cp.partition.valid :G :K :required :parts
+  if not listp :parts [output "false]
+  if (count :parts) <> :K [output "false]
+  localmake "rest :parts
+  localmake "total 0
+  localmake "hit "false
+  localmake "position 1
+  while [not emptyp :rest] [
+    localmake "x first :rest
+    if not numberp :x [output "false]
+    if not (equalp :x (int :x)) [output "false]
+    if :x < 1 [output "false]
+    make "total (:total + :x)
+    if :total > :G [output "false]
+    if and (:required >= 0) (:position < :K) [
+      if :total = :required [make "hit "true]
+      if and (not :hit) (:total > :required) [output "false]
+    ]
+    make "position (:position + 1)
+    make "rest butfirst :rest
+  ]
+  if :total <> :G [output "false]
+  if :required = -1 [output "true]
+  output :hit
+end
+
+to qa.cp.cuts.from.parts :parts
+  localmake "rest butlast :parts
+  localmake "previous 0
+  localmake "cuts []
+  while [not emptyp :rest] [
+    make "previous (:previous + first :rest)
+    make "cuts lput :previous :cuts
+    make "rest butfirst :rest
+  ]
+  output :cuts
+end
+
+to qa.cp.compress.required :cuts :required
+  localmake "rest :cuts
+  localmake "out []
+  while [not emptyp :rest] [
+    localmake "x first :rest
+    if :x <> :required [
+      if :x > :required [make "x (:x - 1)]
+      make "out lput :x :out
+    ]
+    make "rest butfirst :rest
+  ]
+  output :out
+end
+
+to qa.cp.expand.required :compressed :required
+  localmake "rest :compressed
+  localmake "mapped []
+  while [not emptyp :rest] [
+    localmake "x first :rest
+    if :x >= :required [make "x (:x + 1)]
+    make "mapped lput :x :mapped
+    make "rest butfirst :rest
+  ]
+  localmake "rest :mapped
+  localmake "out []
+  localmake "inserted "false
+  while [not emptyp :rest] [
+    if and (not :inserted) (first :rest > :required) [
+      make "out lput :required :out
+      make "inserted "true
+    ]
+    make "out lput (first :rest) :out
+    make "rest butfirst :rest
+  ]
+  if not :inserted [make "out lput :required :out]
+  output :out
+end
+
+to qa.cp.parts.from.cuts :G :cuts
+  localmake "rest :cuts
+  localmake "previous 0
+  localmake "parts []
+  while [not emptyp :rest] [
+    localmake "x first :rest
+    make "parts lput (:x - :previous) :parts
+    make "previous :x
+    make "rest butfirst :rest
+  ]
+  output lput (:G - :previous) :parts
+end
+
+to qa.cp.rank :G :K :required :parts
+  if not (qa.cp.valid.domain :G :K :required) [output []]
+  if not (qa.cp.partition.valid :G :K :required :parts) [output []]
+  localmake "cuts qa.cp.cuts.from.parts :parts
+  if :required = -1 [output qa.cp.subset.rank (:G - 1) (:K - 1) :cuts]
+  localmake "compressed qa.cp.compress.required :cuts :required
+  output qa.cp.subset.rank (:G - 2) (:K - 2) :compressed
+end
+
+to qa.cp.unrank :G :K :required :rank1
+  if not (qa.cp.valid.domain :G :K :required) [output []]
+  if not (monster.stage02.bi.canonical :rank1) [output []]
+  if bi.lt :rank1 (bi.small 1) [output []]
+  localmake "total qa.cp.count :G :K :required
+  if not (monster.stage02.bi.canonical :total) [output []]
+  if bi.eq :total bi.zero [output []]
+  if bi.gt :rank1 :total [output []]
+  if :required = -1 [
+    localmake "cuts qa.cp.subset.unrank (:G - 1) (:K - 1) :rank1
+    if not listp :cuts [output []]
+    output qa.cp.parts.from.cuts :G :cuts
+  ]
+  localmake "compressed qa.cp.subset.unrank (:G - 2) (:K - 2) :rank1
+  if not listp :compressed [output []]
+  localmake "cuts qa.cp.expand.required :compressed :required
+  output qa.cp.parts.from.cuts :G :cuts
+end
+
+; Pure pre-dispatch predicate. This QA module does not call ASK.
+to qa.cp.ask.allowed :G :K :required
+  localmake "total qa.cp.count :G :K :required
+  if not (monster.stage02.bi.canonical :total) [output "false]
+  output bi.gt :total bi.zero
+end
