@@ -85,7 +85,7 @@ jobs:
           script = p/'probe.logo'
           script.write_text('\n'.join(['load "src/exact_integer.logo', 'load "test/normative_reference.logo',
               'print [NATIVE_BEGIN]', 'make "PROBE.INDEX ' + signed,
-              'print (sentence [NATIVE_INDEX] (bi.to.small :PROBE.INDEX))',
+              'print (sentence [NATIVE_INDEX] (sentence (bi.sign :PROBE.INDEX) (bi.digits :PROBE.INDEX)))',
               'make "PROBE.GAP nr.gate.gap :PROBE.INDEX',
               'print (sentence [NATIVE_GAP] (bi.to.small :PROBE.GAP))',
               'print [NATIVE_DONE]', 'bye'])+'\n')
@@ -97,7 +97,7 @@ jobs:
           print(log,flush=True)
           markers = [line.strip() for line in log.splitlines() if line.strip().startswith('NATIVE_')]
           errors = re.findall(r"don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|ERORO:", log,re.I)
-          ok = proc.returncode == 0 and not errors and markers == ['NATIVE_BEGIN',f'NATIVE_INDEX {k}',f'NATIVE_GAP {expected}','NATIVE_DONE']
+          ok = proc.returncode == 0 and not errors and markers == ['NATIVE_BEGIN','NATIVE_INDEX ' + str(1 if k > 0 else -1) + ' ' + ' '.join(map(str,digits)),f'NATIVE_GAP {expected}','NATIVE_DONE']
           result = dict(index=k,limbs=digits,expected=expected,markers=markers,exit=proc.returncode,elapsed=elapsed,errors=errors,qualification='FRESH_NATIVE_SIGNED_GAP_ONLY',passed=ok)
           (p/'result.json').write_text(json.dumps(result,indent=2)+'\n')
           print('NATIVE_SIGNED_GAP_PASS' if ok else 'NATIVE_SIGNED_GAP_NOT_ACCEPTED',result,flush=True)
