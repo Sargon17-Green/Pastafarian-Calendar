@@ -178,7 +178,7 @@ procedure testOracleStateOwnership(testState)
 end
 
 procedure testBootstrapMonsterOwnership(testState)
-    local ctxA, ctxB, dispatcherA, dispatcherB, initial, innerTable, candidate, retryCandidate, committed
+    local ctxA, ctxB, dispatcherA, dispatcherB, initialSnapshot, innerTable, candidate, retryCandidate, committed
     ctxA := newBaseMonsterContext(-15055671, -15055671)
     ctxB := newBaseMonsterContext(-15055670, -15055669)
     dispatcherA := newBaseDispatcher()
@@ -196,11 +196,11 @@ procedure testBootstrapMonsterOwnership(testState)
 
     innerTable := table(0)
     innerTable["value"] := [3,4]
-    initial := [[1,2], innerTable]
-    if /baseSnapshotBegin(ctxA, initial) then testFail(testState, "BASE_SNAPSHOT_BEGIN_INITIAL")
+    initialSnapshot := [[1,2], innerTable]
+    if /baseSnapshotBegin(ctxA, initialSnapshot) then testFail(testState, "BASE_SNAPSHOT_BEGIN_INITIAL")
     committed := baseSnapshotValidateAndCommit(ctxA, "BOOTSTRAP_EXACT")
-    initial[1][1] := 99
-    initial[2]["value"][1] := 99
+    initialSnapshot[1][1] := 99
+    initialSnapshot[2]["value"][1] := 99
     assertNumericEqual(testState, ctxA.semanticSnapshot[1][1], 1, "BASE_COMMIT_LIST_OWNED")
     assertNumericEqual(testState, ctxA.semanticSnapshot[2]["value"][1], 3, "BASE_COMMIT_TABLE_VALUE_OWNED")
     committed[1][1] := 88
