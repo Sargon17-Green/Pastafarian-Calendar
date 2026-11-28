@@ -2,6 +2,23 @@ name: SystemVerilog Stage 1 Bootstrap
 on:
   push:
     branches: ['SystemVerilog+Kalaallisut']
+    # QA-only commits have their own bounded workflow. Keep the legacy full
+    # Stage 1 bootstrap (which includes the accepted Foundation H45 path) out
+    # of those pushes; any mixed QA + production/source change still runs it.
+    paths-ignore:
+      - '.github/workflows/stage1-systemverilog.yml'
+      - '.github/workflows/stage1-generalized-native-qa.yml'
+      - 'scripts/stage1_multivector_full_oracle.js'
+      - 'scripts/verify_stage1_multivector_join.js'
+      - 'scripts/prepare_general_lex_ranks.js'
+      - 'scripts/verify_general_rank_host.js'
+      - 'scripts/verify_general_rank_native.py'
+      - 'scripts/verify_general_h_roots.py'
+      - 'scripts/verify_general_h_lex_chain.py'
+      - 'tests/pcal_stage1_oracle_pkg.sv'
+      - 'tests/tb_weave_general_rank.sv'
+      - 'tests/tb_weave_native_general_h.sv'
+      - 'tests/tb_weave_native_general_lex.sv'
   workflow_dispatch:
 permissions:
   contents: read

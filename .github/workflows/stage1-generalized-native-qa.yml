@@ -1,0 +1,150 @@
+name: Stage1 generalized Native QA (test-only; Foundation H45 skipped)
+on:
+  push:
+    branches: ['SystemVerilog+Kalaallisut']
+    paths:
+      - '.github/workflows/stage1-systemverilog.yml'
+      - '.github/workflows/stage1-generalized-native-qa.yml'
+      - 'scripts/stage1_multivector_full_oracle.js'
+      - 'scripts/verify_stage1_multivector_join.js'
+      - 'scripts/prepare_general_lex_ranks.js'
+      - 'scripts/verify_general_rank_host.js'
+      - 'scripts/verify_general_rank_native.py'
+      - 'scripts/verify_general_h_roots.py'
+      - 'scripts/verify_general_h_lex_chain.py'
+      - 'tests/pcal_stage1_oracle_pkg.sv'
+      - 'tests/tb_weave_general_rank.sv'
+      - 'tests/tb_weave_native_general_h.sv'
+      - 'tests/tb_weave_native_general_lex.sv'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: stage1-generalized-native-qa-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  generalized-native-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Install bounded Icarus toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 600s sudo apt-get update
+          timeout 600s sudo apt-get install -y iverilog
+          mkdir -p build/generalized-native-qa
+          iverilog -V > build/generalized-native-qa/iverilog.version 2>&1
+          vvp -V > build/generalized-native-qa/vvp.version 2>&1
+      - name: Verify exact source and testbench pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$GITHUB_REF" = 'refs/heads/SystemVerilog+Kalaallisut'
+          check_blob() {
+            local expected="$1" path="$2" actual
+            actual="$(git hash-object "$path")"
+            test "$actual" = "$expected" || { echo "BLOB_MISMATCH $path expected=$expected actual=$actual"; exit 1; }
+          }
+          check_blob e228f43f2d33b9af59c5fb232281ca403455ca5c scripts/stage1_multivector_full_oracle.js
+          check_blob 0d427e79824292528ee97519bd54d64fdccc4476 scripts/verify_stage1_multivector_join.js
+          check_blob ff049a672f48e474de31d90b7f698f3345be222e scripts/prepare_general_lex_ranks.js
+          check_blob 462d489edfaa7ebd205e62eaedd648bc5e17bb3e scripts/verify_general_rank_host.js
+          check_blob e35546b63fb0357d2649f02ae71e50d82a3c7a3e scripts/verify_general_rank_native.py
+          check_blob 0d4cc0fbc1c9501c82c2ff75182015fba1bdd837 scripts/verify_general_h_roots.py
+          check_blob f488271db07743b6a2d1f55259aa9c9925126eaa scripts/verify_general_h_lex_chain.py
+          check_blob 89b59176033b8b9808f6a5f7d8cc4bbe998fdd1d tests/pcal_stage1_oracle_pkg.sv
+          check_blob 9befa35ae6b4c02ff371083057159eb138533746 tests/tb_weave_general_rank.sv
+          check_blob dea946e1f1e1bca0ffde60acf6f042f88750368b tests/tb_weave_native_general_h.sv
+          check_blob 265c61c933bdefe47da93150be00b4271e8fc97e tests/tb_weave_native_general_lex.sv
+          mkdir -p build/generalized-native-qa
+          git rev-parse HEAD > build/generalized-native-qa/checked-head.txt
+      - name: Bounded Native multivector join and five tuple mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/generalized-native-qa/join
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          /usr/bin/time -v -o build/generalized-native-qa/join.resources \
+            timeout 240s node --max-old-space-size=512 \
+            scripts/verify_stage1_multivector_join.js --native build/generalized-native-qa/join \
+            2>&1 | tee build/generalized-native-qa/join.log
+          grep -Fq 'NATIVE_HOST_GEOMETRY_JOIN_PASS days=25007 groups=6 mutants=5' build/generalized-native-qa/join.log
+      - name: Prepare pinned non-Foundation rank fixtures and host control
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          timeout 120s node --max-old-space-size=512 scripts/verify_general_rank_host.js \
+            | tee build/generalized-native-qa/rank-host.log
+          timeout 120s node --max-old-space-size=512 scripts/prepare_general_lex_ranks.js \
+            build/generalized-native-qa/rank-fixtures \
+            | tee build/generalized-native-qa/rank-fixtures.log
+          python3 scripts/verify_general_h_lex_chain.py --self-test \
+            | tee build/generalized-native-qa/chain-self-test.log
+      - name: Native generalized Sauce and rank SHA gate (five non-Foundation cases)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          timeout 900s python3 scripts/verify_general_rank_native.py \
+            build/generalized-native-qa/rank-fixtures build/generalized-native-qa/native-rank \
+            | tee build/generalized-native-qa/native-rank.log
+          grep -Fq 'NATIVE_GENERAL_RANK_PASS cases=5 days=20763 FOUNDATION_SKIPPED' \
+            build/generalized-native-qa/native-rank.log
+      - name: Native generalized H roots, small and maximum geometries
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          /usr/bin/time -v -o build/generalized-native-qa/general-h-roots.resources \
+            timeout 3600s python3 scripts/verify_general_h_roots.py --native \
+            build/generalized-native-qa/general-h-roots \
+            2>&1 | tee build/generalized-native-qa/general-h-roots.log
+          grep -Fq 'NATIVE_GENERAL_H_ROOTS_PASS cases=11 negatives=5' \
+            build/generalized-native-qa/general-h-roots.log
+      - name: Native H-table plus full lexical word chain (five non-Foundation cases)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ulimit -S -v 3145728
+          ulimit -H -v 3145728
+          mkdir -p build/generalized-native-qa/general-h-lex
+          for case_name in year4999 year5001 creation_minus1234 creation_plus1234 year5002; do
+            case_dir="build/generalized-native-qa/general-h-lex/$case_name"
+            log="build/generalized-native-qa/general-h-lex-$case_name.log"
+            if timeout 650s python3 scripts/verify_general_h_lex_chain.py \
+              build/generalized-native-qa/rank-fixtures "$case_name" "$case_dir" \
+              > "$log" 2>&1; then
+              cat "$log"
+              rm -f "$case_dir/H.hex" "$case_dir/native.root" "$case_dir/native.word"
+            else
+              rc=$?
+              cat "$log"
+              rm -f "$case_dir/H.hex" "$case_dir/native.root" "$case_dir/native.word"
+              exit "$rc"
+            fi
+          done
+      - name: Record test-only completion without Stage 1 acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'STAGE1_GENERALIZED_NATIVE_QA_PASS TEST_ONLY; STAGE1_NOT_ACCEPTED; FOUNDATION_H45_NOT_RERUN' \
+            | tee build/generalized-native-qa/FINAL_STATUS.txt
+      - name: Preserve bounded Native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage1-generalized-native-qa
+          path: build/generalized-native-qa/
+          if-no-files-found: warn
+          retention-days: 90
