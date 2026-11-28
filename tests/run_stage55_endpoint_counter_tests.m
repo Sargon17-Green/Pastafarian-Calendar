@@ -2,8 +2,9 @@ function run_stage55_endpoint_counter_tests()
 % Experimental: native exact suffix count versus independent brute oracle.
 here = fileparts(mfilename('fullpath'));
 root = fileparts(here);
+originalPath = path;
+cleanup = onCleanup(@() path(originalPath)); %#ok<NASGU>
 addpath(fullfile(root, 'src'));
-cleanup = onCleanup(@() rmpath(fullfile(root, 'src'))); %#ok<NASGU>
 
 cases = { ...
     [1 1], [2 2], [2 2 2], [3 3 3], [4 4 4], [2 3 2], [3 2 3]};

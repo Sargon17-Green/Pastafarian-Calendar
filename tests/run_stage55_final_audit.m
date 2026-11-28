@@ -10,10 +10,11 @@ function run_stage55_final_audit()
 here = fileparts(mfilename('fullpath'));
 root = fileparts(here);
 
+originalPath = path;
+pathCleanup = onCleanup(@() cleanupPaths(root, originalPath)); %#ok<NASGU>
 addpath(here);
 addpath(fullfile(root, 'src'));
 addpath(fullfile(root, 'tests', 'oracle'));
-pathCleanup = onCleanup(@() cleanupPaths(root, here)); %#ok<NASGU>
 
 oldHeavy = getenv('PASTAFARI_STAGE54_HEAVY');
 setenv('PASTAFARI_STAGE54_HEAVY', '1');
@@ -53,6 +54,11 @@ try
     % Independent exact endpoint recurrence: exhaustive small frontiers.
     % This is experimental and does not replace production weaving.
     run_stage55_endpoint_counter_tests();
+    assert(strcmp(which('pastafari.BigInt'), ...
+        fullfile(root, 'src', '+pastafari', 'BigInt.m')), ...
+        'Stage55 endpoint tests did not preserve the production path.');
+    assert(pastafari.BigInt.coerce(1) == pastafari.BigInt(1));
+    fprintf('STAGE_55_ENDPOINT_PATH_RESTORATION_PASS\n');
     normative_oracle('weavePreflight');
 
     % 1. Pełna ścieżka regresji 1..54 + ciężki production/oracle differential.
@@ -232,19 +238,9 @@ assert(contains(txt, 'finalMonsterIntegration'), ...
 out = sprintf('STAGE_55_README_STATE_PASS\n');
 end
 
-function cleanupPaths(root, here)
+function cleanupPaths(root, originalPath)
+% Child stages may remove src; restore caller path even if cache clear fails.
+restorePath = onCleanup(@() path(originalPath)); %#ok<NASGU>
+addpath(fullfile(root, 'src'));
 pastafari.LegacyYearNumberStructureCache.clear();
-
-try
-    rmpath(fullfile(root, 'tests', 'oracle'));
-catch
-end
-try
-    rmpath(fullfile(root, 'src'));
-catch
-end
-try
-    rmpath(here);
-catch
-end
 end
