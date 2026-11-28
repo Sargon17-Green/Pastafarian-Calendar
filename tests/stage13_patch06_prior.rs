@@ -70,7 +70,10 @@ fn stage13_signed_wide_raw_matrix() {
                     red += 1;
                     &hidden[back + 1 - i]
                 } else {
-                    assert_eq!(legacy.outcome, PriorOutcome::Visible(prefix[i - back - 1].clone()));
+                    assert_eq!(
+                        legacy.outcome,
+                        PriorOutcome::Visible(prefix[i - back - 1].clone())
+                    );
                     control += 1;
                     &prefix[i - back - 1]
                 };

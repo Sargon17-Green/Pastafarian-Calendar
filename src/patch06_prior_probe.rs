@@ -55,7 +55,8 @@ impl PhaseHandler for PriorPatch06 {
     }
 
     fn handle(&self, context: &mut MonsterContext) -> Result<(), MonsterError> {
-        if context.patch06_prior_observation.is_some() || context.metrics.get("patch06.applied") != 0
+        if context.patch06_prior_observation.is_some()
+            || context.metrics.get("patch06.applied") != 0
         {
             return Err(invalid("duplicate application"));
         }
