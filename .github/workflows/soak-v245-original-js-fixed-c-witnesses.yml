@@ -1,0 +1,145 @@
+name: Soak v245 original JS independent implementation fixed-c witnesses (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v245-original-js-fixed-c-witnesses.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind exact C++ evidence and anonymously fetch immutable public JS dependency closure
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "77f146ce8fcf5fd705673e75a36b9f0a32ff7ca2"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v245-original-js-fixed-c-witnesses.yml"
+          mkdir -p evidence js
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15236577876/zip > evidence/v244.zip
+          echo "98e33d13e246a4c3744149a492fcb9d3c5603d9acb027dab92e705ba9cb0dcfa  evidence/v244.zip" | sha256sum -c -
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15236391680/zip > evidence/v243.zip
+          echo "7f2c5f235d44f5fc967216026005917dca7619acd8e95e43140ea50299175a0b  evidence/v243.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib,json,zipfile,subprocess,re
+          from pathlib import Path
+          pins={"browser/pastafari-date.js":{"blob":"d83c0ead35ee209476b0d2edf5c6661861fb9678","size":35986},"browser/pastafari-calendar-fast.js":{"blob":"014eca6908ed726c6c760204580bf18119015bbc","size":71999},"browser/pastafari-calendar-router.js":{"blob":"0c708b1c53541d0078c99fcf1d58dc8e46b6531e","size":2313},"browser/pastafari-diagnostics.js":{"blob":"42637e8d83b373ef128b364d1ad62de3bfc81a09","size":13518},"browser/pastafari-engine-client.js":{"blob":"33300cf69b15e7785b65e5caa064653f4a82ff66","size":12157},"browser/pastafari-calendar-router-core.js":{"blob":"6d36c647d08ac4f0999c51bf3c699de10556b008","size":23516},"browser/pastafari-authoritative-worker.js":{"blob":"29ea516eecf3d6fcb58869a070d5de21b1dd1ae7","size":8528},"browser/pastafari-fast-worker.js":{"blob":"cfd9d8a62d41efc7dbffc006639daff8a6942bbc","size":9907},"browser/pastafari-calendar-core.js":{"blob":"3b349037967550b0253db6235db5044ac9703466","size":3449},"browser/pastafari-calendar-core-chronicle.js":{"blob":"0cc8620e4c3e75bdfd887881c287f335346a348a","size":39806},"browser/pastafari-calendar-core-1.js":{"blob":"699ee2c56c9cb8e957a8acb0ee8362a26e128c67","size":14934738},"browser/pastafari-calendar-core-2.js":{"blob":"7bdd5fa2279d67dc812e1514f4f402f53e577174","size":14780839},"browser/proleptic-negative-year-detour.js":{"blob":"c371848fe52ef8fd9d128e49b6a685426d0ad9f9","size":3866},"browser/intl-calendar-semantic-firewall.js":{"blob":"7782a0f89dea0b906dab493e27fa6fad8bfbf218","size":4114},"browser/gate-data-detour.js":{"blob":"e993b0ef23b7177527636bec3e0875e57e8c1eb6","size":4465},"browser/year-ceiling-detour.js":{"blob":"d1a42eeee53e73294ad80f310568b17ace3dcbba","size":5520},"browser/year-ceiling-detour-detour.js":{"blob":"60de73aedb3baa0f4831b3373c9083fb3ea8a7c2","size":5109},"browser/year-ceiling-detour-detour-detour.js":{"blob":"bbfb20bd777f5609082a342b2a6b486012b3cff8","size":6617},"browser/cache-epoch-detour.js":{"blob":"303ea946f7390bff2a3802cd15d1abc2efb28989","size":13281},"browser/month-weaving-domain-detour.js":{"blob":"f6b95731713a2a3180d5ac8d52783e07f665fc9d","size":11022},"browser/short-selection-infeasible-work-detour.js":{"blob":"f912ccd01445e6f69900432bf4d67eba4eb570e1","size":4564},"browser/runtime-patch-ledger.js":{"blob":"1abc271d7f16e152c1425eff2911710d1bb71d0e","size":8441},"browser/generated/pastafari-gate-shadow.js":{"blob":"24af1ab44cb134386e54fcbfd20562e73cb5e7d1","size":71794},"docs/calendar-converters.js":{"blob":"612beffeb06df091c5289d8ae55cdef90f3bac10","size":28620},"docs/chinese-calendrica-detour.js":{"blob":"5d59f6b249029d33a90468ce83e48941ed722df1","size":20935},"src/chinese-calendrica-detour.js":{"blob":"5d59f6b249029d33a90468ce83e48941ed722df1","size":20935}}
+          ref="642cd881e59cfd7cafcb96e8ad30562916776cba"
+          for p,v in pins.items():
+              dst=Path("js",p)
+              dst.parent.mkdir(parents=True,exist_ok=True)
+              subprocess.run(["curl","--fail","--silent","--show-error","--location","--connect-timeout","10","--max-time","60","--retry","1","--output",str(dst),f"https://raw.githubusercontent.com/Sargon17-Green/pastafari-calendar/{ref}/{p}"],check=True,timeout=130)
+              raw=dst.read_bytes()
+              assert len(raw)==v["size"] and hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==v["blob"],p
+              v["sha256"]=hashlib.sha256(raw).hexdigest()
+          Path("js/package.json").write_text('{"private":true,"type":"module"}\n')
+          fast=Path("js/browser/pastafari-calendar-fast.js").read_text()
+          names={}
+          for symbol,n in [("CUTLET_NAMES",17),("MONTH_NAMES",47)]:
+              m=re.search(r"const\s+"+symbol+r"\s*=\s*Object\.freeze\(\s*\[([\s\S]*?)\]\s*\)",fast)
+              assert m
+              a=json.loads("["+m.group(1).rstrip().rstrip(",")+"]")
+              assert len(a)==len(set(a))==n
+              names[symbol]=a
+          Path("js/names.json").write_text(json.dumps(names,ensure_ascii=False))
+          def load(v):
+              with zipfile.ZipFile(f"evidence/v{v}.zip") as z:
+                  assert z.testzip() is None
+                  return json.loads(z.read("result.json"))
+          a,b=load(243),load(244)
+          assert a["schema"]=="SOAK_V243_CELERITAS_VERSIONED_INTERVAL/1" and a["versioned_candidate_pass"]
+          assert b["schema"]=="SOAK_V244_CELERITAS_COMBINED_TIMEOUT_WITNESSES/1" and b["comparison_pass"]
+          assert a["candidate_commit"]==b["candidate_commit"]=="408d80e43159eba06849b6a929e0010f32b9b91b"
+          rows=[x for x in a["rows"] if x["case"] in ("cold","adjacent")]
+          for x in b["comparisons"]:rows.extend(x["modes"]["combined"]["rows"])
+          assert [(x["c"],x["t"]) for x in rows]==[(739617,739617),(739617,739618),(-377237,-377237),(-377237,-377236),(6875993,6875993),(6875993,6875994)]
+          # Convert the integer engine days to Gregorian inputs; verify by
+          # inverse formula. No calendar-specific algorithm in the adapter.
+          def iso(d):
+              j=d+1721425
+              a=j+32044;b=(4*a+3)//146097;c=a-146097*b//4
+              y=(4*c+3)//1461;e=c-1461*y//4;m=(5*e+2)//153
+              day=e-(153*m+2)//5+1;month=m+3-12*(m//10);year=100*b+y-4800+m//10
+              q=(14-month)//12;yy=year+4800-q;mm=month+12*q-3
+              assert day+(153*mm+2)//5+365*yy+yy//4-yy//100+yy//400-32045==j
+              return ("-" if year<0 else "")+str(abs(year)).zfill(4)+f"-{month:02d}-{day:02d}"
+          for x in rows:
+              x["calculation_iso"]=iso(x["c"])
+              x["target_iso"]=iso(x["t"])
+          Path("js/cases.json").write_text(json.dumps(rows,ensure_ascii=False))
+          Path("evidence/frozen-cpp.json").write_text(json.dumps(rows,indent=2,ensure_ascii=False)+"\n")
+          Path("evidence/source-pins.json").write_text(json.dumps({"repo":"Sargon17-Green/pastafari-calendar","commit":ref,"closure_from_v5_harness_blob":"1fd86967bcda559b4ee333923c6d63341fc0b5af","files":pins},indent=2)+"\n")
+          PY
+      - name: Run six original public JS date API calls with calculation day fixed per pair
+        run: |
+          set -euo pipefail
+          node --version > evidence/node.txt
+          cat > js/probe.mjs <<'JS'
+          import fs from "node:fs";
+          import {performance} from "node:perf_hooks";
+          import {getPastafariDateAsync} from "./browser/pastafari-date.js";
+          const cases=JSON.parse(fs.readFileSync(new URL("./cases.json",import.meta.url),"utf8"));
+          const names=JSON.parse(fs.readFileSync(new URL("./names.json",import.meta.url),"utf8"));
+          const cut=new Map(names.CUTLET_NAMES.map((x,i)=>[x,i+1]));
+          const mon=new Map(names.MONTH_NAMES.map((x,i)=>[x,i+1]));
+          const index=Number(process.argv[2]);
+          if(![0,2,4].includes(index)) throw Error("invalid group");
+          for(const x of cases.slice(index,index+2)){
+            console.error("BEGIN",x.c,x.t,x.calculation_iso,x.target_iso);
+            const start=performance.now();
+            // Public JS argument order is target first, calculation second.
+            const d=await getPastafariDateAsync(x.target_iso,x.calculation_iso);
+            const ci=cut.get(String(d.cutletName)),mi=mon.get(String(d.monthName));
+            if(!Number.isInteger(ci)||!Number.isInteger(mi)) throw Error("unmapped authentic name");
+            const fields=[Number(d.year),ci,Number(d.dayInCutlet),mi,Number(d.dayInMonth)];
+            if(!fields.every(Number.isSafeInteger)) throw Error("unsafe field");
+            console.log(JSON.stringify({c:x.c,t:x.t,fields,raw_names:[d.cutletName,d.monthName],seconds:(performance.now()-start)/1000,matched:JSON.stringify(fields)===JSON.stringify(x.fields)}));
+          }
+          // The public router may retain workers; explicitly exit after flushing.
+          await new Promise(resolve=>process.stdout.write("",resolve));
+          process.exit(0);
+          JS
+          sha256sum js/probe.mjs js/names.json js/cases.json > evidence/adapter.sha256
+          for i in 0 2 4; do
+            set +e
+            /usr/bin/time -v -o "evidence/group-$i.time.txt" timeout -k 5s 180s node --max-old-space-size=1536 js/probe.mjs "$i" > "evidence/group-$i.stdout" 2> "evidence/group-$i.stderr"
+            code=$?
+            set -e
+            echo "$code" > "evidence/group-$i.exit"
+            cat "evidence/group-$i.stdout" "evidence/group-$i.stderr"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("evidence");frozen=json.loads((p/"frozen-cpp.json").read_text())
+          rows=[];groups=[]
+          for i in (0,2,4):
+              code=int((p/f"group-{i}.exit").read_text())
+              actual=[json.loads(l) for l in (p/f"group-{i}.stdout").read_text().splitlines() if l.startswith("{")]
+              groups.append({"index":i,"exit":code,"count":len(actual)})
+              for x,y in zip(actual,frozen[i:i+2]):
+                  assert (x["c"],x["t"])==(y["c"],y["t"])
+                  x["cpp_fields"]=y["fields"]
+                  x["cpp_raw_names"]=y["raw_names"]
+                  assert x["matched"]==(x["fields"]==y["fields"])
+                  rows.append(x)
+          ok=all(g["exit"]==0 and g["count"]==2 for g in groups) and len(rows)==6 and all(x["matched"] for x in rows)
+          out={"schema":"SOAK_V245_JS_FIXED_C_PUBLIC_API/1","js_commit":"642cd881e59cfd7cafcb96e8ad30562916776cba","cpp_candidate_commit":"408d80e43159eba06849b6a929e0010f32b9b91b","groups":groups,"rows":rows,"comparison_pass":ok,"new_distinct_c_t_pairs":3 if ok else 0,"independence_scope":"separate original public APIs; shared normative algorithm and broader lineage admission unresolved","whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n")
+          print(json.dumps(out,ensure_ascii=False))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v245-original-js-fixed-c-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
