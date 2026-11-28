@@ -252,3 +252,85 @@ if ($script:trustedRouteChecks44 -ne 18) { throw 'Stage44 trusted route count mi
 Write-Host 'STAGE44_TRUSTED_ROUTE_ASSERTIONS_PASSED=18'
 Write-Host 'STAGE44_TRUSTED_ROUTE_ASSERTIONS_FAILED=0'
 Write-Host 'STAGE44_TRUSTED_ROUTE_RESULT=PASS_SYNTHETIC_BINDING_ONLY'
+
+
+# Runtime gate QA in an isolated real Git repository. No candidate is activated
+# in the actual checkout; fixture trust is synthetic, not external CI evidence.
+# Source adjudication: run 46138874657, 18/18 jobs, 20 exact-SHA artifacts;
+# numerical 5027/0, classifier 240/0, boundary 8/0, route 12/0, pointer 9/0,
+# synthetic binding 18/0, Stage43 2215/0, finalizer twice PASS.
+# ZIP digests matched upload logs and API for five artifacts; not rehashed.
+$script:runtime44Checks=0
+function Invoke44TestGit([string[]]$arguments) {
+    $output=@(& git -C $sandbox44 @arguments)
+    if ($LASTEXITCODE -ne 0) { throw ('Fixture git failed: '+($arguments -join ' ')) }
+    return ($output -join [char]10)
+}
+function Commit44TestMetadata([byte[]]$data,[string]$message) {
+    [IO.File]::WriteAllBytes((Join-Path $sandbox44 'DEVELOPMENT_STAGE.md'),$data)
+    [void](Invoke44TestGit @('add','--','DEVELOPMENT_STAGE.md'))
+    [void](Invoke44TestGit @('commit','-q','-m',$message))
+    return (Invoke44TestGit @('rev-parse','HEAD')).Trim()
+}
+function Check44Runtime([string]$head,[string]$route,$trusted,[string]$expected,[string]$label) {
+    $actual=''
+    try {
+        $actual=Assert-Stage44TrustedExecution -RepositoryRoot $sandbox44 -ExpectedHead $head -ExpectedRoute $route -TrustedEvidence $trusted
+    } catch { $actual=$_.Exception.Message }
+    if ($actual -cne $expected) { throw ('Stage44 runtime '+$label+': expected '+$expected+' actual '+$actual) }
+    $script:runtime44Checks++
+}
+$sandbox44=Join-Path ([IO.Path]::GetTempPath()) ('stage44-git-'+[Guid]::NewGuid().ToString('N'))
+[void][IO.Directory]::CreateDirectory($sandbox44)
+try {
+    [void](Invoke44TestGit @('init','-q'))
+    [void](Invoke44TestGit @('config','user.name','Stage44 QA'))
+    [void](Invoke44TestGit @('config','user.email','stage44-qa@example.invalid'))
+    [void](Invoke44TestGit @('config','core.autocrlf','false'))
+    [void](Invoke44TestGit @('config','commit.gpgsign','false'))
+    # Keep the frozen blob in this independent object database.
+    $ancestor1=Commit44TestMetadata $frozen44 'frozen baseline'
+    $ancestor2=Commit44TestMetadata ([byte[]]($frozen44+10)) 'synthetic historical native'
+    $ancestor3=Commit44TestMetadata ([byte[]]($frozen44+10+10)) 'synthetic historical seal'
+    $ancestors=@($ancestor1,$ancestor2,$ancestor3)
+    $tree44=(Invoke44TestGit @('rev-parse','HEAD^{tree}')).Trim()
+    # A separate root commit has a valid SHA but is not an ancestor.
+    $unrelated44=(Invoke44TestGit @('commit-tree',$tree44,'-m','unrelated root')).Trim()
+    foreach ($n in 1..3) {
+        $candidate=Fixture44 $n
+        $phaseNames=@('PREFLIGHT','NATIVE','SEAL')
+        for ($i=0;$i -lt $n;$i++) {
+            $candidate['STAGE44_'+$phaseNames[$i]+'_CI_SHA']=$ancestors[$i]
+        }
+        $trusted=New-StrictStageMetadataDictionary
+        foreach ($key in $candidate.Keys) {
+            if ($key -cmatch '\ASTAGE44_(PREFLIGHT|NATIVE|SEAL)_' -and $key -cnotin @('STAGE44_NATIVE_ACCEPTANCE','STAGE44_SEAL_COMMIT_NATIVE_RECHECK')) {
+                $trusted.Add($key,$candidate[$key])
+            }
+        }
+        $route=@('IMPLEMENTATION_CANDIDATE','NATIVE_EVIDENCE_CANDIDATE','SEAL_RECHECK_CANDIDATE')[$n-1]
+        [byte[]]$clean44=Encode44 $candidate
+        $candidateHead=Commit44TestMetadata $clean44 ('synthetic candidate '+$n)
+        Check44Runtime $candidateHead $route $trusted $route "clean strict ancestors $n"
+        Check44Runtime $ancestor1 $route $trusted 'Stage44 checkout SHA mismatch' "wrong checkout $n"
+        [IO.File]::WriteAllBytes((Join-Path $sandbox44 'DEVELOPMENT_STAGE.md'),[byte[]]($clean44+10))
+        Check44Runtime $candidateHead $route $trusted 'Stage44 metadata differs from checkout' "unstaged mutation $n"
+        [void](Invoke44TestGit @('add','--','DEVELOPMENT_STAGE.md'))
+        Check44Runtime $candidateHead $route $trusted 'Stage44 metadata differs from checkout' "staged mutation $n"
+        [void](Invoke44TestGit @('reset','--hard','HEAD'))
+        $badTrust=Copy44 $trusted
+        $badTrust['STAGE44_PREFLIGHT_CI_SHA']=$unrelated44
+        Check44Runtime $candidateHead $route $badTrust 'Stage44 trusted phase evidence binding failed' "external binding mismatch $n"
+        # Match the metadata and trust map to isolate ancestry rejection.
+        $badCandidate=Copy44 $candidate
+        $badCandidate['STAGE44_PREFLIGHT_CI_SHA']=$unrelated44
+        $badHead=Commit44TestMetadata (Encode44 $badCandidate) ('synthetic unrelated evidence '+$n)
+        Check44Runtime $badHead $route $badTrust 'Stage44 evidence SHA not a strict ancestor' "unrelated existing commit $n"
+    }
+} finally {
+    Remove-Item -LiteralPath $sandbox44 -Recurse -Force -ErrorAction Stop
+}
+if ($script:runtime44Checks -ne 18) { throw 'Stage44 runtime count mismatch' }
+Write-Host 'STAGE44_RUNTIME_GATE_ASSERTIONS_PASSED=18'
+Write-Host 'STAGE44_RUNTIME_GATE_ASSERTIONS_FAILED=0'
+Write-Host 'STAGE44_RUNTIME_GATE_RESULT=PASS_SYNTHETIC_GIT_ONLY'
