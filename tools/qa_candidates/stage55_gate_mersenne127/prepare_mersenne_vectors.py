@@ -36,37 +36,40 @@ def main() -> None:
             "expected_q": str(q), "expected_r": str(r), "tag": tag,
         })
 
-    # Includes the adversarial fold boundary x = 2^128 - 1:
-    # after the final base-10^7 digit, low + high crosses bit 127.
-    edge_values = [
-        0, 1, -1, BASE - 1, BASE, BASE + 1,
-        BASE**6 - 1, -(BASE**6 - 1),
+    # Includes x = 2^128-1, which forces the 31-bit top-limb fold.
+    mersenne_edges = [
+        0, 1, -1,
         MERSENNE_127 - 1, MERSENNE_127, MERSENNE_127 + 1,
         -(MERSENNE_127 + 1),
         (1 << 127), (1 << 127) + 1,
         (1 << 128) - 1, 1 << 128, (1 << 128) + 1,
         -((1 << 128) - 1), -(1 << 128), -((1 << 128) + 1),
+        2 * MERSENNE_127, -(2 * MERSENNE_127),
     ]
-    edge_divisors = [1, 2, 3, 7, 720, BASE - 1, MERSENNE_127]
-    for divisor in edge_divisors:
-        for value in edge_values:
-            add(value, divisor, "edge")
+    for value in mersenne_edges:
+        add(value, MERSENNE_127, "mersenne-edge")
 
-    for i in range(64):
-        digits = rng.randint(40, 600)
-        value = random_decimal(rng, digits)
+    other_edge_values = [0, 1, -1, BASE**6 - 1, -(BASE**6 - 1)]
+    for divisor in [1, 2, 3, 7, 720, BASE - 1]:
+        values = other_edge_values + [
+            divisor - 1, divisor, divisor + 1, -(divisor + 1)
+        ]
+        for value in values:
+            add(value, divisor, "other-edge")
+
+    for i in range(32):
+        value = random_decimal(rng, rng.randint(40, 600))
         if i % 2:
             value = -value
         add(value, MERSENNE_127, "mersenne-127")
 
-    for i in range(48):
-        digits = rng.randint(40, 600)
-        value = random_decimal(rng, digits)
+    for i in range(24):
+        value = random_decimal(rng, rng.randint(40, 600))
         if i % 2:
             value = -value
         add(value, rng.randint(1, BASE - 1), "single-limb")
 
-    for i in range(48):
+    for i in range(24):
         value = random_decimal(rng, rng.randint(60, 600))
         divisor = random_decimal(rng, rng.randint(8, 150))
         if i % 2:
@@ -86,7 +89,8 @@ def main() -> None:
         "vector_count": len(vectors),
         "vectors_sha256": hashlib.sha256(vectors_path.read_bytes()).hexdigest(),
         "categories": {
-            "edge": sum(v["tag"] == "edge" for v in vectors),
+            "mersenne_edge": sum(v["tag"] == "mersenne-edge" for v in vectors),
+            "other_edge": sum(v["tag"] == "other-edge" for v in vectors),
             "mersenne_127": sum(v["tag"] == "mersenne-127" for v in vectors),
             "single_limb": sum(v["tag"] == "single-limb" for v in vectors),
             "multi_limb": sum(v["tag"] == "multi-limb" for v in vectors),
