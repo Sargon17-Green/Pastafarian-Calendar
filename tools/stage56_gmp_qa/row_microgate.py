@@ -5,7 +5,12 @@ e745c64c41fc77f85e00a19e96d0b07a106e4529b9bea883c2b37b12223489e4.
 Initial DP widths derive L[0]=q[0], L[i]=q[i]-q[i-1]+1.
 This is a row-only microgate: rank/unrank qualification is still required.
 """
-import hashlib, itertools, json, math, os, pathlib, resource, subprocess, sys, tempfile, time
+import hashlib, itertools, json, math, os, pathlib, resource, signal, subprocess, sys, tempfile, time
+
+# The source bounds the maximum word length to 5778; exact decimal digests
+# may exceed Python's default 4300-digit conversion ceiling.
+if hasattr(sys, 'set_int_max_str_digits'):
+    sys.set_int_max_str_digits(0)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 LOCKS = {
@@ -119,12 +124,21 @@ def run(mode,L):
     with tempfile.TemporaryDirectory(prefix="stage56-gmp-") as d:
         rss=pathlib.Path(d)/"rss"
         t=time.monotonic_ns()
-        p=subprocess.run(["/usr/bin/time","-f","%M","-o",str(rss),"php","-d","memory_limit=512M",
-                          "-r",PHP,str(ROOT),mode,json.dumps(L)],capture_output=True,
-                         text=True,timeout=180,preexec_fn=cap)
+        p=subprocess.Popen(["/usr/bin/time","-f","%M","-o",str(rss),"php","-d","memory_limit=512M",
+                          "-r",PHP,str(ROOT),mode,json.dumps(L)],stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,text=True,preexec_fn=cap,start_new_session=True)
+        try:
+            stdout,stderr=p.communicate(timeout=180)
+        except BaseException:
+            try: os.killpg(p.pid,signal.SIGKILL)
+            except ProcessLookupError: pass
+            p.communicate()
+            raise
         elapsed=time.monotonic_ns()-t
-        if p.returncode or p.stderr: raise RuntimeError(f"{mode} exit={p.returncode} stderr={p.stderr[:1000]} stdout={p.stdout[:1000]}")
-        result=json.loads(p.stdout)
+        if p.returncode or stderr: raise RuntimeError(f"{mode} exit={p.returncode} stderr={stderr[:1000]} stdout={stdout[:1000]}")
+        result=json.loads(stdout)
+        if result.get("status")!="ROW_RESULT" or result.get("mode")!=mode:
+            raise RuntimeError("invalid worker identity")
         result["rss_bytes"]=int(rss.read_text().strip())*1024
         result["elapsed_ns"]=elapsed
         if result["rss_bytes"]>512*1024**2: raise RuntimeError("RSS limit")
