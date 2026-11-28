@@ -9,6 +9,12 @@ from math import comb, perm
 from pathlib import Path
 import json
 import subprocess
+import sys
+
+# The conservative V32 upper bound has fewer than 10,000 decimal digits.
+# Keep an explicit finite limit rather than disabling the conversion guard.
+if hasattr(sys, 'set_int_max_str_digits'):
+    sys.set_int_max_str_digits(12000)
 
 from test_sm83_stage1_year_path_oracle import find_year, gate_at
 from test_sm83_stage1_selection_oracle import bowl_answer_flow, select
@@ -31,7 +37,9 @@ ROWS = [
 
 def worker(mode, payload=None):
     p = subprocess.run(["node","--max-old-space-size=512",str(WORKER),mode],
-        input=json.dumps(payload), text=True, capture_output=True, timeout=180, check=True)
+        input=json.dumps(payload), text=True, capture_output=True, timeout=180, check=False)
+    if p.returncode:
+        raise RuntimeError(f'Node {mode} exit={p.returncode}: {p.stderr[-4000:]}')
     return json.loads(p.stdout)
 
 def C(n,k):
