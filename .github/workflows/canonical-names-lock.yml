@@ -1934,3 +1934,70 @@ jobs:
         with:
           name: fortran-stage02-patch01-${{ github.sha }}
           path: build/stage02-evidence/
+  canonical-ordinal-correction:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/Fortran+English' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: '5a9c6387ef1a703e11bc5ddbbf7aa6111c94e6c6'
+          path: historical-discovery
+      - name: Install Fortran
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq gfortran
+      - name: Verify exact historical and current sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/ordinal-evidence build/ordinal-historical build/ordinal-current
+          git rev-parse HEAD | tee build/ordinal-evidence/current-checkout.txt
+          git -C historical-discovery rev-parse HEAD | tee build/ordinal-evidence/historical-checkout.txt
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C historical-discovery rev-parse HEAD)" = '5a9c6387ef1a703e11bc5ddbbf7aa6111c94e6c6'
+          test "$(git -C historical-discovery hash-object src/discovery01_remainder.f90)" = '1381c19b0badccf25a28239d4aad6c427fab11a6'
+          test "$(git hash-object src/discovery01_remainder.f90)" = '2563ef9851e17dfd513c3f522498990cc47976e6'
+          gfortran --version > build/ordinal-evidence/compiler.txt
+          git -C historical-discovery hash-object src/discovery01_remainder.f90 > build/ordinal-evidence/historical-source.txt
+          git hash-object src/discovery01_remainder.f90 > build/ordinal-evidence/current-source.txt
+          compile_probe() {
+            local src="$1" out="$2" probe="$3"
+            local flags=(-std=f2018 -Wall -Wextra -fcheck=all -ffree-line-length-none -J "$out" -I "$out")
+            gfortran "${flags[@]}" -c "$src/src/big_integer.f90" -o "$out/big_integer.o"
+            gfortran "${flags[@]}" -c "$src/src/bootstrap_infrastructure.f90" -o "$out/bootstrap_infrastructure.o"
+            gfortran "${flags[@]}" -c "$src/src/discovery01_remainder.f90" -o "$out/discovery01_remainder.o"
+            gfortran "${flags[@]}" -c "$src/test/normative_oracle_core.f90" -o "$out/normative_oracle_core.o"
+            gfortran "${flags[@]}" "$probe" "$out"/*.o -o "$out/probe"
+          }
+          compile_probe historical-discovery build/ordinal-historical test/correction_discovery01_3m.f90 > build/ordinal-evidence/discovery-compile.log 2>&1 || { cat build/ordinal-evidence/discovery-compile.log; exit 1; }
+          compile_probe . build/ordinal-current test/correction_patch01_3m.f90 > build/ordinal-evidence/patch-compile.log 2>&1 || { cat build/ordinal-evidence/patch-compile.log; exit 1; }
+          run_probe() {
+            local label="$1" executable="$2" marker="$3"
+            local rc
+            set +e
+            (ulimit -v 1048576; timeout --signal=TERM --kill-after=3s 30s "$executable") > "build/ordinal-evidence/$label.stdout.log" 2> "build/ordinal-evidence/$label.stderr.log"
+            rc=$?
+            set -e
+            printf '%s\n' "$rc" > "build/ordinal-evidence/$label.exit.txt"
+            cat "build/ordinal-evidence/$label.stdout.log" "build/ordinal-evidence/$label.stderr.log"
+            test "$rc" -eq 0
+            test ! -s "build/ordinal-evidence/$label.stderr.log"
+            test "$(grep -c '^CORRECTION_CASE=' "build/ordinal-evidence/$label.stdout.log")" -eq 6
+            grep -Fx "$marker" "build/ordinal-evidence/$label.stdout.log"
+          }
+          run_probe discovery build/ordinal-historical/probe CORRECTIVE_DISCOVERY01_GATE_PASS
+          run_probe patch build/ordinal-current/probe CORRECTIVE_PATCH01_GATE_PASS
+          test "$(grep -c '^CORRECTION_PATCH_RESULT=' build/ordinal-evidence/patch.stdout.log)" -eq 6
+      - name: Hash evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build/ordinal-evidence
+          cd build/ordinal-evidence
+          find . -maxdepth 1 -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 -r sha256sum > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fortran-canonical-ordinal-correction-${{ github.sha }}
+          path: build/ordinal-evidence/
+          if-no-files-found: error
