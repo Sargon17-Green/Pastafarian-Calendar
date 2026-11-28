@@ -4,9 +4,9 @@ PROJECT_ID: PC-BRANCH-LOGO-IDO
 QA_BRANCH: qa/logo-ido-stage2-wide-general-k3plus-20261122
 BASE_QA_HEAD: 1fea4a9a2b1f595151411b1f3457546deb8bd2e4
 CANONICAL_SOURCE_SHA: ad001c6aeeb6c758f5004b206a656fec5d6fc403
-STATUS: QA_IMPLEMENTATION_AND_INDEPENDENT_HOST_ORACLE; K5_NATIVE_DIAGNOSTIC_PASS
+STATUS: QA_IMPLEMENTATION_AND_INDEPENDENT_HOST_ORACLE; K6_NATIVE_DIAGNOSTIC_PASS
 PRODUCTION_CHANGED: NO
-NATIVE: INCREMENTAL_DIAGNOSTICS_THROUGH_K5; FULL_K_ACCEPTANCE: NOT_RUN
+NATIVE: INCREMENTAL_DIAGNOSTICS_THROUGH_K6; FULL_K_ACCEPTANCE: NOT_RUN
 STAGE2_ACCEPTED: NO
 LAST_COMPLETED_STAGE: 1
 
@@ -135,7 +135,7 @@ The current WIDE2 Native run 44947067097 is already accepted at its exact SHA an
 - Canonical Logo+Ido HEAD remains ad001c6aeeb6c758f5004b206a656fec5d6fc403.
 - No canonical promotion, main, merge, publication or Stage-2 completion.
 - LAST_COMPLETED_STAGE remains 1.
-- Next: continue bounded Native width expansion (k6, then k32/k33/k64); preserve per-case markers and timeouts; do not promote Stage 2 until all required widths pass. Do not change the accepted k=2 reporter or D20's 0..31 contract.
+- Next: continue bounded Native width expansion (k32, then k33 and k64); preserve per-case markers and timeouts; do not promote Stage 2 until all required widths pass. Do not change the accepted k=2 reporter or D20's 0..31 contract.
 
 ## 9. Diagnostic update after exact-SHA timeout (2026-11-22)
 
@@ -169,3 +169,12 @@ This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replace
 - Native output: 34 cases, 82 checks; k=2 compatibility and k=3/k=4/k=5 vectors passed, along with all 18 invalid guards.
 - Artifact 15267158014, 5,516 bytes, SHA-256 9fd6b6fa1afa989791d66d81a9c054d17a730d8ff3672e5a7bbbe3f00b470a97. The ZIP digest was independently recomputed; its git-blob manifest is newline-delimited.
 - The prior Native generator omitted k=6 despite the contract listing it. The next revision adds explicit k=6 vectors; full-k acceptance remains open.
+
+
+## 13. Completed k2/k3/k4/k5/k6 Native diagnostic evidence
+
+- Actions run 46155759160, job 141011936908, completed success at exact QA SHA 5dcd67da5e7d4fee72ea94deb999454aac607d48.
+- Canonical Names Lock run 46155759171, job 141011936901, completed success on the same SHA.
+- Native output: 38 cases, 98 checks; k=2 compatibility and k=3/k=4/k=5/k=6 vectors passed, along with all 18 invalid guards. The log contains a case-start marker for each vector and the final K6 diagnostic marker.
+- Artifact 15267424069, 6,143 bytes, SHA-256 a66d16c3af4737cbe7ba707a27fc21f42a5942ffbd5811291dfbdbfb14ae4dfd. The ZIP digest was independently recomputed; its git-blob manifest is newline-delimited.
+- This proves only the bounded k2 through k6 diagnostic. k32, k33, k64 and whole-Stage-2 acceptance remain open.
