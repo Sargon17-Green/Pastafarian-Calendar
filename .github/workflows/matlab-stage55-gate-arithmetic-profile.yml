@@ -1,0 +1,77 @@
+name: MATLAB Stage55 Gate Arithmetic Profile
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-gate-arithmetic-profile.yml'
+      - 'tools/qa_candidates/stage55_gate_arithmetic/**'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-gate-arithmetic-profile
+  cancel-in-progress: false
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Verify exact baseline and prepare independent vectors
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = 341927541dccc940bfc5e2b4073c21c647261278
+          test "$(git -C source rev-parse HEAD:src/+pastafari/BigInt.m)" = 86581532df7492a236283c5ee9410ca281e2e6f5
+          test "$(git -C source rev-parse HEAD:src/+pastafari/GateQuestionEngine.m)" = 4b774c90f9a2fcdccaa2baac3ef80b0e8e99489e
+          test -z "$(git -C source status --porcelain)"
+          mkdir -p profile-output
+          python3 qa/tools/qa_candidates/stage55_gate_arithmetic/prepare_vectors.py profile-output
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Start bounded process-tree watchdog
+        run: |
+          set -euo pipefail
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch profile-output > profile-output/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f profile-output/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Run baseline arithmetic oracle and physical inner-route profile
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 20
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            maxNumCompThreads(1);
+            addpath(fullfile(base,'qa','tools','qa_candidates','stage55_gate_arithmetic'));
+            run_gate_arithmetic_profile(fullfile(base,'source'),fullfile(base,'profile-output','vectors.json'),fullfile(base,'profile-output','profile.json'));
+      - name: Stop watchdog and verify bounded execution
+        if: always()
+        run: |
+          set -euo pipefail
+          touch profile-output/watch.stop
+          for i in {1..40}; do
+            test ! -f profile-output/watch.json || exit 0
+            sleep 0.5
+          done
+          exit 1
+      - name: Verify independent arithmetic oracle and physical route counts
+        if: success()
+        run: python3 qa/tools/qa_candidates/stage55_gate_arithmetic/verify_profile.py profile-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-gate-arithmetic-profile-\${{ github.run_id }}
+          path: profile-output/
+          if-no-files-found: warn
+          retention-days: 30
