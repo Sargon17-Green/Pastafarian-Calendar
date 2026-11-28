@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify exact Mersenne candidate semantics and per-call physical route execution."""
+"""Verify exact Mersenne candidate semantics and aggregate physical route execution."""
 from __future__ import annotations
 import hashlib
 import json
@@ -22,6 +22,22 @@ ROUTES = [
 ]
 
 
+def expected_route_counts(gate_calls: int) -> dict:
+    # MATLAB profile selector is contains(FunctionName, class name), NOT .call only.
+    # Derivation from BASELINE_SOURCE, independently of measured counts.
+    drops, grinds, bowls, stirs, paths = 46, 11, 6, 12, 2
+    per_gate = [
+        1, 1, 1,
+        1 + paths * (1 + drops * (1 + 1 + grinds)),  # call, builders, computeDrop, saves
+        1 + paths * (1 + drops * (1 + grinds)),  # call, builders, saves
+        1 + 1 + bowls + paths * (1 + drops * (1 + bowls * (1 + 2))),  # call, init, saves, builders, order, saves, wraps
+        1 + 1 + bowls + paths * (1 + drops),  # call, init, saves, builders, order
+        1 + drops + stirs + stirs * (1 + bowls + 2 * bowls),  # call, order, saves, wraps
+        1,
+    ]
+    return dict(zip(ROUTES, (gate_calls * n for n in per_gate)))
+
+
 def read_json(path: pathlib.Path):
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -42,6 +58,8 @@ def check_profile(profile: dict, expected_blob: str, vectors: list, manifest: di
     assert profile["arithmetic_vector_count"] == len(vectors) == manifest["vector_count"]
     assert len(profile["arithmetic_results"]) == len(vectors)
     for index, (vector, actual) in enumerate(zip(vectors, profile["arithmetic_results"]), 1):
+        q, r = divmod(int(vector["a"]), int(vector["b"]))
+        assert (vector["expected_q"], vector["expected_r"]) == (str(q), str(r)), f"oracle mismatch {index}"
         assert actual["q"] == vector["expected_q"], f"quotient mismatch {index}: {vector['tag']}"
         assert actual["r"] == vector["expected_r"], f"remainder mismatch {index}: {vector['tag']}"
         assert actual["regular_r"] == vector["expected_r"], f"regularMod mismatch {index}: {vector['tag']}"
@@ -55,9 +73,11 @@ def check_profile(profile: dict, expected_blob: str, vectors: list, manifest: di
     assert len(profile["call_seconds"]) == 48
     assert len(profile["pass_seconds"]) == 2
     assert profile["profile_gap_results"] == profile["gap_results"][:24]
-    for route in ROUTES:
-        assert profile["route_counts"][route]["calls"] == 24, (
-            route, profile["route_counts"][route]
+    expected = expected_route_counts(len(offsets))
+    assert set(profile["route_counts"]) == set(expected)
+    for route, calls in expected.items():
+        assert profile["route_counts"][route]["calls"] == calls, (
+            route, calls, profile["route_counts"][route]
         )
     assert profile["total_measured_gate_seconds"] > 0
     assert profile["divmod_profile"]["calls"] > 0
@@ -126,7 +146,7 @@ def main() -> None:
         "vector_categories": vectors_manifest["categories"],
         "regularMod_independent_oracle": "PASS",
         "profiled_gate_engine_calls_per_variant": 24,
-        "profiled_route_calls_per_route_per_variant": 24,
+        "profiled_aggregate_route_calls_per_variant": expected_route_counts(24),
         "timed_unprofiled_gate_calls_per_variant": 48,
         "gap_outputs_identical": True,
         "baseline_pass_seconds": baseline_passes,
