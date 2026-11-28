@@ -1,0 +1,135 @@
+name: FALSE Arabic Stage23 bounded replay and mutants
+on:
+  push:
+    branches: ['FALSE\+العربية']
+    paths:
+      - '.github/workflows/false-arabic-stage23-replay-native.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native:
+    if: github.ref == 'refs/heads/FALSE+العربية'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        case: [fresh_replay, interleaving, mutant_swap, mutant_skip_batches_result, mutant_identity_order]
+    env:
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      SOURCE_PIN: 422874de123623dc262eecc80e3624fc9f02c281
+      RUNTIME_PIN: eb3135565a8670cced3f6bbca4dbf7b014c45634
+      CASE_NAME: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 422874de123623dc262eecc80e3624fc9f02c281
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: false-arabic-stage23-replay-prepare
+          run-id: 46180051751
+          github-token: ${{ github.token }}
+          path: prepared
+      - name: Verify preparation and build pinned interpreter
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/native upstream
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git rev-parse HEAD HEAD^{tree} > evidence/native/source.txt
+          git -C upstream init -q
+          git -C upstream remote add origin https://github.com/ianjray/false.git
+          git -C upstream fetch --no-tags --depth=1 origin "$RUNTIME_PIN" > evidence/native/runtime_fetch.log 2>&1
+          git -C upstream rev-parse FETCH_HEAD > evidence/native/runtime_observed.txt
+          test "$(cat evidence/native/runtime_observed.txt)" = "$RUNTIME_PIN"
+          git -C upstream checkout -q --detach "$RUNTIME_PIN"
+          test -z "$(git -C upstream status --porcelain)"
+          gcc --version > evidence/native/compiler_version.txt
+          gcc -Wall -Wextra -O2 -D_GNU_SOURCE -Iupstream -Iupstream/src upstream/interpreter.c upstream/src/false.c upstream/utils/file.c upstream/src/stack.c upstream/src/slice.c upstream/src/storage.c upstream/src/token.c -o upstream/false_int > evidence/native/compiler_stdout.txt 2> evidence/native/compiler_stderr.txt
+          printf '%s' '4 7 1ø.%%' > evidence/native/unicode_pick.false
+          timeout 15s upstream/false_int -e evidence/native/unicode_pick.false > evidence/native/unicode_pick.stdout 2> evidence/native/unicode_pick.stderr
+          test "$(cat evidence/native/unicode_pick.stdout)" = '4'
+      - name: Execute selected exact program under bounded original runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PYTHONPATH=tools python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, signal, subprocess, time
+          import stage23_measure as m
+          from stage23_malformed_native import diagnostic
+          P=pathlib.Path("prepared/stage23_replay_mutant_prepare")
+          E=pathlib.Path("evidence/native")
+          r=json.loads((P/"receipt.json").read_text())
+          assert r["source_pin"]==os.environ["SOURCE_PIN"] and r["runtime_pin"]==os.environ["RUNTIME_PIN"]==m.RT
+          assert r["project_id"]=="PC-BRANCH-FALSE-ARABIC"
+          assert r["timeout_seconds"]==600 and r["address_space_limit_bytes"]==m.LIMIT==2*1024**3
+          for name,digest in r["source_sha256"].items():
+              data=(P/"source"/name).read_bytes()
+              assert m.sha(data)==digest and data==pathlib.Path(name).read_bytes()==subprocess.check_output(["git","show",r["source_pin"]+":"+name])
+          pins={"fresh_replay":"f5e95cabe859349b3e1ebcde2ff137a1b54abb256cb5320a238ccecade9e2c1c",
+                "interleaving":"b02b8d24649189785874b463e000a98479c360cd6dafee9542d2b57b4ec93b38",
+                "mutant_swap":"b2f9ebc2573f735ec63d77fddad800647a9d27c3c41efef6bf321f2260f218f5",
+                "mutant_skip_batches_result":"81ef1a4403143c661bd29bd6d5b38715788507a148816d845e5ad6f06e87425e",
+                "mutant_identity_order":"fc61e92320a71414e029ce93c2feb8c9bac861fce95ca88d1848e68100264688"}
+          name=os.environ["CASE_NAME"]
+          entry=next(e for e in r["entries"] if e["name"]==name)
+          data=(P/(name+".false")).read_bytes()
+          assert m.sha(data)==entry["program_sha256"]==pins[name]
+          (E/"preparation_receipt.json").write_bytes((P/"receipt.json").read_bytes())
+          m.E=E
+          m.framing_preflight()
+          reports=[]
+          previous=None
+          for index in range(2 if name=="fresh_replay" else 1):
+              case=E/str(index+1);case.mkdir()
+              path=case/"program.false";path.write_bytes(data)
+              started=time.monotonic()
+              cmd=["/usr/bin/time","-v","-o",str(case/"time.txt"),"upstream/false_int","-e",str(path)]
+              with subprocess.Popen(cmd,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True,preexec_fn=m.limits) as proc:
+                  try:
+                      out,err=proc.communicate(timeout=600);code=proc.returncode
+                  except subprocess.TimeoutExpired:
+                      os.killpg(proc.pid,signal.SIGKILL);out,err=proc.communicate();code=124
+              elapsed=time.monotonic()-started
+              (case/"stdout.txt").write_bytes(out);(case/"stderr.txt").write_bytes(err)
+              (case/"exit_code.txt").write_text(str(code)+"\n")
+              timing=(case/"time.txt").read_text() if (case/"time.txt").exists() else ""
+              match=re.search(r"Maximum resident set size \(kbytes\):\s*(\d+)",timing)
+              rss=int(match.group(1)) if match else None
+              bounded=rss is not None and 0<rss<=m.LIMIT//1024 and elapsed<=600
+              wrong=entry["expected_first_numeric_mismatch"]
+              heap=m.parse_heap(out)
+              if wrong is None:
+                  passed=bounded and code==0 and not err and heap is not None and heap>0
+              else:
+                  marker=wrong["marker"]
+                  passed=bounded and code==1 and out==marker.encode() and diagnostic(path,marker,err)
+              if previous is not None:
+                  passed=passed and (out,err,code)==previous
+              previous=(out,err,code)
+              result=dict(case=name,process=index+1,passed=passed,exit_code=code,heap_cells=heap,peak_rss_kib=rss,
+                          elapsed_seconds=round(elapsed,3),program_sha256=m.sha(data),stdout_sha256=m.sha(out),
+                          stderr_sha256=m.sha(err),expected_first_numeric_mismatch=wrong)
+              reports.append(result)
+              (case/"receipt.json").write_text(json.dumps(result,indent=2)+"\n")
+              print(json.dumps(result),flush=True)
+          report=dict(project_id=r["project_id"],source_pin=r["source_pin"],runtime_pin=r["runtime_pin"],
+                      preparation_run=46180051751,preparation_artifact=15277386416,case=name,
+                      results=reports,passed=all(x["passed"] for x in reports),
+                      timeout_seconds=600,address_space_limit_bytes=m.LIMIT,stage_acceptance=False,
+                      retained_heap_double_full_assessed=False)
+          (E/"receipt.json").write_text(json.dumps(report,indent=2)+"\n")
+          assert report["passed"],"Native case not accepted"
+          PY
+      - name: Preserve per-process evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage23-native-${{ matrix.case }}
+          path: evidence/native/
+          if-no-files-found: error
+          retention-days: 30
