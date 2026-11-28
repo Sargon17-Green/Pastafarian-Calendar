@@ -53,18 +53,20 @@ TRACE_HELPER = [
 ]
 
 
-# Diagnostic only: independent native EC receipts for the exact line 234 shape witness.
-LINE234_PROBES = (
-    ("hidden_shape", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ ⍴hidden"),
-    ("hidden_tally", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ ≢hidden"),
-    ("shape_shape", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ ⍴⍴hidden"),
-    ("scalar_match", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ 7≡⍴hidden"),
-    ("vector_match", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ (,7)≡⍴hidden"),
-    ("hidden_range", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ ∧/(1≤hidden)∧hidden≤M"),
-    ("original_assert", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ AssertEqual (⊂7) (⊂⍴hidden) (⊂'Die normative Referenz erzeugt genau sieben verborgene Tropfen')"),
-    ("vector_assert", "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ AssertEqual (⊂,7) (⊂⍴hidden) (⊂'Die normative Referenz erzeugt genau sieben verborgene Tropfen')"),
+# Diagnostic only: independent native EC witnesses for line 237, with locked source unchanged.
+LINE237_ANCHOR = "  AssertEqual (⊂46) (⊂⍴visible) (⊂'Die normative Referenz erzeugt genau 46 sichtbare Tropfen')"
+LINE237_SETUP = "QAS01Counts←FOUNDATION_DAY WorkCounts FOUNDATION_DAY ⋄ QAS01Hidden←BuildHidden QAS01Counts ⋄ QAS01Visible←QAS01Counts BuildVisible QAS01Hidden ⋄ "
+LINE237_PROBES = (
+    ("visible_shape", LINE237_SETUP + "⍴QAS01Visible"),
+    ("visible_tally", LINE237_SETUP + "≢QAS01Visible"),
+    ("visible_shape_shape", LINE237_SETUP + "⍴⍴QAS01Visible"),
+    ("visible_scalar_match", LINE237_SETUP + "46≡⍴QAS01Visible"),
+    ("visible_vector_match", LINE237_SETUP + "(,46)≡⍴QAS01Visible"),
+    ("visible_range", LINE237_SETUP + "∧/(1≤QAS01Visible)∧QAS01Visible≤M"),
+    ("visible_original_assert", LINE237_SETUP + "AssertEqual (⊂46) (⊂⍴QAS01Visible) (⊂'Die normative Referenz erzeugt genau 46 sichtbare Tropfen')"),
+    ("visible_vector_assert", LINE237_SETUP + "AssertEqual (⊂,46) (⊂⍴QAS01Visible) (⊂'Die normative Referenz erzeugt genau 46 sichtbare Tropfen')"),
 )
-LINE234_KEYS = tuple(f"probe_{name}_{slot}" for name, _ in LINE234_PROBES for slot in ("ec", "et", "payload"))
+LINE237_KEYS = tuple(f"probe_{name}_{slot}" for name, _ in LINE237_PROBES for slot in ("ec", "et", "payload"))
 
 
 def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
@@ -77,6 +79,8 @@ def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
         raise ValueError("TRACE_HEADER_MISMATCH")
     # The source remains immutable; patch only the transient QA definition.
     index = PATCH_LINE - block["start_line"]
+    if original[237 - block["start_line"]] != LINE237_ANCHOR:
+        raise ValueError("LINE237_PROBE_ANCHOR_MISMATCH")
     if original[index] != PATCH_BEFORE:
         raise ValueError("LINE234_MONKEY_PATCH_ANCHOR_MISMATCH")
     patched = original.copy()
@@ -175,7 +179,7 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
                    for name in ("start", "return", "ec", "et", "payload", "done",
                                 "trace_helper_fx", "trace_main_fx", "trace_run_fx",
                                 "trace", "trace_ec", "trace_et", "trace_payload",
-                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload") }
+                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload", *LINE237_KEYS) }
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
@@ -233,8 +237,14 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01DiagEC[2]", suite_paths["trace_et"]),
         write_expr("⊃QAS01DiagEC[3]", suite_paths["trace_payload"]),
     ]
-    # Previously verified A/B probes are not repeated.
-    receipt_programs += diagnostic_programs + [
+    # Line 234 is already proven. Witnesses do not patch line 237 or alter the original gate.
+    probe_programs = []
+    for index, (name, expression) in enumerate(LINE237_PROBES):
+        var = f"QAS01Probe237_{index}"
+        probe_programs.append(var + "←⎕EC ⎕UCS " + _codes(expression))
+        for slot, key in enumerate(("ec", "et", "payload"), 1):
+            probe_programs.append(write_expr(f"⊃{var}[{slot}]", suite_paths[f"probe_{name}_{key}"]))
+    receipt_programs += diagnostic_programs + probe_programs + [
         marker_write(f"APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE={SOURCE_COMMIT}", suite_paths["done"]),
     ]
     programs = chunk_programs + [final_program] + receipt_programs
@@ -295,6 +305,7 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         "trace_assembly_chunks": len(trace_parts),
         "trace_definition_sha256": hashlib.sha256("\n".join(traced).encode("utf-8")).hexdigest(),
         "trace_diagnostic_only": True,
+        "line237_probes": [{"name": name, "expression": expression} for name, expression in LINE237_PROBES],
         "trace_monkey_patch": {"line": PATCH_LINE, "before": PATCH_BEFORE,
                                "after": PATCH_AFTER, "scope": "TRANSIENT_QA_ALIAS_ONLY",
                                "original_acceptance_unchanged": True},

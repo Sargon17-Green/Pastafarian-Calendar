@@ -3,7 +3,7 @@ import pathlib
 import unittest
 
 from stage01_authorized_import import (
-    PATCH_LINE, PATCH_BEFORE, PATCH_AFTER,
+    PATCH_LINE, PATCH_BEFORE, PATCH_AFTER, LINE237_ANCHOR, LINE237_PROBES, LINE237_KEYS,
     CHUNK_SIZE, TAIL_START, TAIL_CHUNK_SIZE, EXPECTED_CHUNK_BOUNDARIES,
     STAGE01_MARKER, TRACE_HEADER, TRACE_GROUPS, build_stage01_chunked, build_trace_definition,
 )
@@ -77,7 +77,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(receipt["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(receipt["final_expression"], "SAME_EC_AFTER_TEST")
         _, outer, programs = self.decode(candidate)
-        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"])
+        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"] + 4 * len(LINE237_PROBES))
         self.assertEqual(outer.count("⎕EC ⎕UCS "), len(programs))
         self.assertNotIn("←", outer)
         self.assertNotIn("QAS01FinalEC", outer)
@@ -99,7 +99,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(programs[-1].count("⎕NAPPEND"), 1)
         self.assertEqual(set(receipt["suite_paths"]), {"start", "return", "ec", "et", "payload", "done",
             "trace_helper_fx", "trace_main_fx", "trace_run_fx", "trace", "trace_ec", "trace_et", "trace_payload",
-            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"})
+            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload", *LINE237_KEYS})
         self.assertEqual(len(STAGE01_MARKER.encode("ascii")), 113)
         self.assertEqual(receipt["final_inner_sha256"], hashlib.sha256(final.encode("utf-8")).hexdigest())
         self.assertEqual(sum(program.count(" Stage01PrefixFix ") for program in programs), 95)
@@ -162,6 +162,32 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertNotIn(STAGE01_MARKER, "".join(programs[27:]))
         self.assertEqual(receipt["stage01"], "NOT_ACCEPTED")
 
+    def test_line237_probes_are_independent_and_never_patch_source(self):
+        block = next(b for b in self.locked["blocks"] if b["name"] == "RunStage01Tests")
+        source = fx_definition_lines(block)
+        self.assertEqual(source[237 - 171], LINE237_ANCHOR)
+        traced, _ = build_trace_definition(block)
+        self.assertIn(LINE237_ANCHOR, traced)
+        candidate, receipt = build_stage01_chunked(BASE, ROOT, MARKER)
+        _, _, programs = self.decode(candidate)
+        self.assertEqual(receipt["line237_probes"], [{"name": n, "expression": e} for n,e in LINE237_PROBES])
+        self.assertEqual(len(LINE237_PROBES), 8)
+        self.assertEqual(len(LINE237_KEYS), 24)
+        start = len(programs) - 1 - 4 * len(LINE237_PROBES)
+        for i, (name, expr) in enumerate(LINE237_PROBES):
+            var = f"QAS01Probe237_{i}"
+            prefix = var + "←⎕EC ⎕UCS "
+            self.assertTrue(programs[start + 4*i].startswith(prefix))
+            decoded = "".join(chr(int(n)) for n in programs[start + 4*i][len(prefix):].split())
+            self.assertEqual(decoded, expr)
+            for slot, key in enumerate(("ec","et","payload"), 1):
+                program = programs[start+4*i+slot]
+                self.assertIn(f"{var}[{slot}]", program)
+                self.assertIn("⎕NAPPEND", program)
+                self.assertIn(f"probe_{name}_{key}", receipt["suite_paths"][f"probe_{name}_{key}"])
+        self.assertNotIn(STAGE01_MARKER, "".join(programs[start:]))
+        self.assertEqual(receipt["stage01"], "NOT_ACCEPTED")
+
     def test_every_chunk_has_source_count_and_separate_exact_receipt(self):
         candidate, receipt = build_stage01_chunked(BASE, ROOT, MARKER)
         _, _, programs = self.decode(candidate)
@@ -188,7 +214,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         serialized, outer, _ = self.decode(candidate)
         self.assertTrue(serialized.isascii())
         self.assertNotIn("⋄", serialized)
-        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"])
+        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"] + 4 * len(LINE237_PROBES))
         self.assertEqual(receipt["outer_lx_chars"], len(outer))
         self.assertEqual(receipt["outer_lx_sha256"], hashlib.sha256(outer.encode("utf-8")).hexdigest())
         self.assertIn("0=foo=:3", candidate.decode("cp1252"))
