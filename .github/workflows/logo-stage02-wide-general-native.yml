@@ -29,7 +29,7 @@ jobs:
           test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md)" = 8db0826de0be208b9f9582010d2f4ec9a96bc8eb
           test "$(git hash-object src/stage02_choose_wide_general.logo)" = 5a624a2f3ade5b356b0569e3a1165904ad7e9c1d
           test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
-          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 25b383fb22183c0120a7c5f5f72195353500bea4
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = ea46f82c5a3f2bcf0aaa99a103ca3d9cf24000fa
           git rev-parse HEAD > "$RUNNER_TEMP/wide-general-commit.txt"
           git hash-object .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-workflow-blob.txt"
           for path in src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml; do

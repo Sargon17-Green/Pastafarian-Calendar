@@ -131,9 +131,9 @@ def valid_cases():
         assert check_width == width
         cases.append(("general", M - 1, 1, count, expected, f"k{width}_transition_plus_M"))
 
-    assert len(cases) == 30
+    assert len(cases) == 34
     assert sum(1 for c in cases if c[0] == "two") == 4
-    assert sum(1 for c in cases if c[0] == "general") == 26
+    assert sum(1 for c in cases if c[0] == "general") == 30
     return cases
 
 
