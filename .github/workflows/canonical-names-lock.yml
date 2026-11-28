@@ -1520,9 +1520,9 @@ jobs:
       - name: Verify format and capture exact repair evidence
         shell: bash
         run: |
-          if ! dart format --output=none --set-exit-if-changed lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; then
-            dart format --output=write lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart
-            for file in lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; do
+          if ! dart format --output=none --set-exit-if-changed lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart test_support/normative_reference.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; then
+            dart format --output=write lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart test_support/normative_reference.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart
+            for file in lib/src/gregorian_converter.dart lib/src/monster_five_field_calendar.dart test_support/normative_reference.dart bin/production_gregorian_tests.dart bin/production_inverse_fixed_c_tests.dart bin/pastafari_calendar_cli.dart lib/pastafari_calendar.dart; do
               echo "DART_CAPTURE_BEGIN:${file}"
               base64 -w0 "${file}"
               printf '\n'
@@ -1539,8 +1539,9 @@ jobs:
           git rev-parse HEAD | tee out/production-gregorian/source-sha.txt
           dart --version 2>&1 | tee out/production-gregorian/sdk.txt
           dart run bin/production_gregorian_tests.dart | tee out/production-gregorian/results.log
-          dart run bin/production_inverse_fixed_c_tests.dart | tee out/production-gregorian/inverse-fixed-c.log
+          timeout 450s dart run bin/production_inverse_fixed_c_tests.dart | tee out/production-gregorian/inverse-fixed-c.log
           grep -q '^PRODUCTION_GREGORIAN_BOUNDARY_PASS checks=' out/production-gregorian/results.log
+          grep -q '^PRODUCTION_INVERSE_DIFFERENTIAL_PASS samples=' out/production-gregorian/inverse-fixed-c.log
           grep -q '^PRODUCTION_INVERSE_FIXED_C_PASS checks=' out/production-gregorian/inverse-fixed-c.log
       - uses: actions/upload-artifact@v4
         if: always()

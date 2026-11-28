@@ -474,11 +474,24 @@ final class NormativeReference {
 
   static final List<Stone> stones = buildStones();
 
-  final Map<BigInt, BigInt> _gates = <BigInt, BigInt>{
-    BigInt.zero: foundationDay,
-  };
+  final Map<BigInt, BigInt> _gates = <BigInt, BigInt>{};
   BigInt _minKnownGateIndex = BigInt.zero;
   BigInt _maxKnownGateIndex = BigInt.zero;
+
+  /// Seed a local gate anchor for bounded independent reference calculations.
+  /// With no arguments, the original Foundation gate at index zero is used.
+  NormativeReference({BigInt? anchorGateIndex, BigInt? anchorGateDay}) {
+    if ((anchorGateIndex == null) != (anchorGateDay == null)) {
+      throw ArgumentError(
+        'An anchor gate index and day must be supplied together.',
+      );
+    }
+    final index = anchorGateIndex ?? BigInt.zero;
+    final day = anchorGateDay ?? foundationDay;
+    _gates[index] = day;
+    _minKnownGateIndex = index;
+    _maxKnownGateIndex = index;
+  }
 
   static BigInt floorDiv(BigInt a, BigInt b) {
     if (b == BigInt.zero) {
@@ -986,7 +999,10 @@ final class NormativeReference {
     if (k > _maxKnownGateIndex) {
       var n = _maxKnownGateIndex + BigInt.one;
       while (n <= k) {
-        _gates[n] = _gates[n - BigInt.one]! + positiveGateGap(n);
+        final gap = n > BigInt.zero
+            ? positiveGateGap(n)
+            : negativeGateGap((n - BigInt.one).abs());
+        _gates[n] = _gates[n - BigInt.one]! + gap;
         _maxKnownGateIndex = n;
         n += BigInt.one;
       }
@@ -994,7 +1010,10 @@ final class NormativeReference {
     if (k < _minKnownGateIndex) {
       var n = _minKnownGateIndex - BigInt.one;
       while (n >= k) {
-        _gates[n] = _gates[n + BigInt.one]! - negativeGateGap(n.abs());
+        final gap = n >= BigInt.zero
+            ? positiveGateGap(n + BigInt.one)
+            : negativeGateGap(n.abs());
+        _gates[n] = _gates[n + BigInt.one]! - gap;
         _minKnownGateIndex = n;
         n -= BigInt.one;
       }
@@ -1310,9 +1329,11 @@ final class NormativeReference {
     );
   }
 
-  CalendarTuple calendarDate(BigInt calculationDay, BigInt targetDay) {
-    final year = findTargetYear(calculationDay, targetDay);
-    final structure = buildYearStructure(calculationDay, year);
+  CalendarTuple calendarDateFromStructure(
+    Year year,
+    YearStructure structure,
+    BigInt targetDay,
+  ) {
     Cutlet? chosenCutlet;
     for (final cutlet in structure.cutlets) {
       if (cutlet.firstDay <= targetDay && targetDay <= cutlet.lastDay) {
@@ -1346,5 +1367,11 @@ final class NormativeReference {
       monthName: SourceLanguageCatalog.monthText(monthCanonicalIndex),
       dayInMonth: dayInMonth,
     );
+  }
+
+  CalendarTuple calendarDate(BigInt calculationDay, BigInt targetDay) {
+    final year = findTargetYear(calculationDay, targetDay);
+    final structure = buildYearStructure(calculationDay, year);
+    return calendarDateFromStructure(year, structure, targetDay);
   }
 }
