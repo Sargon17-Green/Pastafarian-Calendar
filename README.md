@@ -1,5 +1,7 @@
 # Pastafarian Calendar - Fortran / English line
 
+**OPEN CORRECTION (2026-11-28):** The historical Stage2 label below was incorrect; Discovery01 and Patch01 belong to canonical Stages 2 and 3 respectively. The original mandatory 3M test was also missing. The historical prose is deliberately retained below as evidence of the error, not current acceptance. See [explicit correction record](ORDINAL_CORRECTION_2026-11-28.md). Canonical Stage2 and Stage3 acceptance is reopened pending corrective Native evidence. Stage4 is not open.
+
 This directory grew from the Stage 1 bootstrap of an independent implementation line. It was created from an empty project tree from the embedded specification supplied for this line. No implementation, test, fixture, generated table, checksum, trace, cache, or expected output from another implementation line is used.
 
 ## Language contract
