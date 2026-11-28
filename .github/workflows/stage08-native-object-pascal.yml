@@ -1,0 +1,34 @@
+name: Stage 8 Native Object Pascal - seeded stone snapshot discovery
+on:
+  push:
+    branches:
+      - 'Object-Pascal\+Português'
+    paths:
+      - 'src/**'
+      - 'test/stage08_stone_snapshot_probe.pas'
+      - 'test/build_and_run_stage08_stone_snapshot.sh'
+      - 'docs/stage08_stone_snapshot_preflight.js'
+      - 'docs/stage08_stone_snapshot_verify.py'
+      - '.github/workflows/stage08-native-object-pascal.yml'
+permissions:
+  contents: read
+jobs:
+  stage08-native-seeded-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FPC
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fp-compiler
+      - name: Native probe and independent exact verification
+        run: bash test/build_and_run_stage08_stone_snapshot.sh
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage08-stone-snapshot-evidence
+          path: evidence/stage08/
+          if-no-files-found: error
+          retention-days: 30
