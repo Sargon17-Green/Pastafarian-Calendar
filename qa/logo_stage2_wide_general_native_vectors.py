@@ -12,7 +12,7 @@ from pathlib import Path
 
 M = (1 << 127) - 1
 BASE = 10000
-WIDTHS = (3, 4, 5, 32, 33, 64)
+WIDTHS = (3, 4, 5, 6, 32, 33, 64)
 
 
 def logo_bi(value: int) -> str:

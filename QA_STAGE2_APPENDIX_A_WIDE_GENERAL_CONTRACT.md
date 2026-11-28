@@ -4,9 +4,9 @@ PROJECT_ID: PC-BRANCH-LOGO-IDO
 QA_BRANCH: qa/logo-ido-stage2-wide-general-k3plus-20261122
 BASE_QA_HEAD: 1fea4a9a2b1f595151411b1f3457546deb8bd2e4
 CANONICAL_SOURCE_SHA: ad001c6aeeb6c758f5004b206a656fec5d6fc403
-STATUS: QA_IMPLEMENTATION_AND_INDEPENDENT_HOST_ORACLE; K4_NATIVE_DIAGNOSTIC_PASS
+STATUS: QA_IMPLEMENTATION_AND_INDEPENDENT_HOST_ORACLE; K5_NATIVE_DIAGNOSTIC_PASS
 PRODUCTION_CHANGED: NO
-NATIVE: INCREMENTAL_DIAGNOSTICS_THROUGH_K4; FULL_K_ACCEPTANCE: NOT_RUN
+NATIVE: INCREMENTAL_DIAGNOSTICS_THROUGH_K5; FULL_K_ACCEPTANCE: NOT_RUN
 STAGE2_ACCEPTED: NO
 LAST_COMPLETED_STAGE: 1
 
@@ -122,7 +122,7 @@ No Native workflow or production source is added by this contract commit. After 
    - CANONICAL_NAMES_LOCK.sha256: 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
    The future general production source, Native test harness, fixture generator, contract and workflow must also be locked by their exact Git blob IDs.
 4. Generate Native expected values using Python integers only. Neither the production reporter nor nr.choose.wide may generate expected values.
-5. Target 48 cases / 138 assertions: 30 valid large-M vectors (four k=2 compatibility probes plus 26 k>=3 boundary/rejection vectors) with four assertions each (canonical BI shape, exact expected rank, range, deterministic repeated call), and 18 invalid cases with exact [] results (14 public input guards plus four malformed BI-structure cases such as empty digits, invalid sign, out-of-base digit and noncanonical trailing zero).
+5. Target 52 cases / 154 assertions: 34 valid large-M vectors (four k=2 compatibility probes plus 30 k>=3 vectors: four each for k=3,4,5,6,32,33,64 and two transition-plus-M cases at k=32/33) with four assertions each (canonical BI shape, exact expected rank, range, deterministic repeated call), and 18 invalid cases with exact [] results (14 public input guards plus four malformed BI-structure cases such as empty digits, invalid sign, out-of-base digit and noncanonical trailing zero).
 6. Use a bounded Native process timeout of 1200 seconds and a CI job timeout of 30 minutes. Require exact full-line case/check markers, a unique Native PASS marker, zero exit status and absence of failure text. Preserve commit SHA, source-lock manifest, generated fixture, host log and Native log in one artifact and verify its digest against GitHub.
 7. Verify the completed Native run, job, logs, exact SHA and artifact independently. A completed/success job without the Native markers is not Native PASS. Queued/in_progress is neither PASS nor blocker. A same-SHA Names Lock run is also required; do not manually duplicate a naturally triggered run.
 
@@ -135,13 +135,13 @@ The current WIDE2 Native run 44947067097 is already accepted at its exact SHA an
 - Canonical Logo+Ido HEAD remains ad001c6aeeb6c758f5004b206a656fec5d6fc403.
 - No canonical promotion, main, merge, publication or Stage-2 completion.
 - LAST_COMPLETED_STAGE remains 1.
-- Next: continue bounded Native width expansion (k5, k6, then k32/k33/k64); preserve per-case markers and timeouts; do not promote Stage 2 until all required widths pass. Do not change the accepted k=2 reporter or D20's 0..31 contract.
+- Next: continue bounded Native width expansion (k6, then k32/k33/k64); preserve per-case markers and timeouts; do not promote Stage 2 until all required widths pass. Do not change the accepted k=2 reporter or D20's 0..31 contract.
 
 ## 9. Diagnostic update after exact-SHA timeout (2026-11-22)
 
 Full-k Native run 44960408541 / job 137017741464 completed FAILURE on c4371498a7bae80f3fae1dcf6a31aa2a08f1c6ef. Independent Python host enumerator (42,748 cases), fixture generation (48 / 138 planned checks), and pinned UCBLogo build passed. Native timed out after 1,200 seconds (exit 124); artifact 14729549954, ZIP SHA-256 25a0a2c043cd5dba9d8641f51e0126443e332cac39345e224f559445b5fcb4b7, contains a zero-byte Native log. No individual Native case or general-k PASS can be inferred. Generated invalid fixtures also referenced `nr.M`, but the normative reference was not loaded.
 
-This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replaces uninitialized `nr.M`, emits boot and case-start markers, and limits Native to four accepted-interface k=2 probes and four k=3 large-M probes plus 18 invalid guards: 26 cases / 50 checks; 300-second bounded runtime. This is NOT the full general-k acceptance gate, and a diagnostic PASS cannot be promoted to all-k PASS. Wider k=4,5,6,32,33,64 Native vectors are still unverified; keep Stage2 incomplete. Updated fixture-generator Git blob: 4e5eef7d8f8558579bf9a466adf7d126212e2bc2.
+This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replaces uninitialized `nr.M`, emits boot and case-start markers, and limits Native to four accepted-interface k=2 probes and four k=3 large-M probes plus 18 invalid guards: 26 cases / 50 checks; 300-second bounded runtime. This is NOT the full general-k acceptance gate, and a diagnostic PASS cannot be promoted to all-k PASS. At that revision, k=4,5,6,32,33,64 Native vectors were still unverified; subsequent diagnostic results are recorded below. Keep Stage2 incomplete. Updated fixture-generator Git blob: 4e5eef7d8f8558579bf9a466adf7d126212e2bc2.
 
 
 ## 10. Completed k2/k3 Native diagnostic evidence
@@ -160,3 +160,12 @@ This diagnostic-only revision initializes independent exact-BI `WIDE.M`, replace
 - Native output: 30 cases, 66 checks, including the k=2 compatibility vectors and k=3/k=4 wide vectors; all 18 invalid guards passed.
 - Artifact 15267560855, 4,999 bytes, SHA-256 12a33d01ae6a24785570fd91f58579eecd0aebb2f12ae0f332f09ce6b8e0f538. The ZIP digest was independently recomputed; its git-blob manifest is newline-delimited.
 - This proves only the bounded k2/k3/k4 diagnostic. k5, k6, k32, k33, k64 and whole-Stage-2 acceptance remain open.
+
+
+## 12. Completed k2/k3/k4/k5 Native diagnostic evidence
+
+- Actions run 46155347973, job 141010673096, completed success at exact QA SHA 4312c1bef57201957a2fcf7ee8e152aa2c822501.
+- Canonical Names Lock run 46155347965, job 141010673098, completed success on the same SHA.
+- Native output: 34 cases, 82 checks; k=2 compatibility and k=3/k=4/k=5 vectors passed, along with all 18 invalid guards.
+- Artifact 15267158014, 5,516 bytes, SHA-256 9fd6b6fa1afa989791d66d81a9c054d17a730d8ff3672e5a7bbbe3f00b470a97. The ZIP digest was independently recomputed; its git-blob manifest is newline-delimited.
+- The prior Native generator omitted k=6 despite the contract listing it. The next revision adds explicit k=6 vectors; full-k acceptance remains open.

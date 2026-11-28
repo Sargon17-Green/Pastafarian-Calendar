@@ -26,10 +26,10 @@ jobs:
           test "$(git hash-object src/stage02_choose_wide.logo)" = 8fb2dc47c827b8ccd8fa6fdd817b9fa088c51013
           test "$(git hash-object test/normative_reference.logo)" = 625171ecd5fd93fb8381686f2b2f6b29ed3649cf
           test "$(git hash-object CANONICAL_NAMES_LOCK.sha256)" = 0d5b3dec0b01551b1304ee7104d08a57aa1f440b
-          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md)" = 490efd18fc17116d20ffeb96ea7266644ad5ea1a
+          test "$(git hash-object QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md)" = 8db0826de0be208b9f9582010d2f4ec9a96bc8eb
           test "$(git hash-object src/stage02_choose_wide_general.logo)" = 5a624a2f3ade5b356b0569e3a1165904ad7e9c1d
           test "$(git hash-object qa/logo_stage2_wide_general_host_oracle.py)" = 5b718c56a7a4f073a73bed6379bdee70c93b3399
-          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 4e5eef7d8f8558579bf9a466adf7d126212e2bc2
+          test "$(git hash-object qa/logo_stage2_wide_general_native_vectors.py)" = 25b383fb22183c0120a7c5f5f72195353500bea4
           git rev-parse HEAD > "$RUNNER_TEMP/wide-general-commit.txt"
           git hash-object .github/workflows/logo-stage02-wide-general-native.yml > "$RUNNER_TEMP/wide-general-workflow-blob.txt"
           for path in src/exact_integer.logo src/stage02_context.logo src/stage02_answer_at.logo src/stage02_choose_wide.logo src/stage02_choose_wide_general.logo test/normative_reference.logo CANONICAL_NAMES_LOCK.sha256 QA_STAGE2_APPENDIX_A_WIDE_GENERAL_CONTRACT.md qa/logo_stage2_wide_general_host_oracle.py qa/logo_stage2_wide_general_native_vectors.py .github/workflows/logo-stage02-wide-general-native.yml; do
@@ -56,14 +56,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 qa/logo_stage2_wide_general_native_vectors.py --output "$RUNNER_TEMP/wide-general-native.logo" --max-width 5 | tee "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_VALID 16' "$RUNNER_TEMP/wide-general-vectors.log"
+          python3 qa/logo_stage2_wide_general_native_vectors.py --output "$RUNNER_TEMP/wide-general-native.logo" --max-width 6 | tee "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_VALID 20' "$RUNNER_TEMP/wide-general-vectors.log"
           grep -Fxq 'WIDE_GENERAL_HOST_INVALID 18' "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED 8' "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_PLUS 4' "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_MINUS 4' "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_CASES 34' "$RUNNER_TEMP/wide-general-vectors.log"
-          grep -Fxq 'WIDE_GENERAL_HOST_CHECKS 82' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED 10' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_PLUS 5' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_REJECTED_MINUS 5' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_CASES 38' "$RUNNER_TEMP/wide-general-vectors.log"
+          grep -Fxq 'WIDE_GENERAL_HOST_CHECKS 98' "$RUNNER_TEMP/wide-general-vectors.log"
           grep -Fxq 'WIDE_GENERAL_HOST_ORACLE=PASS' "$RUNNER_TEMP/wide-general-vectors.log"
 
       - name: Build pinned headless UCBLogo 6.2.5
@@ -82,7 +82,7 @@ jobs:
           make install
           echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
 
-      - name: Execute bounded k5 Native diagnostic only (not full-k acceptance)
+      - name: Execute bounded k6 Native diagnostic only (not full-k acceptance)
         shell: bash
         run: |
           set -euo pipefail
@@ -95,14 +95,14 @@ jobs:
             echo "::error::General wide Native failure/timeout exit=$code"
             exit 1
           fi
-          grep -Fxq 'WIDE_GENERAL_NATIVE_CASES_PASIS 34' "$log"
-          grep -Fxq 'WIDE_GENERAL_NATIVE_CHECKS_PASIS 82' "$log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE_CASES_PASIS 38' "$log"
+          grep -Fxq 'WIDE_GENERAL_NATIVE_CHECKS_PASIS 98' "$log"
           grep -Fxq 'WIDE_GENERAL_NATIVE_PASIS' "$log"
           if grep -Eq 'FALIIS|You don.t say what to do with|I don.t know how to|not enough inputs|doesn.t like' "$log"; then
             echo "::error::Native failure text present"
             exit 1
           fi
-          echo 'NATIVE_LOGO_STAGE2_WIDE_GENERAL_K5_DIAGNOSTIC=PASS'
+          echo 'NATIVE_LOGO_STAGE2_WIDE_GENERAL_K6_DIAGNOSTIC=PASS'
 
       - name: Preserve exact inputs and logs
         if: always()
