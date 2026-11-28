@@ -29,6 +29,15 @@ jobs:
       - name: Independent Stage1 fixed-endpoint year path oracle
         timeout-minutes: 3
         run: python3 tests/test_sm83_stage1_year_path_oracle.py
+      - name: Independent Stage1 exact combinatorial small-domain QA
+        timeout-minutes: 3
+        run: node --max-old-space-size=512 tests/sm83_stage1_combinatorial_qa.js
+      - name: Stage1 V32 exact shared-prefix synthetic differential
+        timeout-minutes: 3
+        run: node --max-old-space-size=512 tests/sm83_v32_shared_prefix_qa.js
+      - name: Stage1 AC.1 actual structure sauce and 50-field differential
+        timeout-minutes: 25
+        run: python3 tests/test_sm83_stage1_ac1_five_fields.py
       - name: Generate independent Native396 actual-map differential vectors
         timeout-minutes: 3
         run: python3 tests/sm83_native396_vectors.py
