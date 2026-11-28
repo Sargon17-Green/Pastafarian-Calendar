@@ -1500,6 +1500,48 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  stage56-isolated-gmp-medium-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gmp
+          coverage: none
+      - name: Exact-SHA isolated medium rank qualification
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p stage56-gmp-medium-evidence
+          cd stage56-gmp-medium-evidence
+          printf '%s\n' PC-BRANCH-PHP-MALAY > PROJECT_ID.txt
+          git rev-parse HEAD > SHA.txt
+          test "$(cat SHA.txt)" = "$GITHUB_SHA" || exit 1
+          php -v > php-version.txt
+          php --ri gmp > gmp-version.txt || exit 1
+          cd ..
+          sha256sum tools/stage56_gmp_qa/{row_microgate,rank_microgate,medium_rank_gate}.py > stage56-gmp-medium-evidence/source.sha256
+          timeout 900s python3 -B tools/stage56_gmp_qa/medium_rank_gate.py > stage56-gmp-medium-evidence/medium.stdout 2> stage56-gmp-medium-evidence/medium.stderr; rc=$?
+          cd stage56-gmp-medium-evidence
+          printf '%s\n' "$rc" > medium.exit
+          cat medium.stdout
+          cat medium.stderr >&2
+          sha256sum PROJECT_ID.txt SHA.txt *version.txt source.sha256 medium.stdout medium.stderr medium.exit > manifest.sha256
+          test "$rc" -eq 0 && test ! -s medium.stderr
+      - name: Retain medium GMP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-malay-stage56-gmp-medium-${{ github.sha }}
+          path: stage56-gmp-medium-evidence/
+          if-no-files-found: error
+          retention-days: 30
+
   stage56-real-year-profile-b5-preflight-native:
     if: github.event_name == 'push' && github.ref == 'refs/heads/PHP+Bahasa-Melayu'
     runs-on: ubuntu-latest
