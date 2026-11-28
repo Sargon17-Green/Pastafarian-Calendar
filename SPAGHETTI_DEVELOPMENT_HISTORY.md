@@ -34,4 +34,6 @@ Istoricul anterior, inclusiv rezultatul nativ v17 (115/115), este păstrat integ
 
 ## Stage 3 — PATCH 01
 
-Învelișul `salvarePatch01` cheamă dispecerul istoric, înlocuiește doar restul zero cu M și păstrează orice alt rest. Fișierul legacy rămâne intact. Ruta publică folosește noul înveliș; martorii istorici verifică dispecerul, iar aserțiunile normative neschimbate sunt obligatoriu GREEN. Execuția nativă este încă NOT_RUN; Stage 2 rămâne ultima etapă acceptată.
+Învelișul `salvarePatch01` cheamă dispecerul istoric, înlocuiește doar restul zero cu M și păstrează orice alt rest. Fișierul legacy rămâne intact. Ruta publică folosește noul înveliș; martorii istorici verifică dispecerul, iar aserțiunile normative neschimbate sunt obligatoriu GREEN. Execuția nativă este ACCEPTAT GREEN; Stage 3 este ultima etapă acceptată.
+
+2026-11-28 — Stage 3 PATCH 01 ACCEPTAT nativ pe J9.7.1 Windows x64, runner v20. Sursa executată: 8adc978d973f01669ba45ef0243be94885457c62, tree 855d1eb71ef9d909aacfdaddbaaecfd1e5fa7537. Rezultate: 63/63 Stage1, 17 fixtures, 18/18 martori, 6/6 PATCH01, GREEN 0,1,2,3, zero RED; exit 0, receipt PASSED, stderr gol. CRC PASS, manifest 27/27 verificat independent; 21/21 blob IDs conform jurnalului runnerului (sursa nu este în arhivă). LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Stage 4 nu a fost început; nu se repetă v20.

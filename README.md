@@ -26,12 +26,14 @@ Toate calculele normative folosesc întregi extinși J (`x`) și, unde este nece
 
 ## Starea dezvoltării
 
-Vezi `DEVELOPMENT_STAGE.md`. Stage 1 și Stage 2 DISCOVERY 01 sunt acceptate; Stage 3 PATCH 01 este implementat, în așteptarea verificării native.
+Vezi `DEVELOPMENT_STAGE.md`. Stage 1 și Stage 2 DISCOVERY 01 sunt acceptate; Stage 3 PATCH 01 este acceptat nativ, GREEN.
 
 ## Realiniere canonica Stage 2
 
-Dupa auditul specificatiei originale, istoricul anterior este conservat la commit 842f6044b2689f20b39a28afad56be5da23c893e. Nu se ruleaza din nou v16/v17. Pentru noul DISCOVERY 01 se ruleaza separat generatorul de fixtures Stage 1, testele Stage 1 si test/stage02_discovery01_tests.ijs cu J9.7.1. Nu se foloseste complete_stage01.ijs, deoarece acesta rescrie starea etapei. Se cer trei RED normative si un control GREEN, cu martori si regresii GREEN. Stage 2 acceptat nativ: 63/63 regresii, 18/18 martori, trei RED intenționate și un control GREEN. Vezi DEVELOPMENT_STAGE.md. PATCH 01 este implementat ulterior; acceptarea sa nativă este încă în așteptare.
+Dupa auditul specificatiei originale, istoricul anterior este conservat la commit 842f6044b2689f20b39a28afad56be5da23c893e. Nu se ruleaza din nou v16/v17. Pentru noul DISCOVERY 01 se ruleaza separat generatorul de fixtures Stage 1, testele Stage 1 si test/stage02_discovery01_tests.ijs cu J9.7.1. Nu se foloseste complete_stage01.ijs, deoarece acesta rescrie starea etapei. Se cer trei RED normative si un control GREEN, cu martori si regresii GREEN. Stage 2 acceptat nativ: 63/63 regresii, 18/18 martori, trei RED intenționate și un control GREEN. Vezi DEVELOPMENT_STAGE.md. PATCH 01 este acceptat ulterior, GREEN.
 
 ## Stage 3 — PATCH 01
 
 Pentru verificarea curentă, folosiți generatorul de fixtures, testele Stage 1 și `test/stage02_discovery01_tests.ijs`. Contractul normativ este neschimbat; toate cele patru aserțiuni trebuie să fie GREEN, iar martorii legacy rămân valizi. Data publică este NOT_INTEGRATED.
+
+2026-11-28 — Stage 3 PATCH 01 ACCEPTAT nativ pe J9.7.1 Windows x64, runner v20. Sursa executată: 8adc978d973f01669ba45ef0243be94885457c62, tree 855d1eb71ef9d909aacfdaddbaaecfd1e5fa7537. Rezultate: 63/63 Stage1, 17 fixtures, 18/18 martori, 6/6 PATCH01, GREEN 0,1,2,3, zero RED; exit 0, receipt PASSED, stderr gol. CRC PASS, manifest 27/27 verificat independent; 21/21 blob IDs conform jurnalului runnerului (sursa nu este în arhivă). LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Stage 4 nu a fost început; nu se repetă v20.

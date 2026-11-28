@@ -2,7 +2,7 @@ TOTAL_STAGES=55
 CURRENT_STAGE=3
 CURRENT_KIND=PATCH
 CURRENT_PATCH=01
-LAST_COMPLETED_STAGE=2
+LAST_COMPLETED_STAGE=3
 EXPECTED_REPOSITORY_STATE=GREEN
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
@@ -24,4 +24,6 @@ Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/
 
 2026-11-28 — DISCOVERY 01 ACCEPTAT nativ, în starea intenționată EXPECTED_RED. Arhiva results(20261128-094801).zip, SHA256=12b2aee364bc300fed8ea8d5b4002a4b4ab009202aa638e2204d61e92a495818; CRC PASS; 27/27 înregistrări manifest verificate independent; patru loguri finale goale sunt în afara manifestului. Sursa executată: 4c93da154362e5f9ce0e9da4a9196760eb587a37, tree 048d84901bcd57bd7cffc7c6459663a4d5d89647; jurnalul runnerului confirmă 20/20 Git blob IDs (fișierele sursă nu sunt incluse în arhiva de rezultate). J9.7.1 j64 Windows; probe -js fără marker, fallback stdin reușit. 63/63 regresii Stage1, 17 fixtures, 18/18 martori Stage2, RED 0,1,2, control GREEN 3, receipt PASSED, exit 0. Contorizare independentă din stdout, stderr gol. Wrapper v19, runner intern v18. LAST_COMPLETED_STAGE=2. Etapa următoare: Stage 3 PATCH 01, păstrarea intactă a restVechi și a martorilor, strat suplimentar 0→M; nu a fost implementată. Data publică NOT_INTEGRATED. Nu se repetă v18/v19.
 
-2026-11-28 — Stage 3 / PATCH 01 implementat: salvarePatch01 apelează dispecerRestVechi și substituie numai zero cu M. restVechi și contractul normativ rămân identice. Ruta publică trece prin înveliș; martorii istorici folosesc dispecerul legacy. Se cer 18 martori/regresii, patru aserțiuni normative GREEN și șase verificări suplimentare. Execuție nativă: NOT_RUN. LAST_COMPLETED_STAGE=2. Data publică NOT_INTEGRATED. Fără Stage 4.
+2026-11-28 — Stage 3 / PATCH 01 implementat: salvarePatch01 apelează dispecerRestVechi și substituie numai zero cu M. restVechi și contractul normativ rămân identice. Ruta publică trece prin înveliș; martorii istorici folosesc dispecerul legacy. Se cer 18 martori/regresii, patru aserțiuni normative GREEN și șase verificări suplimentare. Execuție nativă: ACCEPTAT GREEN. LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Fără Stage 4.
+
+2026-11-28 — Stage 3 PATCH 01 ACCEPTAT nativ pe J9.7.1 Windows x64, runner v20. Sursa executată: 8adc978d973f01669ba45ef0243be94885457c62, tree 855d1eb71ef9d909aacfdaddbaaecfd1e5fa7537. Rezultate: 63/63 Stage1, 17 fixtures, 18/18 martori, 6/6 PATCH01, GREEN 0,1,2,3, zero RED; exit 0, receipt PASSED, stderr gol. CRC PASS, manifest 27/27 verificat independent; 21/21 blob IDs conform jurnalului runnerului (sursa nu este în arhivă). LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Stage 4 nu a fost început; nu se repetă v20.
