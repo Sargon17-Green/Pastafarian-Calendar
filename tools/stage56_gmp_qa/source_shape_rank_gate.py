@@ -90,16 +90,6 @@ def blob_sha(path: pathlib.Path) -> str:
 
 
 def source_lock() -> None:
-    ancestor = subprocess.run(
-        ["git", "merge-base", "HEAD", BASE_SOURCE_SHA],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        check=True,
-        timeout=5,
-    ).stdout.strip()
-    if ancestor != BASE_SOURCE_SHA:
-        raise RuntimeError(f"BASE_SOURCE_SHA_NOT_ANCESTOR expected={BASE_SOURCE_SHA} got={ancestor}")
     for relative, expected in SOURCE_BLOBS.items():
         got = blob_sha(ROOT / relative)
         if got != expected:

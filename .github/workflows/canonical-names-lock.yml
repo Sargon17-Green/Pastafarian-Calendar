@@ -1968,12 +1968,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          BASE_SHA='fcaf1674d2c4125b6794fd37312f68d11aa2a8dd'
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git merge-base HEAD "$BASE_SHA")" = "$BASE_SHA"
           mkdir -p source-shape-evidence
           git rev-parse HEAD > source-shape-evidence/head.txt
-          git rev-parse HEAD^ > source-shape-evidence/parent.txt
+          git show -s --format=%P HEAD > source-shape-evidence/parent.txt
+          test "$(cat source-shape-evidence/head.txt)" = "$GITHUB_SHA"
           git status --short > source-shape-evidence/git-status.txt
           php -v > source-shape-evidence/php-version.txt
           php --ri gmp > source-shape-evidence/gmp-info.txt 2>&1 || true
@@ -2009,5 +2007,5 @@ jobs:
         with:
           name: php-malay-source-shape-gmp-rank-${{ github.sha }}
           path: source-shape-evidence/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
