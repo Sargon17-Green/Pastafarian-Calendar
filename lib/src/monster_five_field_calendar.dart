@@ -34,7 +34,8 @@ final class MonsterFiveFieldDate {
     required int dayInMonth,
   }) {
     if (dayInCutlet < 1) {
-      throw ArgumentError.value(dayInCutlet, 'dayInCutlet', 'Must be positive.');
+      throw ArgumentError.value(
+          dayInCutlet, 'dayInCutlet', 'Must be positive.');
     }
     if (dayInMonth < 1) {
       throw ArgumentError.value(dayInMonth, 'dayInMonth', 'Must be positive.');
@@ -216,7 +217,8 @@ final class MonsterFiveFieldCalendar {
     }
     final cutletDay = cutlet.openGate + BigInt.from(date.dayInCutlet);
     if (cutletDay != requestedDay) {
-      throw ArgumentError('Cutlet and month components identify different days.');
+      throw ArgumentError(
+          'Cutlet and month components identify different days.');
     }
     return requestedDay;
   }
