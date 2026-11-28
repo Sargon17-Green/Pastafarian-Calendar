@@ -127,7 +127,15 @@ void main(List<String> args) {
     (i) => BigInt.from(42) + (i * i + i * BigInt.from(17)) % BigInt.from(922),
   ]) {
     for (final day in <int>[
-      -15795619, -20000, -5777, -1, 0, 1, 5778, 20000, 15795619,
+      -15795619,
+      -20000,
+      -5777,
+      -1,
+      0,
+      1,
+      5778,
+      20000,
+      15795619,
     ]) {
       compare(BigInt.from(day), BigInt.zero, gap);
     }
