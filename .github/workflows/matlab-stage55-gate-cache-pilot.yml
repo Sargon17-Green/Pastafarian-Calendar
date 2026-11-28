@@ -1,0 +1,109 @@
+name: MATLAB Stage55 Gate Cache Experimental Pilot
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-gate-cache-pilot.yml'
+      - 'tools/qa_candidates/stage55_gate_cache/GateQuestionEngine.m'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-gate-cache-pilot
+  cancel-in-progress: false
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Download original certified audit ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15257835751/zip > audit.zip
+          echo '66a1b65e47f24bb3e20c45c4fb3b7c69c6d92c056a89f18e809b16f52a9d6504  audit.zip' | sha256sum -c -
+      - uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Prepare pinned expected rows and start independent watchdog
+        run: |
+          set -euo pipefail
+          python3 qa/tools/stage55_public_soak_pilot.py prepare source audit.zip pilot-output
+          test "$(git -C source hash-object src/+pastafari/GateQuestionEngine.m)" = 4b774c90f9a2fcdccaa2baac3ef80b0e8e99489e
+          cp qa/tools/qa_candidates/stage55_gate_cache/GateQuestionEngine.m source/src/+pastafari/GateQuestionEngine.m
+          test "$(git -C source diff --name-only)" = src/+pastafari/GateQuestionEngine.m
+          python3 -c 'import hashlib,json,os,pathlib; p=pathlib.Path("source/src/+pastafari/GateQuestionEngine.m"); pathlib.Path("pilot-output/candidate.json").write_text(json.dumps(dict(experimental=True,baseline_sha="341927541dccc940bfc5e2b4073c21c647261278",qa_sha=os.environ["GITHUB_SHA"],changed_path=str(p),candidate_sha256=hashlib.sha256(p.read_bytes()).hexdigest(),stage55_accepted=False)))'
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch pilot-output > pilot-output/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f pilot-output/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Run instrumented six-call native public diagnostic via licensed action
+        id: native
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 167
+        env:
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            out=fullfile(base,'pilot-output');
+            fid=fopen(fullfile(out,'matlab.pid'),'w');
+            assert(fid>=0);
+            fprintf(fid,'%d',feature('getpid'));
+            fclose(fid);
+            maxNumCompThreads(1);
+            diary(fullfile(out,'session1.log'));
+            addpath(fullfile(base,'qa','tools'));
+            addpath(fullfile(base,'source','src'));
+            assert(strcmp(which('pastafari.GateQuestionEngine'),fullfile(base,'source','src','+pastafari','GateQuestionEngine.m')));
+            pastafari.GateQuestionEngine.clearCache();
+            initial=pastafari.GateQuestionEngine.cacheInfo();
+            assert(initial.entries==0 && initial.hits==0 && initial.misses==0);
+            run_stage55_public_cost_diagnostic(fullfile(base,'source'),fullfile(out,'expected.json'),fullfile(out,'session1.jsonl'));
+            info=pastafari.GateQuestionEngine.cacheInfo();
+            assert(info.hits>0 && info.misses>0 && info.entries<=128);
+            fid=fopen(fullfile(out,'gate_cache_stats.json'),'w');
+            assert(fid>=0); fprintf(fid,'%s\n',jsonencode(info)); fclose(fid);
+            fprintf('EXPERIMENTAL_GATE_CACHE hits=%d misses=%d entries=%d\n',info.hits,info.misses,info.entries);
+            pastafari.GateQuestionEngine.clearCache();
+            foundation=pastafari.BigInt('-15055671');
+            for step=[-2,-1,1,2]
+                a=pastafari.MonsterContext(foundation,foundation);
+                [a,gapA]=pastafari.GateGapCompatibilityRoute.call(a,pastafari.BigInt(step));
+                b=pastafari.MonsterContext(foundation,foundation);
+                [b,gapB]=pastafari.GateGapCompatibilityRoute.call(b,pastafari.BigInt(step));
+                assert(gapA==gapB && a.legacyPositiveOnlyGateGap==b.legacyPositiveOnlyGateGap);
+                assert(a.legacyPositiveOnlyGateQuestionDay==b.legacyPositiveOnlyGateQuestionDay && a.gateQuestionDayCandidate==b.gateQuestionDayCandidate);
+                assert(isequal(a.branchTrace,b.branchTrace) && isequal(a.metrics,b.metrics));
+            end
+            fprintf('EXPERIMENTAL_GATE_ROUTE_REPEAT_PASS cases=4\n');
+            diary off;
+      - name: Verify native result and bounded watchdog evidence
+        if: always()
+        env:
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          set -euo pipefail
+          test -f pilot-output/summary.json
+          python3 qa/tools/stage55_public_soak_pilot.py verify pilot-output "$NATIVE_OUTCOME"
+      - name: Verify per-call phase timings (diagnostic only)
+        run: python3 qa/tools/verify_stage55_public_cost_diagnostic.py pilot-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-gate-cache-pilot-${{ github.run_id }}
+          path: pilot-output/
+          if-no-files-found: warn
+          retention-days: 30
