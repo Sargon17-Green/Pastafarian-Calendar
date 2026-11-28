@@ -30,14 +30,21 @@ jobs:
       - name: Checkout exact isolated QA commit
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Verify branch, parent and frozen source locks
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test "$GITHUB_REF" = "refs/heads/qa/logo-ido-stage2-cutlet-partition-20261128"
-          test "$(git rev-parse HEAD^)" = ad001c6aeeb6c758f5004b206a656fec5d6fc403
+          git merge-base --is-ancestor ad001c6aeeb6c758f5004b206a656fec5d6fc403 HEAD
+          expected_files="$(printf '%s\\n' \
+            .github/workflows/logo-stage02-cutlet-partition-qa.yml \
+            QA_STAGE2_CUTLET_PARTITION_CONTRACT_20261128.md \
+            qa/logo_cutlet_partition_candidate.logo \
+            qa/logo_cutlet_partition_oracle.py | LC_ALL=C sort)"
+          actual_files="$(git diff --name-only ad001c6aeeb6c758f5004b206a656fec5d6fc403 HEAD | LC_ALL=C sort)"
+          test "$actual_files" = "$expected_files"
           test "$(git hash-object src/exact_integer.logo)" = f2c1a8aa5822423402cd5825255891183f0fc83c
           test "$(git hash-object src/stage02_context.logo)" = f8451359e6ddcf38bb823ff2b78c9acbfbcf7830
           test "$(git hash-object qa/logo_cutlet_partition_candidate.logo)" = 8345a4fa2dead77ad36154ace18134678134ab8f
