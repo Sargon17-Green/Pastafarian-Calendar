@@ -23,7 +23,18 @@ final class GregorianCivilDate {
   static final _fourHundred = BigInt.from(400);
   static final _cycleDays = BigInt.from(146097);
   static const _monthLengths = <int>[
-    31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+    31,
+    28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31
   ];
 
   static BigInt _floorDiv(BigInt n, BigInt d) => (n - n % d) ~/ d;
