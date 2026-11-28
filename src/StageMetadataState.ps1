@@ -457,3 +457,28 @@ function Assert-Stage43MetadataCompatibility {
     }
     return $state
 }
+
+# One snapshot, validated lifecycle and exact frozen content in either supported checkout representation.
+function Assert-Stage44PreflightMetadata {
+    param([Parameter(Mandatory=$true)][AllowEmptyCollection()][byte[]]$Bytes,
+          [Parameter(Mandatory=$true)][string]$RepositoryRoot)
+    $state = Get-Stage43PredecessorCompatibilityState -Bytes $Bytes -RepositoryRoot $RepositoryRoot
+    if (-not $state.Success -or $state.Profile -cne 'SEALED_SHAPE_ONLY') {
+        throw 'Stage44 preflight requires sealed Stage43 shape'
+    }
+    if ($null -ne $state.PSObject.Properties['Stage44Profile']) {
+        throw 'Stage44 phase-specific execution is not wired; preflight entry point refuses activated metadata'
+    }
+    [byte[]]$frozen = Get-Stage44FrozenBytes -RepositoryRoot $RepositoryRoot
+    $actual = [Convert]::ToBase64String($Bytes)
+    if ($actual -ceq [Convert]::ToBase64String($frozen)) { return }
+    # Git's Windows checkout may expand every LF to CRLF. Permit exactly that
+    # transformation of the hash-verified LF blob, not arbitrary normalization.
+    $utf8 = [Text.UTF8Encoding]::new($false,$true)
+    $text = $utf8.GetString($frozen)
+    if ($text.Contains([string][char]13)) { throw 'Stage44 frozen metadata must be LF for checkout conversion' }
+    [byte[]]$windows = $utf8.GetBytes($text.Replace([string][char]10,([string][char]13+[char]10)))
+    if ($actual -cne [Convert]::ToBase64String($windows)) {
+        throw 'Stage44 preflight requires frozen Stage43 metadata bytes (LF or uniform CRLF checkout)'
+    }
+}

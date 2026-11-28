@@ -143,6 +143,37 @@ foreach($n in 1..3){
     $rejected=Get-Stage43PredecessorCompatibilityState -Bytes (Encode44 $bad) -RepositoryRoot $root
     Check44State (-not $rejected.Success -and $rejected.Profile -ceq 'REJECT_STATE') "gateway wrong-stage injection $n"
 }
+# Exercise the exact callable gate used by the standalone numerical entry point.
+# Keep classifier and boundary assertion counters separate.
+$script:boundary44=0
+function Check44Boundary([byte[]]$bytes,[string]$expected,[string]$label) {
+    $actual=''
+    try { Assert-Stage44PreflightMetadata -Bytes $bytes -RepositoryRoot $root }
+    catch { $actual=$_.Exception.Message }
+    if ($actual -cne $expected) { throw ('Stage44 boundary '+$label+': '+$actual) }
+    $script:boundary44++
+}
+[byte[]]$frozen44=Get-Stage44FrozenBytes -RepositoryRoot $root
+$strict44=[Text.UTF8Encoding]::new($false,$true)
+$baseText44=$strict44.GetString($frozen44)
+$lf44=[string][char]10
+$crlf44=[string][char]13+[char]10
+$shapeError44='Stage44 preflight requires sealed Stage43 shape'
+$byteError44='Stage44 preflight requires frozen Stage43 metadata bytes (LF or uniform CRLF checkout)'
+$activeError44='Stage44 phase-specific execution is not wired; preflight entry point refuses activated metadata'
+Check44Boundary $frozen44 '' 'exact LF'
+Check44Boundary ($strict44.GetBytes($baseText44.Replace($lf44,$crlf44))) '' 'uniform CRLF'
+# A BOM is parser-valid but not a frozen checkout representation.
+Check44Boundary ([byte[]](@(0xEF,0xBB,0xBF)+$frozen44)) $byteError44 'BOM mutation'
+# A single extra blank line preserves the map but changes the frozen bytes.
+Check44Boundary ($strict44.GetBytes($baseText44+$lf44)) $byteError44 'extra blank line'
+Check44Boundary ($strict44.GetBytes($baseText44+$lf44+'CURRENT_STAGE=43')) $shapeError44 'duplicate pointer'
+foreach($n in 1..3){
+    Check44Boundary (Encode44 (Fixture44 $n)) $activeError44 "activated profile $n"
+}
+if($script:boundary44 -ne 8){throw ('Stage44 boundary count mismatch: '+$script:boundary44)}
+Write-Host ('STAGE44_BOUNDARY_ASSERTIONS_PASSED='+$script:boundary44)
+Write-Host 'STAGE44_BOUNDARY_ASSERTIONS_FAILED=0'
 if($script:checks44 -ne 240){throw ('Stage44 classifier count mismatch: '+$script:checks44)}
 
 Write-Host ('STAGE44_CLASSIFIER_ASSERTIONS_PASSED='+$script:checks44)

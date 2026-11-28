@@ -5,18 +5,8 @@ $root = Split-Path -Parent $PSScriptRoot
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 . (Join-Path $root 'src/StageMetadataState.ps1')
-$state44 = Assert-Stage43MetadataCompatibility -RepositoryRoot $root
-if ($state44.Profile -cne 'SEALED_SHAPE_ONLY') { throw 'Stage44 preflight requires sealed Stage43 shape' }
-# This entry point currently emits preflight-only evidence. Do not reuse a projected
-# predecessor profile as evidence that the live lifecycle is still unactivated.
-if ($null -ne $state44.PSObject.Properties['Stage44Profile']) {
-    throw 'Stage44 phase-specific execution is not wired; preflight entry point refuses activated metadata'
-}
 [byte[]]$live44Metadata = [System.IO.File]::ReadAllBytes((Join-Path $root 'DEVELOPMENT_STAGE.md'))
-[byte[]]$frozen44Metadata = Get-Stage44FrozenBytes -RepositoryRoot $root
-if ([Convert]::ToBase64String($live44Metadata) -cne [Convert]::ToBase64String($frozen44Metadata)) {
-    throw 'Stage44 preflight requires exact frozen Stage43 metadata bytes'
-}
+Assert-Stage44PreflightMetadata -Bytes $live44Metadata -RepositoryRoot $root
 
 function Check44 {
     param([bool]$Ok, [string]$Label)
