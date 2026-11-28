@@ -1,0 +1,108 @@
+{
+  "blob_sha1": "f935bebfe5ffaec971a4e4c32b6cfe1c64478ad6",
+  "commit": {
+    "author": {
+      "avatar_url": "https://avatars.githubusercontent.com/u/313830411?v=4",
+      "events_url": "https://api.github.com/users/Sargon17-Green/events{/privacy}",
+      "followers_url": "https://api.github.com/users/Sargon17-Green/followers",
+      "following_url": "https://api.github.com/users/Sargon17-Green/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Sargon17-Green/gists{/gist_id}",
+      "gravatar_id": "",
+      "html_url": "https://github.com/Sargon17-Green",
+      "id": 313830411,
+      "login": "Sargon17-Green",
+      "node_id": "U_kgDOErSsCw",
+      "organizations_url": "https://api.github.com/users/Sargon17-Green/orgs",
+      "received_events_url": "https://api.github.com/users/Sargon17-Green/received_events",
+      "repos_url": "https://api.github.com/users/Sargon17-Green/repos",
+      "site_admin": false,
+      "starred_url": "https://api.github.com/users/Sargon17-Green/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Sargon17-Green/subscriptions",
+      "type": "User",
+      "url": "https://api.github.com/users/Sargon17-Green",
+      "user_view_type": "public"
+    },
+    "comments_url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/commits/480426329465a8e7d51f7fb49ad5058a43b146bf/comments",
+    "commit": {
+      "author": {
+        "date": "2026-11-27T20:39:42Z",
+        "email": "bwtbdyqtmsprytgydym@gmail.com",
+        "name": "Sargon 17 Green"
+      },
+      "comment_count": 0,
+      "committer": {
+        "date": "2026-11-27T20:39:42Z",
+        "email": "bwtbdyqtmsprytgydym@gmail.com",
+        "name": "Sargon 17 Green"
+      },
+      "message": "qa(soak): preserve exact short rejection arithmetic regression, no converter dispatch",
+      "tree": {
+        "sha": "008ebc3f7b62fe373ec079dc09110db8c3905318",
+        "url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/git/trees/008ebc3f7b62fe373ec079dc09110db8c3905318"
+      },
+      "url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/git/commits/480426329465a8e7d51f7fb49ad5058a43b146bf",
+      "verification": {
+        "payload": null,
+        "reason": "unsigned",
+        "signature": null,
+        "verified": false,
+        "verified_at": null
+      }
+    },
+    "committer": {
+      "avatar_url": "https://avatars.githubusercontent.com/u/313830411?v=4",
+      "events_url": "https://api.github.com/users/Sargon17-Green/events{/privacy}",
+      "followers_url": "https://api.github.com/users/Sargon17-Green/followers",
+      "following_url": "https://api.github.com/users/Sargon17-Green/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Sargon17-Green/gists{/gist_id}",
+      "gravatar_id": "",
+      "html_url": "https://github.com/Sargon17-Green",
+      "id": 313830411,
+      "login": "Sargon17-Green",
+      "node_id": "U_kgDOErSsCw",
+      "organizations_url": "https://api.github.com/users/Sargon17-Green/orgs",
+      "received_events_url": "https://api.github.com/users/Sargon17-Green/received_events",
+      "repos_url": "https://api.github.com/users/Sargon17-Green/repos",
+      "site_admin": false,
+      "starred_url": "https://api.github.com/users/Sargon17-Green/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Sargon17-Green/subscriptions",
+      "type": "User",
+      "url": "https://api.github.com/users/Sargon17-Green",
+      "user_view_type": "public"
+    },
+    "files": [
+      {
+        "additions": 88,
+        "blob_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/blob/480426329465a8e7d51f7fb49ad5058a43b146bf/qa%2Fsoak%2Fv232_short_rejection_model.py",
+        "changes": 88,
+        "contents_url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/contents/qa%2Fsoak%2Fv232_short_rejection_model.py?ref=480426329465a8e7d51f7fb49ad5058a43b146bf",
+        "deletions": 0,
+        "filename": "qa/soak/v232_short_rejection_model.py",
+        "patch": "@@ -0,0 +1,88 @@\n+\"\"\"Exact short-rejection arithmetic model. No converter invocation.\n+Source pins: C++ 32ad50c8177233adc87eed1721c1e6f34f24ced1;\n+src/monster.cpp a9cb83e67fc962fdf5560ad0b2cdf5354148e6a9\n+(ringAnswer, biasedLegacyPick, Patch13RejectionWrapper::repair);\n+include/pastafari/monster.hpp 4c24d36e3704dd10ecf5420e7bc11a3da958d441.\n+For valid N and d, the rejected interval is [A+1,M]. In the negative\n+direction its first exit is A, with no wrap. In the positive direction\n+its first exit is 1 via wrap. The original loop and direct calculation\n+therefore have identical acceptance limit, answer, offset and rank.\n+This is a mathematical regression, not evidence that the observed\n+C++ timeouts are caused by this loop.\n+\"\"\"\n+from random import Random\n+import json\n+\n+\n+def ring(m, x, d, k):\n+    return 1 + (x - 1 + d * k) % m\n+\n+\n+def direct(m, n, x, d):\n+    assert 1 <= n <= m and d in (-1, 1)\n+    x = ring(m, x, d, 0)\n+    a = (m // n) * n\n+    if x <= a:\n+        k, y = 0, x\n+    elif d == -1:\n+        k, y = x - a, a\n+    else:\n+        k, y = m - x + 1, 1\n+    return (a, y, k, (y - 1) % n + 1)\n+\n+\n+def legacy(m, n, x, d):\n+    a = (m // n) * n\n+    k = 0\n+    while True:\n+        y = ring(m, x, d, k)\n+        if y <= a:\n+            return (a, y, k, (y - 1) % n + 1)\n+        k += 1\n+\n+\n+def certificate(m, n, x, d):\n+    a, y, k, rank = direct(m, n, x, d)\n+    x = ring(m, x, d, 0)\n+    assert y == ring(m, x, d, k) and 1 <= y <= a\n+    assert 1 <= rank <= n\n+    if k:\n+        assert x > a and ring(m, x, d, k - 1) > a\n+        if d == -1:\n+            assert x - k == a and k <= m - a\n+        else:\n+            assert x + k == m + 1 and k <= m - a\n+    else:\n+        assert x <= a\n+    return k\n+\n+\n+def main():\n+    small = loop_steps = 0\n+    for m in range(1, 97):\n+        for n in range(1, m+1):\n+            for x in range(1, m+1):\n+                for d in (-1, 1):\n+                    got = direct(m, n, x, d)\n+                    assert got == legacy(m, n, x, d)\n+                    small += 1\n+                    loop_steps += got[2]\n+    m = (1 << 127) - 1\n+    rng = Random(20261127)\n+    ns = set(range(1, 124)) | {m, m-1, m//2, m//2+1, m//3, m//3+1}\n+    ns |= {rng.randrange(1, m+1) for _ in range(10000)}\n+    large = max_k = 0\n+    for n in sorted(ns):\n+        a = m//n*n\n+        xs = {1, m, a, max(1,a-1), min(m,a+1), rng.randrange(1,m+1)}\n+        for x in xs:\n+            for d in (-1,1):\n+                max_k = max(max_k, certificate(m,n,x,d))\n+                large += 1\n+    assert max_k == (m-1)//2\n+    assert (small, loop_steps, large) == (599072, 1126972, 121492)\n+    print(json.dumps({'schema':'SHORT_REJECTION_MODEL_V232/1','small_exhaustive_cases':small,'legacy_rejected_iterations':loop_steps,'actual_modulus_certificate_cases':large,'max_exact_rejections':str(max_k),'mismatches':0,'native_calls':0,'whole_year_credit':0,'scope':'arithmetic model; not C++ source runtime evidence'}, sort_keys=True))\n+\n+\n+if __name__ == '__main__':\n+    main()",
+        "raw_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/raw/480426329465a8e7d51f7fb49ad5058a43b146bf/qa%2Fsoak%2Fv232_short_rejection_model.py",
+        "sha": "f935bebfe5ffaec971a4e4c32b6cfe1c64478ad6",
+        "status": "added"
+      }
+    ],
+    "html_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/480426329465a8e7d51f7fb49ad5058a43b146bf",
+    "node_id": "C_kwDOUE73Z9oAKDQ4MDQyNjMyOTQ2NWE4ZTdkNTFmN2ZiNDlhZDUwNThhNDNiMTQ2YmY",
+    "parents": [
+      {
+        "html_url": "https://github.com/Sargon17-Green/Pastafarian-Calendar/commit/8e9ba2b7b6a01ba6eed171103d6e143564c7c7e4",
+        "sha": "8e9ba2b7b6a01ba6eed171103d6e143564c7c7e4",
+        "url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/commits/8e9ba2b7b6a01ba6eed171103d6e143564c7c7e4"
+      }
+    ],
+    "sha": "480426329465a8e7d51f7fb49ad5058a43b146bf",
+    "stats": {
+      "additions": 88,
+      "deletions": 0,
+      "total": 88
+    },
+    "url": "https://api.github.com/repos/Sargon17-Green/Pastafarian-Calendar/commits/480426329465a8e7d51f7fb49ad5058a43b146bf"
+  },
+  "execution": "NO_ACTIONS_RUN_FOUND; source-only archived",
+  "path": "qa/soak/v232_short_rejection_model.py",
+  "source_bytes": 2914,
+  "source_sha256": "fd5ccb0cbb4377d14bfa90effbcfad434f15ab4aea1e866fe77b5177c5540426"
+}
