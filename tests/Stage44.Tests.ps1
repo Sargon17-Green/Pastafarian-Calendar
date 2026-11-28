@@ -1,3 +1,9 @@
+[CmdletBinding()]
+param(
+    [ValidateSet('RESEARCH_PREFLIGHT','IMPLEMENTATION_CANDIDATE','NATIVE_EVIDENCE_CANDIDATE','SEAL_RECHECK_CANDIDATE')][string]$ExecutionRoute='RESEARCH_PREFLIGHT',
+    [string]$ExpectedHead='',
+    [System.Collections.Generic.Dictionary[string,string]]$TrustedEvidence=$null
+)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -5,8 +11,17 @@ $root = Split-Path -Parent $PSScriptRoot
 . (Join-Path $root 'oracle/NormativeScroll.ps1')
 . (Join-Path $root 'tests/TestHarness.ps1')
 . (Join-Path $root 'src/StageMetadataState.ps1')
-[byte[]]$live44Metadata = [System.IO.File]::ReadAllBytes((Join-Path $root 'DEVELOPMENT_STAGE.md'))
-Assert-Stage44PreflightMetadata -Bytes $live44Metadata -RepositoryRoot $root
+if ($ExecutionRoute -ceq 'RESEARCH_PREFLIGHT') {
+    if ($null -ne $TrustedEvidence -or $ExpectedHead -ne '') { throw 'Research preflight does not accept candidate evidence arguments' }
+    [byte[]]$live44Metadata = [System.IO.File]::ReadAllBytes((Join-Path $root 'DEVELOPMENT_STAGE.md'))
+    Assert-Stage44PreflightMetadata -Bytes $live44Metadata -RepositoryRoot $root
+} else {
+    if ($null -eq $TrustedEvidence -or $ExpectedHead -ceq '') { throw 'Stage44 candidate requires independent trusted evidence and exact checkout SHA' }
+    . (Join-Path $root 'src/Stage44TrustedExecution.ps1')
+    $authorized44 = Assert-Stage44TrustedExecution -RepositoryRoot $root -ExpectedRoute $ExecutionRoute -ExpectedHead $ExpectedHead -TrustedEvidence $TrustedEvidence
+    Write-Host ('STAGE44_AUTHORIZED_CANDIDATE_ROUTE=' + $authorized44)
+}
+Write-Host ('STAGE44_NUMERICAL_EXECUTION_ROUTE=' + $ExecutionRoute)
 
 function Check44 {
     param([bool]$Ok, [string]$Label)

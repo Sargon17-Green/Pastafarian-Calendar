@@ -218,3 +218,37 @@ foreach($bad in @('OTHER=23','CURRENT_STAGE=abc','CURRENT_STAGE=023','CURRENT_ST
 if ($script:pointerChecks -ne 9) { throw 'Stage pointer count mismatch' }
 Write-Host 'STRICT_POINTER_ASSERTIONS_PASSED=9'
 Write-Host 'STRICT_POINTER_ASSERTIONS_FAILED=0'
+
+# Synthetic trust is for boundary QA only; never use it as CI provenance.
+. (Join-Path $root 'src/Stage44TrustedExecution.ps1')
+$script:trustedRouteChecks44=0
+function CheckTrustedRoute44($map, $route, $trusted, [string]$expected) {
+    $actual=''
+    try { $actual=Assert-Stage44TrustedCandidateRoute -Bytes (Encode44 $map) -RepositoryRoot $root -ExpectedRoute $route -TrustedEvidence $trusted }
+    catch { $actual='REJECT' }
+    if ($actual -cne $expected) { throw ('Stage44 trusted route mismatch: '+$actual+' expected '+$expected) }
+    $script:trustedRouteChecks44++
+}
+foreach ($n in 1..3) {
+    $candidate=Fixture44 $n
+    $route=@('IMPLEMENTATION_CANDIDATE','NATIVE_EVIDENCE_CANDIDATE','SEAL_RECHECK_CANDIDATE')[$n-1]
+    $wrongRoute=@('NATIVE_EVIDENCE_CANDIDATE','SEAL_RECHECK_CANDIDATE','IMPLEMENTATION_CANDIDATE')[$n-1]
+    $trusted=New-StrictStageMetadataDictionary
+    foreach ($key in $candidate.Keys) {
+        if ($key -cmatch '\ASTAGE44_(PREFLIGHT|NATIVE|SEAL)_' -and $key -cnotin @('STAGE44_NATIVE_ACCEPTANCE','STAGE44_SEAL_COMMIT_NATIVE_RECHECK')) { $trusted.Add($key,$candidate[$key]) }
+    }
+    CheckTrustedRoute44 $candidate $route $trusted $route
+    CheckTrustedRoute44 $candidate $wrongRoute $trusted 'REJECT'
+    $bad=Copy44 $trusted; [void]$bad.Remove('STAGE44_PREFLIGHT_CI_SHA')
+    CheckTrustedRoute44 $candidate $route $bad 'REJECT'
+    $bad=Copy44 $trusted; $bad['STAGE44_PREFLIGHT_CI_SHA']='f'*40
+    CheckTrustedRoute44 $candidate $route $bad 'REJECT'
+    $bad=Copy44 $trusted; $bad.Add('STAGE44_PREFLIGHT_UNKNOWN','extra')
+    CheckTrustedRoute44 $candidate $route $bad 'REJECT'
+    $bad=Copy44 $candidate; $bad['STAGE44_PLANNED_ASSERTIONS']='5026'
+    CheckTrustedRoute44 $bad $route $trusted 'REJECT'
+}
+if ($script:trustedRouteChecks44 -ne 18) { throw 'Stage44 trusted route count mismatch' }
+Write-Host 'STAGE44_TRUSTED_ROUTE_ASSERTIONS_PASSED=18'
+Write-Host 'STAGE44_TRUSTED_ROUTE_ASSERTIONS_FAILED=0'
+Write-Host 'STAGE44_TRUSTED_ROUTE_RESULT=PASS_SYNTHETIC_BINDING_ONLY'
