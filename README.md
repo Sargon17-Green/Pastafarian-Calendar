@@ -1,29 +1,33 @@
-# Calendarul Pastafarian - J + romana
+# Calendarul Pastafarian — J + română
 
-Aceasta este o linie de implementare independenta, pornita de la zero. Limbajul de programare este J, iar limba-sursa umana este romana. Stage 1, Stage 2 si Stage 3 / PATCH 01 au fost acceptate prin executii native. Stage 4 / DISCOVERY 02 a fost acceptat prin Native QA v17.
+Acest arbore continuă Stage 1 (Bootstrap) prin Stage 2 (DISCOVERY 01) al unei linii de implementare independente, pornite de la zero. Limbajul de programare al întregii linii este J, iar limba-sursă umană este româna.
 
 ## Scopul Stage 1
 
-Stage 1 fixeaza catalogul de limba-sursa, construieste referinta normativa de test direct din specificatia incorporata, pregateste infrastructura neutra a monstrului si defineste un ham de test local. Niciun defect legacy si niciun patch din etapele 2-53 nu este prezent in scheletul initial.
+Stage 1 fixează catalogul de limbă-sursă, construiește referința normativă de test direct din specificația încorporată, pregătește infrastructura neutră a monstrului și definește un ham de test local. Stage 1 nu conținea defecte legacy sau patch-uri; Stage 2 introduce exclusiv restul istoric.
 
-## Reguli de independenta
+## Reguli de independență
 
-Nu s-a clonat si nu s-a consultat nicio alta implementare a calendarului. Nu s-au copiat teste, fixture-uri, rezultate asteptate, tabele generate, urme sau hash-uri de la o alta linie. Referinta normativa din `test/normative_reference.ijs` este scrisa pentru aceasta linie exclusiv din specificatia Stage 1.
+Codul activ este derivat din specificația originală și din baza J Stage 1 acceptată. Documentația unei alte linii a fost consultată în timpul căutării istorice, dar nu este sursa codului sau testelor. Nu s-au copiat teste, fixture-uri, rezultate așteptate, tabele generate, urme sau hash-uri de la o altă linie. Referința normativă din `test/normative_reference.ijs` este scrisă pentru această linie exclusiv din specificația Stage 1.
 
 ## Rulare
 
-Pentru verificarea nativa Windows, folositi pachetul Native QA versionat pregatit pentru etapa curenta. Runtime-ul J 9.7.1 este descarcat si verificat SHA256 de runner.
-
-Comanda locala de baza pentru Stage 1 ramane:
+Din rădăcina proiectului, cu un runtime J 9.7.x, finalizarea Stage 1 se face printr-o singură comandă:
 
 ```text
 jconsole test/complete_stage01.ijs
 ```
 
-## Precizie numerica
+Runnerul generează `test/stage01_fixtures.tsv`, execută suita locală și actualizează `DEVELOPMENT_STAGE.md` numai după succes. Generatorul folosește numai referința normativă J din această linie. Pentru detalii, vedeți `HANDOFF_STAGE_01.md`.
 
-Toate calculele normative folosesc intregi extinsi J (`x`) si, unde este necesara o impartire intermediara, operatori exacti care pastreaza domeniul intreg/rational. Nu se foloseste aritmetica in virgula mobila pentru decizii normative. PATCH 01 normalizeaza zilele intregi acceptate, inclusiv intrarile rational cu numitor 1, la extended integer inainte de calculul celor cinci valori de lucru.
+## Precizie numerică
 
-## Starea dezvoltarii
+Toate calculele normative folosesc întregi extinși J (`x`) și, unde este necesară o împărțire intermediară, operatori exacți care păstrează domeniul întreg/rational. Nu se folosește aritmetică în virgulă mobilă pentru decizii normative.
 
-Stage 1: 63/63 Native PASS. Stage 2: 17/17 Native PASS. Stage 3 / PATCH 01: 11/11 Native PASS, J9.7.1, exit 0. Stage 4 / DISCOVERY 02: operatia SAVE pozitiv exact, Native 24/24 PASS, J9.7.1, exit 0; calea publica ramane `NOT_INTEGRATED`.
+## Starea dezvoltării
+
+Vezi `DEVELOPMENT_STAGE.md`. Etapa următoare după un Bootstrap valid este Stage 2 — DISCOVERY 01.
+
+## Realiniere canonica Stage 2
+
+Dupa auditul specificatiei originale, istoricul anterior este conservat la commit 842f6044b2689f20b39a28afad56be5da23c893e. Nu se ruleaza din nou v16/v17. Pentru noul DISCOVERY 01 se ruleaza separat generatorul de fixtures Stage 1, testele Stage 1 si test/stage02_discovery01_tests.ijs cu J9.7.1. Nu se foloseste complete_stage01.ijs, deoarece acesta rescrie starea etapei. Se cer trei RED normative si un control GREEN, cu martori si regresii GREEN. Stage 2 inca neacceptat.

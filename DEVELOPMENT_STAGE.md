@@ -1,29 +1,23 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=4
+CURRENT_STAGE=2
 CURRENT_KIND=DISCOVERY
-CURRENT_PATCH=NONE
-LAST_COMPLETED_STAGE=4
-EXPECTED_REPOSITORY_STATE=GREEN
+CURRENT_PATCH=01
+LAST_COMPLETED_STAGE=1
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
 CROSS_IMPLEMENTATION_HASH_CHECKS=NO
 CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=J
-NATURAL_LANGUAGE=romana
+NATURAL_LANGUAGE=רומנית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=context de baza, dispatcher neutru, validator neutru, invelis de eroare, colector de metrici, canonizarea zilelor intregi la extended integer, SAVE pozitiv exact
+MONSTER_ARCHITECTURE_GROWTH=context de bază, dispatcher neutru, validator neutru, înveliș de eroare și colector de metrici fără logică de patch
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=YES
-HANDOFF_PACKAGE_PREPARED=YES
+HANDOFF_PACKAGE_PREPARED=NO
 
-Stage 1 a fost finalizat prin executie nativa J9.7.1 pe Windows: 63/63 verificari, 17 fixture-uri, audit GREEN, exit code 0. Dovada: Native QA v13.
+Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/63 verificări, 17 fixture-uri, audit GREEN, exit code 0. Dovadă: results(20261102-191247).zip, SHA256=f0c43242323ce04c2734c969deb60a9461335056d63767cd7d39c4cebdbb5e2b; sursa testată este commit a836206fd842e18d60f3a5df6a07382cf81573bb, tree d00980351d0123b15fe72b7f01db5151ecce608d. Etapa următoare: Stage 2 — DISCOVERY 01; aceasta nu este încă finalizată.
 
-Stage 2 / DISCOVERY 01 a fost acceptat dupa executie nativa J9.7.1 pe Windows: regresie Stage 1 63/63 si Stage 2 17/17, exit code 0. Intrarea si iesirea raman exacte, iar calea publica continua sa returneze NOT_INTEGRATED.
-
-Stage 3 / PATCH 01: intrarile rational exacte cu valoare intreaga (tip J 128) trec validarea, dar pot promova cele cinci valori de lucru la tipul rational. Solutia extrage numaratorul si numitorul cu 2 x: dupa validare, cere numitorul 1 si stocheaza zilele ca extended integer inainte de calcul. Testele de regresie acopera tipul 128, valori inainte/inapoi/identice, o valoare mare, respingerea fractiilor si pastrarea NOT_INTEGRATED.
-
-Stage 3 / PATCH 01 ACCEPTAT pe baza executiei native Windows cu J9.7.1, in rezultatele results(20261103-102552).zip, SHA256 7f5af4739c4021dc2bfbe28f07edbeba7745fb71482fb28a2bbe6cce1f4ce223. Manifest 29/29 validat, source 20/20 Git blobs din commit d619a61704618eee0e5f6501da79f5522a84b0fb si tree 4c8df007204eafbfce7d6490942c044fd40244fd (conform jurnalului de executie), Native PASS: Stage 1 63/63, Stage 2 17/17, Stage 3 11/11, exit 0, fixture-uri Stage 1: 17. Primul mod J_VERSION (-js) nu a emis marker, modul stdin a trecut si toate testele native au trecut. Etapa publica calendar date ramane NOT_INTEGRATED.
-
-Stage 4 / DISCOVERY 02 ACCEPTAT: Native QA v17, Windows x64 J9.7.1, results(20261127-064947).zip SHA256=7dac2d23f15c8e02d20b36ec3e88bd94e61d24ffb3fc759b23ab84786b34b571. Source commit=082d3715cdceb510520ed2efacd7be695dc8f9cc, tree=68cca1a0c6e0a4a421e729b1b3376424edd2dfa5 conform receipt; 22 Git blobs validate conform jurnalului; manifest 31/31 verificat independent; Stage 1 63/63, Stage 2 17/17, Stage 3 11/11, Stage 4 24/24, 17 fixtures, exit 0. Testul rational a fost corectat printr-un substantiv numit; codul de productie SAVE neschimbat. Public calendar date ramane NOT_INTEGRATED. LAST_COMPLETED_STAGE=4. Urmatorul pas: contractul independent pentru Stage 5, fara implementare prematura.
+2026-11-28 — Realiniere canonica dupa recuperarea specificatiei independente 06-implementation-prompt.md (2026-08-26), sectiunile 5, 9–12 si anexa B. Stage 1 ramane ACCEPTAT. Starea anterioara a arborelui, 842f6044b2689f20b39a28afad56be5da23c893e, si acceptarea nativa v17 de 115/115 sunt pastrate in istoria Git; acea succesiune Stage 2–4 nu corespunde hartii istorice obligatorii. Arborele activ este reconstruit din baza acceptata Stage 1, 7c23a7e46b521adf2b52c42987366fb17aa901ee, fara reset sau force push. DISCOVERY 01 implementeaza numai restul gresit regularMod(x,M) si martorii M, 2M, 3M, M+1. Niciun PATCH 01 sau Stage 3–5 anticipat. Native J pentru noul Stage 2: NOT_RUN; LAST_COMPLETED_STAGE=1. Calendar public NOT_INTEGRATED.

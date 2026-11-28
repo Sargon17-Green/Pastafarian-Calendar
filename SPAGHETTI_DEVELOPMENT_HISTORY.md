@@ -1,42 +1,29 @@
-# Istoria dezvoltarii monstrului spaghetti
+# Istoria dezvoltării monstrului spaghetti
 
-## Stage 1 - Bootstrap - acceptat
+## Stage 1 — Bootstrap
 
-### Starea initiala
+### Ce exista la început
 
-Nimic. Linia J + romana a fost pornita intr-un arbore gol, exclusiv din specificatia furnizata pentru aceasta linie.
+Nimic. Linia J + română a fost pornită într-un arbore gol, exclusiv din specificația furnizată pentru această linie.
 
 ### Ce s-a construit
 
-S-au introdus numai mecanisme generale, neutre: un context de invocare, un dispatcher de faze, un validator de baza, un invelis determinist pentru erori, un registru de metrici si jurnalizare ne-semantica. Niciunul nu contine cunoastere despre defectele legacy sau despre patch-urile 01-26.
+S-au introdus numai mecanisme generale, neutre: un context de invocare, un dispatcher de faze, un validator de bază, un înveliș determinist pentru erori, un registru de metrici și jurnalizare ne-semantică. Niciunul nu conține cunoaștere despre defectele legacy sau despre patch-urile 01–26.
 
-S-a creat si referinta normativa de test in J, separata de scheletul de productie. Referinta nu este disponibila ca fallback pentru productie.
+S-a creat și referința normativă de test în J, separată de scheletul de producție. Referința nu este disponibilă ca fallback pentru producție.
 
-### Catalogul de limba-sursa
+### Catalogul de limbă-sursă
 
-Catalogul romanesc este inghetat in Stage 1. Ordinea semantica este definita exclusiv de `canonicalIndex`; textul romanesc nu participa la sortare, rank, unrank, cache-uri semantice sau selectii.
+Catalogul românesc este înghețat în Stage 1. Ordinea semantică este definită exclusiv de `canonicalIndex`; textul românesc nu participă la sortare, rank, unrank, cache-uri semantice sau selecții.
 
-### Stratul de monstru
+### Stratul de monstru adăugat
 
-Stratul adaugat este intentionat modest si neutru: context + dispatcher + validator + error wrapper + metrici. El este observational sau structural si nu schimba niciun rezultat normativ.
+Stratul adăugat este intenționat modest și neutru: context + dispatcher + validator + error wrapper + metrici. El este observațional sau structural și nu schimbă niciun rezultat normativ.
 
-## Stage 2 - DISCOVERY 01 - acceptat
+Nu există încă secțiuni pentru patch-uri. Ele vor fi adăugate numai atunci când etapele istorice respective vor avea loc.
 
-A fost introdusa o cale de productie J independenta pentru cinci valori de lucru: eticheta zilei de calcul, eticheta zilei tinta, distanta inclusiva, suma si directia. Rezultatul ramane doar in `semanticPending` din context, iar API-ul de calendar continua sa declare `NOT_INTEGRATED`: cele cinci componente finale de data nu exista inca.
+## Stage 2 — DISCOVERY 01 — realiniere canonica
 
-Testele Stage 2 sunt separate de cele 63 de verificari Stage 1 si au valori asteptate explicite, inclusiv directie inversa, traversarea fundatiei si numere intregi extinse. Nu exista import de oracle in productie. Stage 2 a fost acceptat prin executie nativa J9.7.1 pe Windows: Stage 1 63/63, Stage 2 17/17, exit code 0, manifest 26/26 si 19/19 Git blobs verificate.
+Specificația independentă originală, 06-implementation-prompt.md, 2026-08-26, fixează succesiunea DISCOVERY 01/PATCH 01. Ipoteza veche este că modulo obișnuit este SAVE; la M, 2M și 3M rezultă zero în loc de M, iar la M+1 rezultatul coincide. Producția păstrează restVechi, dispecerRestVechi și ruta calendarSalvareSpaghete; contextul public observă rezultatul, fără a pretinde integrarea datei. Nu există corecția PATCH 01. Aserțiunile normative sunt separate și se cer trei RED exacte și un control GREEN. Execuția nativă rămâne NOT_RUN.
 
-## Stage 3 - PATCH 01 - acceptat
-
-Revizuirea independenta a codului Stage 2 a identificat un defect de reprezentare: validatorul accepta intrari rational exacte a caror valoare este intreaga, dar calculele mixte pastreaza/promoveaza tipul rational (128). Astfel, cele cinci valori de lucru pot fi rational in loc de extended integer (64), desi valorile lor sunt intregi exacte.
-
-PATCH 01 canonizeaza fiecare zi dupa validare: `2 x:` extrage numaratorul si numitorul ca extended integers, numitorul este verificat ca 1, iar ziua este stocata ca extended integer in context si in calculele de productie. Formulele Stage 2 nu se schimba. Referinta normativa ramane test-only, iar calea publica ramane `NOT_INTEGRATED`.
-
-Noua suita `test/stage03_patch01_tests.ijs` acopera tipul fixture-ului, rezultatele inainte/inapoi/aceeasi zi, un rational intreg mare, tipul 64 pentru rezultate si zilele din context, respingerea fractiilor si pastrarea `NOT_INTEGRATED`. Stage 3 a fost acceptat prin Windows Native J9.7.1: manifest 29/29, Stage 1 63/63, Stage 2 17/17, Stage 3 11/11, exit 0.
-
-## Stage 4 - DISCOVERY 02 - acceptat
-
-Primitiva exacta SAVE pentru stari de sauce foloseste modulul M=2^127-1 si da valori in 1..M, inclusiv pentru zero, negative, multipli M si rationali integrali. Helperul stage04SaveCounts reduce doar vectori de cinci valori de lucru; nu modifica public calendar date, care ramane NOT_INTEGRATED. Suita Stage4 are 24 de verificari. La momentul implementarii initiale, executia Windows Native J9.7.1 nu avusese inca loc si LAST_COMPLETED_STAGE era 3; acceptarea ulterioara este consemnata mai jos. Fara main/merge/publicare.
-
-
-Stage 4 / DISCOVERY 02 ACCEPTAT: Native QA v17, Windows x64 J9.7.1, results(20261127-064947).zip SHA256=7dac2d23f15c8e02d20b36ec3e88bd94e61d24ffb3fc759b23ab84786b34b571. Source commit=082d3715cdceb510520ed2efacd7be695dc8f9cc, tree=68cca1a0c6e0a4a421e729b1b3376424edd2dfa5 conform receipt; 22 Git blobs validate conform jurnalului; manifest 31/31 verificat independent; Stage 1 63/63, Stage 2 17/17, Stage 3 11/11, Stage 4 24/24, 17 fixtures, exit 0. Testul rational a fost corectat printr-un substantiv numit; codul de productie SAVE neschimbat. Public calendar date ramane NOT_INTEGRATED. LAST_COMPLETED_STAGE=4. Urmatorul pas: contractul independent pentru Stage 5, fara implementare prematura.
+Istoricul anterior, inclusiv rezultatul nativ v17 (115/115), este păstrat integral prin părintele 842f6044b2689f20b39a28afad56be5da23c893e. Baza canonică activă este Stage 1 acceptat, 7c23a7e46b521adf2b52c42987366fb17aa901ee. Acceptarea istorică a rezultatelor nu este anulată; conformitatea ordinală a etapelor 2–4 a fost infirmată de specificație. Nu se introduc etape viitoare.
