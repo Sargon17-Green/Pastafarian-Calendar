@@ -1,0 +1,117 @@
+name: MATLAB Stage55 Gate Mersenne127 Exact Arithmetic Candidate
+on:
+  push:
+    branches:
+      - 'MATLAB\+Polski'
+    paths:
+      - '.github/workflows/matlab-stage55-gate-mersenne127-candidate.yml'
+      - 'tools/qa_candidates/stage55_gate_mersenne127/**'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: matlab-stage55-gate-arithmetic-profile
+  cancel-in-progress: false
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: qa
+      - uses: actions/checkout@v4
+        with:
+          ref: 341927541dccc940bfc5e2b4073c21c647261278
+          path: source
+      - name: Verify baseline, prepare independent vectors, and build disposable candidate
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = 341927541dccc940bfc5e2b4073c21c647261278
+          test "$(git -C source rev-parse HEAD:src/+pastafari/BigInt.m)" = 86581532df7492a236283c5ee9410ca281e2e6f5
+          test "$(git -C source rev-parse HEAD:src/+pastafari/GateQuestionEngine.m)" = 4b774c90f9a2fcdccaa2baac3ef80b0e8e99489e
+          test "$(git -C source rev-parse HEAD:src/+pastafari/LegacyRemainderAdapter.m)" = bf7ec0147b9f3492d1e0db311f0f835a48775e85
+          test -z "$(git -C source status --porcelain)"
+          mkdir -p profile-output
+          python3 qa/tools/qa_candidates/stage55_gate_arithmetic/prepare_vectors.py profile-output
+          cp -a source candidate
+          python3 qa/tools/qa_candidates/stage55_gate_mersenne127/apply_mersenne127.py candidate profile-output/candidate_manifest.json
+      - name: Set up MATLAB R2026a
+        uses: matlab-actions/setup-matlab@v3
+        with:
+          release: R2026a
+      - name: Start baseline watchdog
+        run: |
+          set -euo pipefail
+          mkdir -p profile-output/baseline
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch profile-output/baseline > profile-output/baseline/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f profile-output/baseline/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Profile original baseline with all inner routes active
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 20
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            maxNumCompThreads(1);
+            addpath(fullfile(base,'qa','tools','qa_candidates','stage55_gate_mersenne127'));
+            run_gate_arithmetic_profile_variant(fullfile(base,'source'),fullfile(base,'profile-output','vectors.json'),fullfile(base,'profile-output','baseline','profile.json'),'86581532df7492a236283c5ee9410ca281e2e6f5');
+      - name: Stop baseline watchdog
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -f profile-output/baseline/watch_started.json ]; then
+            touch profile-output/baseline/watch.stop
+            for i in {1..40}; do
+              test ! -f profile-output/baseline/watch.json || exit 0
+              sleep 0.5
+            done
+            exit 1
+          fi
+      - name: Start candidate watchdog
+        if: success()
+        run: |
+          set -euo pipefail
+          mkdir -p profile-output/candidate
+          nohup python3 qa/tools/stage55_public_soak_pilot.py watch profile-output/candidate > profile-output/candidate/watch.log 2>&1 < /dev/null &
+          for i in {1..50}; do
+            test ! -f profile-output/candidate/watch_started.json || exit 0
+            sleep 0.2
+          done
+          exit 1
+      - name: Profile Mersenne-127 candidate with all inner routes active
+        if: success()
+        uses: matlab-actions/run-command@v3
+        timeout-minutes: 20
+        with:
+          command: |
+            base=getenv('GITHUB_WORKSPACE');
+            maxNumCompThreads(1);
+            addpath(fullfile(base,'qa','tools','qa_candidates','stage55_gate_mersenne127'));
+            manifest=jsondecode(fileread(fullfile(base,'profile-output','candidate_manifest.json')));
+            run_gate_arithmetic_profile_variant(fullfile(base,'candidate'),fullfile(base,'profile-output','vectors.json'),fullfile(base,'profile-output','candidate','profile.json'),manifest.candidate_git_blob);
+      - name: Stop candidate watchdog
+        if: always()
+        run: |
+          set -euo pipefail
+          if [ -f profile-output/candidate/watch_started.json ]; then
+            touch profile-output/candidate/watch.stop
+            for i in {1..40}; do
+              test ! -f profile-output/candidate/watch.json || exit 0
+              sleep 0.5
+            done
+            exit 1
+          fi
+      - name: Verify exact arithmetic, route counts, differential output, and speedup
+        if: success()
+        run: python3 qa/tools/qa_candidates/stage55_gate_mersenne127/verify_mersenne127_candidate.py profile-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-stage55-gate-mersenne127-candidate-\${{ github.run_id }}
+          path: profile-output/
+          if-no-files-found: warn
+          retention-days: 30
