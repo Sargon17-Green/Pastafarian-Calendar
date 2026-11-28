@@ -1,9 +1,9 @@
 TOTAL_STAGES=55
-CURRENT_STAGE=3
-CURRENT_KIND=PATCH
-CURRENT_PATCH=01
+CURRENT_STAGE=4
+CURRENT_KIND=DISCOVERY
+CURRENT_PATCH=02
 LAST_COMPLETED_STAGE=3
-EXPECTED_REPOSITORY_STATE=GREEN
+EXPECTED_REPOSITORY_STATE=EXPECTED_RED
 FOREIGN_LANGUAGE_USAGE=NONE
 IMPLEMENTATION_STARTED_FROM_ZERO=YES
 CROSS_IMPLEMENTATION_ARTIFACTS_USED=NO
@@ -12,11 +12,11 @@ CROSS_IMPLEMENTATION_DIFFERENTIAL_TESTS=NO
 PROGRAMMING_LANGUAGE=J
 NATURAL_LANGUAGE=רומנית
 SOURCE_LANGUAGE_CATALOG_FROZEN=YES
-MONSTER_ARCHITECTURE_GROWTH=context de bază, dispatcher neutru, validator neutru, înveliș de eroare și colector de metrici și înveliș SAVE peste restul istoric
+MONSTER_ARCHITECTURE_GROWTH=context de bază, dispatcher neutru, validator neutru, înveliș de eroare și colector de metrici și înveliș SAVE peste restul istoric, dispecerul etichetelor legacy
 SEMANTIC_STATE_OWNER_VALIDATED=YES
 GITHUB_ACTIONS_PERFORMED=NO
 GIT_HISTORY_MUTATED=YES
-HANDOFF_PACKAGE_PREPARED=YES
+HANDOFF_PACKAGE_PREPARED=NO
 
 Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/63 verificări, 17 fixture-uri, audit GREEN, exit code 0. Dovadă: results(20261102-191247).zip, SHA256=f0c43242323ce04c2734c969deb60a9461335056d63767cd7d39c4cebdbb5e2b; sursa testată este commit a836206fd842e18d60f3a5df6a07382cf81573bb, tree d00980351d0123b15fe72b7f01db5151ecce608d. Stage 2 — DISCOVERY 01 a urmat după această acceptare.
 
@@ -27,3 +27,7 @@ Notă: Stage 1 a fost finalizat după o execuție nativă J9.7.1 pe Windows: 63/
 2026-11-28 — Stage 3 / PATCH 01 implementat: salvarePatch01 apelează dispecerRestVechi și substituie numai zero cu M. restVechi și contractul normativ rămân identice. Ruta publică trece prin înveliș; martorii istorici folosesc dispecerul legacy. Se cer 18 martori/regresii, patru aserțiuni normative GREEN și șase verificări suplimentare. Execuție nativă: ACCEPTAT GREEN. LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Fără Stage 4.
 
 2026-11-28 — Stage 3 PATCH 01 ACCEPTAT nativ pe J9.7.1 Windows x64, runner v20. Sursa executată: 8adc978d973f01669ba45ef0243be94885457c62, tree 855d1eb71ef9d909aacfdaddbaaecfd1e5fa7537. Rezultate: 63/63 Stage1, 17 fixtures, 18/18 martori, 6/6 PATCH01, GREEN 0,1,2,3, zero RED; exit 0, receipt PASSED, stderr gol. CRC PASS, manifest 27/27 verificat independent; 21/21 blob IDs conform jurnalului runnerului (sursa nu este în arhivă). LAST_COMPLETED_STAGE=3. Data publică NOT_INTEGRATED. Stage 4 nu a fost început; nu se repetă v20.
+
+## Stage 4 — DISCOVERY 02
+
+Ipoteza greșită: eticheta zilei este întotdeauna 2 × distanța absolută față de Fundație. Modulul nou `src/stage04_eticheta_veche.ijs` păstrează exact această formulă, iar ruta publică introduce etichetele de calcul și țintă în context, la indicii 11 și 12, fără a modifica indexul SAVE. Oracolul de test și regresiile precedente rămân neschimbate. Pentru offseturile -2, -1, 0, +1, +2, rezultatele legacy sunt 4, 2, 0, 2, 4, iar cele normative sunt 4, 2, 1, 3, 5. Se cer controalele GREEN 0,1 și RED intenționate 2,3,4, 33 verificări Stage4 și toate regresiile anterioare. Nu există PATCH 02, nici integrarea datei publice. Execuția nativă încă nu a avut loc; LAST_COMPLETED_STAGE=3.
