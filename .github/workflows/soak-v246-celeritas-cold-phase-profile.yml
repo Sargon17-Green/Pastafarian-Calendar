@@ -1,0 +1,164 @@
+name: Soak v246 combined Celeritas cold phase profile (not soak)
+on:
+  push:
+    branches:
+      - qa/issue29-gmp-complete-small-family-v198
+    paths:
+      - .github/workflows/soak-v246-celeritas-cold-phase-profile.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Bind previous independent public API receipt and exact candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "6bda2d255918524628b071a50b7e6e4f415e7809"
+          test "$(git diff --name-only HEAD^ HEAD)" = ".github/workflows/soak-v246-celeritas-cold-phase-profile.yml"
+          mkdir -p evidence source/include/pastafari source/src
+          gh api repos/Sargon17-Green/Pastafarian-Calendar/actions/artifacts/15255358297/zip > prior.zip
+          echo "9e8902c00f65a7481ccf2fb4c826f6571a7b2bde757a7a0e4d297e36574e452c  prior.zip" | sha256sum -c -
+          python3 - <<'PY'
+          import json,hashlib,zipfile,subprocess
+          from pathlib import Path
+          with zipfile.ZipFile("prior.zip") as z:
+              assert z.testzip() is None
+              prior=json.loads(z.read("result.json"))
+          assert prior["schema"]=="SOAK_V245_JS_FIXED_C_PUBLIC_API/1" and prior["comparison_pass"]
+          assert prior["cpp_candidate_commit"]=="408d80e43159eba06849b6a929e0010f32b9b91b" and len(prior["rows"])==6
+          assert prior["whole_year_credit"]==0 and prior["new_distinct_c_t_pairs"]==3
+          frozen=[x for x in prior["rows"] if x["c"]==x["t"]]
+          assert [x["c"] for x in frozen]==[739617,-377237,6875993]
+          Path("evidence/frozen-v245.json").write_text(json.dumps(frozen,ensure_ascii=False,indent=2)+"\n")
+          ref=prior["cpp_candidate_commit"]
+          pins={"src/monster.cpp":"faad56bd1a2f70b19d40e266b3b2e05754197a48","include/pastafari/monster.hpp":"4c24d36e3704dd10ecf5420e7bc11a3da958d441","include/pastafari/source_language_catalog.hpp":"9f204d93166b2c33532bb236bc2bd929252f27be"}
+          manifest={}
+          for p,h in pins.items():
+              raw=subprocess.check_output(["gh","api","-H","Accept: application/vnd.github.raw+json",f"repos/Sargon17-Green/Pastafarian-Calendar/contents/{p}?ref={ref}"],timeout=45)
+              assert hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\x00"+raw).hexdigest()==h
+              Path("source",p).write_bytes(raw)
+              manifest[p]={"blob":h,"sha256":hashlib.sha256(raw).hexdigest()}
+          Path("evidence/source-pins.json").write_text(json.dumps({"commit":ref,"prior_artifact":15255358297,"prior_sha256":"9e8902c00f65a7481ccf2fb4c826f6571a7b2bde757a7a0e4d297e36574e452c","files":manifest},indent=2)+"\n")
+          PY
+      - name: Build reversible low-overhead phase telemetry
+        run: |
+          set -euo pipefail
+          (
+            if ! printf '#include <boost/multiprecision/cpp_int.hpp>\nint main(){}\n' | g++ -std=c++17 -x c++ -fsyntax-only -; then
+              timeout -k 5s 120s sudo apt-get update -qq
+              timeout -k 5s 120s sudo apt-get install -y --no-install-recommends libboost-dev
+            fi
+            g++ --version
+            dpkg-query -W libboost-dev
+          ) > evidence/compiler.txt 2>&1
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path("source/src/monster.cpp")
+          original=p.read_text()
+          a='FINAL_MAIN_DISPATCH:\n    ctx.subPhase = stage;'
+          b='''FINAL_MAIN_DISPATCH:
+              {
+                  const auto m = persistentScarMetricsDiagnostic();
+                  const auto now = std::chrono::steady_clock::now().time_since_epoch();
+                  std::cerr << "PHASE\\t" << stage << "\\t"
+                            << std::chrono::duration_cast<std::chrono::microseconds>(now).count()
+                            << "\\t" << m.patch28GateCalculated
+                            << "\\t" << m.patch28GateResurrection
+                            << "\\t" << m.patch32SauceRecomputed
+                            << "\\t" << m.patch33DiagnosticBodyBuilt
+                            << "\\t" << m.patch35StoneFullRebuild
+                            << "\\t" << m.patch36RejectionScarMiss
+                            << "\\t" << m.patch38CountBackendBorn
+                            << "\\t" << m.patch38UnrankBackendBorn << std::endl;
+              }
+              ctx.subPhase = stage;'''
+          prefix="#include <chrono>\n#include <iostream>\n"
+          assert original.count(a)==1
+          instrumented=prefix+original.replace(a,b)
+          assert instrumented.removeprefix(prefix).replace(b,a)==original
+          Path("source/src/profile.cpp").write_text(instrumented)
+          Path("evidence/instrumentation.json").write_text(json.dumps({"original_sha256":hashlib.sha256(original.encode()).hexdigest(),"profile_sha256":hashlib.sha256(instrumented.encode()).hexdigest(),"reversible":True,"edits":["two includes","one dispatcher telemetry block"],"counter_samples":"cumulative at stage entry, one line per transition"},indent=2)+"\n")
+          PY
+          cat > source/driver.cpp <<'CPP'
+          #include "pastafari/monster.hpp"
+          #include "pastafari/source_language_catalog.hpp"
+          #include <chrono>
+          #include <iostream>
+          #include <stdexcept>
+          using namespace pastafari;
+          std::size_t ci(const std::string& n){for(const auto& x:CUTLET_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("cutlet");}
+          std::size_t mi(const std::string& n){for(const auto& x:MONTH_SOURCE_CATALOG)if(x.text==n)return x.canonicalIndex;throw std::runtime_error("month");}
+          int main(int argc,char** argv){
+            if(argc!=2)return 2;
+            const Integer c{argv[1]};
+            resetPersistentScarVaultsDiagnostic();
+            setAccelerationScarsEnabled(true);
+            setFullHistoricalAccelerationValidation(false);
+            const auto a=calendarDateSpaghetti(c,c);
+            const auto m=persistentScarMetricsDiagnostic();
+            const auto now=std::chrono::steady_clock::now().time_since_epoch();
+            std::cerr<<"PHASE\t70\t"<<std::chrono::duration_cast<std::chrono::microseconds>(now).count()
+              <<"\t"<<m.patch28GateCalculated<<"\t"<<m.patch28GateResurrection<<"\t"<<m.patch32SauceRecomputed
+              <<"\t"<<m.patch33DiagnosticBodyBuilt<<"\t"<<m.patch35StoneFullRebuild
+              <<"\t"<<m.patch36RejectionScarMiss<<"\t"<<m.patch38CountBackendBorn<<"\t"<<m.patch38UnrankBackendBorn<<std::endl;
+            std::cout<<"DATE\t"<<c<<"\t"<<a.yearNumber<<"\t"<<ci(a.cutletName)<<"\t"<<a.dayInCutlet<<"\t"<<mi(a.monthName)<<"\t"<<a.dayInMonth<<"\t"<<a.cutletName<<"\t"<<a.monthName<<std::endl;
+          }
+          CPP
+          (ulimit -v 4194304; timeout -k 5s 120s g++ -std=c++17 -O2 -pthread -I source/include source/src/profile.cpp source/driver.cpp -o source/probe) > evidence/build.log 2>&1 || { cat evidence/build.log; exit 1; }
+          sha256sum source/probe source/driver.cpp source/src/profile.cpp > evidence/build.sha256
+      - name: Measure three cold original public API calls separately
+        run: |
+          set -euo pipefail
+          for c in 739617 -377237 6875993; do
+            set +e
+            (ulimit -v 3145728; /usr/bin/time -v -o "evidence/$c.time.txt" timeout -k 5s 160s source/probe "$c") > "evidence/$c.stdout" 2> "evidence/$c.stderr"
+            code=$?
+            set -e
+            echo "$code" > "evidence/$c.exit"
+            cat "evidence/$c.stdout" "evidence/$c.stderr"
+          done
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          p=Path("evidence");frozen=json.loads((p/"frozen-v245.json").read_text())
+          keys=["gate_calculated","gate_resurrections","sauce_recomputed","diagnostic_body_built","stone_full_rebuild","rejection_scar_miss","count_backend_born","unrank_backend_born"]
+          rows=[]
+          for x in frozen:
+              c=x["c"]
+              code=int((p/f"{c}.exit").read_text())
+              a=(p/f"{c}.stdout").read_text().strip().split("\t")
+              samples=[]
+              for l in (p/f"{c}.stderr").read_text().splitlines():
+                  q=l.split("\t")
+                  assert len(q)==11 and q[0]=="PHASE"
+                  samples.append(list(map(int,q[1:])))
+              ok=code==0 and len(a)==9 and a[0]=="DATE" and int(a[1])==c and list(map(int,a[2:7]))==x["cpp_fields"] and a[7:9]==x["cpp_raw_names"] and [z[0] for z in samples]==[0,10,20,30,40,50,60,70]
+              phases=[]
+              if ok:
+                  for a1,b1 in zip(samples,samples[1:]):
+                      d=[y-z for z,y in zip(a1[1:],b1[1:])]
+                      assert all(v>=0 for v in d)
+                      phases.append({"stage":a1[0],"seconds":d[0]/1e6,**dict(zip(keys,d[1:]))})
+              m=re.search(r"Maximum resident set size \(kbytes\): (\d+)",(p/f"{c}.time.txt").read_text())
+              rows.append({"c":c,"exit":code,"matched":ok,"phases":phases,"peak_rss_kib":int(m.group(1)) if m else None})
+          ok=all(x["matched"] for x in rows)
+          out={"schema":"SOAK_V246_CELERITAS_COLD_PHASE_PROFILE/1","candidate_commit":"408d80e43159eba06849b6a929e0010f32b9b91b","rows":rows,"profile_completed":ok,"instrumented_qa_copy":True,"new_original_f_credit":0,"whole_year_credit":0,"admitted_engines":0,"STOP_NEW_NATIVE_SOAK_DISPATCH":True}
+          (p/"result.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(json.dumps(out))
+          assert ok
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soak-v246-cold-phase-profile-${{ github.run_id }}
+          path: evidence/
+          retention-days: 90
