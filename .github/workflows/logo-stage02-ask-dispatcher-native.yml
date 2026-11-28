@@ -1,4 +1,4 @@
-name: Logo Stage2 QA signed gap coverage and shard audit
+name: Logo Stage2 fresh Native signed gap boundary probes
 on:
   push:
     branches:
@@ -6,104 +6,108 @@ on:
 permissions:
   contents: read
 jobs:
-  host-coverage:
+  native-gap:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 25
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
-        direction: [forward, reverse]
+        include:
+          - gate: -12
+            expected: 746
+          - gate: -1
+            expected: 503
+          - gate: 10
+            expected: 763
+          - gate: 29473
+            expected: 175
+          - gate: 29485
+            expected: 534
+          - gate: 29496
+            expected: 864
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Verify exact inputs and reconstruct bounded host coverage
+      - name: Verify locked inputs
         shell: bash
-        env:
-          DIRECTION: ${{ matrix.direction }}
         run: |
           set -euo pipefail
           mkdir -p evidence
           git rev-parse HEAD > evidence/commit.txt
           test "$(cat evidence/commit.txt)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor c3e34663db5e33712f35fbebd3190443125babc4 HEAD
           git diff --exit-code c21646e1b06f25b3f75fb672dd432ead8e664875 HEAD -- src test
           test "$(git ls-remote origin 'refs/heads/Logo+Ido' | awk '{print $1}')" = ad001c6aeeb6c758f5004b206a656fec5d6fc403
           test "$(git hash-object qa/logo_signed_gap_oracle.py)" = 0bbce1ed67f4eb7c12986b4a3431eff9b27a4974
-          test "$(git hash-object qa/logo_ido_ask_dispatcher_code_bundle.zip)" = b679bba73363c4d8644aa510c798eaabae915824
           git ls-tree -r HEAD src test > evidence/source-blobs.txt
-          timeout --signal=TERM --kill-after=5s 540 python3 -u - <<'PY' | tee evidence/host.log
-          import hashlib, json, os, re, sys, zipfile
+          test "$(sha256sum evidence/source-blobs.txt | cut -d' ' -f1)" = 0a3e7007f21874e94ace3f70e361767ff7dbc7ee5464eea34e446494fa907123
+          sha256sum src/exact_integer.logo test/normative_reference.logo qa/logo_signed_gap_oracle.py > evidence/input-sha256.txt
+          printf '%s\n' 'host-run=46078314376' 'forward-artifact=15235573233 sha256=1f5b95293e776f8debfb4f941760a841238f7fa38c1eb7bc341b791ebd4e264e' 'reverse-artifact=15234874328 sha256=2fe59e72deef9c592969160203f57c162f5b8b2a660154eddd1d72d21502a4f7' > evidence/host-provenance.txt
+      - name: Build pinned UCBLogo 6.2.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git gcc g++ make autoconf automake autoconf-archive libncurses-dev
+          git clone --quiet --depth 1 --branch version_6.2.5 https://github.com/jrincayc/ucblogo-code.git "$RUNNER_TEMP/ucblogo-source"
+          test "$(git -C "$RUNNER_TEMP/ucblogo-source" rev-parse HEAD)" = "a0215433f07384e4c42fe247525867f11e6f32f7"
+          cd "$RUNNER_TEMP/ucblogo-source"
+          autoreconf -fi
+          CFLAGS="-O2 -std=gnu17" ./configure --prefix="$RUNNER_TEMP/ucblogo-headless" --disable-wx --disable-x11 --disable-docs
+          make -j2
+          make install
+          echo "LOGO_BIN=$RUNNER_TEMP/ucblogo-headless/bin/ucblogo" >> "$GITHUB_ENV"
+      - name: Fresh unmodified reference versus audited host probe
+        shell: bash
+        env:
+          GATE: ${{ matrix.gate }}
+          EXPECTED: ${{ matrix.expected }}
+        run: |
+          set -euo pipefail
+          python3 -u - <<'PY'
+          import json, os, re, subprocess, sys, time
           from pathlib import Path
           sys.path.insert(0, 'qa')
-          from logo_signed_gap_oracle import FOUNDATION, gap, reconstruct
+          from logo_signed_gap_oracle import gap
+          k, expected = int(os.environ['GATE']), int(os.environ['EXPECTED'])
+          assert k != 0 and 42 <= expected <= 963 and gap(k) == expected
+          # bi.small accepts a single base-10000 limb; use normalized limbs for every index.
+          n, digits = abs(k), []
+          while n:
+              n, r = divmod(n, 10000)
+              digits.append(r)
+          assert sum(x*10000**i for i,x in enumerate(digits)) == abs(k)
+          assert all(0 <= x < 10000 for x in digits)
+          signed = '(bi.make ' + str(1 if k > 0 else -1) + ' [' + ' '.join(map(str,digits)) + '])'
           p = Path('evidence')
-          direction = os.environ['DIRECTION']
-          src = Path('src/exact_integer.logo').read_text()
-          def constant(name):
-              m = re.search(r'^to nr\.' + name + r'\n  output bi\.make (-?1) \[([0-9 ]+)\]\nend$', src, re.M)
-              if not m: raise RuntimeError('constant source shape changed: ' + name)
-              return int(m[1]) * sum(int(x) * 10000**i for i,x in enumerate(m[2].split()))
-          with zipfile.ZipFile('qa/logo_ido_ask_dispatcher_code_bundle.zip') as z:
-              harness = z.read('qa/logo_stage2_ask_dispatcher_common.logo').decode()
-          assert harness.count('localmake "calculation nr.foundation') == 1
-          assert harness.count('if equalp :AD.DIRECTION "reverse [make "calculation nr.tablets]') == 1
-          assert harness.count('if equalp :AD.GROUP "year5000 [ad.run.year5000 :AD.DIRECTION :calculation]') == 1
-          assert constant('foundation') == FOUNDATION == -15055671
-          assert constant('tablets') == -278522
-          center = constant('foundation' if direction == 'forward' else 'tablets')
-          # Previously completed frozen references only; other candidate pairs are not reference evidence.
-          for k,g in [(38,767),(-1,503),(37,238),(41,68)]:
-              assert gap(k) == g, (k,g)
-          print('HOST_COVERAGE_BEGIN',direction,center,flush=True)
-          data = reconstruct(center)
-          rows = data['gates']
-          assert (data['low'],data['high']) == (center-5778,center+5778)
-          def dump(path,obj):
-              path.write_text(json.dumps(obj,sort_keys=True,separators=(',',':'))+'\n')
-          def digest(path):
-              return hashlib.sha256(path.read_bytes()).hexdigest()
-          # Host-computed shards, not Native or independent algorithm evidence.
-          manifest=[]
-          for start in range(0,len(rows),512):
-              part=rows[start:start+512]
-              f=p/f'shard-{start//512:04d}.json'
-              dump(f,part)
-              manifest.append({'file':f.name,'sha256':digest(f),'first':part[0]['index'],'last':part[-1]['index'],'count':len(part)})
-          dump(p/'manifest.json',{'center':center,'low':data['low'],'high':data['high'],'shards':manifest})
-          # Reassemble from persisted shards, verify all bounds and signed recurrences.
-          rebuilt=[]
-          for entry in json.loads((p/'manifest.json').read_text())['shards']:
-              f=p/entry['file']; assert digest(f)==entry['sha256']
-              part=json.loads(f.read_text())
-              assert len(part)==entry['count'] and part[0]['index']==entry['first'] and part[-1]['index']==entry['last']
-              rebuilt.extend(part)
-          assert rebuilt==rows
-          assert [x['index'] for x in rebuilt]==list(range(rebuilt[0]['index'],rebuilt[-1]['index']+1))
-          anchor=[x for x in rebuilt if x['index']==0]
-          assert anchor==[{'index':0,'day':FOUNDATION,'gap':None}]
-          for a,b in zip(rebuilt,rebuilt[1:]):
-              g=b['gap'] if b['index']>0 else a['gap']
-              assert type(g) is int and 42<=g<=963 and b['day']-a['day']==g
-          lo,hi=data['low'],data['high']
-          assert rebuilt[0]['day']<=lo<=hi<=rebuilt[-1]['day']
-          left=max(i for i,x in enumerate(rebuilt) if x['day']<=lo)
-          right=min(i for i,x in enumerate(rebuilt) if x['day']>=hi)
-          window=rebuilt[left:right+1]
-          assert window[0]['day']<=lo and window[-1]['day']>=hi
-          # Keep the full anchored proof; separate compact scan window to avoid quadratic cache lookup.
-          dump(p/'window.json',{'center':center,'low':lo,'high':hi,'gates':window})
-          # Boundary and interior Native probes to be run later; no implied Native pass.
-          probes=sorted({x['index'] for x in [window[0],window[-1],window[len(window)//2]] if x['index']!=0})
-          dump(p/'native-probe-plan.json',[{'index':k,'host_gap':gap(k)} for k in probes])
-          dump(p/'summary.json',{'direction':direction,'center':center,'count':len(rebuilt),'first':rebuilt[0],'last':rebuilt[-1],'window_count':len(window),'window_first':window[0],'window_last':window[-1],'manifest_sha256':digest(p/'manifest.json'),'window_sha256':digest(p/'window.json'),'qualification':'HOST_ONLY_NO_NATIVE_ACCEPTANCE'})
-          print((p/'summary.json').read_text(),flush=True)
-          print('HOST_SIGNED_COVERAGE=PASS',flush=True)
+          script = p/'probe.logo'
+          script.write_text('\n'.join(['load "src/exact_integer.logo', 'load "test/normative_reference.logo',
+              'print [NATIVE_BEGIN]', 'make "PROBE.INDEX ' + signed,
+              'print (sentence [NATIVE_INDEX] (bi.to.small :PROBE.INDEX))',
+              'make "PROBE.GAP nr.gate.gap :PROBE.INDEX',
+              'print (sentence [NATIVE_GAP] (bi.to.small :PROBE.GAP))',
+              'print [NATIVE_DONE]', 'bye'])+'\n')
+          t = time.monotonic()
+          with (p/'native.log').open('w') as f:
+              proc = subprocess.run(['timeout','--signal=TERM','--kill-after=5s','600','stdbuf','-oL','-eL',os.environ['LOGO_BIN'],str(script)],stdin=subprocess.DEVNULL,stdout=f,stderr=subprocess.STDOUT)
+          elapsed = time.monotonic()-t
+          log = (p/'native.log').read_text(errors='replace')
+          print(log,flush=True)
+          markers = [line.strip() for line in log.splitlines() if line.strip().startswith('NATIVE_')]
+          errors = re.findall(r"don.t know how to|not enough inputs|doesn.t like|You don.t say what to do with|ERORO:", log,re.I)
+          ok = proc.returncode == 0 and not errors and markers == ['NATIVE_BEGIN',f'NATIVE_INDEX {k}',f'NATIVE_GAP {expected}','NATIVE_DONE']
+          result = dict(index=k,limbs=digits,expected=expected,markers=markers,exit=proc.returncode,elapsed=elapsed,errors=errors,qualification='FRESH_NATIVE_SIGNED_GAP_ONLY',passed=ok)
+          (p/'result.json').write_text(json.dumps(result,indent=2)+'\n')
+          print('NATIVE_SIGNED_GAP_PASS' if ok else 'NATIVE_SIGNED_GAP_NOT_ACCEPTED',result,flush=True)
+          sys.exit(0 if ok else 1)
           PY
-      - name: Preserve host evidence
+      - name: Preserve source lock, probe and results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logo-host-gap-coverage-${{ matrix.direction }}
+          name: logo-native-signed-gap-${{ matrix.gate }}
           path: evidence/
           if-no-files-found: error
           retention-days: 30
