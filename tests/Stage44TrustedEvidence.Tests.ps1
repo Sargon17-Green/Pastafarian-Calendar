@@ -58,6 +58,8 @@ $lineText = 'A=one' + $crlf + 'B=two' + $crlf
 Confirm-Stage44EvidenceTest ((Get-Stage44UniqueLineValue -Text $lineText -Key 'A') -ceq 'one') 'unique exact transcript key'
 Expect-Stage44EvidenceThrow { Get-Stage44UniqueLineValue -Text ('A=one' + $lf + 'A=two' + $lf) -Key 'A' } 'duplicate transcript key'
 Expect-Stage44EvidenceThrow { Get-Stage44UniqueLineValue -Text ('B=two' + $lf) -Key 'A' } 'missing transcript key'
+Expect-Stage44EvidenceThrow { Get-Stage44UniqueLineValue -Text ('A=one' + $crlf + 'A=two' + $crlf) -Key 'A' } 'duplicate CRLF transcript key'
+Confirm-Stage44EvidenceTest ((Get-Stage44UniqueLineValue -Text 'A=one' -Key 'A') -ceq 'one') 'single-line transcript without terminator'
 
 $baseJobs = @()
 foreach ($name in $script:Stage44TrustedEvidenceRequiredJobs) {
