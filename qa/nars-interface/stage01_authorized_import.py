@@ -43,7 +43,10 @@ TRACE_GROUPS = (
     (312, 316), (318, 321), (323, 323), (324, 324), (325, 325),
     (327, 327),
 )
-TRACE_HEADER = f"APL_GERMAN_STAGE01_TRACE_V1|SOURCE={SOURCE_COMMIT}|"
+TRACE_HEADER = f"APL_GERMAN_STAGE01_TRACE_V1|SOURCE={SOURCE_COMMIT}|PATCH=LINE234|"
+PATCH_LINE = 234
+PATCH_BEFORE = "  AssertEqual (⊂7) (⊂⍴hidden) (⊂'Die normative Referenz erzeugt genau sieben verborgene Tropfen')"
+PATCH_AFTER = "  AssertEqual (⊂,7) (⊂⍴hidden) (⊂'Die normative Referenz erzeugt genau sieben verborgene Tropfen')"
 TRACE_HELPER = [
     "QAS01T token;unused",
     "  unused←token ⎕NAPPEND QAS01TraceTie",
@@ -72,6 +75,14 @@ def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
     original = fx_definition_lines(block)
     if not original[0].startswith("RunStage01Tests;"):
         raise ValueError("TRACE_HEADER_MISMATCH")
+    # The source remains immutable; patch only the transient QA definition.
+    index = PATCH_LINE - block["start_line"]
+    if original[index] != PATCH_BEFORE:
+        raise ValueError("LINE234_MONKEY_PATCH_ANCHOR_MISMATCH")
+    patched = original.copy()
+    patched[index] = PATCH_AFTER
+    if [i for i, (a, b) in enumerate(zip(original, patched)) if a != b] != [index]:
+        raise ValueError("LINE234_MONKEY_PATCH_DIFF_MISMATCH")
     starts = {a for a, _ in TRACE_GROUPS}
     ends = {b for _, b in TRACE_GROUPS}
     covered = [n for a, b in TRACE_GROUPS for n in range(a, b + 1)]
@@ -80,7 +91,7 @@ def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
         raise ValueError("TRACE_SPAN_COVERAGE_MISMATCH")
     traced = ["QAS01TraceMain" + original[0][len("RunStage01Tests"):]]
     tokens = []
-    for n, line in enumerate(original[1:], 172):
+    for n, line in enumerate(patched[1:], 172):
         if n in starts:
             token = f"{n:04d}S"
             traced.append(f"  QAS01T '{token}'")
@@ -91,8 +102,11 @@ def build_trace_definition(block: dict) -> tuple[list[str], list[str]]:
             traced.append(f"  QAS01T '{token}'")
             tokens.append(token)
     restored = [original[0]] + [line for line in traced[1:] if not line.startswith("  QAS01T '")]
+    if restored != patched or restored[index] != PATCH_AFTER:
+        raise ValueError("TRACE_PATCHED_STATEMENT_CHANGED")
+    restored[index] = PATCH_BEFORE
     if restored != original:
-        raise ValueError("TRACE_ORIGINAL_STATEMENT_CHANGED")
+        raise ValueError("TRACE_UNAUTHORIZED_STATEMENT_CHANGED")
     return traced, tokens
 
 
@@ -161,7 +175,7 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
                    for name in ("start", "return", "ec", "et", "payload", "done",
                                 "trace_helper_fx", "trace_main_fx", "trace_run_fx",
                                 "trace", "trace_ec", "trace_et", "trace_payload",
-                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload") + LINE234_KEYS}
+                                "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload") }
     start_token = f"APL_GERMAN_STAGE01_START|SOURCE={SOURCE_COMMIT}"
     final_program = ("95 Stage01ChunkAssert 0 ⋄ "
                      + marker_write(start_token, suite_paths["start"])
@@ -179,9 +193,9 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01FinalEC[2]", suite_paths["et"]),
         write_expr("⊃QAS01FinalEC[3]", suite_paths["payload"]),
     ]
-    # Do not overwrite or modify any original function. Only after original
-    # EC=0, run a separately named diagnostic copy with unchanged statements.
-    # Its initializers run again; it is not independent acceptance evidence.
+    # Original function stays untouched. After original EC=0, FX a separately
+    # named diagnostic copy with exactly the authorized line234 monkey patch.
+    # Its initializers run again; it can never serve as acceptance evidence.
     traced, trace_tokens = build_trace_definition(next(b for b in blocks if b["name"] == "RunStage01Tests"))
     # Assemble the exact nested vector in bounded fragments. Compile with a
     # short expression and capture compiler EC separately from invocation EC.
@@ -219,15 +233,8 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         write_expr("⊃QAS01DiagEC[2]", suite_paths["trace_et"]),
         write_expr("⊃QAS01DiagEC[3]", suite_paths["trace_payload"]),
     ]
-    # No probe can write the acceptance marker or alter any locked function.
-    # Capture each EC independently, so failure in one witness cannot hide the next.
-    probe_programs = []
-    for index, (name, expression) in enumerate(LINE234_PROBES):
-        var = f"QAS01Probe{index}"
-        probe_programs.append(var + "←⎕EC ⎕UCS " + _codes(expression))
-        for slot, key in enumerate(("ec", "et", "payload"), 1):
-            probe_programs.append(write_expr(f"⊃{var}[{slot}]", suite_paths[f"probe_{name}_{key}"]))
-    receipt_programs += diagnostic_programs + probe_programs + [
+    # Previously verified A/B probes are not repeated.
+    receipt_programs += diagnostic_programs + [
         marker_write(f"APL_GERMAN_STAGE01_RECEIPTS_ATTEMPTED|SOURCE={SOURCE_COMMIT}", suite_paths["done"]),
     ]
     programs = chunk_programs + [final_program] + receipt_programs
@@ -288,6 +295,9 @@ def build_stage01_chunked(raw: bytes, root: pathlib.Path, marker: str) -> tuple[
         "trace_assembly_chunks": len(trace_parts),
         "trace_definition_sha256": hashlib.sha256("\n".join(traced).encode("utf-8")).hexdigest(),
         "trace_diagnostic_only": True,
+        "trace_monkey_patch": {"line": PATCH_LINE, "before": PATCH_BEFORE,
+                               "after": PATCH_AFTER, "scope": "TRANSIENT_QA_ALIAS_ONLY",
+                               "original_acceptance_unchanged": True},
         "candidate_sha256": hashlib.sha256(candidate).hexdigest(),
         "workspace_source_sha256": base_meta["input_sha256"],
         "outer_lx_chars": len(outer),

@@ -3,7 +3,7 @@ import pathlib
 import unittest
 
 from stage01_authorized_import import (
-    LINE234_PROBES, LINE234_KEYS,
+    PATCH_LINE, PATCH_BEFORE, PATCH_AFTER,
     CHUNK_SIZE, TAIL_START, TAIL_CHUNK_SIZE, EXPECTED_CHUNK_BOUNDARIES,
     STAGE01_MARKER, TRACE_HEADER, TRACE_GROUPS, build_stage01_chunked, build_trace_definition,
 )
@@ -77,7 +77,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(receipt["test_entrypoint"], "RunStage01Tests")
         self.assertEqual(receipt["final_expression"], "SAME_EC_AFTER_TEST")
         _, outer, programs = self.decode(candidate)
-        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"] + 4 * len(LINE234_PROBES))
+        self.assertEqual(len(programs), 41 + receipt["trace_assembly_chunks"])
         self.assertEqual(outer.count("⎕EC ⎕UCS "), len(programs))
         self.assertNotIn("←", outer)
         self.assertNotIn("QAS01FinalEC", outer)
@@ -99,24 +99,27 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(programs[-1].count("⎕NAPPEND"), 1)
         self.assertEqual(set(receipt["suite_paths"]), {"start", "return", "ec", "et", "payload", "done",
             "trace_helper_fx", "trace_main_fx", "trace_run_fx", "trace", "trace_ec", "trace_et", "trace_payload",
-            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"} | set(LINE234_KEYS))
+            "trace_def_count", "trace_compile_ec", "trace_compile_et", "trace_compile_payload"})
         self.assertEqual(len(STAGE01_MARKER.encode("ascii")), 113)
         self.assertEqual(receipt["final_inner_sha256"], hashlib.sha256(final.encode("utf-8")).hexdigest())
         self.assertEqual(sum(program.count(" Stage01PrefixFix ") for program in programs), 95)
         self.assertEqual(programs[-1].count(" Stage01PrefixFix "), 0)
 
-    def test_trace_alias_preserves_every_original_statement_and_subtest(self):
+    def test_trace_alias_only_monkey_patches_line234_and_preserves_subtests(self):
         from stage01_fx_prefix_probe import nested_fx_expression
         block = next(b for b in self.locked["blocks"] if b["name"] == "RunStage01Tests")
         source = fx_definition_lines(block)
         traced, tokens = build_trace_definition(block)
         self.assertEqual(traced[0], "QAS01TraceMain" + source[0][len("RunStage01Tests"):])
-        self.assertEqual([line for line in traced[1:] if not line.startswith("  QAS01T '")], source[1:])
+        patched = source.copy()
+        self.assertEqual(source[PATCH_LINE - 171], PATCH_BEFORE)
+        patched[PATCH_LINE - 171] = PATCH_AFTER
+        self.assertEqual([line for line in traced[1:] if not line.startswith("  QAS01T '")], patched[1:])
         self.assertEqual(tokens, [token for a,b in TRACE_GROUPS for token in (f"{a:04d}S", f"{b:04d}E")])
         self.assertEqual(len(tokens), 122)
         for n in (230, 231, *range(233, 245)):
             self.assertIn((n, n), TRACE_GROUPS)
-            statement = source[n - 171]
+            statement = patched[n - 171]
             idx = traced.index(statement)
             self.assertEqual(traced[idx-1], f"  QAS01T '{n:04d}S'")
             self.assertEqual(traced[idx+1], f"  QAS01T '{n:04d}E'")
@@ -127,6 +130,13 @@ class Stage01ChunkedTests(unittest.TestCase):
         candidate, receipt = build_stage01_chunked(BASE, ROOT, MARKER)
         _, _, programs = self.decode(candidate)
         self.assertTrue(receipt["trace_diagnostic_only"])
+        self.assertEqual(receipt["trace_monkey_patch"], {"line": 234, "before": PATCH_BEFORE,
+            "after": PATCH_AFTER, "scope": "TRANSIENT_QA_ALIAS_ONLY", "original_acceptance_unchanged": True})
+        import copy
+        invalid = copy.deepcopy(block)
+        invalid["lines"][234 - 171] = PATCH_AFTER
+        with self.assertRaisesRegex(ValueError, "LINE234_MONKEY_PATCH_ANCHOR_MISMATCH"):
+            build_trace_definition(invalid)
         self.assertEqual(receipt["trace_tokens"], tokens)
         self.assertEqual(receipt["trace_header"], TRACE_HEADER)
         self.assertEqual(receipt["trace_definition_lines"], len(traced))
@@ -149,20 +159,6 @@ class Stage01ChunkedTests(unittest.TestCase):
         self.assertEqual(run, end + 7)
         for index, slot in enumerate((1, 2, 3), run + 1):
             self.assertIn(f"QAS01DiagEC[{slot}]", programs[index])
-        setup = "hidden←BuildHidden (FOUNDATION_DAY WorkCounts FOUNDATION_DAY) ⋄ "
-        self.assertEqual(LINE234_PROBES[-2][1], setup + source[234 - 171].strip())
-        self.assertEqual(LINE234_PROBES[-1][1], setup + source[234 - 171].strip().replace("(⊂7)", "(⊂,7)", 1))
-        self.assertEqual([name for name, _ in LINE234_PROBES], ["hidden_shape","hidden_tally","shape_shape","scalar_match","vector_match","hidden_range","original_assert","vector_assert"])
-        self.assertTrue(all(expression.startswith(setup) for _, expression in LINE234_PROBES))
-        offset = run + 4
-        for index, (name, expression) in enumerate(LINE234_PROBES):
-            var = f"QAS01Probe{index}"
-            capture = programs[offset + 4 * index]
-            prefix = var + "←⎕EC ⎕UCS "
-            self.assertTrue(capture.startswith(prefix))
-            self.assertEqual("".join(chr(int(n)) for n in capture[len(prefix):].split()), expression)
-            for slot in (1, 2, 3):
-                self.assertIn(f"{var}[{slot}]", programs[offset + 4 * index + slot])
         self.assertNotIn(STAGE01_MARKER, "".join(programs[27:]))
         self.assertEqual(receipt["stage01"], "NOT_ACCEPTED")
 
@@ -192,7 +188,7 @@ class Stage01ChunkedTests(unittest.TestCase):
         serialized, outer, _ = self.decode(candidate)
         self.assertTrue(serialized.isascii())
         self.assertNotIn("⋄", serialized)
-        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"] + 4 * len(LINE234_PROBES))
+        self.assertEqual(serialized.count("{diamond}"), 40 + receipt["trace_assembly_chunks"])
         self.assertEqual(receipt["outer_lx_chars"], len(outer))
         self.assertEqual(receipt["outer_lx_sha256"], hashlib.sha256(outer.encode("utf-8")).hexdigest())
         self.assertIn("0=foo=:3", candidate.decode("cp1252"))

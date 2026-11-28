@@ -71,7 +71,7 @@ try {
  $r['candidate_sha256']=$csha
  $r['checkpoint_manifest_sha256']=(Get-FileHash -LiteralPath $receipt -Algorithm SHA256).Hash.ToLowerInvariant()
  $r['outer_lx_chars']=[int]$meta.outer_lx_chars
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_hidden_shape_ec','probe_hidden_shape_et','probe_hidden_shape_payload','probe_hidden_tally_ec','probe_hidden_tally_et','probe_hidden_tally_payload','probe_shape_shape_ec','probe_shape_shape_et','probe_shape_shape_payload','probe_scalar_match_ec','probe_scalar_match_et','probe_scalar_match_payload','probe_vector_match_ec','probe_vector_match_et','probe_vector_match_payload','probe_hidden_range_ec','probe_hidden_range_et','probe_hidden_range_payload','probe_original_assert_ec','probe_original_assert_et','probe_original_assert_payload','probe_vector_assert_ec','probe_vector_assert_et','probe_vector_assert_payload')) {
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload')) {
    $expectedPath=Join-Path $env:RUNNER_TEMP ('apl_german_stage01_chunked_suite_'+$key+'.txt')
    if($meta.suite_paths.$key -cne $expectedPath -or (Test-Path -LiteralPath $expectedPath)){throw 'SUITE_RECEIPT_PATH_INVALID_OR_PREEXISTS'}
  }
@@ -138,7 +138,7 @@ try {
  $finalSha=if($existsFinal){(Get-FileHash -LiteralPath $marker -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null}
  $r['final_marker']=@{exists=[bool]$existsFinal;exact=[bool]$matchFinal;bytes=$actualFinal.Length;expected_bytes=$want.Length;sha256=$finalSha}
  $suite=@{}
- foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload','probe_hidden_shape_ec','probe_hidden_shape_et','probe_hidden_shape_payload','probe_hidden_tally_ec','probe_hidden_tally_et','probe_hidden_tally_payload','probe_shape_shape_ec','probe_shape_shape_et','probe_shape_shape_payload','probe_scalar_match_ec','probe_scalar_match_et','probe_scalar_match_payload','probe_vector_match_ec','probe_vector_match_et','probe_vector_match_payload','probe_hidden_range_ec','probe_hidden_range_et','probe_hidden_range_payload','probe_original_assert_ec','probe_original_assert_et','probe_original_assert_payload','probe_vector_assert_ec','probe_vector_assert_et','probe_vector_assert_payload')){
+ foreach($key in @('start','return','ec','et','payload','done','trace_helper_fx','trace_main_fx','trace_run_fx','trace','trace_ec','trace_et','trace_payload','trace_def_count','trace_compile_ec','trace_compile_et','trace_compile_payload')){
    $path=[string]$meta.suite_paths.$key
    if(Test-Path -LiteralPath $path -PathType Leaf){
      Copy-Item -LiteralPath $path -Destination (Join-Path $Evidence ('suite_'+$key+'.txt')) -Force
@@ -164,7 +164,10 @@ try {
  $r['trace_prefix_exact']=$false
  $r['trace_events']=@()
  $r['trace_next_expected']=$null
- $traceHeader=('APL_GERMAN_STAGE01_TRACE_V1|SOURCE='+$source+'|')
+ $traceHeader=('APL_GERMAN_STAGE01_TRACE_V1|SOURCE='+$source+'|PATCH=LINE234|')
+ $patch=$meta.trace_monkey_patch
+ if($patch.line -ne 234 -or $patch.scope -cne 'TRANSIENT_QA_ALIAS_ONLY' -or $patch.original_acceptance_unchanged -ne $true -or $patch.before -cnotmatch '\(⊂7\)' -or $patch.after -cne $patch.before.Replace('(⊂7)','(⊂,7)')){throw 'TRACE_MONKEY_PATCH_CONTRACT_FAILED'}
+ $r['trace_monkey_patch']=$patch
  if($meta.trace_header -cne $traceHeader -or $meta.trace_diagnostic_only -ne $true -or $meta.trace_tokens.Count -ne 122){throw 'TRACE_METADATA_CONTRACT_FAILED'}
  if($null -ne $suite.trace -and $suite.trace.StartsWith($traceHeader,[StringComparison]::Ordinal)){
    $body=$suite.trace.Substring($traceHeader.Length)
