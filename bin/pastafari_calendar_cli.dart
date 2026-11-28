@@ -42,8 +42,7 @@ Map<String, Object?> runCalendarCli(List<String> args) {
   final maxTransitions = int.parse(options['max-transitions'] ?? '64');
   final converter = PastafariGregorianConverter();
   if (command == 'forward') {
-    final requestedDate =
-        _parseCivilDate(_required(options, 'requested-date'));
+    final requestedDate = _parseCivilDate(_required(options, 'requested-date'));
     final date = converter.calculate(
       calculationDate,
       requestedDate,
@@ -109,8 +108,7 @@ String _required(Map<String, String> options, String key) {
 }
 
 GregorianCivilDate _parseCivilDate(String value) {
-  final match = RegExp(r'^([+-]?\d+)-(\d{1,2})-(\d{1,2})$')
-      .firstMatch(value);
+  final match = RegExp(r'^([+-]?\d+)-(\d{1,2})-(\d{1,2})$').firstMatch(value);
   if (match == null) {
     throw FormatException('Date must use signed-year YYYY-MM-DD syntax.');
   }
@@ -121,8 +119,7 @@ GregorianCivilDate _parseCivilDate(String value) {
   );
 }
 
-Map<String, Object?> _civilJson(GregorianCivilDate date) =>
-    <String, Object?>{
+Map<String, Object?> _civilJson(GregorianCivilDate date) => <String, Object?>{
       'year': date.year.toString(),
       'month': date.month,
       'day': date.day,
