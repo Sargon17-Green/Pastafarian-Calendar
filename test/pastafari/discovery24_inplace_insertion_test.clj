@@ -155,7 +155,7 @@
               (some (fn [chunk]
                       (or (not (instance? (Class/forName "[B") chunk))
                           (zero? (alength ^bytes chunk))
-                          (> (alength ^bytes chunk) alternative-chunk-limit-bytes))) chunks)
+                          (> (alength ^bytes chunk) alternative-chunk-limit-bytes))) chunks))
       (parser-fail! :chunk-size {:chunk-count chunk-count}))
     (let [frame-bytes (reduce + 0 (map #(alength ^bytes %) chunks))]
       (when (> frame-bytes alternative-frame-limit-bytes)
@@ -200,7 +200,7 @@
                   (expect-literal! input "}")
                   (when-not (= -1 (.read input)) (parser-fail! :trailing-bytes {}))
                   {:profile profile :p position :rank-bytes (Arrays/copyOf rank-buffer rank-length)
-                   :rank-capacity (:B certificate) :frame-bytes frame-bytes :chunk-count chunk-count}))))))))))
+                   :rank-capacity (:B certificate) :frame-bytes frame-bytes :chunk-count chunk-count})))))))))
 (defn- byte-chunks [^bytes bytes chunk-size]
   (loop [offset 0 chunks []]
     (if (>= offset (alength bytes))
@@ -225,6 +225,12 @@
 (defn- streaming-parser-small-checks []
   (let [sample (.getBytes "{\"profile\":[4,5],\"p\":3,\"rank\":\"35\"}" StandardCharsets/US_ASCII)
         length (alength sample)]
+    (let [parsed (parse-streamed-frame [sample])]
+      (is (= [4N 5N] (:profile parsed)))
+      (is (= 3 (:p parsed)))
+      (is (= "35" (String. ^bytes (:rank-bytes parsed) StandardCharsets/US_ASCII))))
+    (is (= :chunk-size (thrown-code #(parse-streamed-frame []))))
+    (is (= :chunk-size (thrown-code #(parse-streamed-frame [(byte-array 0)]))))
     (doseq [split (range 1 length)]
       (let [parsed (parse-streamed-frame [(Arrays/copyOfRange sample 0 split)
                                           (Arrays/copyOfRange sample split length)])]
