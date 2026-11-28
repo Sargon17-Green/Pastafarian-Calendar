@@ -1,0 +1,79 @@
+; Stage2 ASK(2,21) integration, isolated QA only.
+; Successful result: [exact N, stream, exact rank, positive parts].
+; Invalid/empty domain, invalid context or stream, or failed roundtrip: [].
+to qa.ai.count :G :K :required
+  if not (qa.cp.valid.domain :G :K :required) [output []]
+  if or (:G > 137) (:K > 17) [output []]
+  localmake "N qa.cp.count :G :K :required
+  if not (monster.stage02.bi.canonical :N) [output []]
+  if bi.lt :N (bi.small 1) [output []]
+  if bi.gt :N nr.M [output []]
+  output :N
+end
+
+to qa.ai.context.valid :ctx
+  if not listp :ctx [output "false]
+  localmake "rest :ctx
+  while [not emptyp :rest] [
+    localmake "entry first :rest
+    if not listp :entry [output "false]
+    if (count :entry) <> 2 [output "false]
+    make "rest butfirst :rest
+  ]
+  if not (equalp (monster.context.get :ctx "status) "SAUCE_ONLY) [output "false]
+  localmake "bowls monster.context.get :ctx "sauceBowls
+  if not listp :bowls [output "false]
+  if (count :bowls) <> 6 [output "false]
+  localmake "rest :bowls
+  while [not emptyp :rest] [
+    localmake "b first :rest
+    if not (monster.stage02.bi.canonical :b) [output "false]
+    if bi.lt :b (bi.small 1) [output "false]
+    if bi.gt :b nr.M [output "false]
+    make "rest butfirst :rest
+  ]
+  localmake "order monster.context.get :ctx "sauceOrder46
+  if not listp :order [output "false]
+  if (count :order) <> 6 [output "false]
+  repeat 6 [if not (memberp repcount :order) [output "false]]
+  output "true
+end
+
+; Distinct stream entry permits invalid-stream QA without replacing real ASK.
+to qa.ai.finish :G :K :required :N :stream
+  localmake "rank monster.stage02.choose.short :stream :N
+  if not (monster.stage02.bi.canonical :rank) [output []]
+  if bi.lt :rank (bi.small 1) [output []]
+  if bi.gt :rank :N [output []]
+  localmake "parts qa.cp.unrank :G :K :required :rank
+  if not (qa.cp.partition.valid :G :K :required :parts) [output []]
+  localmake "back qa.cp.rank :G :K :required :parts
+  if not (monster.stage02.bi.canonical :back) [output []]
+  if not (bi.eq :rank :back) [output []]
+  localmake "again qa.cp.count :G :K :required
+  if not (monster.stage02.bi.canonical :again) [output []]
+  if not (bi.eq :N :again) [output []]
+  output (list :N :stream :rank :parts)
+end
+
+to qa.ai.report :ctx :G :K :required
+  localmake "N qa.ai.count :G :K :required
+  if emptyp :N [output []]
+  if not (qa.ai.context.valid :ctx) [output []]
+  localmake "stream monster.stage02.ask :ctx 2 21
+  output qa.ai.finish :G :K :required :N :stream
+end
+
+; NONE or any non-interior index maps to -1; malformed BI/interval returns [].
+to qa.ai.required :exact :opening :closing
+  if not (monster.stage02.bi.canonical :opening) [output []]
+  if not (monster.stage02.bi.canonical :closing) [output []]
+  if not (bi.lt :opening :closing) [output []]
+  if equalp :exact "NONE [output -1]
+  if not (monster.stage02.bi.canonical :exact) [output []]
+  if not (bi.gt :exact :opening) [output -1]
+  if not (bi.lt :exact :closing) [output -1]
+  localmake "offset bi.sub :exact :opening
+  if bi.gt :offset (bi.small 137) [output []]
+  output bi.to.small :offset
+end
