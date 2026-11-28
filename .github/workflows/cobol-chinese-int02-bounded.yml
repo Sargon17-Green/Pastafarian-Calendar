@@ -1,4 +1,4 @@
-name: COBOL Chinese INT-02 isolated bounded Native
+name: COBOL Chinese INT-02 isolated name-family Native
 on:
   push:
     branches:
@@ -8,52 +8,53 @@ on:
 permissions:
   contents: read
 jobs:
-  bounded-native:
+  name-family-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 65
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 2
           persist-credentials: false
-      - name: Verify exact source blobs and initialize evidence
+      - name: Verify exact parent and source blobs
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p evidence build-int02
           {
-            printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\nHEAD=%s\nSOURCE_LOCK=4177479dea3f7662df383148a471a411f6419a0c\n' "$GITHUB_SHA"
+            printf 'PROJECT_ID=PC-BRANCH-COBOL-SIMPLIFIED-CHINESE\n'
+            printf 'HEAD=%s\n' "$GITHUB_SHA"
+            printf 'EXPECTED_SOURCE_HEAD=60dc2d1d76004446af4e58186026f9868fa3bbf2\n'
+            test "$GITHUB_REF" = 'refs/heads/COBOL+简体中文'
             test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+            test "$(git rev-parse HEAD^)" = '60dc2d1d76004446af4e58186026f9868fa3bbf2'
+            changed="$(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")"
+            test "$changed" = '.github/workflows/cobol-chinese-int02-bounded.yml'
             while read -r expected path; do
               actual="$(git rev-parse "HEAD:$path")"
               printf '%s %s\n' "$actual" "$path"
               test "$actual" = "$expected"
             done <<'LOCK'
-          d9fa549f6bf1da91b5ddc1fced95db3e774c34da src/calendar_save.cob
-          b41f2d0b8ddf95a018c81ddd412ee482dab35acb src/calendar_wide.cob
-          7bbc0320113bf47c1a76aaea4e60a89fd3bd877a src/calendar_year_candidates.cob
-          e56dd49bae87b6af6d2e8a37304f9072278edcc6 test/calendar_save_tests.cob
-          6d1e7c5a8e8f4b7581296accc6cf4e56e4e39755 test/int02_wide_driver.cob
-          f2b22950038445b44432af939d3314e41ad3bb9f test/int02_wide_diff.mjs
-          d06eb1d4ba4f435c08c1b46fa6e4d58c587acb4a test/int02_year_candidates_driver.cob
-          bae9707e320eb1e1a1f1dbde806144d993e175ec test/int02_year_candidates_diff.mjs
-          63cb9905c7a26d876255711256e84d3a217b2a74 test/int02_source_gate_year_oracle.mjs
-          752065cb456942cd724f0572d087cbe1b75f6877 src/calendar_gate_window.cob
-          63358f3cf4ba139ad07fa824edb6c446a058cfd0 src/calendar_sauce.cob
-          97bb89fafaabd673ac89a1fe0fe2fc9c125e47c4 src/calendar_gap.cob
-          3b9e6ea45c08c819c676409a5d9c88eb2a9e36f1 test/int02_gap_window_tests.cob
-          824a8e920e1312730302373d6cebe1d1863abdd5 test/int02_normative_gap_vectors.mjs
-          f250dfeff812f8a5349a68d645c1ffd72a1fc8c9 test/int02_normative_gap_vectors.json
-          0304043610542db8041ac1307c328e91fa85f0d0 src/calendar_short_rank.cob
-          f5209a845218cc03f57318f34bd0f1dad6608dd0 src/calendar_seal10.cob
-          82fca0f5dbc0c8a1a5bdecc7ab86b784e2a68452 src/calendar_select_year.cob
-          3b968c1a01b188823c913950b79c000690054c52 test/int02_generated_year_vectors.json
-          1e528b04de7b755d7a8531a0f7bdf12ff04ee786 test/int02_generated_year_diff.mjs
-          d79ee969419f9fed7a71b2d0b820f6350664713d test/int02_select_year_driver.cob
-          3b77d72ec5077536c1a026edd965b1da0898ebb3 test/int02_short_rank_driver.cob
-          0f073fffe7a883f04b8fa47ded9f685b8da3e493 test/int02_short_rank_diff.mjs
+          982c1f266a18c2bcaba79b994177a93750f27bfa src/big_integer.cob
+          47c3bcd0138eea16e7b58b4f7c662db389b07a57 src/calendar_name_family.cob
+          92b00a253b7fd142cc40d39ed70d76e254b1ebe8 test/int02_name_driver.cob
+          aea5eb732661d159c892efb190009c4baf88d12e test/int02_name_diff.mjs
           LOCK
+            printf 'SOURCE_LOCK=PASS\n'
           } 2>&1 | tee evidence/source-lock.log
-      - name: Install compiler from Ubuntu sources only
+      - name: Check and preflight the independent oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check test/int02_name_diff.mjs 2>&1 | tee evidence/oracle-syntax.log
+          timeout -k 5s 30s node test/int02_name_diff.mjs --oracle-only 2>&1 | tee evidence/oracle-preflight.log
+          grep -Fq '"families":15' evidence/oracle-preflight.log
+          grep -Fq '"smallRows":409' evidence/oracle-preflight.log
+          grep -Fq '"large":15' evidence/oracle-preflight.log
+          grep -Fq '"requests":915' evidence/oracle-preflight.log
+          grep -Fq '"verdict":"ORACLE_ONLY_NOT_NATIVE"' evidence/oracle-preflight.log
+          printf 'ORACLE_PREFLIGHT=PASS_NOT_NATIVE\n' | tee -a evidence/oracle-preflight.log
+      - name: Install GnuCOBOL from Ubuntu sources
         shell: bash
         run: |
           set -euo pipefail
@@ -65,45 +66,28 @@ jobs:
             cobc -V
             node --version
           } 2>&1 | tee evidence/toolchain.log
-      - name: Execute only the six unaccepted INT-02 gates independently
+      - name: Strict compile and run the 915-request Native differential gate
         shell: bash
         run: |
-          set -uo pipefail
-          flags=(-x -free -Wall -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror)
-          gate() {
-            local name="$1" driver="$2" source="$3" seconds="$4"; shift 4
-            local -a sources
-            read -r -a sources <<< "$source"
-            (
-              printf 'GATE=%s HEAD=%s\n' "$name" "$GITHUB_SHA"
-              timeout -k 5s 90s cobc "${flags[@]}" -o "build-int02/$name" "$driver" "${sources[@]}" || exit $?
-              timeout -k 5s "$seconds" "$@" || exit $?
-            ) 2>&1 | tee "evidence/$name.log"
-            local rc=$?
-            if [ "$rc" = 0 ]; then
-              case "$name" in
-                save) grep -Eq '^SAVE_CHECKS=0*48$' "evidence/$name.log" && grep -Fxq 'SAVE_GATE=PASS' "evidence/$name.log" ;;
-                candidates) grep -Fxq 'INT02_YEAR_CANDIDATES_CASES=58 GATE=PASS_BOUNDED_CANDIDATES_ONLY' "evidence/$name.log" ;;
-                wide) grep -Fxq '{"cases":1051,"statusCounts":{"0":702,"22":3,"24":346},"scope":"NATIVE_WIDE_ONLY","gate":"MATCH"}' "evidence/$name.log" ;;
-                gap-window) grep -Eq '^GAP_WINDOW_CHECKS=0*27$' "evidence/$name.log" && grep -Fxq 'GAP_WINDOW_GATE=PASS' "evidence/$name.log" ;;
-                short-rank) grep -Fxq 'INT02_SHORT_RANK_CASES=196009 INVALID=9 REJECTED_TAIL=39198 GATE=MATCH_NATIVE_RANK_ONLY' "evidence/$name.log" ;;
-                generated-year) grep -Fxq 'INT02_GENERATED_YEAR_CASES=11 GATE=MATCH_NATIVE_BOUNDED_ONLY' "evidence/$name.log" ;;
-              esac
-              rc=$?
-            fi
-            printf '%s exit=%s\n' "$name" "$rc" | tee -a evidence/status.log
-            return "$rc"
-          }
-          failures=0
-          gate save test/calendar_save_tests.cob src/calendar_save.cob 30s ./build-int02/save || failures=$((failures+1))
-          gate candidates test/int02_year_candidates_driver.cob src/calendar_year_candidates.cob 300s node test/int02_year_candidates_diff.mjs "$(pwd)/build-int02/candidates" || failures=$((failures+1))
-          gate wide test/int02_wide_driver.cob src/calendar_wide.cob 300s node test/int02_wide_diff.mjs "$(pwd)/build-int02/wide" || failures=$((failures+1))
-          gate gap-window test/int02_gap_window_tests.cob 'src/calendar_sauce.cob src/calendar_gap.cob src/calendar_gate_window.cob src/calendar_wide.cob src/calendar_save.cob' 600s ./build-int02/gap-window || failures=$((failures+1))
-          gate short-rank test/int02_short_rank_driver.cob src/calendar_short_rank.cob 150s node test/int02_short_rank_diff.mjs "$(pwd)/build-int02/short-rank" || failures=$((failures+1))
-          gate generated-year test/int02_select_year_driver.cob 'src/calendar_select_year.cob src/calendar_seal10.cob src/calendar_short_rank.cob src/calendar_year_candidates.cob src/calendar_sauce.cob src/calendar_gap.cob src/calendar_gate_window.cob src/calendar_wide.cob src/calendar_save.cob' 1800s node test/int02_generated_year_diff.mjs "$(pwd)/build-int02/generated-year" || failures=$((failures+1))
-          printf 'FAILED_GATES=%s\n' "$failures" | tee -a evidence/status.log
-          test "$failures" = 0
-      - name: Hash logs
+          set -euo pipefail
+          {
+            printf 'NATIVE_HEAD=%s\n' "$GITHUB_SHA"
+            timeout -k 5s 180s cobc -x -free -Wall -Wstrict-typing -Wcall-params -Wlinkage -Wtruncate -Werror \
+              -o build-int02/name-family-driver \
+              test/int02_name_driver.cob src/calendar_name_family.cob src/big_integer.cob
+            printf 'STRICT_COMPILE=PASS\n'
+            timeout -k 5s 150s node test/int02_name_diff.mjs "$(pwd)/build-int02/name-family-driver"
+            printf 'NATIVE_GATE=PASS\nRESULT=PASS_INT02_NAME_FAMILY_NATIVE\n'
+          } 2>&1 | tee evidence/name-family-native.log
+          grep -Fq '"families":15' evidence/name-family-native.log
+          grep -Fq '"smallRows":409' evidence/name-family-native.log
+          grep -Fq '"large":15' evidence/name-family-native.log
+          grep -Fq '"requests":915' evidence/name-family-native.log
+          grep -Fq '"heapNonzero":0' evidence/name-family-native.log
+          grep -Fq '"unexpected":0' evidence/name-family-native.log
+          grep -Fq '"verdict":"INT02_NAME_NATIVE_PASS"' evidence/name-family-native.log
+          grep -Fxq 'RESULT=PASS_INT02_NAME_FAMILY_NATIVE' evidence/name-family-native.log
+      - name: Hash evidence logs
         if: always()
         shell: bash
         run: |
@@ -112,7 +96,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cobol-int02-bounded-native
+          name: int02-name-family-native-${{ github.sha }}
           path: evidence/
           if-no-files-found: error
           retention-days: 90
