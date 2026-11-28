@@ -45,7 +45,7 @@ function Get-Stage44UniqueLineValue {
         [Parameter(Mandatory=$true)][string]$Text,
         [Parameter(Mandatory=$true)][string]$Key
     )
-    $pattern = '(?m)^' + [regex]::Escape($Key) + '=([^\r\n]*)\r?
+    $pattern = '(?m)^' + [regex]::Escape($Key) + '=([^\r\n]*)\r?$'
     $found = [regex]::Matches($Text, $pattern)
     if ($found.Count -ne 1) {
         throw ('STAGE44_EVIDENCE_LINE_COUNT:' + $Key + ':' + $found.Count)
