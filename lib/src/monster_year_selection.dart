@@ -44,7 +44,7 @@ final class MonsterYear5000Selector {
   }) : locator = locator ?? MonsterYearLocator();
 
   MonsterYear5000Selection select(BigInt calculationDay) {
-    final preview = locator.sentinelSearch(calculationDay);
+    final preview = locator.streamingPreview(calculationDay);
     preview.requireComplete();
     if (preview.candidates.isEmpty) {
       throw StateError('No eligible §Q year contains the calculation day.');

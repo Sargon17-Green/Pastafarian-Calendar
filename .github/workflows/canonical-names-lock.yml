@@ -1546,3 +1546,45 @@ jobs:
           name: dart-hebrew-production-gregorian-boundary
           path: out/production-gregorian/
           if-no-files-found: warn
+
+  dart-hebrew-production-streaming-q:
+    if: github.ref == 'refs/heads/Dart+עברית' && contains(github.event.head_commit.message, '[dart-streaming-q]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: '3.13.2'
+      - run: dart pub get
+      - name: Verify format and capture exact repair evidence
+        shell: bash
+        run: |
+          files=(lib/src/monster_year_locator.dart lib/src/monster_year_selection.dart bin/production_streaming_q_tests.dart)
+          if ! dart format --output=none --set-exit-if-changed "${files[@]}"; then
+            dart format --output=write "${files[@]}"
+            for file in "${files[@]}"; do
+              echo "DART_CAPTURE_BEGIN:${file}"
+              base64 -w0 "${file}"
+              printf '\n'
+              echo "DART_CAPTURE_END:${file}"
+            done
+            exit 1
+          fi
+      - run: dart analyze
+      - name: Run streaming differential and real modern date
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p out/production-streaming-q
+          git rev-parse HEAD | tee out/production-streaming-q/source-sha.txt
+          dart --version 2>&1 | tee out/production-streaming-q/sdk.txt
+          timeout 1000s dart run bin/production_streaming_q_tests.dart --modern | tee out/production-streaming-q/results.log
+          grep -q '^PRODUCTION_STREAMING_Q_SYNTHETIC_NEAR_PASS checks=' out/production-streaming-q/results.log
+          grep -q '^PRODUCTION_STREAMING_Q_MODERN_PASS checks=' out/production-streaming-q/results.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dart-hebrew-production-streaming-q
+          path: out/production-streaming-q/
+          if-no-files-found: warn

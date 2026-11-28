@@ -84,6 +84,117 @@ final class MonsterYearLocator {
     return fromGateSnapshot(day, positions);
   }
 
+  /// Exact bounded-memory traversal for production §Q.
+  MonsterYearPreview streamingPreview(
+    BigInt day, {
+    int maximumGapCalls = 400000,
+  }) =>
+      fromGateSnapshot(
+        day,
+        streamGateWindow(
+          day,
+          MonsterWorkCounter.foundationDay,
+          (ordinal) => _gates.gapFor(ordinal).length,
+          maximumGapCalls: maximumGapCalls,
+        ),
+      );
+
+  /// Only the nearest strict outside gates and intervening gates are retained.
+  /// The callback supplies the actual signed §O gap, never ordinal zero.
+  static Map<int, BigInt> streamGateWindow(
+    BigInt day,
+    BigInt foundation,
+    BigInt Function(BigInt) gapFor, {
+    required int maximumGapCalls,
+  }) {
+    if (maximumGapCalls < 1 || maximumGapCalls > 400000) {
+      throw RangeError.range(maximumGapCalls, 1, 400000, 'maximumGapCalls');
+    }
+    final lower = day - maximumLength;
+    final upper = day + maximumLength - BigInt.one;
+    final minGap = BigInt.from(42);
+    final maxGap = BigInt.from(963);
+    const budgetFailure = IncompleteMonsterYearDomain(
+      <String>['GAP_BUDGET_EXHAUSTED'],
+    );
+    // Even the largest possible gaps cannot reach the far strict sentinel.
+    final reach = maxGap * BigInt.from(maximumGapCalls);
+    if (foundation <= lower && foundation + reach <= upper ||
+        foundation >= upper && foundation - reach >= lower) {
+      throw budgetFailure;
+    }
+
+    var calls = 0;
+    BigInt gap(int ordinal) {
+      if (calls == maximumGapCalls) {
+        throw budgetFailure;
+      }
+      calls++;
+      final length = gapFor(BigInt.from(ordinal));
+      if (length < minGap || length > maxGap) {
+        throw StateError('§O gap outside 42..963.');
+      }
+      return length;
+    }
+
+    var index = 0;
+    var position = foundation;
+    final positions = <int, BigInt>{};
+    if (foundation < lower) {
+      // Approach from the left; discard only gates strictly before the
+      // nearest left sentinel. Never evaluate a gap twice.
+      while (position < lower) {
+        final previous = position;
+        position += gap(index + 1);
+        index++;
+        if (position >= lower) {
+          positions[index - 1] = previous;
+        }
+      }
+      positions[index] = position;
+      while (position <= upper) {
+        position += gap(index + 1);
+        index++;
+        positions[index] = position;
+      }
+    } else if (foundation > upper) {
+      // Symmetric approach from the right. Backward gaps have negative
+      // ordinals, and their lengths are subtracted.
+      while (position > upper) {
+        final previous = position;
+        position -= gap(index - 1);
+        index--;
+        if (position <= upper) {
+          positions[index + 1] = previous;
+        }
+      }
+      positions[index] = position;
+      while (position >= lower) {
+        position -= gap(index - 1);
+        index--;
+        positions[index] = position;
+      }
+    } else {
+      positions[0] = foundation;
+      while (position >= lower) {
+        position -= gap(index - 1);
+        index--;
+        positions[index] = position;
+      }
+      index = 0;
+      position = foundation;
+      while (position <= upper) {
+        position += gap(index + 1);
+        index++;
+        positions[index] = position;
+      }
+    }
+    if (positions.length > 278) {
+      throw StateError('§Q streaming window exceeded the proven bound.');
+    }
+    return Map<int, BigInt>.unmodifiable(positions);
+  }
+
   /// Traverse each signed §O gap once; no repeated quadratic gatePosition calls.
   MonsterYearPreview boundedPreview(
     BigInt day, {
