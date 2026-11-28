@@ -85,6 +85,7 @@ function ConvertFrom-Stage44EvidenceMetadataBytes {
 function Read-Stage44ZipEntries {
     param([Parameter(Mandatory=$true)][AllowEmptyCollection()][byte[]]$Bytes)
     Add-Type -AssemblyName System.IO.Compression
+    if ($Bytes.Length -gt 10485760) { throw 'STAGE44_EVIDENCE_ZIP_COMPRESSED_SIZE_LIMIT' }
     $memory = [System.IO.MemoryStream]::new()
     $memory.Write($Bytes, 0, $Bytes.Length)
     $memory.Position = 0
@@ -154,6 +155,7 @@ function Assert-Stage44ArtifactBinding {
         [Parameter(Mandatory=$true)][string]$ExpectedBranch
     )
     if ($Artifact.expired -ne $false) { throw 'STAGE44_EVIDENCE_ARTIFACT_EXPIRED' }
+    if ([long]$Artifact.workflow_run.repository_id -ne [long]$Artifact.workflow_run.head_repository_id) { throw 'STAGE44_EVIDENCE_ARTIFACT_REPOSITORY_MISMATCH' }
     if ([long]$Artifact.workflow_run.id -ne $RunId) { throw 'STAGE44_EVIDENCE_ARTIFACT_RUN_MISMATCH' }
     Assert-Stage44EvidenceEqual $Artifact.workflow_run.head_sha $ExpectedSha 'ARTIFACT_SHA'
     Assert-Stage44EvidenceEqual $Artifact.workflow_run.head_branch $ExpectedBranch 'ARTIFACT_BRANCH'
@@ -179,6 +181,7 @@ function Assert-Stage44RequiredStep {
 function Assert-Stage44EvidenceJobSet {
     param(
         [Parameter(Mandatory=$true)][object[]]$Jobs,
+        [Parameter(Mandatory=$true)][long]$RunId,
         [switch]$CurrentRun
     )
     if ($Jobs.Count -ne 19) { throw 'STAGE44_EVIDENCE_CANONICAL_JOB_COUNT' }
@@ -186,6 +189,7 @@ function Assert-Stage44EvidenceJobSet {
     foreach ($name in $script:Stage44TrustedEvidenceRequiredJobs) {
         $found = @($Jobs | Where-Object { $_.name -ceq $name })
         if ($found.Count -ne 1) { throw ('STAGE44_EVIDENCE_CANONICAL_JOB_MISSING_OR_DUPLICATE:' + $name) }
+        if ([long]$found[0].run_id -ne $RunId) { throw ('STAGE44_EVIDENCE_JOB_RUN_MISMATCH:' + $name) }
         if ($found[0].status -cne 'completed' -or $found[0].conclusion -cne 'success') {
             throw ('STAGE44_EVIDENCE_CANONICAL_JOB_NOT_SUCCESS:' + $name)
         }
@@ -195,6 +199,7 @@ function Assert-Stage44EvidenceJobSet {
     if ($extras.Count -ne 1 -or $extras[0].name -cne $script:Stage44TrustedEvidenceJobName) {
         throw 'STAGE44_EVIDENCE_UNEXPECTED_CANONICAL_JOB_SET'
     }
+    if ([long]$extras[0].run_id -ne $RunId) { throw 'STAGE44_EVIDENCE_ADJUDICATOR_RUN_MISMATCH' }
     if ($CurrentRun) {
         if ($extras[0].status -cne 'in_progress' -or $null -ne $extras[0].conclusion) {
             throw 'STAGE44_EVIDENCE_CURRENT_ADJUDICATOR_STATE'
@@ -233,6 +238,7 @@ function Get-Stage44ArtifactZipBytes {
     $request.Method = 'GET'
     $request.Headers.Add('Authorization', ('Bearer ' + $Token))
     $request.Accept = 'application/vnd.github+json'
+    $request.UserAgent = 'Stage44TrustedEvidence/1'
     $request.AllowAutoRedirect = $false
     $request.Timeout = 120000
     $response = $null
@@ -255,16 +261,22 @@ function Get-Stage44ArtifactZipBytes {
             $response = $null
             $downloadRequest = [System.Net.HttpWebRequest]::Create($target)
             $downloadRequest.Method = 'GET'
+            $downloadRequest.UserAgent = 'Stage44TrustedEvidence/1'
             $downloadRequest.AllowAutoRedirect = $true
             $downloadRequest.Timeout = 120000
             $response = [System.Net.HttpWebResponse]$downloadRequest.GetResponse()
             $status = [int]$response.StatusCode
         }
         if ($status -ne 200) { throw ('STAGE44_EVIDENCE_ARTIFACT_HTTP_STATUS:' + $status) }
+        if ($response.ContentLength -gt 10485760) { throw 'STAGE44_EVIDENCE_ARTIFACT_DOWNLOAD_SIZE_LIMIT' }
         $stream = $response.GetResponseStream()
         $memory = [System.IO.MemoryStream]::new()
         try {
-            $stream.CopyTo($memory)
+            $buffer = New-Object byte[] 65536
+            while (($read = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+                $memory.Write($buffer, 0, $read)
+                if ($memory.Length -gt 10485760) { throw 'STAGE44_EVIDENCE_ARTIFACT_DOWNLOAD_SIZE_LIMIT' }
+            }
             return ,$memory.ToArray()
         } finally {
             $memory.Dispose()
@@ -284,6 +296,7 @@ function Get-Stage44ArtifactPayload {
     )
     $bytes = & $ArtifactDownload $Repository ([long]$Artifact.id) $Token
     if ($bytes -isnot [byte[]]) { throw 'STAGE44_EVIDENCE_ARTIFACT_DOWNLOAD_TYPE' }
+    if ([long]$Artifact.size_in_bytes -le 0 -or [long]$Artifact.size_in_bytes -gt 10485760) { throw 'STAGE44_EVIDENCE_ARTIFACT_SIZE_LIMIT' }
     $hash = [System.Security.Cryptography.SHA256]::Create()
     try {
         $actualDigest = [System.BitConverter]::ToString($hash.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant()
@@ -352,6 +365,8 @@ function Get-Stage44TrustedEvidence {
     Assert-Stage44EvidenceEqual $run.head_branch $ExpectedBranch 'RUN_BRANCH'
     Assert-Stage44EvidenceEqual $run.event 'push' 'RUN_EVENT'
     Assert-Stage44EvidenceEqual $run.path '.github/workflows/canonical-names-lock.yml' 'RUN_WORKFLOW'
+    if ($null -ne $run.PSObject.Properties['repository']) { Assert-Stage44EvidenceEqual $run.repository.full_name $Repository 'RUN_REPOSITORY' }
+    if ($null -ne $run.PSObject.Properties['head_repository']) { Assert-Stage44EvidenceEqual $run.head_repository.full_name $Repository 'RUN_HEAD_REPOSITORY' }
     if ([int]$run.run_attempt -ne 1) { throw 'STAGE44_EVIDENCE_RUN_ATTEMPT_UNSUPPORTED' }
     if ($CurrentRun) {
         if ($run.status -cne 'in_progress' -or $null -ne $run.conclusion) {
@@ -366,7 +381,7 @@ function Get-Stage44TrustedEvidence {
     $jobsResponse = & $ApiGet ($base + '/actions/runs/' + $RunId + '/jobs?per_page=100') $Token
     $jobs = @($jobsResponse.jobs)
     if ([int]$jobsResponse.total_count -ne $jobs.Count) { throw 'STAGE44_EVIDENCE_JOBS_PAGINATION_REQUIRED' }
-    $jobSet = Assert-Stage44EvidenceJobSet -Jobs $jobs -CurrentRun:$CurrentRun
+    $jobSet = Assert-Stage44EvidenceJobSet -Jobs $jobs -RunId $RunId -CurrentRun:$CurrentRun
 
     Assert-Stage44RequiredStep -Job $jobSet['verify'] -StepName 'Verify canonical names lock'
     Assert-Stage44RequiredStep -Job $jobSet['Stage43 preflight: independent oracle at neighboring year gates'] -StepName 'Run 42-case fail-closed Stage43 metadata-state classifier regression'
@@ -505,11 +520,12 @@ function Get-Stage44TrustedEvidence {
         ($prefix + 'summary.txt')
     )
     Assert-Stage44ExactEntrySet -Entries $finalizerEntries -ExpectedNames $finalizerNames
-    $finalizerSummaryKeys = @('TEST','PS_VERSION','BRANCH','HEAD','SHA256_BEFORE','RUN_1_EXIT_CODE','RUN_1_ALREADY_FINALIZED','RUN_1_STDERR_LENGTH','RUN_1_SHA256_AFTER','RUN_2_EXIT_CODE','RUN_2_ALREADY_FINALIZED','RUN_2_STDERR_LENGTH','RUN_2_SHA256_AFTER','RESULT')
+    $finalizerSummaryKeys = @('TEST','PS_VERSION','BRANCH','HEAD','KNOWN_PATCH11_HEAD','SHA256_BEFORE','RUN_1_EXIT_CODE','RUN_1_ALREADY_FINALIZED','RUN_1_STDERR_LENGTH','RUN_1_SHA256_AFTER','RUN_2_EXIT_CODE','RUN_2_ALREADY_FINALIZED','RUN_2_STDERR_LENGTH','RUN_2_SHA256_AFTER','RESULT')
     $finalizerSummary = ConvertFrom-Stage44EvidenceMetadataBytes -Bytes $finalizerEntries[$summaryPaths[0]] -RequiredKeys $finalizerSummaryKeys
     Assert-Stage44EvidenceEqual $finalizerSummary['TEST'] 'STAGE23_FINALIZE_IDEMPOTENCY' 'FINALIZER_TEST'
     Assert-Stage44EvidenceEqual $finalizerSummary['BRANCH'] $ExpectedBranch 'FINALIZER_BRANCH'
     Assert-Stage44EvidenceEqual $finalizerSummary['HEAD'] $ExpectedSha 'FINALIZER_SHA'
+    Assert-Stage44EvidenceEqual $finalizerSummary['KNOWN_PATCH11_HEAD'] '7e895d374962dbc57a68035eef02f76a365af440' 'FINALIZER_KNOWN_PATCH11_HEAD'
     Assert-Stage44EvidenceEqual $finalizerSummary['RUN_1_EXIT_CODE'] '0' 'FINALIZER_RUN1_EXIT'
     Assert-Stage44EvidenceEqual $finalizerSummary['RUN_2_EXIT_CODE'] '0' 'FINALIZER_RUN2_EXIT'
     Assert-Stage44EvidenceEqual $finalizerSummary['RUN_1_ALREADY_FINALIZED'] 'True' 'FINALIZER_RUN1_IDEMPOTENT'
