@@ -1,15 +1,7 @@
 name: WAT Stage02 B04 Focused Native QA
 
 on:
-  push:
-    branches:
-      - 'WAT+Español'
-    paths:
-      - 'tests/stage02_b04_boundary_cases.wat.inc'
-      - 'tests/stage02_b04_build_module.py'
-      - 'tests/stage02_b04_boundary_oracle.py'
-      - 'tests/stage02_b04_boundary_differential.cjs'
-      - '.github/workflows/wat-stage02-b04-boundary-native.yml'
+  workflow_call:
   workflow_dispatch:
 
 permissions:

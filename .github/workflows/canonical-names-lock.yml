@@ -115,3 +115,10 @@ jobs:
           node tests/stage02_k5_q9_boundary_oracle.cjs
       - name: Run all 111 Native WAT cases and 83 exact independent BigInt oracles
         run: node tests/run_stage02_discovery01_webassembly.cjs
+
+  wat-stage02-b04-focused-native:
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/WAT+Español' && contains(github.event.head_commit.message, 'B04')"
+    needs: wat-stage02-semantic
+    uses: ./.github/workflows/wat-stage02-b04-boundary-native.yml
+    permissions:
+      contents: read
