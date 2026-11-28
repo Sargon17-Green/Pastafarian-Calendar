@@ -4,8 +4,8 @@ BRANCH=Rust+Azərbaycan-dili
 HISTORICAL_EVIDENCE_SHA=706aff42918c0654864d229e494a5365cf5c6c92
 SUCCESSOR_GATE_SHA=5fe050e3290e664b0649b95d1cb382445142d92e
 STAGE11_CLOSURE=ACCEPTED
-STAGE12_CLOSURE=NOT_CLAIMED
-CURRENT_STATE=DISCOVERY06_STAGE12_PENDING_NATIVE
+STAGE12_CLOSURE=ACCEPTED
+CURRENT_STATE=DISCOVERY06_STAGE12_ACCEPTED_HOLD_NO_STAGE13
 NO_STAGE13=YES
 NO_MAIN_MERGE_RELEASE=YES
 
@@ -76,3 +76,44 @@ LAST_COMPLETED_STAGE=11
 EXPECTED_REPOSITORY_STATE=DISCOVERY06_STAGE12_PENDING_NATIVE
 
 This is only the 12/11 pending-native state, not Stage12 acceptance. Next: validate the new commit's exact-SHA completed CI runs and their logs/artifacts. Only after those gates pass may the state advance to 12/12 with DISCOVERY06_STAGE12_ACCEPTED_HOLD_NO_STAGE13. No Stage13, main merge, protected-branch change, or release is authorized.
+
+
+## 12/11 pending-native CI result and Stage12 acceptance
+
+PENDING_NATIVE_SHA=103e9a4a23c8f78a7e9543abf82f34357449be07
+PENDING_NATIVE_RUNS=10/10_COMPLETED_SUCCESS
+PENDING_NATIVE_JOBS=10/10_COMPLETED_SUCCESS
+PENDING_NATIVE_ARTIFACTS=9/9_VERIFIED
+STAGE12_CLOSURE=ACCEPTED
+STAGE12_ACCEPTANCE_BASIS=Native+independent raw differential+expected strict RED witness+all Stage04-11 regressions+successor state gates
+
+All ten automatic runs on the exact 103e9a4a23c8f78a7e9543abf82f34357449be07 HEAD completed successfully, run_attempt=1. All nine Stage04–12 jobs passed the exact checkout check; Canonical Names Lock completed successfully and intentionally has no artifact.
+
+| Workflow | Run ID | Job ID | Artifact ID | Bytes | ZIP SHA-256 |
+|---|---:|---:|---:|---:|---|
+| Stage04 | 46147847673 | 140987706088 | 15264243698 | 91347 | e16fc162f4c2a0670f247a81095cdb368578c27d6904e16dab48d1eaa4f78cc9 |
+| Stage05 | 46147847724 | 140987706140 | 15264013062 | 75449 | d3664f088489d3877768266673be63783050c8775d5c28edf9bc12ccb66bb7be |
+| Stage06 | 46147847619 | 140987705757 | 15263733698 | 75907 | e6f20834208291ddc96c010a59ce7e278d4f3ed1bfe075d06cbf886ea945fb47 |
+| Stage07 | 46147847615 | 140987705883 | 15264596771 | 75888 | 354f94538a6820344d64568d771d8c2cfc7169e65ee12e98a3c60495b30abd90 |
+| Stage08 | 46147847622 | 140987705773 | 15264641617 | 76353 | 6a476599c6407c0834d597671b8a689aacd01d44b7f75cfb79dcbf4ad3512605 |
+| Stage09 | 46147847669 | 140987706100 | 15264661558 | 76544 | 72bf14cf56776e30a97df436181722264b3813ee66cea59bb97972a8453ef45c |
+| Stage10 | 46147847632 | 140987706859 | 15264078095 | 77514 | 3b05d1e52088787c13407d8ab962a8ab432519d2da84948992b42e3feaee6cd4 |
+| Stage11 | 46147847612 | 140987705814 | 15264078086 | 77902 | e65620a72aa50996ef1e5a11bb34e08bb228fbf73450e03cb54263d0185e0b2f |
+| Stage12 | 46147847607 | 140987705829 | 15264038045 | 21945 | c2c8bb8a76aea985941706f00318198e9a74fe5d37dde8576f4e9014c235d611 |
+
+Every downloaded ZIP matched the upload-log size and SHA-256, passed CRC validation, contained the exact PROJECT_ID and pending-native SHA, and recorded exit.txt=0. Stage04 whole-stage verifier: 20/20 tests, OK. Stage12: normal Native test group 3 passed/0 failed/1 ignored; independent oracle PASS for 13 inputs, 598 prefixes, 1794 rows (143 RED/1651 CONTROL); isolated Stage12 strict RED exit 101 with MissingVisibleSlot versus independently computed Visible(H1); preserved Stage10 strict RED exit 101. Stage12 raw ZIP independently replayed again on this exact pending-native SHA with harness-prefix-aware parsing; all observations and pair totals match. All Stage04–11 regressions and their independent oracles passed.
+
+Across the three audited SHAs (706aff historical, 5fe050e successor-gate candidate, 103e9a4 pending-native): 33 automatic runs completed/success, 29 ZIP artifacts verified, and three Stage12 ZIPs independently replayed with identical complete coverage. The prior 24-run figure was a counting error; the first two SHAs total 23 runs, then this pending-native SHA adds 10.
+
+Pending_User_Execution was listed completely after completed results: one page, four files, no next_page_token. All four are PC-BRANCH-POWERSHELL-TAGALOG; no Rust package exists in the folder, so no file was trashed or deleted.
+
+## Accepted state and hold
+
+DEVELOPMENT_STAGE.md advances to:
+CURRENT_STAGE=12
+CURRENT_KIND=DISCOVERY06
+CURRENT_PATCH=PATCH05
+LAST_COMPLETED_STAGE=12
+EXPECTED_REPOSITORY_STATE=DISCOVERY06_STAGE12_ACCEPTED_HOLD_NO_STAGE13
+
+Stage12 is accepted on the evidence above. This is a hold before Stage13; no Stage13, main merge, protected-branch change, or release is authorized.
