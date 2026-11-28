@@ -33,7 +33,7 @@ jobs:
           test "$(git -C source rev-parse HEAD:src/+pastafari/LegacyRemainderAdapter.m)" = bf7ec0147b9f3492d1e0db311f0f835a48775e85
           test -z "$(git -C source status --porcelain)"
           mkdir -p profile-output
-          python3 qa/tools/qa_candidates/stage55_gate_arithmetic/prepare_vectors.py profile-output
+          python3 qa/tools/qa_candidates/stage55_gate_mersenne127/prepare_mersenne_vectors.py profile-output
           cp -a source candidate
           python3 qa/tools/qa_candidates/stage55_gate_mersenne127/apply_mersenne127.py candidate profile-output/candidate_manifest.json
       - name: Set up MATLAB R2026a

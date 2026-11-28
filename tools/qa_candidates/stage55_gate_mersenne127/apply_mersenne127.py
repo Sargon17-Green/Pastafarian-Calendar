@@ -71,6 +71,7 @@ def main() -> None:
             % little-endian uint32 limbs (the top limb has 31 live bits).
             mask32 = uint64(4294967295);
             top31 = uint64(2147483647);
+            top32 = uint64(2147483648);
             base32 = uint64(4294967296);
             base10 = uint64(pastafari.BigInt.BASE);
             state = zeros(1, 4, 'uint64');
@@ -91,17 +92,27 @@ def main() -> None:
                 low = [expanded(1), expanded(2), expanded(3), ...
                     bitand(expanded(4), top31)];
 
+                % Add high to the low 127 bits. The top limb is 31 bits,
+                % not 32; its overflow is the carry that must be folded.
                 carry = high;
-                for k = 1:4
+                for k = 1:3
                     current = low(k) + carry;
                     low(k) = bitand(current, mask32);
                     carry = bitshift(current, -32);
                 end
+                topSum = low(4) + carry;
+                if topSum >= top32
+                    low(4) = topSum - top32;
+                    carry = uint64(1);
+                else
+                    low(4) = topSum;
+                    carry = uint64(0);
+                end
 
-                % A carry out of bit 126 is another 2^127, hence +1.
+                % Fold the carry out of bit 126 as +1.
                 if carry ~= uint64(0)
                     carry = uint64(1);
-                    for k = 1:4
+                    for k = 1:3
                         current = low(k) + carry;
                         low(k) = bitand(current, mask32);
                         carry = bitshift(current, -32);
@@ -110,9 +121,12 @@ def main() -> None:
                         end
                     end
                     if carry ~= uint64(0)
-                        error('Pastafari:BigInt:MersenneFoldOverflow', ...
-                            'Unexpected second carry in Mersenne-127 reduction.');
+                        low(4) = low(4) + carry;
                     end
+                end
+                if low(4) >= top32
+                    error('Pastafari:BigInt:MersenneFoldOverflow', ...
+                        'Unexpected second carry in Mersenne-127 reduction.');
                 end
 
                 % The sole 127-bit value equal to the modulus maps to zero.
@@ -166,6 +180,7 @@ def main() -> None:
         "changed_paths": changed,
         "algorithm": "exact base-2^32 Mersenne fold for modulus 2^127-1",
         "negative_semantics": "r = M - (abs(a) mod M) when a < 0 and remainder != 0",
+        "top_limb_carry": "explicitly fold overflow from the 31-bit top limb at bit 127",
     }
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
