@@ -1,0 +1,73 @@
+name: FALSE Arabic Stage23 replay mutant preparation
+on:
+  push:
+    branches: ['FALSE\+العربية']
+    paths:
+      - '.github/workflows/false-arabic-stage23-replay-prepare.yml'
+permissions:
+  contents: read
+jobs:
+  prepare:
+    if: github.ref == 'refs/heads/FALSE+العربية'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      LC_ALL: C.UTF-8
+      SOURCE_PIN: 422874de123623dc262eecc80e3624fc9f02c281
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 422874de123623dc262eecc80e3624fc9f02c281
+          persist-credentials: false
+      - name: Compile and generate five locked QA programs (not Native)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p evidence/stage23_replay_prepare_ci
+          exec > >(tee evidence/stage23_replay_prepare_ci/prepare.log) 2>&1
+          test "$(git rev-parse HEAD)" = "$SOURCE_PIN"
+          git rev-parse HEAD HEAD^{tree} > evidence/stage23_replay_prepare_ci/source.txt
+          python3 --version
+          node --version
+          python3 -m py_compile tools/stage23_measure.py tools/stage23_differential.py tools/stage23_replay_mutant_prepare.py
+          timeout 60s python3 tools/stage23_replay_mutant_prepare.py
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          p = Path("evidence/stage23_replay_mutant_prepare")
+          r = json.loads((p/"receipt.json").read_text())
+          assert r["project_id"] == "PC-BRANCH-FALSE-ARABIC"
+          assert r["source_pin"] == os.environ["SOURCE_PIN"]
+          assert r["runtime_pin"] == "eb3135565a8670cced3f6bbca4dbf7b014c45634"
+          assert r["timeout_seconds"] == 600 and r["address_space_limit_bytes"] == 2*1024**3
+          assert r["fresh_replay_processes"] == 2
+          assert r["native_executed"] is False and r["stage_acceptance"] is False
+          assert r["retained_heap_double_full_assessed"] is False
+          expected = {"fresh_replay":None,"interleaving":None,
+            "mutant_swap":{"marker":"S23_BOWL_1_CELL_2","expected":332,"wrong":45},
+            "mutant_skip_batches_result":{"marker":"S23_BOWL_1_CELL_1","expected":15,"wrong":14},
+            "mutant_identity_order":{"marker":"S23_ORDER_1","expected":6,"wrong":1}}
+          assert len(r["entries"]) == 5
+          assert {e["name"] for e in r["entries"]} == set(expected)
+          sha = lambda b: hashlib.sha256(b).hexdigest()
+          for e in r["entries"]:
+              data = (p/(e["name"]+".false")).read_bytes()
+              assert sha(data) == e["program_sha256"]
+              assert e["native_executed"] is False
+              assert e["expected_first_numeric_mismatch"] == expected[e["name"]]
+              assert e["assertions_prepared"] > 0
+          for name, digest in r["source_sha256"].items():
+              assert sha((p/"source"/name).read_bytes()) == digest
+          assert len({e["program_sha256"] for e in r["entries"]}) == 5
+          print("STAGE23_PREPARE_RECEIPT_CHECK_OK; NOT_NATIVE; NOT_ACCEPTED")
+          PY
+      - name: Preserve preparation evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-arabic-stage23-replay-prepare
+          path: |
+            evidence/stage23_replay_mutant_prepare/
+            evidence/stage23_replay_prepare_ci/
+          if-no-files-found: error
+          retention-days: 30
