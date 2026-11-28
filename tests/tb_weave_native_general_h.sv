@@ -23,7 +23,7 @@ module tb_weave_native_general_h;
     localparam integer WIDTH=32768, CWIDTH=896, CLIMBS=CWIDTH/32;
     localparam integer MAXDAYS=5778, MAXMONTHS=47, FULL_BYTES=WIDTH/8;
     integer lengths[1:MAXMONTHS], cap[1:MAXMONTHS];
-    integer m,L,s,n,j,v,f,rc,extra,outf,tf,records,expected_records,b;
+    integer m,L,s,n,j,v,f,rc,extra,outf,tf,records,expected_records,b,tmp_length;
     logic [WIDTH-1:0] next_row[0:MAXDAYS], row[0:MAXDAYS];
     logic [CWIDTH-1:0] coefficient;
     logic [CWIDTH+12:0] numerator;
@@ -75,7 +75,7 @@ module tb_weave_native_general_h;
         if(rc!=1 || m<1 || m>MAXMONTHS) $fatal(1,"GENERAL_H_MONTH_COUNT");
         L=0;expected_records=0;
         for(j=1;j<=m;j=j+1) begin
-            rc=$fscanf(f,"%d",lengths[j]);
+            rc=$fscanf(f,"%d",tmp_length); lengths[j]=tmp_length;
             if(rc!=1 || lengths[j]<4 || lengths[j]>123)
                 $fatal(1,"GENERAL_H_LENGTH");
             L=L+lengths[j];cap[j]=L-j;

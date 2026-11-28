@@ -7,7 +7,7 @@ module tb_weave_native_general_lex;
 // Not compiled or accepted. Does not select year, sauce, or rank natively.
 localparam integer WIDTH=32768,CWIDTH=896,LIMBS=CWIDTH/32;
 localparam integer MAXMONTHS=47,MAXDAYS=5778,BYTES=WIDTH/8,REC_BYTES=WIDTH/4+1;
-integer MONTHS,DAYS,geom,scan_rc,extra,record_count;
+integer MONTHS,DAYS,geom,scan_rc,extra,record_count,scan_tmp;
 longint unsigned table_bytes;
 string geom_path,root_path,rank_path,table_path,word_path;
 integer lengths[1:MAXMONTHS],caps[1:MAXMONTHS],remaining[1:MAXMONTHS];
@@ -221,7 +221,7 @@ initial begin
         $fatal(1,"GENERAL_LEX_MONTH_COUNT");
     DAYS=0;record_count=0;
     for(k=1;k<=MONTHS;k=k+1) begin
-        scan_rc=$fscanf(geom,"%d",lengths[k]);
+        scan_rc=$fscanf(geom,"%d",scan_tmp); lengths[k]=scan_tmp;
         if(scan_rc!=1 || $isunknown(lengths[k]) || lengths[k]<4 || lengths[k]>123)
             $fatal(1,"GENERAL_LEX_LENGTH");
         DAYS=DAYS+lengths[k];caps[k]=DAYS-k;remaining[k]=0;

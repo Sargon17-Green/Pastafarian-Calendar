@@ -21,7 +21,7 @@ permissions:
   contents: read
 concurrency:
   group: stage1-generalized-native-qa-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   generalized-native-qa:
     runs-on: ubuntu-latest
@@ -60,8 +60,8 @@ jobs:
           check_blob f488271db07743b6a2d1f55259aa9c9925126eaa scripts/verify_general_h_lex_chain.py
           check_blob 89b59176033b8b9808f6a5f7d8cc4bbe998fdd1d tests/pcal_stage1_oracle_pkg.sv
           check_blob 9befa35ae6b4c02ff371083057159eb138533746 tests/tb_weave_general_rank.sv
-          check_blob dea946e1f1e1bca0ffde60acf6f042f88750368b tests/tb_weave_native_general_h.sv
-          check_blob 265c61c933bdefe47da93150be00b4271e8fc97e tests/tb_weave_native_general_lex.sv
+          check_blob 4fe8ed6bd877ece356a6ce468d198af9d2ccb9f2 tests/tb_weave_native_general_h.sv
+          check_blob cbd6dcf9b20d0605024bae3137c0098539bab3d0 tests/tb_weave_native_general_lex.sv
           mkdir -p build/generalized-native-qa
           git rev-parse HEAD > build/generalized-native-qa/checked-head.txt
       - name: Bounded Native multivector join and five tuple mutations
