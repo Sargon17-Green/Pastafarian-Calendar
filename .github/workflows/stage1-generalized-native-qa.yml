@@ -52,7 +52,7 @@ jobs:
             test "$actual" = "$expected" || { echo "BLOB_MISMATCH $path expected=$expected actual=$actual"; exit 1; }
           }
           check_blob e228f43f2d33b9af59c5fb232281ca403455ca5c scripts/stage1_multivector_full_oracle.js
-          check_blob 0d427e79824292528ee97519bd54d64fdccc4476 scripts/verify_stage1_multivector_join.js
+          check_blob 4fc462f5baa668cfe044f17aacee23961d882dfb scripts/verify_stage1_multivector_join.js
           check_blob ff049a672f48e474de31d90b7f698f3345be222e scripts/prepare_general_lex_ranks.js
           check_blob 462d489edfaa7ebd205e62eaedd648bc5e17bb3e scripts/verify_general_rank_host.js
           check_blob e35546b63fb0357d2649f02ae71e50d82a3c7a3e scripts/verify_general_rank_native.py

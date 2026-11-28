@@ -43,7 +43,7 @@ const fixture=Buffer.from(result.lines.join('\n')+'\n');
 fs.writeFileSync(path.join(dir,'fixture.txt'),fixture);
 fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify({oracleBlob:blob,fixtureSHA256:sha(fixture),days:result.days,canonical:result.canonical,groups:result.meta,scope:'HOST_GEOMETRY_NATIVE_JOIN_ONLY'},null,2)+'\n');
 const sv=`module multivector_join;
-integer f,rc,g,ng,c,opn,cls,y,m,k,i,j,p,n,prev,ci,start,ord,ey,ec,ed,em,eo,days,extra;
+integer f,rc,g,ng,c,opn,cls,y,m,k,i,j,p,n,prev,ci,start,ord,ey,ec,ed,em,eo,days,extra,tmp1,tmp2;
 integer ends[1:17],cutname[1:17],lens[1:47],names[1:47],cnt[1:47],fp[1:47],lp[1:47];
 initial begin
  f=$fopen("fixture.txt","r"); if(!f)$fatal(1,"OPEN");
@@ -53,13 +53,13 @@ initial begin
   if(rc!=6||n<1||n>5778||m<1||m>47||k<1||k>17)$fatal(1,"GEOMETRY");
   prev=0;
   for(i=1;i<=k;i=i+1)begin
-   rc=$fscanf(f,"%d %d",ends[i],cutname[i]);
+   rc=$fscanf(f,"%d %d",tmp1,tmp2); ends[i]=tmp1; cutname[i]=tmp2;
    if(rc!=2||ends[i]<=prev||ends[i]>n||cutname[i]<1||cutname[i]>17)$fatal(1,"CUTLET");
    for(j=1;j<i;j=j+1)if(cutname[j]==cutname[i])$fatal(1,"CUTLET_DUP"); prev=ends[i];
   end
   if(prev!=n)$fatal(1,"CUTLET_COVER"); prev=0;
   for(i=1;i<=m;i=i+1)begin
-   rc=$fscanf(f,"%d %d",lens[i],names[i]);
+   rc=$fscanf(f,"%d %d",tmp1,tmp2); lens[i]=tmp1; names[i]=tmp2;
    if(rc!=2||lens[i]<4||lens[i]>123||names[i]<1||names[i]>47)$fatal(1,"MONTH");
    for(j=1;j<i;j=j+1)if(names[j]==names[i])$fatal(1,"MONTH_DUP");
    prev=prev+lens[i];cnt[i]=0;fp[i]=0;lp[i]=0;
