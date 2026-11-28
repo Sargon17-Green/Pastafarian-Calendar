@@ -1,8 +1,9 @@
 import 'package:pastafari_calendar_dart_hebrew/pastafari_calendar.dart';
 
+import 'package:pastafari_calendar_dart_hebrew/src/monster_year_selection.dart';
+import 'package:pastafari_calendar_dart_hebrew/src/monster_year_traversal.dart';
+
 import 'pastafari_calendar_cli.dart';
-import '../lib/src/monster_year_selection.dart';
-import '../lib/src/monster_year_traversal.dart';
 import '../test_support/normative_reference.dart' as normative;
 import 'stage2_production14_weave_tests.dart' as weave_oracle;
 
