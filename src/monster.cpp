@@ -2678,6 +2678,7 @@ public:
             throw BaseValidationError("rank texturae mensium celeris extra familiam est");
         }
         Integer rank = rank1;
+        Integer extensions = 1;
         const int totalLength = std::accumulate(lengths_.begin(), lengths_.end(), 0);
         std::vector<int> out;
         out.reserve(static_cast<std::size_t>(totalLength));
@@ -2685,7 +2686,10 @@ public:
             bool chosen = false;
             const bool useRatios = accelerationsOn() && !fullHistoricalValidationOn();
             std::vector<Integer> activeBlocks;
-            if (useRatios) activeBlocks = qaActiveBlocks(state);
+            if (useRatios) {
+                if(totalLength<=10 && extensions!=qaRecomputeExtensions(state)) throw BaseValidationError("incremental extension mismatch");
+                activeBlocks = qaActiveBlocks(state, extensions);
+            }
             for (int monthId = 1; monthId <= monthCount_; ++monthId) {
                 if (!legalMove(state, monthId)) {
                     continue;
@@ -2700,6 +2704,7 @@ public:
                     continue;
                 }
                 out.push_back(monthId);
+                if(useRatios) qaUpdateExtensions(state, monthId, extensions);
                 state = next;
                 chosen = true;
                 break;
@@ -2769,17 +2774,44 @@ private:
     // All legal decrements of already-open labels share the same
     // suffix table entry. Compute the common active-extension product
     // once, then update each binomial factor by its exact ratio.
-    std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state) {
+    Integer qaRecomputeExtensions(const LegalMonthWeavingStateInternal& state) {
+        Integer result=1;
+        int p=0;
+        for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
+            int r=state.remaining.at(static_cast<std::size_t>(id-1));
+            result*=binomial(p+r-1,r-1);
+            p+=r;
+        }
+        return result;
+    }
+    void qaUpdateExtensions(const LegalMonthWeavingStateInternal& state,int chosen,Integer& extensions) {
+        int active=0;
+        for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id)
+            active+=state.remaining.at(static_cast<std::size_t>(id-1));
+        if(chosen>state.openedUpTo){
+            const int r=state.remaining.at(static_cast<std::size_t>(chosen-1))-1;
+            if(r>0) extensions*=binomial(active+r-1,r-1);
+            return;
+        }
+        // Each substitution replaces one integer binomial factor.
+        for(int id=state.openedUpTo;id>=chosen;--id){
+            const int r=state.remaining.at(static_cast<std::size_t>(id-1));
+            active-=r;
+            if(r>1){
+                extensions*=id==chosen?r-1:active;
+                extensions/=active+r-1;
+            }
+        }
+    }
+    std::vector<Integer> qaActiveBlocks(const LegalMonthWeavingStateInternal& state,const Integer& extensions) {
         std::vector<Integer> blocks(static_cast<std::size_t>(monthCount_));
         std::vector<int> prefix(static_cast<std::size_t>(monthCount_));
         int active=0;
-        Integer extensions=1;
         for(int id=state.closedUpTo+1;id<=state.openedUpTo;++id){
             const std::size_t i=static_cast<std::size_t>(id-1);
             const int r=state.remaining.at(i);
             if(r<=0) throw BaseValidationError("QA corrupt active state");
             prefix[i]=active;
-            extensions*=binomial(active+r-1,r-1);
             active+=r;
         }
         if(active==0)return blocks;
